@@ -3,9 +3,9 @@
 > **Reference integration: generating and using a contract-aligned, generics-aware OpenAPI client in a Spring Boot application**
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.21.0-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../../LICENSE)
 
 ---
 
@@ -22,7 +22,7 @@
 ---
 
 > This is a minimal reference implementation.  
-> See the [Adoption Guides](../../docs/adoption/client-side-adoption.md) for rules, constraints, and architecture.
+> See the [Adoption Guides](../../../docs/adoption/client-side-adoption.md) for rules, constraints, and architecture.
 
 ## 🚀 TL;DR (Start Here)
 
@@ -131,9 +131,9 @@ Fallbacks handled:
 
 ## 🔗 Related Modules
 
-* **[Contract](../../openapi-generics-contract/README.md)**
-* **[Server Starter](../../openapi-generics-server-starter/README.md)**
-* **[Client Codegen](../../openapi-generics-java-codegen-parent/README.md)**
+* **[Contract](../../../openapi-generics-contract/README.md)**
+* **[Server Starter](../../../openapi-generics-server-starter/README.md)**
+* **[Client Codegen](../../../openapi-generics-java-codegen-parent/README.md)**
 * **[Server Sample](../customer-service/README.md)**
 
 ---

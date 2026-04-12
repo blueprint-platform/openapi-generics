@@ -3,9 +3,9 @@
 > **Reference implementation: exposing a Spring Boot API that produces a clean, deterministic OpenAPI for contract-aligned, generics-aware clients**
 
 [![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.13-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Springdoc](https://img.shields.io/badge/Springdoc-2.8.16-brightgreen)](https://springdoc.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../LICENSE)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Springdoc](https://img.shields.io/badge/Springdoc-3.x-brightgreen)](https://springdoc.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../../LICENSE)
 
 ---
 
@@ -20,7 +20,7 @@
 ---
 
 > This is a minimal reference implementation.  
-> See the [Adoption Guides](../../docs/adoption/server-side-adoption.md) for rules, constraints, and architecture.
+> See the [Adoption Guides](../../../docs/adoption/server-side-adoption.md) for rules, constraints, and architecture.
 
 ## 🚀 Start here (what you actually want)
 
@@ -61,9 +61,9 @@ Everything is handled by the starter.
 
 ## 🔗 Related Modules
 
-* **[Contract](../../openapi-generics-contract/README.md)**
-* **[Server Starter](../../openapi-generics-server-starter/README.md)**
-* **[Client Codegen](../../openapi-generics-java-codegen-parent/README.md)**
+* **[Contract](../../../openapi-generics-contract/README.md)**
+* **[Server Starter](../../../openapi-generics-server-starter/README.md)**
+* **[Client Codegen](../../../openapi-generics-java-codegen-parent/README.md)**
 * **[Client Sample](../customer-service-client/README.md)**
 
 ---
