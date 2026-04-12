@@ -1,35 +1,35 @@
 # openapi-generics-java-codegen
 
-> Generics-aware OpenAPI Generator extension for contract-aligned Java clients
+> Generics-aware OpenAPI Generator extension for **contract-aligned Java clients**
 
 `openapi-generics-java-codegen` is a **custom OpenAPI Generator extension** that enforces **contract-first client generation**.
 
 It does not try to be smarter than your contract.
 It ensures the generator **does not break it**.
 
-The role of this module is strict:
-
 > Prevent OpenAPI Generator from redefining platform-owned models and enforce contract-aligned output.
 
-It is a **build-time component** and is typically used via `openapi-generics-java-codegen-parent`.
+This module is **build-time only** and is typically consumed via `openapi-generics-java-codegen-parent`.
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-1. [Purpose](#-purpose)
-2. [Core Idea](#-core-idea)
-3. [What It Does](#-what-it-does)
-4. [Result](#-result)
-5. [Template Integration](#-template-integration)
-6. [How It Is Used](#-how-it-is-used)
-7. [Not Intended For Direct Use](#-not-intended-for-direct-use)
-8. [Compatibility Matrix](#-compatibility-matrix)
-9. [Determinism Guarantees](#-determinism-guarantees)
-10. [Design Constraints](#-design-constraints)
-11. [Mental Model](#-mental-model)
-12. [Related Modules](#-related-modules)
-13. [License](#-license)
+* 🎯 [Purpose](#-purpose)
+* 🧠 [Core Idea](#-core-idea)
+* ⚙️ [What It Does](#️-what-it-does)
+* 🧱 [Result](#-result)
+* 🧩 [External Model Mapping (BYOC)](#-external-model-mapping-byoc)
+* 🧩 [Template Integration](#-template-integration)
+* 🔗 [How It Is Used](#-how-it-is-used)
+* 🚫 [Not Intended For Direct Use](#-not-intended-for-direct-use)
+* 🔗 [Compatibility Matrix](#-compatibility-matrix)
+* 🔒 [Determinism Guarantees](#-determinism-guarantees)
+* ⚠️ [Design Constraints](#️-design-constraints)
+* 🧠 [Mental Model](#-mental-model)
+* 🔗 [Related Modules](#-related-modules)
+* 📜 [License](#-license)
+
 ---
 
 ## 🎯 Purpose
@@ -69,38 +69,60 @@ If OpenAPI contains structure that already exists in the contract:
 
 ## ⚙️ What It Does
 
-### 1. Detects non-generatable models
+### 1) External model registry (BYOC)
 
-Models marked with:
+Reads `additionalProperties` and registers mappings:
 
+```text
+openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto
 ```
-x-ignore-model: true
-```
 
-are treated as **platform-owned**.
+Backed by: `ExternalModelRegistry`
+
+Effect:
+
+* marks models as **externally provided**
+* prevents generation of those models
+* enables import injection in wrappers
 
 ---
 
-### 2. Suppresses model generation (3-phase strategy)
+### 2) Ignore decision (dual source)
 
-#### Phase 1 — MARK
+A model is ignored if:
 
-* intercepts `fromModel`
-* collects ignored model names
+* `x-ignore-model=true` is present in schema extensions
+* OR it is registered as an external model
 
-#### Phase 2 — LOCAL FILTER
-
-* removes models from current processing batch
-
-#### Phase 3 — GLOBAL REMOVE
-
-* removes models from full generation graph
+Backed by: `ModelIgnoreDecider`
 
 ---
 
-### 3. Cleans imports
+### 3) 3-phase suppression strategy
 
-* removes references to ignored models from generated classes
+#### Phase A — MARK
+
+* during `fromModel`
+* mark models as ignored
+
+#### Phase B — LOCAL FILTER
+
+* in `postProcessModels`
+* remove ignored models from the current batch
+
+#### Phase C — GLOBAL REMOVE
+
+* in `postProcessAllModels`
+* remove ignored models from the full graph
+
+---
+
+### 4) Import hygiene
+
+* removes imports that reference ignored models
+* injects correct imports for external types into wrapper models
+
+Backed by: `ExternalImportResolver`
 
 ---
 
@@ -115,45 +137,74 @@ Generated code:
 
 ---
 
+## 🧩 External Model Mapping (BYOC)
+
+Optional but powerful.
+
+### Configuration
+
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapiGenerics.responseContract.CustomerDto=
+    io.example.contract.CustomerDto
+  </additionalProperty>
+</additionalProperties>
+```
+
+### Behavior
+
+* prevents generation of `CustomerDto`
+* injects correct import into wrappers
+* reuses your domain model directly
+
+### Important
+
+* mapping key must match **OpenAPI model name**
+* value must be **fully-qualified class name (FQCN)**
+
+---
+
 ## 🧩 Template Integration
 
-This module also provides custom templates under:
+Templates live under:
 
-```
+```text
 META-INF/openapi-generics/templates
 ```
 
 ### Core template: `api_wrapper.mustache`
 
-This template:
+Responsibilities:
 
-* wraps generated models
-* injects `ServiceResponse<T>`
-* handles container types (`Page<T>`)
+* generate thin wrapper classes
+* extend `ServiceResponse<T>`
+* apply container semantics (`Page<T>`)
 
 Example output:
 
 ```java
-public class CustomerResponse extends ServiceResponse<CustomerDto> {}
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
 ---
 
 ## 🔗 How It Is Used
 
-This module is **not typically used directly**.
+This module is **not used directly**.
 
-Instead, it is wired via:
+It is wired via:
 
-```
+```text
 openapi-generics-java-codegen-parent
 ```
 
 The parent POM:
 
-* registers this generator
+* registers this generator (`java-generics-contract`)
 * injects templates
-* configures OpenAPI Generator plugin
+* configures the OpenAPI Generator plugin
 
 ---
 
@@ -167,31 +218,25 @@ End users should NOT:
 
 Instead:
 
-> Use the codegen parent — it handles everything
+> Use the codegen parent — it orchestrates everything
 
 ---
 
 ## 🔗 Compatibility Matrix
 
-This module is tested with the following versions:
-
-| Component          | Supported Versions |
-|--------------------|-------------------|
-| Java              | 17+               |
-| OpenAPI Generator | 7.x               |
+| Component         | Supported Versions |
+| ----------------- | ------------------ |
+| Java              | 17+                |
+| OpenAPI Generator | 7.x                |
 
 Notes:
 
-* `restclient` library is available starting from **OpenAPI Generator 7.6.0**
-* If you use `restclient`, you must use **7.6.0 or newer**
-* This module is designed to work across the **OpenAPI Generator 7.x series**
-* This is a **build-time module** — no runtime dependency on Spring
+* `restclient` library requires **OpenAPI Generator ≥ 7.6.0**
+* Module is build-time only (no Spring/runtime dependency)
 
 ---
 
 ## 🔒 Determinism Guarantees
-
-This generator ensures:
 
 * ✔ No duplication of contract models
 * ✔ Stable model graph
@@ -200,27 +245,23 @@ This generator ensures:
 
 Mechanisms:
 
-* controlled model suppression
-* explicit extension handling
-* no implicit behavior
+* explicit ignore rules
+* controlled graph pruning
+* deterministic template application
 
 ---
 
 ## ⚠️ Design Constraints
 
-The generator:
-
 * depends on vendor extensions (`x-*` fields)
 * assumes contract-first design
-* is tightly coupled to platform semantics
+* tightly coupled to platform semantics
 
 It is NOT a general-purpose generator.
 
 ---
 
 ## 🧠 Mental Model
-
-Think of this module as:
 
 > A guardrail inside OpenAPI Generator that prevents contract drift
 
@@ -245,9 +286,3 @@ Not:
 ## 📜 License
 
 MIT License
-
----
-
-**Maintained by:**
-**Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

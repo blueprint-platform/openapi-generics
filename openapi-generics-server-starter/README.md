@@ -127,7 +127,7 @@ This module is designed to work with the following baseline while remaining forw
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.8.x</version>
+  <version>0.9.x</version>
 </dependency>
 ```
 

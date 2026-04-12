@@ -32,44 +32,45 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      # -----------------------------
-      # 🔧 Core modules (publishable)
-      # -----------------------------
       - name: Build core modules
         run: mvn -B -q -ntp clean verify
 
-      # -----------------------------
-      # 🧪 Samples (tests + coverage)
-      # -----------------------------
-      - name: Build samples (tests + coverage)
+      - name: Build samples
         run: mvn -B -q -ntp -f samples/pom.xml clean verify
 
-      # -----------------------------
-      # 📦 Generated Client Sources
-      # -----------------------------
-      - name: Upload generated client sources
+      - name: Upload generated client sources (SB3)
         uses: actions/upload-artifact@v4
         with:
-          name: generated-client-sources
-          path: samples/customer-service-client/target/generated-sources/openapi/src/gen/java
+          name: generated-client-sources-sb3
+          path: samples/spring-boot-3/customer-service-client/target/generated-sources/openapi/src/gen/java
           if-no-files-found: warn
           retention-days: 7
 
-      # -----------------------------
-      # 📄 OpenAPI Spec
-      # -----------------------------
-      - name: Upload OpenAPI spec (YAML)
+      - name: Upload generated client sources (SB4)
         uses: actions/upload-artifact@v4
         with:
-          name: customer-api-docs
-          path: samples/customer-service-client/target/classes/customer-api-docs.yaml
+          name: generated-client-sources-sb4
+          path: samples/spring-boot-4/customer-service-client/target/generated-sources/openapi/src/gen/java
           if-no-files-found: warn
           retention-days: 7
 
-      # -----------------------------
-      # 📊 Coverage (samples only)
-      # -----------------------------
-      - name: Upload coverage (samples)
+      - name: Upload OpenAPI spec (SB3)
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-api-docs-sb3
+          path: samples/spring-boot-3/customer-service-client/src/main/resources/customer-api-docs.yaml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload OpenAPI spec (SB4)
+        uses: actions/upload-artifact@v4
+        with:
+          name: customer-api-docs-sb4
+          path: samples/spring-boot-4/customer-service-client/src/main/resources/customer-api-docs.yaml
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload coverage (samples only)
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -1,9 +1,9 @@
 ---
-title: openapi-generics-server — Architecture & Internals (0.8.x)
+title: openapi-generics-server — Architecture & Internals (0.9.x)
 nav_exclude: true
 ---
 
-# openapi-generics-server — Architecture & Internals (0.8.x)
+# openapi-generics-server — Architecture & Internals (0.9.x)
 
 This document explains **how the server starter operates at runtime** and clarifies its **exact architectural role inside the platform**.
 

@@ -6,32 +6,34 @@ nav_order: 1
 
 # OpenAPI Generics — Keep Your API Contract Intact End-to-End
 
-> Define your API once in Java.  
+> Define your API once in Java.
 > Preserve it across OpenAPI and generated clients — without duplication or drift.
 
 ---
 
 ## Table of Contents
 
-- [Why this exists](#why-this-exists)
-- [What you actually do](#what-you-actually-do)
-- [Quick Start](#-quick-start)
-    - [1. Server (producer)](#1-server-producer)
-    - [2. Client (consumer)](#2-client-consumer)
-- [Result](#result)
-- [Compatibility Matrix](#-compatibility-matrix)
-- [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
-    - [Before (default OpenAPI behavior)](#before-default-openapi-behavior)
-    - [After (contract-aligned generation)](#after-contract-aligned-generation)
-- [What changed](#what-changed)
-- [What is actually generated](#what-is-actually-generated)
-- [How you actually use it](#how-you-actually-use-it)
-- [What this gives you](#what-this-gives-you)
-- [Why this matters](#why-this-matters)
-- [Mental model](#mental-model)
-- [Next steps](#next-steps)
-- [References & External Links](#-references--external-links)
-- [Final note](#final-note)
+* [Why this exists](#why-this-exists)
+* [What you actually do](#what-you-actually-do)
+* [Quick Start](#-quick-start)
+
+  * [1. Server (producer)](#1-server-producer)
+  * [2. Client (consumer)](#2-client-consumer)
+* [Result](#result)
+* [Compatibility Matrix](#-compatibility-matrix)
+* [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
+
+  * [Before (default OpenAPI behavior)](#before-default-openapi-behavior)
+  * [After (contract-aligned generation)](#after-contract-aligned-generation)
+* [What changed](#what-changed)
+* [What is actually generated](#what-is-actually-generated)
+* [How you actually use it](#how-you-actually-use-it)
+* [What this gives you](#what-this-gives-you)
+* [Why this matters](#why-this-matters)
+* [Mental model](#mental-model)
+* [Next steps](#next-steps)
+* [References & External Links](#-references--external-links)
+* [Final note](#final-note)
 
 ---
 
@@ -41,6 +43,7 @@ In most OpenAPI-based workflows:
 
 * generics are flattened or lost
 * response envelopes are regenerated per endpoint
+* shared models are duplicated on the client side
 * clients gradually drift from server-side contracts
 
 Over time, this creates a gap between what your API **defines** and what your clients **consume**.
@@ -55,14 +58,15 @@ This platform removes that entire class of problems.
 
 ## What you actually do
 
-You don’t configure OpenAPI.  
-You don’t maintain templates.  
+You don’t configure OpenAPI.
+You don’t maintain templates.
 You don’t fight generator behavior.
 
-You only do two things:
+You only do three things:
 
 1. return your contract from controllers
-2. generate clients from OpenAPI
+2. optionally reuse your own shared contract models on the client side
+3. generate clients from OpenAPI
 
 That’s it.
 
@@ -80,7 +84,7 @@ Add the dependency:
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.8.2</version>
+  <version>0.9.0</version>
 </dependency>
 ```
 
@@ -100,8 +104,18 @@ Inherit the parent:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.2</version>
+  <version>0.9.0</version>
 </parent>
+```
+
+Optionally declare externally owned shared contract models:
+
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto
+  </additionalProperty>
+</additionalProperties>
 ```
 
 Generate the client:
@@ -118,11 +132,11 @@ mvn clean install
 ServiceResponse<CustomerDto>
 ```
 
-The exact same contract type flows from server to client.
+The exact same contract shape flows from server to client.
 
-* no duplicated models
+* no duplicated envelope models
 * generics preserved end-to-end
-* contract types reused (not regenerated)
+* external contract models reused instead of regenerated
 
 ---
 
@@ -130,17 +144,17 @@ The exact same contract type flows from server to client.
 
 ### Runtime (Server)
 
-| Component           | Supported Versions        |
-|--------------------|--------------------------|
-| Java               | 17+                      |
-| Spring Boot        | 3.4.x, 3.5.x             |
-| springdoc-openapi  | 2.8.x (WebMvc starter)   |
+| Component         | Supported Versions          |
+| ----------------- |-----------------------------|
+| Java              | 17+                         |
+| Spring Boot       | 3.4.x, 3.5.x, 4.x           |
+| springdoc-openapi | 2.8.x, 3.x (WebMvc starter) |
 
 ### Build-time (Client Generation)
 
-| Component           | Supported Versions |
-|--------------------|-------------------|
-| OpenAPI Generator  | 7.x               |
+| Component         | Supported Versions |
+| ----------------- | ------------------ |
+| OpenAPI Generator | 7.x                |
 
 ---
 
@@ -151,7 +165,6 @@ The exact same contract type flows from server to client.
 <p align="center">
   <img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-before.png" width="700"/>
 </p>
-
 
 * duplicated envelope per endpoint
 * generics flattened or lost
@@ -172,18 +185,18 @@ public class ServiceResponsePageCustomerDto
 
 * no envelope duplication
 * generics preserved end-to-end
-* contract types reused directly
+* externally owned contract models reused directly
 
 ---
-
 
 ## What changed
 
 Instead of generating new models from OpenAPI:
 
-* the contract is preserved
+* the server projects the Java contract into OpenAPI deterministically
+* external contract models can be explicitly mapped and reused
 * wrappers are generated as thin type bindings
-* the client reuses existing domain semantics
+* the generator enforces contract alignment instead of passively materializing schemas
 
 Result:
 
@@ -194,7 +207,7 @@ OpenAPI (projection, not authority)
         ↓
 Generator (deterministic reconstruction)
         ↓
-Client (canonical contract types)
+Client (contract-aligned types)
 ```
 
 No reinterpretation.
@@ -207,7 +220,9 @@ No drift.
 
 The client does **not** recreate your models.
 
-Instead, it generates **thin wrapper classes** that bind OpenAPI responses back to your canonical contract.
+If you provide shared contract models, they are reused directly via explicit mapping. If you do not, the platform still preserves the generic response structure and generates the required wrappers deterministically.
+
+Instead, the generator produces **thin wrapper classes** that bind OpenAPI responses back to your canonical contract shape.
 
 Example:
 
@@ -226,6 +241,7 @@ Key properties:
 * no envelope duplication
 * no structural redefinition
 * no generic type loss
+* shared contract reuse is supported, but not mandatory
 
 These classes exist only to bridge OpenAPI → Java type system.
 
@@ -235,7 +251,7 @@ These classes exist only to bridge OpenAPI → Java type system.
 
 You never interact with generated wrappers directly.
 
-Instead, you define an adapter layer:
+Instead, you define an adapter boundary:
 
 ```java
 public interface CustomerClientAdapter {
@@ -249,7 +265,7 @@ public interface CustomerClientAdapter {
 }
 ```
 
-Implementation delegates to generated API:
+Implementation delegates to the generated API:
 
 ```java
 @Service
@@ -273,6 +289,8 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
 }
 ```
 
+If you choose to keep shared DTO ownership outside the generated client, this adapter boundary is also where you isolate generated request/response details from the rest of your application.
+
 ---
 
 ## What this gives you
@@ -286,26 +304,31 @@ ServiceResponse<Page<CustomerDto>>
 
 Not:
 
-* generated wrapper classes
-* duplicated DTO hierarchies
-* OpenAPI-specific models
+* duplicated envelope classes
+* flattened generic shapes
+* unstable model graphs
+* generator-specific envelope hierarchies
 
-No translation layer. No reinterpretation. No drift.
+And when you reuse shared contract DTOs, it also avoids regenerating models you already own.
+
+No reinterpretation. No duplication. No drift.
 
 ---
 
 ## Why this matters
 
-Traditional OpenAPI generation produces:
+Traditional OpenAPI generation often produces:
 
 * duplicated response envelopes
 * flattened generics
 * unstable model graphs
+* regenerated shared models that the client should not own
 
 This approach guarantees:
 
-* a single contract shared across all layers
+* a single contract shape shared across all layers
 * stable and predictable client generation
+* optional reuse of shared external contract models
 * zero drift between server and client semantics
 
 ---
@@ -316,17 +339,17 @@ Think of generated classes as:
 
 > thin type adapters — not models
 
-They exist because OpenAPI cannot express Java generics — not because your model requires them.
+They exist because OpenAPI cannot express Java generics directly — not because your domain model requires duplication.
 
-They simply reconnect OpenAPI output back to your **existing contract**, without redefining it.
+When shared contract models are provided, generated wrappers reference them directly. When they are not, the platform still preserves the success-envelope structure deterministically.
 
-Your system always operates on:
+Your system always operates around:
 
 ```text
 ServiceResponse<T>
 ```
 
-Everything else is just infrastructure.
+Everything else is infrastructure.
 
 ---
 
@@ -343,7 +366,6 @@ Everything else is just infrastructure.
 * 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
 ---
-
 
 ## Final note
 

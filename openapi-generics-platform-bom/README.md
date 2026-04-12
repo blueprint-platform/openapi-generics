@@ -82,7 +82,7 @@ Example (internal usage):
     <dependency>
       <groupId>io.github.blueprintplatform</groupId>
       <artifactId>openapi-generics-platform-bom</artifactId>
-      <version>0.8.x</version>
+      <version>0.9.x</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>

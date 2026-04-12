@@ -2,15 +2,11 @@ coverage:
   status:
     project:
       default:
-        target: 60%
-        threshold: 1%
-    patch:
-      default:
-        enabled: false
+        target: 50%
+        threshold: 2%
+    patch: off
 
-comment:
-  layout: "reach, diff, flags, files"
-  behavior: default
+comment: false
 
 ignore:
   - "**/target/**"

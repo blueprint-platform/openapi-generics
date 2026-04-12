@@ -9,24 +9,26 @@ nav_order: 1
 
 > Publish a **deterministic, generics-aware OpenAPI** from Spring Boot with **one contract and zero duplication**.
 
-A **practical, minimal, and deterministic** guide for exposing a **contract-aligned OpenAPI** from a Spring Boot (WebMVC) service.
+This is a **contract-first projection system**, not a documentation tool.
 
-This guide is intentionally **action-oriented**: you implement a small set of rules, and the platform guarantees the rest.
+You define your contract in Java.
+The platform guarantees a **stable, generator-ready OpenAPI projection**.
 
 ---
 
 ## 📑 Table of Contents
 
 * [⚡ 60-second quick start](#-60-second-quick-start)
-* [🎯 What the server is responsible for](#-what-the-server-is-responsible-for)
+* [🎯 What the server actually does](#-what-the-server-actually-does)
 * [🧩 The only rule that matters](#-the-only-rule-that-matters)
 * [📦 Minimal dependencies](#-minimal-dependencies)
 * [✍️ What you actually write](#-what-you-actually-write)
 * [🧠 What gets published to OpenAPI](#-what-gets-published-to-openapi)
+* [🔁 Projection pipeline (what really happens)](#-projection-pipeline-what-really-happens)
 * [⚠️ Rules (do NOT break these)](#-rules-do-not-break-these)
 * [🔍 Quick verification](#-quick-verification)
+* [📦 Samples (recommended)](#-samples-recommended)
 * [🧠 Mental model](#-mental-model)
-* [🚫 What this guide does NOT cover](#-what-this-guide-does-not-cover)
 * [🧾 Summary](#-summary)
 
 ---
@@ -47,6 +49,7 @@ Do this:
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
+  <version>0.9.0</version>
 </dependency>
 ```
 
@@ -67,25 +70,25 @@ Done.
 
 ---
 
-## 🎯 What the server is responsible for
+## 🎯 What the server actually does
 
-The server has **exactly one responsibility**:
+The server has **one responsibility**:
 
-> Publish a **correct, deterministic projection** of the runtime contract.
+> Project the runtime Java contract into a **deterministic OpenAPI representation**.
 
 It does **not**:
 
 * generate clients
-* define alternative response models
-* adapt for specific generators
+* define alternative models
+* adapt output for specific generators
 
 It only performs:
 
 ```text
-Contract → OpenAPI (projection)
+Java Contract → OpenAPI (projection)
 ```
 
-Everything else (generation, typing, reuse) happens downstream.
+Everything else happens downstream.
 
 ---
 
@@ -104,17 +107,17 @@ ServiceResponse<T>
 ServiceResponse<Page<T>>
 ```
 
-This constraint is what enables:
+This constraint enables:
 
-* deterministic schema generation
-* stable naming
+* deterministic schema naming
+* stable projection
 * type-safe client reconstruction
 
 ---
 
 ## 📦 Minimal dependencies
 
-No custom configuration is required.
+No configuration required.
 
 ```xml
 <dependency>
@@ -123,10 +126,10 @@ No custom configuration is required.
 </dependency>
 ```
 
-Requires:
+Requirements:
 
 * Spring Boot (WebMVC)
-* An OpenAPI endpoint at `/v3/api-docs` (e.g. via springdoc-openapi)
+* OpenAPI endpoint (`/v3/api-docs`) via springdoc
 
 ---
 
@@ -134,7 +137,7 @@ Requires:
 
 You write **only your domain contract**.
 
-### Controller example
+### Example
 
 ```java
 @GetMapping("/{id}")
@@ -143,7 +146,7 @@ public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(...) {
 }
 ```
 
-### Pagination example
+### Pagination
 
 ```java
 @GetMapping
@@ -154,21 +157,23 @@ public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(...) {
 
 That’s it.
 
-- No annotations
-- No schema configuration
-- No wrapper DTOs
+No:
+
+* annotations
+* schema config
+* wrapper DTOs
 
 ---
 
 ## 🧠 What gets published to OpenAPI
 
-From this runtime type:
+From:
 
 ```java
 ServiceResponse<CustomerDto>
 ```
 
-The system produces a deterministic schema:
+The system produces:
 
 ```text
 ServiceResponseCustomerDto
@@ -176,19 +181,61 @@ ServiceResponseCustomerDto
 
 Characteristics:
 
-* stable, predictable naming
-* `allOf`-based composition
-* vendor extensions for downstream generation (e.g. `x-api-wrapper`)
+* deterministic naming
+* `allOf` composition
+* vendor extensions for generation
 
-> OpenAPI is a **projection artifact** — not the source of truth.
+Example extensions:
+
+```text
+x-api-wrapper
+x-data-container
+x-data-item
+x-ignore-model
+```
+
+> OpenAPI is a **projection artifact**, not the source of truth.
 
 ---
 
-## ⚠️ Rules
+## 🔁 Projection pipeline (what really happens)
 
-These are **architectural constraints**, not conventions.
+The server is not "configurable".
+It is a **fixed execution pipeline**.
 
-### 1. Only constrain the envelope
+```text
+Controller return types
+        ↓
+Response type discovery
+        ↓
+Contract-aware introspection
+        ↓
+Base schema registration
+        ↓
+Wrapper schema generation
+        ↓
+Container enrichment
+        ↓
+Duplicate model marking
+        ↓
+Contract validation (fail-fast)
+        ↓
+OpenAPI output
+```
+
+### Key properties
+
+* single orchestrator (no ordering issues)
+* no patching / no overrides
+* deterministic output
+
+---
+
+## ⚠️ Rules (do NOT break these)
+
+These are **hard architectural constraints**.
+
+### 1. Only use the canonical envelope
 
 ```text
 ServiceResponse<T>
@@ -207,21 +254,20 @@ ApiResponse
 PagedResult
 ```
 
-Replacing the envelope breaks cross-layer consistency and determinism.
+Breaks determinism and cross-layer alignment.
 
 ---
 
-### 3. Payload is completely free
+### 3. Payload is fully flexible
 
 ✔ Valid:
 
 ```text
 ServiceResponse<CustomerDto>
-ServiceResponse<CustomerDeleteResponse>
 ServiceResponse<Anything>
 ```
 
-The system constrains structure — not domain models.
+The system constrains structure — not domain.
 
 ---
 
@@ -231,7 +277,7 @@ The system constrains structure — not domain models.
 ProblemDetail (RFC 9457)
 ```
 
-Errors are handled as a protocol, separate from success responses.
+Separate protocol.
 
 ---
 
@@ -240,22 +286,20 @@ Errors are handled as a protocol, separate from success responses.
 No:
 
 * manual schemas
-* custom annotations
+* annotations
 * overrides
 
-The starter owns the projection.
+The starter owns projection.
 
 ---
 
 ## 🔍 Quick verification
 
-Run a request:
-
 ```bash
 curl http://localhost:8084/.../v1/.../1
 ```
 
-Expected shape:
+Expected:
 
 ```json
 {
@@ -264,11 +308,30 @@ Expected shape:
 }
 ```
 
-If this is correct, then:
+If correct:
 
 ```text
-Server → OpenAPI → Client will remain consistent
+Server → OpenAPI → Client is aligned
 ```
+
+---
+
+## 📦 Samples (recommended)
+
+Full end-to-end examples are provided:
+
+* Spring Boot 3 samples
+* Spring Boot 4 samples
+* client generation examples
+* consumer services
+
+These demonstrate:
+
+* how the contract is produced
+* how the client is generated
+* how it is consumed safely
+
+> If anything is unclear, inspect samples instead of guessing.
 
 ---
 
@@ -281,37 +344,23 @@ Think of the server as:
 Not:
 
 * a schema designer
-* a generator configuration layer
-
----
-
-## 🚫 What this guide does NOT cover
-
-This guide intentionally excludes:
-
-* client generation
-* template customization
-* generator internals
-
-These belong to the **client-side adoption guide**.
+* a customization layer
 
 ---
 
 ## 🧾 Summary
 
-If you remember only this:
-
 ```text
-Return ServiceResponse<T>
-Add the starter
-Do nothing else
+Input   = Java contract
+Process = projection pipeline
+Output  = deterministic OpenAPI
 ```
 
-The platform handles:
+The system works because:
 
-* OpenAPI projection
-* schema stability
-* downstream compatibility
+* contract is never redefined
+* projection is deterministic
+* downstream generation is predictable
 
 ---
 

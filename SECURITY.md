@@ -28,7 +28,7 @@ We currently provide security fixes for the latest minor release line and the `m
 | Version   | Status          |
 | --------- | --------------- |
 | `main`    | ✅ Supported     |
-| `0.8.x`   | ✅ Supported     |
+| `0.9.x`   | ✅ Supported     |
 | `< 0.8.0` | ❌ Not supported |
 
 > **Note**
