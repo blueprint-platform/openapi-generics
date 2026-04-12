@@ -104,9 +104,11 @@ Inherit the parent:
 Optionally declare externally owned shared contract models:
 
 ```xml
- <!-- Map your DTOs to existing contract classes -->
+<!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
-    <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto</additionalProperty>
+    <additionalProperty>
+        openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto
+    </additionalProperty>
 </additionalProperties>
 ```
 

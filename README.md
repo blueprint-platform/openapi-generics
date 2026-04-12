@@ -73,9 +73,11 @@ It is now a **contract-aligned generation system with progressive adoption**.
 Reuse your own domain models instead of generating them:
 
 ```xml
- <!-- Map your DTOs to existing contract classes -->
+<!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
-  <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto</additionalProperty>
+  <additionalProperty>
+    openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto
+  </additionalProperty>
 </additionalProperties>
 ```
 
@@ -86,9 +88,9 @@ Result:
 
 ---
 
-### 2. Progressive adoption (no lock-in)
+### 2. Progressive adoption (client-side only)
 
-Switch between modes safely:
+Switch generation modes through the client build configuration:
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
@@ -98,8 +100,6 @@ Switch between modes safely:
 | ----------------- | --------------------------- |
 | `false` (default) | Contract-aware generation   |
 | `true`            | Standard OpenAPI generation |
-
-> Adopt incrementally — not all-or-nothing.
 
 ---
 
