@@ -7,8 +7,8 @@ services:
     image: customer-service-sb4:latest
     restart: on-failure
     environment:
-      APP_PORT: ${APP_PORT:-8085}
+      APP_PORT: ${APP_PORT:-8094}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       JAVA_OPTS: ${JAVA_OPTS:-}
     ports:
-      - "${APP_PORT:-8085}:${APP_PORT:-8085}"
+      - "${APP_PORT:-8094}:${APP_PORT:-8094}"

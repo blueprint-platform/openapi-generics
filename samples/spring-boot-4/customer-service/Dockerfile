@@ -31,5 +31,5 @@ USER 10001
 ENV SPRING_PROFILES_ACTIVE=default \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -Dfile.encoding=UTF-8"
 
-EXPOSE 8085
+EXPOSE 8094
 ENTRYPOINT ["java","org.springframework.boot.loader.launch.JarLauncher"]

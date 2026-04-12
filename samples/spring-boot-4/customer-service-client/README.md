@@ -32,7 +32,7 @@
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.3</version>
+  <version>0.9.0</version>
 </parent>
 ```
 

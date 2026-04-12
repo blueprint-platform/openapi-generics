@@ -71,7 +71,7 @@ Everything is handled by the starter.
 ## 🧪 Verify quickly
 
 ```bash
-curl http://localhost:8085/customer-service/customers/1
+curl http://localhost:8094/customer-service/customers/1
 ```
 
 Expected:
@@ -101,10 +101,10 @@ Contract → OpenAPI → Client will be correct
 ## 🌐 OpenAPI endpoints
 
 * Swagger UI
-  [http://localhost:8085/customer-service/swagger-ui/index.html](http://localhost:8085/customer-service/swagger-ui/index.html)
+  [http://localhost:8094/customer-service/swagger-ui/index.html](http://localhost:8094/customer-service/swagger-ui/index.html)
 
 * OpenAPI YAML
-  [http://localhost:8085/customer-service/v3/api-docs.yaml](http://localhost:8085/customer-service/v3/api-docs.yaml)
+  [http://localhost:8094/customer-service/v3/api-docs.yaml](http://localhost:8094/customer-service/v3/api-docs.yaml)
 
 ---
 

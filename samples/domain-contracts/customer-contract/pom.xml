@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform.samples</groupId>
         <artifactId>domain-contracts</artifactId>
-        <version>0.8.3</version>
+        <version>0.9.0</version>
     </parent>
 
     <artifactId>customer-contract</artifactId>

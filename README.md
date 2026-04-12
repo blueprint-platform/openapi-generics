@@ -91,7 +91,7 @@ Add the starter:
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.8.x</version>
+  <version>0.9.x</version>
 </dependency>
 ```
 
@@ -103,7 +103,7 @@ Inherit the parent:
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.8.x</version>
+  <version>0.9.x</version>
 </parent>
 ```
 
@@ -470,7 +470,7 @@ io.github.blueprint-platform
 **Version:**
 
 ```
-0.8.x
+0.9.x
 ```
 
 ### Available Artifacts
