@@ -7,9 +7,13 @@ toc_label: "Contents"
 ---
 
 # OpenAPI Generics — Keep Your API Contract Intact End-to-End
+{: .no_toc }
 
 > Define your API once in Java.
 > Preserve it across OpenAPI and generated clients — without duplication or drift.
+
+1. TOC
+{:toc}
 
 ---
 

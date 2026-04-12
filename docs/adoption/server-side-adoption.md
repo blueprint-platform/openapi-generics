@@ -8,13 +8,17 @@ toc_label: "Contents"
 ---
 
 # Server-Side Adoption — Contract-First OpenAPI Publication
+{: .no_toc }
 
 > Publish a **deterministic, generics-aware OpenAPI** from Spring Boot with **one contract and zero duplication**.
 
 This is a **contract-first projection system**, not a documentation tool.
 
-You define your contract in Java.
+You define your contract in Java.  
 The platform guarantees a **stable, generator-ready OpenAPI projection**.
+
+1. TOC
+{:toc}
 
 ---
 

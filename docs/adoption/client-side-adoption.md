@@ -8,6 +8,7 @@ toc_label: "Contents"
 ---
 
 # Client-Side Adoption — Contract-First Client Integration
+{: .no_toc }
 
 > Generate a Java client that **preserves contract semantics exactly as published** — with **progressive adoption**, **zero duplication**, and **no drift**.
 
@@ -29,7 +30,8 @@ It focuses on four things:
 * optionally aligning with an external contract
 * using the generated client safely
 
----
+1. TOC
+{:toc}
 
 ## ⚡ 60-second quick start
 
