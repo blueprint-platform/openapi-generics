@@ -2,22 +2,21 @@ services:
   customer-service:
     container_name: customer-service-sb3
     build:
-      context: ./customer-service
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: spring-boot-3/customer-service/Dockerfile
     image: customer-service-sb3:latest
     restart: on-failure
     environment:
       APP_PORT: ${APP_PORT:-8084}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
-      JAVA_OPTS: ${JAVA_OPTS:-}
     ports:
       - "${APP_PORT:-8084}:${APP_PORT:-8084}"
 
   customer-service-consumer:
     container_name: customer-service-consumer-sb3
     build:
-      context: ./customer-service-consumer
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: spring-boot-3/customer-service-consumer/Dockerfile
     image: customer-service-consumer-sb3:latest
     restart: on-failure
     depends_on:
@@ -25,7 +24,6 @@ services:
     environment:
       APP_PORT: ${CONSUMER_APP_PORT:-8085}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
-      CUSTOMER_API_BASE_URL: http://customer-service-sb3:8084/customer-service
-      JAVA_OPTS: ${JAVA_OPTS:-}
+      CUSTOMER_API_BASE_URL: "http://customer-service-sb3:8084/customer-service"
     ports:
       - "${CONSUMER_APP_PORT:-8085}:${CONSUMER_APP_PORT:-8085}"

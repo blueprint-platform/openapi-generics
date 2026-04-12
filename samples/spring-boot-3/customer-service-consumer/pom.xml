@@ -108,7 +108,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>io.github.blueprintplatform.samples.customerservice.consumer.io.github.blueprintplatform.samples.customerservice.consumer.CustomerServiceConsumerApplication</mainClass>
+                    <mainClass>io.github.blueprintplatform.samples.customerservice.consumer.CustomerServiceConsumerApplication</mainClass>
                     <layers>
                         <enabled>true</enabled>
                     </layers>
