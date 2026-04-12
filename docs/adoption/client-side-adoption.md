@@ -151,11 +151,117 @@ It provides:
 
 ### 2. OpenAPI Generator plugin (USER INPUT ONLY)
 
-You control only:
+You control the **input and integration surface only**.
 
-* input OpenAPI spec
+At minimum:
+
+* OpenAPI input (`inputSpec`)
+* generator (`java-generics-contract`)
 * HTTP client (`library`)
 * package structure
+
+---
+
+Expand the example below if you need a full configuration.
+
+<details>
+<summary>Example configuration</summary>
+
+```xml
+<plugin>
+  <groupId>org.openapitools</groupId>
+  <artifactId>openapi-generator-maven-plugin</artifactId>
+
+  <executions>
+    <execution>
+      <id>generate-client</id>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+
+      <configuration>
+
+        <generatorName>java-generics-contract</generatorName>
+
+        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
+
+        <library>your-library-choice</library>
+
+        <apiPackage>your.api.package</apiPackage>
+        <modelPackage>your.model.package</modelPackage>
+        <invokerPackage>your.invoker.package</invokerPackage>
+
+        <configOptions>
+          <!-- Choose ONE depending on your runtime -->
+          <!-- Spring Boot 3 -->
+          <useSpringBoot3>true</useSpringBoot3>
+
+          <!-- Spring Boot 4 -->
+          <!-- <useSpringBoot4>true</useSpringBoot4> -->
+
+          <serializationLibrary>your-choice</serializationLibrary>
+          <openApiNullable>false</openApiNullable>
+        </configOptions>
+
+        <!-- Optional: Bring Your Own Contract (external models) -->
+        <!--
+        <additionalProperties>
+          <additionalProperty>
+            openapiGenerics.responseContract.YourDto=your.package.YourDto
+          </additionalProperty>
+        </additionalProperties>
+        -->
+
+        <cleanupOutput>true</cleanupOutput>
+        <skipValidateSpec>false</skipValidateSpec>
+
+        <generateApiDocumentation>false</generateApiDocumentation>
+        <generateApiTests>false</generateApiTests>
+        <generateModelDocumentation>false</generateModelDocumentation>
+        <generateModelTests>false</generateModelTests>
+
+      </configuration>
+
+    </execution>
+  </executions>
+</plugin>
+```
+
+</details>
+
+---
+
+### What you control here
+
+* which OpenAPI spec is used
+* which HTTP client is generated (`library`)
+* package structure
+* serialization strategy
+* optional external contract mappings
+
+---
+
+### What you do NOT control
+
+* generator internals
+* template system
+* contract semantics
+* wrapper generation rules
+
+---
+
+### Reference implementations
+
+For concrete, working setups:
+
+```text
+samples/
+  spring-boot-3/customer-service-client
+  spring-boot-4/customer-service-client
+```
+
+These show real configurations for both Spring Boot 3 and Spring Boot 4.
 
 ---
 
