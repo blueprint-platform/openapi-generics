@@ -20,7 +20,7 @@ public class ExternalModelRegistry {
 
   private static final Logger log = LoggerFactory.getLogger(ExternalModelRegistry.class);
 
-  private static final String PREFIX = "openapiGenerics.externalModel.";
+  private static final String PREFIX = "openapiGenerics.responseContract.";
 
   private final Map<String, String> externalModels = new HashMap<>();
 

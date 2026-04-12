@@ -192,7 +192,7 @@
                             </configOptions>
 
                             <additionalProperties>
-                                <additionalProperty>openapiGenerics.externalModel.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto</additionalProperty>
+                                <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto</additionalProperty>
                             </additionalProperties>
                         </configuration>
 

@@ -47,11 +47,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <customer-service-client.version>0.9.0</customer-service-client.version>
+        <customer-contract.version>0.9.0</customer-contract.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <argLine/>
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.blueprint-platform.samples</groupId>
+            <artifactId>customer-contract</artifactId>
+            <version>${customer-contract.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>io.github.blueprint-platform.samples</groupId>
