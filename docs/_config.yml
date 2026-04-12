@@ -8,12 +8,14 @@ plugins:
 
 baseurl: "/openapi-generics"
 
-just_the_docs:
-  custom_css:
-    - assets/css/custom.css
+# TOC davranışı (Home sayfa için kritik)
+toc:
+  min_level: 2
+  max_level: 2
 
+# Üst sağ link
 aux_links:
-  "View on GitHub":
+  "GitHub":
     - "https://github.com/blueprint-platform/openapi-generics"
 
 search_enabled: true

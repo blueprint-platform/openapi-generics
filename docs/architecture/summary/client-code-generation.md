@@ -1,3 +1,8 @@
+---
+title: openapi-generics-client-side — Summary (0.9.x)
+nav_exclude: true
+---
+
 # openapi-generics Client Side — Summary
 
 ## What the client side is now

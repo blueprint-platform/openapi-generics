@@ -1,3 +1,9 @@
+---
+title: openapi-generics Server Side — Summary (0.9.x)
+nav_exclude: true
+---
+
+
 # openapi-generics Server Side — Summary
 
 ## What this module is now

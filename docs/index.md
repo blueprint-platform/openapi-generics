@@ -2,38 +2,14 @@
 layout: default
 title: Home
 nav_order: 1
+has_toc: true
+toc_label: "Contents"
 ---
 
 # OpenAPI Generics — Keep Your API Contract Intact End-to-End
 
 > Define your API once in Java.
 > Preserve it across OpenAPI and generated clients — without duplication or drift.
-
----
-
-## Table of Contents
-
-* [Why this exists](#why-this-exists)
-* [What you actually do](#what-you-actually-do)
-* [Quick Start](#-quick-start)
-
-  * [1. Server (producer)](#1-server-producer)
-  * [2. Client (consumer)](#2-client-consumer)
-* [Result](#result)
-* [Compatibility Matrix](#-compatibility-matrix)
-* [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
-
-  * [Before (default OpenAPI behavior)](#before-default-openapi-behavior)
-  * [After (contract-aligned generation)](#after-contract-aligned-generation)
-* [What changed](#what-changed)
-* [What is actually generated](#what-is-actually-generated)
-* [How you actually use it](#how-you-actually-use-it)
-* [What this gives you](#what-this-gives-you)
-* [Why this matters](#why-this-matters)
-* [Mental model](#mental-model)
-* [Next steps](#next-steps)
-* [References & External Links](#-references--external-links)
-* [Final note](#final-note)
 
 ---
 

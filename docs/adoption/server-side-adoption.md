@@ -3,6 +3,8 @@ layout: default
 title: Server-Side Adoption
 parent: Adoption Guides
 nav_order: 1
+has_toc: true
+toc_label: "Contents"
 ---
 
 # Server-Side Adoption — Contract-First OpenAPI Publication
@@ -13,23 +15,6 @@ This is a **contract-first projection system**, not a documentation tool.
 
 You define your contract in Java.
 The platform guarantees a **stable, generator-ready OpenAPI projection**.
-
----
-
-## 📑 Table of Contents
-
-* [⚡ 60-second quick start](#-60-second-quick-start)
-* [🎯 What the server actually does](#-what-the-server-actually-does)
-* [🧩 The only rule that matters](#-the-only-rule-that-matters)
-* [📦 Minimal dependencies](#-minimal-dependencies)
-* [✍️ What you actually write](#-what-you-actually-write)
-* [🧠 What gets published to OpenAPI](#-what-gets-published-to-openapi)
-* [🔁 Projection pipeline (what really happens)](#-projection-pipeline-what-really-happens)
-* [⚠️ Rules (do NOT break these)](#-rules-do-not-break-these)
-* [🔍 Quick verification](#-quick-verification)
-* [📦 Samples (recommended)](#-samples-recommended)
-* [🧠 Mental model](#-mental-model)
-* [🧾 Summary](#-summary)
 
 ---
 
