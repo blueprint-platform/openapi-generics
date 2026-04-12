@@ -4,6 +4,7 @@ import io.github.blueprintplatform.samples.customerservice.client.adapter.suppor
 import io.github.blueprintplatform.samples.customerservice.client.common.problem.ApiProblemException;
 import io.github.blueprintplatform.samples.customerservice.client.generated.api.CustomerControllerApi;
 import io.github.blueprintplatform.samples.customerservice.client.generated.invoker.ApiClient;
+import java.util.List;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -12,6 +13,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.restclient.RestClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
@@ -66,20 +68,29 @@ public class CustomerApiClientConfig {
   }
 
   @Bean
-  RestClient customerRestClient(
-          RestClient.Builder builder,
-          HttpComponentsClientHttpRequestFactory requestFactory,
-          ObjectMapper objectMapper) {
-
-    return builder
-            .requestFactory(requestFactory)
-            .defaultStatusHandler(
+  RestClientCustomizer problemDetailStatusHandler(ObjectMapper objectMapper) {
+    return builder ->
+            builder.defaultStatusHandler(
                     HttpStatusCode::isError,
                     (request, response) -> {
                       ProblemDetail pd = ProblemDetailSupport.extract(objectMapper, response);
                       throw new ApiProblemException(pd, response.getStatusCode().value());
-                    })
-            .build();
+                    });
+  }
+
+  @Bean
+  RestClient customerRestClient(
+          RestClient.Builder builder,
+          HttpComponentsClientHttpRequestFactory requestFactory,
+          List<RestClientCustomizer> customizers) {
+
+    builder.requestFactory(requestFactory);
+
+    if (customizers != null) {
+      customizers.forEach(c -> c.customize(builder));
+    }
+
+    return builder.build();
   }
 
   @Bean
