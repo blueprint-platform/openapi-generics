@@ -70,12 +70,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      - name: Upload coverage (samples only)
+      - name: Upload coverage (customer-service and client only)
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
-            samples/**/target/site/jacoco*/jacoco.xml
+            samples/spring-boot-3/customer-service/target/site/jacoco/jacoco.xml
+            samples/spring-boot-3/customer-service-client/target/site/jacoco/jacoco.xml
+            samples/spring-boot-4/customer-service/target/site/jacoco/jacoco.xml
+            samples/spring-boot-4/customer-service-client/target/site/jacoco/jacoco.xml
           flags: samples
           name: samples
           fail_ci_if_error: false
