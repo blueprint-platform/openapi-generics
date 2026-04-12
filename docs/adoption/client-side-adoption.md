@@ -3,12 +3,10 @@ layout: default
 title: Client-Side Adoption
 parent: Adoption Guides
 nav_order: 2
-has_toc: true
-toc_label: "Contents"
+has_toc: false
 ---
 
 # Client-Side Adoption — Contract-First Client Integration
-{: .no_toc }
 
 > Generate a Java client that **preserves contract semantics exactly as published** — with **progressive adoption**, **zero duplication**, and **no drift**.
 
@@ -30,8 +28,25 @@ It focuses on four things:
 * optionally aligning with an external contract
 * using the generated client safely
 
-1. TOC
-{:toc}
+---
+
+## 📑 Contents
+
+- [60-second quick start](#-60-second-quick-start)
+- [What the client actually does](#-what-the-client-actually-does)
+- [Input: OpenAPI (not your contract)](#-input-openapi-not-your-contract)
+- [Minimal setup](#-minimal-setup)
+- [Progressive adoption modes (0.9.x)](#-progressive-adoption-modes-09x)
+- [Build pipeline (what really happens)](#-build-pipeline-what-really-happens)
+- [Output: what gets generated](#-output-what-gets-generated)
+- [Usage: how the client enters your system](#-usage-how-the-client-enters-your-system)
+- [Adapter boundary (strongly recommended)](#-adapter-boundary-strongly-recommended)
+- [Quick verification](#-quick-verification)
+- [Error handling](#-error-handling)
+- [Mental model](#-mental-model)
+- [Summary](#-summary)
+
+---
 
 ## ⚡ 60-second quick start
 
@@ -148,10 +163,10 @@ At minimum:
 
 ---
 
-Expand the example below if you need a full configuration.
+### Full example configuration
 
 <details>
-<summary>Example configuration</summary>
+<summary>Show complete plugin configuration</summary>
 
 ```xml
 <plugin>

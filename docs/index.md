@@ -2,18 +2,31 @@
 layout: default
 title: Home
 nav_order: 1
-has_toc: true
-toc_label: "Contents"
+has_toc: false
 ---
 
 # OpenAPI Generics — Keep Your API Contract Intact End-to-End
-{: .no_toc }
-
 > Define your API once in Java.
 > Preserve it across OpenAPI and generated clients — without duplication or drift.
 
-1. TOC
-{:toc}
+---
+
+## 📑 Contents
+
+- [Why this exists](#why-this-exists)
+- [What you actually do](#what-you-actually-do)
+- [Quick Start](#quick-start)
+- [Result](#result)
+- [Compatibility Matrix](#compatibility-matrix)
+- [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
+- [What changed](#what-changed)
+- [What is actually generated](#what-is-actually-generated)
+- [How you actually use it](#how-you-actually-use-it)
+- [What this gives you](#what-this-gives-you)
+- [Why this matters](#why-this-matters)
+- [Mental model](#mental-model)
+- [Next steps](#next-steps)
+- [References](#references--external-links)
 
 ---
 
@@ -54,7 +67,7 @@ The platform handles projection, generation, and contract alignment automaticall
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Server (producer)
 
@@ -119,7 +132,7 @@ The exact same contract shape flows from server to client.
 
 ---
 
-## 🔧 Compatibility Matrix
+## Compatibility Matrix
 
 ### Runtime (Server)
 
@@ -341,7 +354,7 @@ Everything else is infrastructure.
 
 ---
 
-## 🔗 References & External Links
+## References & External Links
 
 * 🌐 **GitHub Repository** — [openapi-generics](https://github.com/blueprint-platform/openapi-generics)
 * 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)

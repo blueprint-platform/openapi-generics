@@ -4,10 +4,8 @@
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
 [![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 
-[![Java](https://img.shields.io/badge/Java-17%2B-red?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot 3.4.x](https://img.shields.io/badge/Spring%20Boot-3.4.x-lightgrey?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Spring Boot 3.5.x](https://img.shields.io/badge/Spring%20Boot-3.5.x-lightgrey?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Spring Boot 4.x](https://img.shields.io/badge/Spring%20Boot-4.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-17%2B-lightgrey?logo=openjdk)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x%20%E2%86%92%204.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
