@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    name: Build & Test
+    name: Build & Verify
     runs-on: ubuntu-latest
 
     steps:
@@ -35,50 +35,5 @@ jobs:
       - name: Build core modules
         run: mvn -B -q -ntp clean verify
 
-      - name: Build samples
+      - name: Build samples (end-to-end validation)
         run: mvn -B -q -ntp -f samples/pom.xml clean verify
-
-      - name: Upload generated client sources (SB3)
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-client-sources-sb3
-          path: samples/spring-boot-3/customer-service-client/target/generated-sources/openapi/src/gen/java
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload generated client sources (SB4)
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-client-sources-sb4
-          path: samples/spring-boot-4/customer-service-client/target/generated-sources/openapi/src/gen/java
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload OpenAPI spec (SB3)
-        uses: actions/upload-artifact@v4
-        with:
-          name: customer-api-docs-sb3
-          path: samples/spring-boot-3/customer-service-client/src/main/resources/customer-api-docs.yaml
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload OpenAPI spec (SB4)
-        uses: actions/upload-artifact@v4
-        with:
-          name: customer-api-docs-sb4
-          path: samples/spring-boot-4/customer-service-client/src/main/resources/customer-api-docs.yaml
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Upload coverage (customer-service and client only)
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: |
-            samples/spring-boot-3/customer-service/target/site/jacoco/jacoco.xml
-            samples/spring-boot-3/customer-service-client/target/site/jacoco/jacoco.xml
-            samples/spring-boot-4/customer-service/target/site/jacoco/jacoco.xml
-            samples/spring-boot-4/customer-service-client/target/site/jacoco/jacoco.xml
-          flags: samples
-          name: samples
-          fail_ci_if_error: false

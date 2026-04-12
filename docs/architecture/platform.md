@@ -106,23 +106,40 @@ It treats OpenAPI as a **transport format**, not a modeling authority.
 
 ---
 
-## 4. High-Level Platform Structure
+## High-Level Platform Structure
 
 ```text
 openapi-generics
 │
-├── openapi-generics-contract                         # Contract authority (SSOT)
-├── openapi-generics-platform-bom                    # Version alignment (ecosystem boundary)
-├── openapi-generics-server-starter                  # Server projection layer (runtime → OpenAPI)
-├── openapi-generics-java-codegen                    # Generator engine (OpenAPI → code)
-├── openapi-generics-java-codegen-parent             # Build-time orchestration (plugin + templates)
+├── openapi-generics-contract              # Canonical contract (SSOT)
+├── openapi-generics-platform-bom         # Dependency alignment (platform boundary)
+├── openapi-generics-server-starter       # Server-side projection (Java → OpenAPI)
+├── openapi-generics-java-codegen         # Generator engine (OpenAPI → Java)
+├── openapi-generics-java-codegen-parent  # Build-time orchestration (plugin + templates)
 │
-├── samples                                          # Reference implementations (non-authoritative)
-│   ├── customer-service                             # Sample producer (contract → OpenAPI)
-│   └── customer-service-client                      # Sample consumer (OpenAPI → client usage)
+├── samples                               # End-to-end reference pipelines (non-authoritative)
+│   ├── domain-contracts                  # Shared DTO examples
+│   ├── spring-boot-3                     # SB3 pipeline (producer → client)
+│   │   ├── customer-service
+│   │   └── customer-service-client
+│   │
+│   └── spring-boot-4                     # SB4 pipeline (producer → client)
+│       ├── customer-service
+│       └── customer-service-client
 │
-└── pom.xml                                          # Root aggregator
+└── pom.xml                              # Root aggregator
 ```
+
+---
+
+### Notes
+
+* `contract` is the single source of truth (never generated)
+* `server-starter` projects the contract into OpenAPI deterministically
+* `codegen` reconstructs the contract shape from OpenAPI
+* `samples` demonstrate real usage, not production architecture
+
+> The platform enforces a single invariant: contract integrity across all layers.
 
 ---
 

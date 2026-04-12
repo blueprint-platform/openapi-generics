@@ -1,12 +1,15 @@
 # OpenAPI Generics for Spring Boot — Keep Your API Contract Intact End-to-End
 
 [![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
-[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release\&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
-[![codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
+[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
+
 [![Java](https://img.shields.io/badge/Java-17%2B-red?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x%20%7C%203.5.x%20%7C%204.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot 3.4.x](https://img.shields.io/badge/Spring%20Boot-3.4.x-lightgrey?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot 3.5.x](https://img.shields.io/badge/Spring%20Boot-3.5.x-lightgrey?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot 4.x](https://img.shields.io/badge/Spring%20Boot-4.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <p align="center">
@@ -35,7 +38,6 @@
 * 🔎 [Proof — before vs after](#proof--before-vs-after)
 * 🧠 [Design guarantees](#design-guarantees)
 * 📦 [Modules](#modules)
-* 📘 [Adoption guides](#adoption-guides)
 * 🔗 [References](#references)
 * 🤝 [Contributing](#contributing)
 * 🛡 [License](#license)
@@ -64,7 +66,7 @@ This project removes that entire class of problems.
 
 ## What’s new in 0.9.x
 
-This is no longer a “template tweak”.
+This is no longer a template-level customization.
 
 It is now a **contract-aligned generation system with progressive adoption**.
 
@@ -73,11 +75,9 @@ It is now a **contract-aligned generation system with progressive adoption**.
 Reuse your own domain models instead of generating them:
 
 ```xml
+ <!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
-  <additionalProperty>
-    openapiGenerics.responseContract.CustomerDto=
-    io.example.contract.CustomerDto
-  </additionalProperty>
+  <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto</additionalProperty>
 </additionalProperties>
 ```
 
@@ -115,7 +115,7 @@ Client generation is a **controlled execution system**:
 
 ---
 
-### 4. End-to-end samples (SB3 + SB4)
+### 4. End-to-end samples (Spring Boot 3 & 4)
 
 Full pipelines are included:
 
@@ -141,7 +141,7 @@ You only add two building blocks.
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.9.x</version>
+  <version>0.9.0</version>
 </dependency>
 ```
 
@@ -151,7 +151,7 @@ You only add two building blocks.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.9.x</version>
+  <version>0.9.0</version>
 </parent>
 ```
 
@@ -196,9 +196,9 @@ public class ServiceResponsePageCustomerDto
     extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-✔ No duplicated envelope
-✔ Generics preserved
-✔ Contract reused end-to-end
+- No duplicated envelope
+- Generics preserved
+- Contract reused end-to-end
 
 ---
 
@@ -237,7 +237,7 @@ ServiceResponse<T>
 ServiceResponse<Page<T>>
 ```
 
-Everything else falls back to default OpenAPI behavior.
+Other cases follow standard OpenAPI behavior.
 
 ---
 
@@ -250,6 +250,15 @@ Everything else falls back to default OpenAPI behavior.
 </p>
 
 ---
+
+### Dive deeper
+
+Explore internal architecture and design decisions:
+
+- [Architecture](docs/architecture/platform.md)
+
+---
+
 
 ## Proof — before vs after
 
@@ -295,13 +304,6 @@ public class ServiceResponsePageCustomerDto
 * [openapi-generics-server-starter](openapi-generics-server-starter/README.md)
 * [openapi-generics-java-codegen](openapi-generics-java-codegen/README.md)
 * [openapi-generics-java-codegen-parent](openapi-generics-java-codegen-parent/README.md)
-
----
-
-## Adoption guides
-
-* [Server-Side Adoption](docs/adoption/server-side-adoption.md)
-* [Client-Side Adoption](docs/adoption/client-side-adoption.md)
 
 ---
 

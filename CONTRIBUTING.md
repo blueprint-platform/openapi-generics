@@ -8,7 +8,7 @@ This repository provides a **contract-first, generics-aware OpenAPI platform**, 
 Built with:
 
 * Java 17+
-* Spring Boot 3.4.x, 3.5.x
+* Spring Boot 3.4.x, 3.5.x 4.x
 * OpenAPI Generator 7.x
 
 > Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).

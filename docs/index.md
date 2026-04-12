@@ -91,10 +91,9 @@ Inherit the parent:
 Optionally declare externally owned shared contract models:
 
 ```xml
+ <!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
-  <additionalProperty>
-    openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto
-  </additionalProperty>
+    <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto</additionalProperty>
 </additionalProperties>
 ```
 
@@ -275,23 +274,25 @@ If you choose to keep shared DTO ownership outside the generated client, this ad
 
 ## What this gives you
 
-At usage level, your application only sees:
+At usage level, your application works with a single, stable contract shape:
 
 ```java
 ServiceResponse<CustomerDto>
 ServiceResponse<Page<CustomerDto>>
 ```
 
-Not:
+You do **not** have to deal with common issues produced by default OpenAPI generation:
 
-* duplicated envelope classes
-* flattened generic shapes
-* unstable model graphs
-* generator-specific envelope hierarchies
+* duplicated envelope classes (one per endpoint)
+* flattened generic types (loss of `Page<T>` / `ServiceResponse<T>` semantics)
+* unstable model graphs (frequent diffs from minor changes)
+* generator-specific model hierarchies (e.g., `InlineResponse200`, `CustomerDtoResponse`)
 
-And when you reuse shared contract DTOs, it also avoids regenerating models you already own.
+If you reuse shared contract DTOs, the system also avoids regenerating models you already own.
 
-No reinterpretation. No duplication. No drift.
+- No reinterpretation
+- No duplication
+- No drift
 
 ---
 

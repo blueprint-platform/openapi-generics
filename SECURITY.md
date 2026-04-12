@@ -13,10 +13,9 @@ If you believe you’ve found a vulnerability, **please follow the process below
 * [Severity Guidance](#severity-guidance)
 * [Coordinated Disclosure](#coordinated-disclosure)
 * [Scope](#scope)
-
     * [In scope](#in-scope)
     * [Out of scope](#out-of-scope)
-* [Non-qualifying Reports](#nonqualifying-reports)
+* [Non-qualifying Reports](#non-qualifying-reports)
 * [Questions](#questions)
 
 ---
@@ -26,10 +25,10 @@ If you believe you’ve found a vulnerability, **please follow the process below
 We currently provide security fixes for the latest minor release line and the `main` branch.
 
 | Version   | Status          |
-| --------- | --------------- |
+|-----------| --------------- |
 | `main`    | ✅ Supported     |
 | `0.9.x`   | ✅ Supported     |
-| `< 0.8.0` | ❌ Not supported |
+| `< 0.9.0` | ❌ Not supported |
 
 > **Note**
 > This project is **pre-1.0**. Public APIs and contracts may evolve quickly.
