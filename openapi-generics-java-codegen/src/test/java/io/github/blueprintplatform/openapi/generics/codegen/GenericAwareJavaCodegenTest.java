@@ -3,6 +3,7 @@ package io.github.blueprintplatform.openapi.generics.codegen;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.swagger.v3.oas.models.media.Schema;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -20,22 +21,18 @@ class GenericAwareJavaCodegenTest {
     void shouldFilterExternalModel_andKeepOthers() {
         GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        // simulate additionalProperties (external contract mapping)
         codegen.additionalProperties().put(
                 "openapiGenerics.responseContract.CustomerDto",
                 "io.example.CustomerDto");
 
         codegen.processOpts();
 
-        // --- create schemas
         Schema<?> externalSchema = new Schema<>();
         Schema<?> normalSchema = new Schema<>();
 
-        // --- generate models
         CodegenModel externalModel = codegen.fromModel("CustomerDto", externalSchema);
         CodegenModel normalModel = codegen.fromModel("OrderDto", normalSchema);
 
-        // --- wrap into ModelsMap
         ModelMap mm1 = new ModelMap();
         mm1.setModel(externalModel);
 
@@ -43,17 +40,21 @@ class GenericAwareJavaCodegenTest {
         mm2.setModel(normalModel);
 
         ModelsMap modelsMap = new ModelsMap();
-        modelsMap.setModels(List.of(mm1, mm2));
 
-        // --- run post process
+    // FIX: mutable list
+    List<ModelMap> modelList = new ArrayList<>();
+    modelList.add(mm1);
+    modelList.add(mm2);
+
+    modelsMap.setModels(modelList);
+
         ModelsMap result = codegen.postProcessModels(modelsMap);
 
         assertNotNull(result);
         assertNotNull(result.getModels());
 
-        // external model should be removed
         assertEquals(1, result.getModels().size());
-        assertEquals("OrderDto", result.getModels().getFirst().getModel().name);
+    assertEquals("OrderDto", result.getModels().get(0).getModel().name);
     }
 
     @Test
@@ -71,10 +72,8 @@ class GenericAwareJavaCodegenTest {
 
         CodegenModel model = codegen.fromModel("CustomerDto", schema);
 
-        // simulate imports containing ignored model
         model.imports = new java.util.HashSet<>(List.of("CustomerDto", "OtherDto"));
 
-        // trigger clean
         CodegenModel processed = codegen.fromModel("CustomerDto", schema);
 
         assertNotNull(processed);
