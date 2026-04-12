@@ -12,8 +12,12 @@ ignore:
   - "**/target/**"
   - "**/generated/**"
   - "**/generated-sources/**"
+  - "samples/**/customer-service-consumer/**"
 
 flags:
   samples:
     paths:
-      - "samples/"
+      - "samples/spring-boot-3/customer-service/"
+      - "samples/spring-boot-3/customer-service-client/"
+      - "samples/spring-boot-4/customer-service/"
+      - "samples/spring-boot-4/customer-service-client/"
