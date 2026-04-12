@@ -18,7 +18,7 @@ public class JacksonConfig {
 
     module.addSerializer(
         SortDirection.class,
-        new ValueSerializer<SortDirection>() {
+        new ValueSerializer<>() {
           @Override
           public void serialize(SortDirection value, JsonGenerator gen, SerializationContext ctxt)
               throws JacksonException {

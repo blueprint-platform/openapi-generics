@@ -13,7 +13,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client-sb4</artifactId>
-    <name>customer-service-client</name>
+    <name>customer-service-client-sb4</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
@@ -48,7 +48,7 @@
         <java.version>21</java.version>
         <spring-boot.version>4.0.5</spring-boot.version>
         <openapi-generator.version>7.21.0</openapi-generator.version>
-
+        <customer-contract.version>0.9.0</customer-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
@@ -64,6 +64,12 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>io.github.blueprint-platform.samples</groupId>
+            <artifactId>customer-contract</artifactId>
+            <version>${customer-contract.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -183,6 +189,14 @@
                                 <useJackson3>true</useJackson3>
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
+
+                            <cleanupOutput>true</cleanupOutput>
+                            <skipValidateSpec>false</skipValidateSpec>
+
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateModelTests>false</generateModelTests>
 
                         </configuration>
 

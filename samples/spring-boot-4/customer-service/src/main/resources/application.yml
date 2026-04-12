@@ -34,6 +34,8 @@ app:
     wrapper:
       # Optional: extra annotation for generated client models
       # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+  api:
+    base-path: /customers
 
 springdoc:
   default-consumes-media-type: application/json

@@ -14,7 +14,7 @@
         <groupId>io.github.blueprint-platform.samples</groupId>
         <artifactId>customer-service-sb3</artifactId>
         <version>0.9.0</version>
-        <name>customer-service</name>
+        <name>customer-service-sb3</name>
         <description>Spring Boot reference producer for the OpenAPI Generics platform</description>
         <url>https://github.com/blueprint-platform/openapi-generics</url>
 

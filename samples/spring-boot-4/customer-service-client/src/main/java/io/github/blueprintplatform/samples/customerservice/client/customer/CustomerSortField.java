@@ -11,6 +11,15 @@ public enum CustomerSortField {
     this.value = value;
   }
 
+  public static CustomerSortField from(String s) {
+    if (s == null) return CUSTOMER_ID;
+    for (var f : values()) {
+      if (f.value.equalsIgnoreCase(s)) return f;
+    }
+    throw new IllegalArgumentException("Unsupported sort field: " + s);
+  }
+
+
   public String value() {
     return value;
   }

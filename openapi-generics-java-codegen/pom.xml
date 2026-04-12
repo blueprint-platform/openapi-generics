@@ -54,6 +54,7 @@
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
 
         <slf4j-api.version>2.0.17</slf4j-api.version>
+        <junit.jupiter.version>5.14.3</junit.jupiter.version>
     </properties>
 
     <dependencies>
@@ -74,6 +75,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j-api.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

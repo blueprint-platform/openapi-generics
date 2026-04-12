@@ -44,7 +44,7 @@ public class ExternalImportResolver {
     if (ve == null) return;
 
     Optional<String> typeOpt =
-            extract(ve, EXT_DATA_ITEM).or(() -> extract(ve, EXT_WRAPPER_DATATYPE));
+        extract(ve, EXT_DATA_ITEM).or(() -> extract(ve, EXT_WRAPPER_DATATYPE));
 
     if (typeOpt.isEmpty()) {
       log.debug("Wrapper model has no resolvable inner type: {}", model.name);

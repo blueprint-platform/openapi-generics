@@ -13,7 +13,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client-sb3</artifactId>
-    <name>customer-service-client</name>
+    <name>customer-service-client-sb3</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
@@ -194,6 +194,14 @@
                             <additionalProperties>
                                 <additionalProperty>openapiGenerics.responseContract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto</additionalProperty>
                             </additionalProperties>
+
+                            <cleanupOutput>true</cleanupOutput>
+                            <skipValidateSpec>false</skipValidateSpec>
+
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateModelTests>false</generateModelTests>
                         </configuration>
 
                     </execution>

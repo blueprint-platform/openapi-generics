@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
-  private static final Logger log =
-          LoggerFactory.getLogger(GenericAwareJavaCodegen.class);
+  private static final Logger log = LoggerFactory.getLogger(GenericAwareJavaCodegen.class);
 
   private final ExternalModelRegistry registry = new ExternalModelRegistry();
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
@@ -67,12 +66,12 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     int before = result.getModels().size();
 
     result
-            .getModels()
-            .removeIf(
-                    m -> {
-                      CodegenModel model = m.getModel();
-                      return model != null && ignoreDecider.isIgnored(model.name);
-                    });
+        .getModels()
+        .removeIf(
+            m -> {
+              CodegenModel model = m.getModel();
+              return model != null && ignoreDecider.isIgnored(model.name);
+            });
 
     int after = result.getModels().size();
 
@@ -81,14 +80,14 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     }
 
     result
-            .getModels()
-            .forEach(
-                    m -> {
-                      CodegenModel model = m.getModel();
-                      if (model != null) {
-                        importResolver.apply(model);
-                      }
-                    });
+        .getModels()
+        .forEach(
+            m -> {
+              CodegenModel model = m.getModel();
+              if (model != null) {
+                importResolver.apply(model);
+              }
+            });
 
     return result;
   }

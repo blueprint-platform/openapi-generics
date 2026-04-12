@@ -1,0 +1,47 @@
+server:
+  port: ${APP_PORT:8095}
+  servlet:
+    context-path: /customer-service-consumer
+
+spring:
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  mvc:
+    problemdetails:
+      enabled: true
+  application:
+    name: customer-service-consumer
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  web:
+    error:
+      include-message: always
+      include-binding-errors: always
+      include-stacktrace: never
+      include-exception: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    io.github.blueprintplatform: DEBUG
+
+app:
+  openapi:
+    version: @project.version@
+    base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
+    wrapper:
+      # Optional: extra annotation for generated client models
+      # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+    api:
+      base-path: /customers
+
+customer:
+  api:
+    base-url: ${CUSTOMER_API_BASE_URL:http://localhost:8094/customer-service}
+    max-connections-total: 64
+    max-connections-per-route: 16
+    connect-timeout-seconds: 10
+    connection-request-timeout-seconds: 10
+    read-timeout-seconds: 15
