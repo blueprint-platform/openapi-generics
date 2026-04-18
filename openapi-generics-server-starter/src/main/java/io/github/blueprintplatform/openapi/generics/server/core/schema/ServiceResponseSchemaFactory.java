@@ -1,31 +1,27 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions;
 import io.swagger.v3.oas.models.media.Schema;
-import java.util.List;
+import java.util.Map;
 
 public final class ServiceResponseSchemaFactory {
 
-  private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
-
   private ServiceResponseSchemaFactory() {}
 
-  public static Schema<?> createComposedWrapper(
-      Class<?> envelopeType, String payloadPropertyName, String dataRefName) {
+  public static Schema<?> enrichComposedWrapper(
+          Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
-    ComposedSchema schema = new ComposedSchema();
+    String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
+    Schema<?> wrapper = schemas.get(wrapperName);
 
-    schema.setAllOf(
-        List.of(
-            new Schema<>().$ref(buildRef(envelopeType.getSimpleName())),
-            new ObjectSchema()
-                .addProperty(payloadPropertyName, new Schema<>().$ref(buildRef(dataRefName)))));
+    if (wrapper == null) {
+      throw new IllegalStateException("Missing wrapper schema: " + wrapperName);
+    }
 
-    return schema;
-  }
+    wrapper.addExtension(VendorExtensions.API_WRAPPER, Boolean.TRUE);
+    wrapper.addExtension(VendorExtensions.API_WRAPPER_DATATYPE, descriptor.dataRefName());
 
-  private static String buildRef(String schemaName) {
-    return SCHEMA_REF_PREFIX + schemaName;
+    return wrapper;
   }
 }

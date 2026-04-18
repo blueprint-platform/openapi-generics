@@ -33,20 +33,10 @@ public class OpenApiContractGuard {
     }
 
     for (ResponseTypeDescriptor descriptor : descriptors) {
-      validateEnvelopeSchemaExists(schemas, descriptor);
       validateWrapperSchema(schemas, descriptor);
     }
   }
 
-  private void validateEnvelopeSchemaExists(
-      Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
-
-    String envelopeSchemaName = descriptor.envelopeType().getSimpleName();
-
-    if (!schemas.containsKey(envelopeSchemaName)) {
-      failMissingSchema("envelope", envelopeSchemaName);
-    }
-  }
 
   private void validateWrapperSchema(
       Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
@@ -77,17 +67,20 @@ public class OpenApiContractGuard {
   }
 
   private void validateWrapperStructure(
-      String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
+          String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
 
-    if (wrapper.getAllOf() == null || wrapper.getAllOf().isEmpty()) {
-      failInvalidStructure(wrapperName, "missing allOf composition");
+    boolean hasPayloadProperty = false;
+
+    if (wrapper.getAllOf() != null && !wrapper.getAllOf().isEmpty()) {
+      hasPayloadProperty =
+              wrapper.getAllOf().stream()
+                      .filter(schema -> schema.getProperties() != null)
+                      .anyMatch(
+                              schema -> schema.getProperties().containsKey(descriptor.payloadPropertyName()));
+    } else if (wrapper.getProperties() != null) {
+      hasPayloadProperty =
+              wrapper.getProperties().containsKey(descriptor.payloadPropertyName());
     }
-
-    boolean hasPayloadProperty =
-        wrapper.getAllOf().stream()
-            .filter(schema -> schema.getProperties() != null)
-            .anyMatch(
-                schema -> schema.getProperties().containsKey(descriptor.payloadPropertyName()));
 
     if (!hasPayloadProperty) {
       failMissingProperty(wrapperName, descriptor.payloadPropertyName());

@@ -29,6 +29,11 @@ public final class ResponseTypeIntrospector {
   public Optional<ResponseTypeDescriptor> extract(ResolvableType type) {
     type = unwrap(type);
 
+    Class<?> raw = type.resolve();
+    if (raw == null || !envelopeType.isAssignableFrom(raw)) {
+      return Optional.empty();
+    }
+
     ResolvableType dataType = type.getGeneric(0);
     Optional<ResponseTypeDescriptor> descriptorOpt = buildDescriptor(dataType);
 

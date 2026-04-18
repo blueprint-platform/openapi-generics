@@ -44,10 +44,25 @@ public class ResponseIntrospectionPolicyResolver {
   }
 
   private Class<?> resolveExternalEnvelopeType(String configuredType) {
+    if (configuredType == null || configuredType.isBlank()) {
+      throw new IllegalStateException("Envelope type must not be null or blank");
+    }
+
+    if (!configuredType.contains(".")) {
+      throw new IllegalStateException(
+          "Invalid envelope type '"
+              + configuredType
+              + "'. Expected fully-qualified class name (e.g. com.example.ApiResponse)");
+    }
     try {
       return Class.forName(configuredType);
     } catch (ClassNotFoundException e) {
-      throw new IllegalStateException("Configured envelope class not found: " + configuredType, e);
+      throw new IllegalStateException(
+          "Configured envelope class not found: '"
+              + configuredType
+              + "'. "
+              + "Ensure the class exists and is on the application classpath.",
+          e);
     }
   }
 

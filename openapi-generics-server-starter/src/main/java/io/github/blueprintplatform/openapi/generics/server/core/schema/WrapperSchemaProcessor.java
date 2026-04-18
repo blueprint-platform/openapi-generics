@@ -21,18 +21,14 @@ public class WrapperSchemaProcessor {
   public void process(OpenAPI openApi, ResponseTypeDescriptor descriptor) {
         Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-    String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
 
     Schema<?> wrapper =
-        ServiceResponseSchemaFactory.createComposedWrapper(
-            descriptor.envelopeType(), descriptor.payloadPropertyName(), descriptor.dataRefName());
+        ServiceResponseSchemaFactory.enrichComposedWrapper(schemas, descriptor);
 
-        schemas.put(wrapperName, wrapper);
-
-    log.debug("Wrapper schema '{}' applied", wrapperName);
+    log.debug("Wrapper schema '{}' enriched", wrapper.getName());
 
     if (isDefaultEnvelope(descriptor)) {
-      enricher.enrich(openApi, wrapperName, descriptor.dataRefName());
+        enricher.enrich(openApi, wrapper.getName(), descriptor.dataRefName());
     }
   }
 
