@@ -16,7 +16,7 @@ class WrapperSchemaProcessorTest {
   private final WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
 
   private final WrapperSchemaProcessor processor =
-      new WrapperSchemaProcessor(enricher, "@MyAnnotation");
+      new WrapperSchemaProcessor(enricher);
 
   @Test
   @DisplayName("process -> should create wrapper schema")
@@ -54,20 +54,6 @@ class WrapperSchemaProcessorTest {
     verify(enricher).enrich(openApi, wrapperName, "CustomerDto");
   }
 
-  @Test
-  @DisplayName("process -> should apply class extra annotation via extension")
-  void shouldApplyExtraAnnotation() {
-    OpenAPI openApi = new OpenAPI().components(new Components().schemas(new HashMap<>()));
-
-    processor.process(openApi, "CustomerDto");
-
-    Schema<?> schema =
-        openApi.getComponents().getSchemas().get(SchemaNames.SERVICE_RESPONSE + "CustomerDto");
-
-    assertNotNull(schema.getExtensions());
-    assertTrue(schema.getExtensions().containsKey("x-class-extra-annotation"));
-    assertEquals("@MyAnnotation", schema.getExtensions().get("x-class-extra-annotation"));
-  }
 
   @Test
   @DisplayName("process -> should not fail with empty schemas map")

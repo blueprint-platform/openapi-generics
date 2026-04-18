@@ -11,7 +11,6 @@ import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenA
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.context.annotation.Bean;
@@ -127,22 +126,6 @@ public class OpenApiGenericsAutoConfiguration {
   @ConditionalOnMissingBean
   public WrapperSchemaEnricher wrapperSchemaEnricher() {
     return new WrapperSchemaEnricher();
-  }
-
-  /**
-   * Creates wrapper schema processor.
-   *
-   * @param enricher wrapper enricher
-   * @param extraAnnotation optional extra annotation applied to generated wrappers
-   * @return wrapper schema processor
-   */
-  @Bean
-  @ConditionalOnMissingBean
-  public WrapperSchemaProcessor wrapperSchemaProcessor(
-          WrapperSchemaEnricher enricher,
-          @Value("${app.openapi.wrapper.class-extra-annotation:}") String extraAnnotation) {
-
-    return new WrapperSchemaProcessor(enricher, extraAnnotation);
   }
 
   /**

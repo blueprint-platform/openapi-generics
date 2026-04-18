@@ -79,9 +79,6 @@ public final class VendorExtensions {
   /** Carries the underlying data type of the wrapper. */
   public static final String API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
 
-  /** Optional extension to inject additional annotations into generated models. */
-  public static final String CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
-
   // -------------------------------------------------------------------------
   // Container semantics
   // -------------------------------------------------------------------------

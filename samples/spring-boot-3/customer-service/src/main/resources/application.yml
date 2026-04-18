@@ -30,9 +30,10 @@ app:
   openapi:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
-    wrapper:
-      # Optional: extra annotation for generated client models
-      # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+
+openapi-generics:
+  envelope:
+    type: io.example.ApiResponse
 
 springdoc:
   default-consumes-media-type: application/json

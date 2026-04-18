@@ -48,13 +48,9 @@ public class WrapperSchemaProcessor {
     private static final Logger log = LoggerFactory.getLogger(WrapperSchemaProcessor.class);
 
     private final WrapperSchemaEnricher enricher;
-    private final String classExtraAnnotation;
 
-    public WrapperSchemaProcessor(
-            WrapperSchemaEnricher enricher,
-            String classExtraAnnotation) {
+    public WrapperSchemaProcessor(WrapperSchemaEnricher enricher) {
         this.enricher = enricher;
-        this.classExtraAnnotation = classExtraAnnotation;
     }
 
     /**
@@ -80,7 +76,7 @@ public class WrapperSchemaProcessor {
         boolean exists = schemas.containsKey(wrapperName);
 
         Schema<?> wrapper =
-                ServiceResponseSchemaFactory.createComposedWrapper(ref, classExtraAnnotation);
+                ServiceResponseSchemaFactory.createComposedWrapper(ref);
 
         schemas.put(wrapperName, wrapper);
 

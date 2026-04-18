@@ -47,7 +47,6 @@ import java.util.List;
  * <ul>
  *   <li>{@code x-api-wrapper} → marks schema as wrapper</li>
  *   <li>{@code x-api-wrapper-datatype} → underlying data type</li>
- *   <li>{@code x-class-extra-annotation} → optional generator hint</li>
  * </ul>
  *
  * <h2>Important</h2>
@@ -80,15 +79,6 @@ public final class ServiceResponseSchemaFactory {
 
   private ServiceResponseSchemaFactory() {}
 
-  /**
-   * Creates a wrapper schema without additional class annotations.
-   *
-   * @param dataRefName name of the concrete data schema
-   * @return composed OpenAPI schema
-   */
-  public static Schema<?> createComposedWrapper(String dataRefName) {
-    return createComposedWrapper(dataRefName, null);
-  }
 
   /**
    * Creates a composed OpenAPI schema representing {@code ServiceResponse<T>}.
@@ -102,10 +92,9 @@ public final class ServiceResponseSchemaFactory {
    * </ul>
    *
    * @param dataRefName name of the concrete data schema (must exist in components)
-   * @param classExtraAnnotation optional annotation hint for generated clients
    * @return composed OpenAPI schema
    */
-  public static Schema<?> createComposedWrapper(String dataRefName, String classExtraAnnotation) {
+  public static Schema<?> createComposedWrapper(String dataRefName) {
 
     String dataRef = buildRef(dataRefName);
 
@@ -123,10 +112,6 @@ public final class ServiceResponseSchemaFactory {
     schema.addExtension(VendorExtensions.API_WRAPPER, Boolean.TRUE);
     schema.addExtension(VendorExtensions.API_WRAPPER_DATATYPE, dataRefName);
 
-    if (hasText(classExtraAnnotation)) {
-      schema.addExtension(VendorExtensions.CLASS_EXTRA_ANNOTATION, classExtraAnnotation);
-    }
-
     return schema;
   }
 
@@ -140,13 +125,4 @@ public final class ServiceResponseSchemaFactory {
     return SCHEMA_PREFIX + schemaName;
   }
 
-  /**
-   * Lightweight null/blank check without external dependencies.
-   *
-   * @param value input string
-   * @return true if text is present
-   */
-  private static boolean hasText(String value) {
-    return value != null && !value.isBlank();
-  }
 }
