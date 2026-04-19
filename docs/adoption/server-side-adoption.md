@@ -29,8 +29,6 @@ The platform guarantees a **stable, generator-ready OpenAPI projection**.
 - [Rules (do NOT break these)](#-rules-do-not-break-these)
 - [Quick verification](#-quick-verification)
 - [Samples](#-samples-recommended)
-- [Mental model](#-mental-model)
-- [Summary](#-summary)
 
 ---
 
@@ -467,53 +465,6 @@ These demonstrate:
 * how it is consumed safely
 
 > If anything is unclear, inspect samples instead of guessing.
-
----
-
-## 🧠 Mental model
-
-Think of the server as:
-
-> A deterministic compiler from runtime contract → OpenAPI
-
-Not:
-
-* a schema designer
-* a customization layer
-
-What it compiles is not a specific class like `ServiceResponse` —
-
-it compiles a **contract shape**:
-
-```text
-YourEnvelope<T>
-```
-
-Where:
-
-* the envelope can be **default (ServiceResponse)** or **external (BYOE)**
-* the payload is discovered via **introspection (single direct generic slot)**
-
-The pipeline does not change based on the envelope.
-
-Only the **input contract type** changes — the projection model remains identical.
-
----
-
-## 🧾 Summary
-
-```text
-Input   = Java contract (default or external envelope)
-Process = projection pipeline (envelope-agnostic)
-Output  = deterministic OpenAPI
-```
-
-The system works because:
-
-* contract is never redefined
-* envelope is treated as a **first-class contract boundary**
-* projection is deterministic
-* downstream generation is predictable
 
 ---
 

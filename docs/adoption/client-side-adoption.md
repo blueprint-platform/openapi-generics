@@ -42,8 +42,6 @@ It focuses on four things:
 - [Usage: how the client enters your system](#-usage-how-the-client-enters-your-system)
 - [Quick verification](#-quick-verification)
 - [Error handling](#-error-handling)
-- [Mental model](#-mental-model)
-- [Summary](#-summary)
 
 ---
 
@@ -75,22 +73,22 @@ Do this:
 
 ### 3) (Optional) Align with your contract
 
-Reuse your existing models:
-
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
-  </additionalProperty>
-</additionalProperties>
-```
-
 Use your own envelope (BYOE):
 
 ```xml
 <additionalProperties>
   <additionalProperty>
     openapi-generics.envelope=io.example.contract.ApiResponse
+  </additionalProperty>
+</additionalProperties>
+```
+
+Reuse your existing models:
+
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
   </additionalProperty>
 </additionalProperties>
 ```

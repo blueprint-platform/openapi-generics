@@ -109,6 +109,16 @@ Inherit the parent:
 </parent>
 ```
 
+If using a custom envelope, declare it for client generation:
+
+```xml
+<additionalProperties>
+    <additionalProperty>
+        openapi-generics.envelope=io.example.contract.ApiResponse
+    </additionalProperty>
+</additionalProperties>
+```
+
 Optionally declare externally owned shared contract models:
 
 ```xml
@@ -116,16 +126,6 @@ Optionally declare externally owned shared contract models:
 <additionalProperties>
     <additionalProperty>
         openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
-    </additionalProperty>
-</additionalProperties>
-```
-
-If using a custom envelope, declare it for client generation:
-
-```xml
-<additionalProperties>
-    <additionalProperty>
-        openapi-generics.envelope=io.example.contract.ApiResponse
     </additionalProperty>
 </additionalProperties>
 ```
