@@ -32,91 +32,90 @@ import java.util.Set;
  */
 public class SchemaGenerationControlMarker {
 
-    private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
+  private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
 
-    public void mark(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
-        if (openApi == null
-                || openApi.getComponents() == null
-                || openApi.getComponents().getSchemas() == null
-                || descriptors == null
-                || descriptors.isEmpty()) {
-            return;
-        }
-
-        Map<String, Schema> schemas = openApi.getComponents().getSchemas();
-
-        for (ResponseTypeDescriptor descriptor : descriptors) {
-            markIgnore(schemas, descriptor.envelopeType().getSimpleName());
-
-            if (isDefaultEnvelope(descriptor)) {
-                markIgnore(schemas, Meta.class.getSimpleName());
-                markIgnore(schemas, Sort.class.getSimpleName());
-            }
-
-            markNestedEnvelopeSchemas(schemas, descriptor);
-
-            if (descriptor.isContainer()) {
-                markIgnore(schemas, descriptor.dataRefName());
-            }
-        }
+  public void mark(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
+    if (openApi == null
+        || openApi.getComponents() == null
+        || openApi.getComponents().getSchemas() == null
+        || descriptors == null
+        || descriptors.isEmpty()) {
+      return;
     }
 
-    private void markNestedEnvelopeSchemas(
-            Map<String, Schema> schemas,
-            ResponseTypeDescriptor descriptor) {
+    Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-        String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
-        Schema<?> wrapperSchema = schemas.get(wrapperName);
-        if (wrapperSchema == null || wrapperSchema.getProperties() == null) {
-            return;
-        }
+    for (ResponseTypeDescriptor descriptor : descriptors) {
+      markIgnore(schemas, descriptor.envelopeType().getSimpleName());
 
-        Set<String> ignoreCandidates = new LinkedHashSet<>();
+      if (isDefaultEnvelope(descriptor)) {
+        markIgnore(schemas, Meta.class.getSimpleName());
+        markIgnore(schemas, Sort.class.getSimpleName());
+      }
 
-        for (Map.Entry<String, Schema> entry : wrapperSchema.getProperties().entrySet()) {
-            String propertyName = entry.getKey();
-            Schema<?> propertySchema = entry.getValue();
+      markNestedEnvelopeSchemas(schemas, descriptor);
 
-            if (descriptor.payloadPropertyName().equals(propertyName)) {
-                continue;
-            }
+      if (descriptor.isContainer()) {
+        markIgnore(schemas, descriptor.dataRefName());
+      }
+    }
+  }
 
-            collectReferencedSchemas(propertySchema, ignoreCandidates);
-        }
+  private void markNestedEnvelopeSchemas(
+      Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
-        ignoreCandidates.forEach(name -> markIgnore(schemas, name));
+    String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
+    Schema<?> wrapperSchema = schemas.get(wrapperName);
+    if (wrapperSchema == null || wrapperSchema.getProperties() == null) {
+      return;
     }
 
-    private void collectReferencedSchemas(Schema<?> schema, Set<String> collected) {
-        if (schema == null) {
-            return;
-        }
+    Set<String> ignoreCandidates = new LinkedHashSet<>();
 
-        String ref = schema.get$ref();
-        if (ref != null && ref.startsWith(SCHEMA_REF_PREFIX)) {
-            collected.add(ref.substring(SCHEMA_REF_PREFIX.length()));
-            return;
-        }
+    for (Map.Entry<String, Schema> entry : wrapperSchema.getProperties().entrySet()) {
+      String propertyName = entry.getKey();
+      Schema<?> propertySchema = entry.getValue();
 
-        if (schema instanceof ArraySchema arraySchema) {
-            collectReferencedSchemas(arraySchema.getItems(), collected);
-            return;
-        }
+      if (descriptor.payloadPropertyName().equals(propertyName)) {
+        continue;
+      }
 
-        Schema<?> items = schema.getItems();
-        if (items != null) {
-            collectReferencedSchemas(items, collected);
-        }
+      collectReferencedSchemas(propertySchema, ignoreCandidates);
     }
 
-    private boolean isDefaultEnvelope(ResponseTypeDescriptor descriptor) {
-        return ServiceResponse.class.equals(descriptor.envelopeType());
+    ignoreCandidates.forEach(name -> markIgnore(schemas, name));
+  }
+
+  private void collectReferencedSchemas(Schema<?> schema, Set<String> collected) {
+    if (schema == null) {
+      return;
     }
 
-    private void markIgnore(Map<String, Schema> schemas, String schemaName) {
-        Schema<?> schema = schemas.get(schemaName);
-        if (schema != null) {
-            schema.addExtension(VendorExtensions.IGNORE_MODEL, true);
-        }
+    String ref = schema.get$ref();
+    if (ref != null && ref.startsWith(SCHEMA_REF_PREFIX)) {
+      collected.add(ref.substring(SCHEMA_REF_PREFIX.length()));
+      return;
     }
+
+    if (schema instanceof ArraySchema arraySchema) {
+      collectReferencedSchemas(arraySchema.getItems(), collected);
+      return;
+    }
+
+    Schema<?> items = schema.getItems();
+    if (items != null) {
+      collectReferencedSchemas(items, collected);
+    }
+  }
+
+  private boolean isDefaultEnvelope(ResponseTypeDescriptor descriptor) {
+    return ServiceResponse.class.equals(descriptor.envelopeType());
+  }
+
+  private void markIgnore(Map<String, Schema> schemas, String schemaName) {
+    Schema<?> schema = schemas.get(schemaName);
+    if (schema != null) {
+      schema.addExtension(VendorExtensions.IGNORE_MODEL, true);
+    }
+  }
 }

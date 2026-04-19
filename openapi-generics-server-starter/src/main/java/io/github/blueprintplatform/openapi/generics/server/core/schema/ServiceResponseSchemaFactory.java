@@ -10,7 +10,7 @@ public final class ServiceResponseSchemaFactory {
   private ServiceResponseSchemaFactory() {}
 
   public static Schema<?> enrichComposedWrapper(
-          Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
+      Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
     String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
     Schema<?> wrapper = schemas.get(wrapperName);

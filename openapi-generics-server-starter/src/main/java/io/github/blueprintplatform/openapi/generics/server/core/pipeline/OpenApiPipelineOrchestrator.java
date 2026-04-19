@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
  *   <li>OpenAPI is treated as a projection, not a source of truth
  * </ul>
  *
- * <p>Acts as the integration point between discovery, schema generation,
- * control marking, and contract validation phases.
+ * <p>Acts as the integration point between discovery, schema generation, control marking, and
+ * contract validation phases.
  */
 public class OpenApiPipelineOrchestrator {
 

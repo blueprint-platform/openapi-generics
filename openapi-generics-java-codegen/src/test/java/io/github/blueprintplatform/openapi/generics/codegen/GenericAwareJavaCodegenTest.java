@@ -18,30 +18,30 @@ import org.openapitools.codegen.model.ModelsMap;
 @DisplayName("Smoke Test: GenericAwareJavaCodegen")
 class GenericAwareJavaCodegenTest {
 
-    @Test
-    @DisplayName("processOpts + fromModel + postProcessModels -> should filter external model")
-    void shouldFilterExternalModel_andKeepOthers() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+  @Test
+  @DisplayName("processOpts + fromModel + postProcessModels -> should filter external model")
+  void shouldFilterExternalModel_andKeepOthers() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        codegen.additionalProperties().put(
-                "openapi-generics.response-contract.CustomerDto",
-                "io.example.CustomerDto");
+    codegen
+        .additionalProperties()
+        .put("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto");
 
-        codegen.processOpts();
+    codegen.processOpts();
 
-        Schema<?> externalSchema = new Schema<>();
-        Schema<?> normalSchema = new Schema<>();
+    Schema<?> externalSchema = new Schema<>();
+    Schema<?> normalSchema = new Schema<>();
 
-        CodegenModel externalModel = codegen.fromModel("CustomerDto", externalSchema);
-        CodegenModel normalModel = codegen.fromModel("OrderDto", normalSchema);
+    CodegenModel externalModel = codegen.fromModel("CustomerDto", externalSchema);
+    CodegenModel normalModel = codegen.fromModel("OrderDto", normalSchema);
 
-        ModelMap mm1 = new ModelMap();
-        mm1.setModel(externalModel);
+    ModelMap mm1 = new ModelMap();
+    mm1.setModel(externalModel);
 
-        ModelMap mm2 = new ModelMap();
-        mm2.setModel(normalModel);
+    ModelMap mm2 = new ModelMap();
+    mm2.setModel(normalModel);
 
-        ModelsMap modelsMap = new ModelsMap();
+    ModelsMap modelsMap = new ModelsMap();
 
     // FIX: mutable list
     List<ModelMap> modelList = new ArrayList<>();
@@ -50,175 +50,167 @@ class GenericAwareJavaCodegenTest {
 
     modelsMap.setModels(modelList);
 
-        ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap result = codegen.postProcessModels(modelsMap);
 
-        assertNotNull(result);
-        assertNotNull(result.getModels());
+    assertNotNull(result);
+    assertNotNull(result.getModels());
 
-        assertEquals(1, result.getModels().size());
+    assertEquals(1, result.getModels().size());
     assertEquals("OrderDto", result.getModels().get(0).getModel().name);
+  }
+
+  @Test
+  @DisplayName("fromModel -> should clean imports of ignored models")
+  void shouldCleanImports_ofIgnoredModels() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+
+    codegen
+        .additionalProperties()
+        .put("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto");
+
+    codegen.processOpts();
+
+    Schema<?> schema = new Schema<>();
+
+    CodegenModel model = codegen.fromModel("CustomerDto", schema);
+
+    model.imports = new java.util.HashSet<>(List.of("CustomerDto", "OtherDto"));
+
+    CodegenModel processed = codegen.fromModel("CustomerDto", schema);
+
+    assertNotNull(processed);
+    if (processed.imports != null) {
+      assertFalse(processed.imports.contains("CustomerDto"));
     }
+  }
 
-    @Test
-    @DisplayName("fromModel -> should clean imports of ignored models")
-    void shouldCleanImports_ofIgnoredModels() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+  @Test
+  @DisplayName("postProcessModels -> should inject external import into wrapper model")
+  void shouldInjectExternalImport_intoWrapperModel() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        codegen.additionalProperties().put(
-                "openapi-generics.response-contract.CustomerDto",
-                "io.example.CustomerDto");
+    codegen
+        .additionalProperties()
+        .put("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto");
 
-        codegen.processOpts();
+    codegen.processOpts();
 
-        Schema<?> schema = new Schema<>();
+    CodegenModel wrapperModel = new CodegenModel();
+    wrapperModel.name = "ServiceResponseCustomerDto";
+    wrapperModel.vendorExtensions.put("x-api-wrapper", true);
+    wrapperModel.vendorExtensions.put("x-data-item", "CustomerDto");
 
-        CodegenModel model = codegen.fromModel("CustomerDto", schema);
+    ModelMap mm = new ModelMap();
+    mm.setModel(wrapperModel);
 
-        model.imports = new java.util.HashSet<>(List.of("CustomerDto", "OtherDto"));
+    ModelsMap modelsMap = new ModelsMap();
+    List<ModelMap> modelList = new ArrayList<>();
+    modelList.add(mm);
+    modelsMap.setModels(modelList);
 
-        CodegenModel processed = codegen.fromModel("CustomerDto", schema);
+    ModelsMap result = codegen.postProcessModels(modelsMap);
 
-        assertNotNull(processed);
-        if (processed.imports != null) {
-            assertFalse(processed.imports.contains("CustomerDto"));
-        }
-    }
+    CodegenModel processed = result.getModels().get(0).getModel();
 
-    @Test
-    @DisplayName("postProcessModels -> should inject external import into wrapper model")
-    void shouldInjectExternalImport_intoWrapperModel() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+    assertEquals("io.example.CustomerDto", processed.vendorExtensions.get("x-extra-imports"));
+  }
 
-        codegen.additionalProperties().put(
-                "openapi-generics.response-contract.CustomerDto",
-                "io.example.CustomerDto");
+  @Test
+  @DisplayName("postProcessModels -> should inject envelope metadata into wrapper model")
+  void shouldInjectEnvelopeMetadata_intoWrapperModel() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        codegen.processOpts();
+    codegen.additionalProperties().put("openapi-generics.envelope", "io.example.ApiResponse");
 
-        CodegenModel wrapperModel = new CodegenModel();
-        wrapperModel.name = "ServiceResponseCustomerDto";
-        wrapperModel.vendorExtensions.put("x-api-wrapper", true);
-        wrapperModel.vendorExtensions.put("x-data-item", "CustomerDto");
+    codegen.processOpts();
 
-        ModelMap mm = new ModelMap();
-        mm.setModel(wrapperModel);
+    CodegenModel wrapperModel = new CodegenModel();
+    wrapperModel.name = "ApiResponseCustomerDto";
+    wrapperModel.vendorExtensions.put("x-api-wrapper", true);
 
-        ModelsMap modelsMap = new ModelsMap();
-        List<ModelMap> modelList = new ArrayList<>();
-        modelList.add(mm);
-        modelsMap.setModels(modelList);
+    ModelMap mm = new ModelMap();
+    mm.setModel(wrapperModel);
 
-        ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap modelsMap = new ModelsMap();
+    List<ModelMap> modelList = new ArrayList<>();
+    modelList.add(mm);
+    modelsMap.setModels(modelList);
 
-        CodegenModel processed = result.getModels().get(0).getModel();
+    ModelsMap result = codegen.postProcessModels(modelsMap);
 
-        assertEquals(
-                "io.example.CustomerDto",
-                processed.vendorExtensions.get("x-extra-imports"));
-    }
+    CodegenModel processed = result.getModels().get(0).getModel();
 
-    @Test
-    @DisplayName("postProcessModels -> should inject envelope metadata into wrapper model")
-    void shouldInjectEnvelopeMetadata_intoWrapperModel() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+    assertEquals("io.example.ApiResponse", processed.vendorExtensions.get("x-envelope-import"));
+    assertEquals("ApiResponse", processed.vendorExtensions.get("x-envelope-type"));
+  }
 
-        codegen.additionalProperties().put(
-                "openapi-generics.envelope",
-                "io.example.ApiResponse");
+  @Test
+  @DisplayName("postProcessAllModels -> should remove ignored models from global model graph")
+  void shouldRemoveIgnoredModels_fromGlobalModelGraph() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        codegen.processOpts();
+    codegen
+        .additionalProperties()
+        .put("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto");
 
-        CodegenModel wrapperModel = new CodegenModel();
-        wrapperModel.name = "ApiResponseCustomerDto";
-        wrapperModel.vendorExtensions.put("x-api-wrapper", true);
+    codegen.processOpts();
 
-        ModelMap mm = new ModelMap();
-        mm.setModel(wrapperModel);
+    Schema<?> externalSchema = new Schema<>();
+    Schema<?> normalSchema = new Schema<>();
 
-        ModelsMap modelsMap = new ModelsMap();
-        List<ModelMap> modelList = new ArrayList<>();
-        modelList.add(mm);
-        modelsMap.setModels(modelList);
+    codegen.fromModel("CustomerDto", externalSchema);
+    codegen.fromModel("OrderDto", normalSchema);
 
-        ModelsMap result = codegen.postProcessModels(modelsMap);
+    ModelsMap externalModels = new ModelsMap();
+    externalModels.setModels(new ArrayList<>());
 
-        CodegenModel processed = result.getModels().get(0).getModel();
+    ModelsMap normalModels = new ModelsMap();
+    normalModels.setModels(new ArrayList<>());
 
-        assertEquals(
-                "io.example.ApiResponse",
-                processed.vendorExtensions.get("x-envelope-import"));
-        assertEquals(
-                "ApiResponse",
-                processed.vendorExtensions.get("x-envelope-type"));
-    }
+    Map<String, ModelsMap> allModels = new LinkedHashMap<>();
+    allModels.put("CustomerDto", externalModels);
+    allModels.put("OrderDto", normalModels);
 
-    @Test
-    @DisplayName("postProcessAllModels -> should remove ignored models from global model graph")
-    void shouldRemoveIgnoredModels_fromGlobalModelGraph() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+    Map<String, ModelsMap> result = codegen.postProcessAllModels(allModels);
 
-        codegen.additionalProperties().put(
-                "openapi-generics.response-contract.CustomerDto",
-                "io.example.CustomerDto");
+    assertFalse(result.containsKey("CustomerDto"));
+    assertTrue(result.containsKey("OrderDto"));
+  }
 
-        codegen.processOpts();
+  @Test
+  @DisplayName("getName -> should return custom generator name")
+  void getName_shouldReturnCustomGeneratorName() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
 
-        Schema<?> externalSchema = new Schema<>();
-        Schema<?> normalSchema = new Schema<>();
+    assertEquals("java-generics-contract", codegen.getName());
+  }
 
-        codegen.fromModel("CustomerDto", externalSchema);
-        codegen.fromModel("OrderDto", normalSchema);
+  @Test
+  @DisplayName(
+      "postProcessModels -> should keep non-wrapper model unchanged when no contract metadata applies")
+  void shouldKeepNonWrapperModelUnchanged() {
+    GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
+    codegen.processOpts();
 
-        ModelsMap externalModels = new ModelsMap();
-        externalModels.setModels(new ArrayList<>());
+    CodegenModel model = new CodegenModel();
+    model.name = "OrderDto";
 
-        ModelsMap normalModels = new ModelsMap();
-        normalModels.setModels(new ArrayList<>());
+    ModelMap mm = new ModelMap();
+    mm.setModel(model);
 
-        Map<String, ModelsMap> allModels = new LinkedHashMap<>();
-        allModels.put("CustomerDto", externalModels);
-        allModels.put("OrderDto", normalModels);
+    ModelsMap modelsMap = new ModelsMap();
+    modelsMap.setModels(new ArrayList<>());
+    List<ModelMap> modelList = new ArrayList<>();
+    modelList.add(mm);
+    modelsMap.setModels(modelList);
 
-        Map<String, ModelsMap> result = codegen.postProcessAllModels(allModels);
+    ModelsMap result = codegen.postProcessModels(modelsMap);
 
-        assertFalse(result.containsKey("CustomerDto"));
-        assertTrue(result.containsKey("OrderDto"));
-    }
+    CodegenModel processed = result.getModels().get(0).getModel();
 
-    @Test
-    @DisplayName("getName -> should return custom generator name")
-    void getName_shouldReturnCustomGeneratorName() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
-
-        assertEquals("java-generics-contract", codegen.getName());
-    }
-
-    @Test
-    @DisplayName("postProcessModels -> should keep non-wrapper model unchanged when no contract metadata applies")
-    void shouldKeepNonWrapperModelUnchanged() {
-        GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
-        codegen.processOpts();
-
-        CodegenModel model = new CodegenModel();
-        model.name = "OrderDto";
-
-        ModelMap mm = new ModelMap();
-        mm.setModel(model);
-
-        ModelsMap modelsMap = new ModelsMap();
-        modelsMap.setModels(new ArrayList<>());
-        List<ModelMap> modelList = new ArrayList<>();
-        modelList.add(mm);
-        modelsMap.setModels(modelList);
-
-        ModelsMap result = codegen.postProcessModels(modelsMap);
-
-        CodegenModel processed = result.getModels().get(0).getModel();
-
-        assertNotNull(processed);
-        assertNull(processed.vendorExtensions.get("x-extra-imports"));
-        assertNull(processed.vendorExtensions.get("x-envelope-import"));
-        assertNull(processed.vendorExtensions.get("x-envelope-type"));
-    }
-
+    assertNotNull(processed);
+    assertNull(processed.vendorExtensions.get("x-extra-imports"));
+    assertNull(processed.vendorExtensions.get("x-envelope-import"));
+    assertNull(processed.vendorExtensions.get("x-envelope-type"));
+  }
 }

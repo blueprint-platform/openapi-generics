@@ -58,7 +58,6 @@ public class OpenApiContractGuard {
     }
   }
 
-
   private void validateWrapperSchema(
       Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
@@ -88,19 +87,18 @@ public class OpenApiContractGuard {
   }
 
   private void validateWrapperStructure(
-          String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
+      String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
 
     boolean hasPayloadProperty = false;
 
     if (wrapper.getAllOf() != null && !wrapper.getAllOf().isEmpty()) {
       hasPayloadProperty =
-              wrapper.getAllOf().stream()
-                      .filter(schema -> schema.getProperties() != null)
-                      .anyMatch(
-                              schema -> schema.getProperties().containsKey(descriptor.payloadPropertyName()));
+          wrapper.getAllOf().stream()
+              .filter(schema -> schema.getProperties() != null)
+              .anyMatch(
+                  schema -> schema.getProperties().containsKey(descriptor.payloadPropertyName()));
     } else if (wrapper.getProperties() != null) {
-      hasPayloadProperty =
-              wrapper.getProperties().containsKey(descriptor.payloadPropertyName());
+      hasPayloadProperty = wrapper.getProperties().containsKey(descriptor.payloadPropertyName());
     }
 
     if (!hasPayloadProperty) {
@@ -183,7 +181,6 @@ public class OpenApiContractGuard {
     throw new IllegalStateException(
         "Wrapper schema '" + wrapperName + "' has invalid extension: " + extensionName);
   }
-
 
   private void failMissingProperty(String wrapperName, String propertyName) {
     log.error("Wrapper '{}' missing required property '{}'", wrapperName, propertyName);

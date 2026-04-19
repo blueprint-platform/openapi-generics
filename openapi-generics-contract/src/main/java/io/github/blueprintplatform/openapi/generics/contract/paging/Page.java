@@ -15,13 +15,13 @@ import java.util.List;
  * @param hasPrev whether a previous page exists
  */
 public record Page<T>(
-        List<T> content,
-        int page,
-        int size,
-        long totalElements,
-        int totalPages,
-        boolean hasNext,
-        boolean hasPrev) {
+    List<T> content,
+    int page,
+    int size,
+    long totalElements,
+    int totalPages,
+    boolean hasNext,
+    boolean hasPrev) {
 
   /**
    * Creates a page instance and derives navigation flags and total page count.

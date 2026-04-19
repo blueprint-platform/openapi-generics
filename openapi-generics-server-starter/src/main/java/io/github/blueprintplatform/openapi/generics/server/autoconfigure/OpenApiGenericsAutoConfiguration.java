@@ -81,18 +81,18 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-          SchemaGenerationControlMarker schemaGenerationControlMarker,
-          ResponseTypeDiscoveryStrategy discoveryStrategy,
-          ResponseTypeIntrospector introspector,
-          WrapperSchemaProcessor wrapperSchemaProcessor,
-          OpenApiContractGuard contractGuard) {
+      SchemaGenerationControlMarker schemaGenerationControlMarker,
+      ResponseTypeDiscoveryStrategy discoveryStrategy,
+      ResponseTypeIntrospector introspector,
+      WrapperSchemaProcessor wrapperSchemaProcessor,
+      OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-            schemaGenerationControlMarker,
-            discoveryStrategy,
-            introspector,
-            wrapperSchemaProcessor,
-            contractGuard);
+        schemaGenerationControlMarker,
+        discoveryStrategy,
+        introspector,
+        wrapperSchemaProcessor,
+        contractGuard);
   }
 
   @Bean

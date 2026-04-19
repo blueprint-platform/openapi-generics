@@ -9,24 +9,24 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 /**
  * Emits a warning when Springdoc is not present on the classpath.
  *
- * <p>This auto-configuration is activated only when
- * {@code org.springdoc.core.customizers.OpenApiCustomizer} is missing.
+ * <p>This auto-configuration is activated only when {@code
+ * org.springdoc.core.customizers.OpenApiCustomizer} is missing.
  *
- * <p>In such cases, the OpenAPI Generics starter remains inactive,
- * and this component logs a clear message to inform the user.
+ * <p>In such cases, the OpenAPI Generics starter remains inactive, and this component logs a clear
+ * message to inform the user.
  *
  * <h2>Purpose</h2>
  *
  * <ul>
- *   <li>Prevents silent misconfiguration</li>
- *   <li>Provides explicit guidance to the user</li>
- *   <li>Keeps startup non-blocking (no failure)</li>
+ *   <li>Prevents silent misconfiguration
+ *   <li>Provides explicit guidance to the user
+ *   <li>Keeps startup non-blocking (no failure)
  * </ul>
  *
  * <h2>Activation Condition</h2>
  *
  * <ul>
- *   <li>Springdoc is <b>not</b> present on the classpath</li>
+ *   <li>Springdoc is <b>not</b> present on the classpath
  * </ul>
  *
  * <p>If Springdoc is available, this configuration is not loaded.
@@ -36,31 +36,31 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 public class OpenApiGenericsMissingDependencyAutoConfiguration {
 
   private static final Logger log =
-          LoggerFactory.getLogger(OpenApiGenericsMissingDependencyAutoConfiguration.class);
+      LoggerFactory.getLogger(OpenApiGenericsMissingDependencyAutoConfiguration.class);
 
   private static final String MESSAGE =
-          """
+      """
                 -------------------------------------------------------------------------
                 OpenAPI Generics Starter is inactive
-    
+
                 Reason:
                   Springdoc OpenAPI is not detected on the classpath.
-    
+
                 This starter activates only when Springdoc is present.
-    
+
                 To enable OpenAPI customization, add one of the following:
-    
+
                   - org.springdoc:springdoc-openapi-starter-webmvc-ui
                   - org.springdoc:springdoc-openapi-starter-webflux-ui
-    
+
                 -------------------------------------------------------------------------
                 """;
 
   /**
    * Logs a warning message indicating that Springdoc is missing.
    *
-   * <p>This method is invoked after bean initialization and provides
-   * a clear diagnostic message to the user.
+   * <p>This method is invoked after bean initialization and provides a clear diagnostic message to
+   * the user.
    */
   @PostConstruct
   public void logWarning() {

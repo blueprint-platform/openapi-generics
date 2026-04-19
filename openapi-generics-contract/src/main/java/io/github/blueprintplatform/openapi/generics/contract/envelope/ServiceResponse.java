@@ -12,9 +12,7 @@ public class ServiceResponse<T> {
   private T data;
   private Meta meta;
 
-  /**
-   * Creates an empty response with default metadata.
-   */
+  /** Creates an empty response with default metadata. */
   public ServiceResponse() {
     this.meta = Meta.now();
   }
