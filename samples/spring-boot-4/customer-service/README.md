@@ -130,9 +130,3 @@ Controller → ServiceResponse<T> → OpenAPI (projection)
 
 You define the contract.
 The starter projects it deterministically.
-
----
-
-## 📜 License
-
-MIT

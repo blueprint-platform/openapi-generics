@@ -71,9 +71,3 @@ OpenAPI is projection
 Client preserves it
 Consumer exposes it unchanged
 ```
-
----
-
-## 🛡 License
-
-MIT

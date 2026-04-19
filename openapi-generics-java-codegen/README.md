@@ -28,8 +28,6 @@ This module is build-time only and is typically used through `openapi-generics-j
 9. [Compatibility](#compatibility)
 10. [Determinism Guarantees](#determinism-guarantees)
 11. [Mental Model](#mental-model)
-12. [Related Modules](#related-modules)
-13. [License](#license)
 
 ---
 
@@ -147,9 +145,9 @@ This module does not generate full contract structures.
 It generates thin wrapper classes such as:
 
 ```java
-class ServiceResponseCustomerDto extends ServiceResponse<CustomerDto>
-class ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>>
-class ApiResponseCustomerDto extends ApiResponse<CustomerDto>
+public class ServiceResponseCustomerDto extends ServiceResponse<CustomerDto> {}
+public class ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>> {}
+public class ApiResponseCustomerDto extends ApiResponse<CustomerDto> {}
 ```
 
 What it avoids generating:
@@ -233,17 +231,6 @@ Not:
 
 ---
 
-## Related Modules
-
-| Module                                 | Role                               |
-| -------------------------------------- | ---------------------------------- |
-| `openapi-generics-contract`            | Canonical contract authority       |
-| `openapi-generics-server-starter`      | Runtime OpenAPI projection         |
-| `openapi-generics-java-codegen`        | Contract-aware generator extension |
-| `openapi-generics-java-codegen-parent` | Build-time orchestration           |
-
----
-
 ## License
 
-MIT License
+MIT — see [LICENSE](../LICENSE)

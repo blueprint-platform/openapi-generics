@@ -17,24 +17,23 @@ The goal is simple:
 
 ## 📑 Table of Contents
 
-1. [Why This Module Exists](#-why-this-module-exists)
-2. [Architectural Positioning (Critical)](#-architectural-positioning-critical)
-3. [Design Philosophy](#-design-philosophy)
-4. [Core Concepts](#-core-concepts)
-5. [Relationship with the Platform](#-relationship-with-the-platform)
-6. [Explicit Non-Goals](#-explicit-non-goals)
-7. [Dependency](#-dependency)
-8. [Compatibility Matrix](#-compatibility-matrix)
-9. [Versioning Strategy](#-versioning-strategy)
-10. [When Should You Use This?](#-when-should-you-use-this)
-11. [Design Trade-offs](#-design-trade-offs)
-12. [Failure Philosophy](#-failure-philosophy)
-13. [Mental Model](#-mental-model)
-14. [Summary](#-summary)
+1. [Why This Module Exists](#why-this-module-exists)
+2. [Architectural Positioning (Critical)](#architectural-positioning-critical)
+3. [Design Philosophy](#design-philosophy)
+4. [Core Concepts](#core-concepts)
+5. [Relationship with the Platform](#relationship-with-the-platform)
+6. [Explicit Non-Goals](#explicit-non-goals)
+7. [Dependency](#dependency)
+8. [Compatibility Matrix](#compatibility-matrix)
+9. [Versioning Strategy](#versioning-strategy)
+10. [When Should You Use This?](#when-should-you-use-this)
+11. [Design Trade-offs](#design-trade-offs)
+12. [Failure Philosophy](#failure-philosophy)
+13. [Mental Model](#mental-model)
 
 ---
 
-## 🎯 Why This Module Exists
+## Why This Module Exists
 
 Most HTTP APIs converge on the same shape:
 
@@ -60,7 +59,7 @@ that both producers and consumers depend on directly.
 
 ---
 
-## 🧠 Architectural Positioning (Critical)
+## Architectural Positioning (Critical)
 
 Within the platform, this module is the **authority layer**:
 
@@ -85,7 +84,7 @@ If this boundary is violated, contract drift is reintroduced.
 
 ---
 
-## 🧠 Design Philosophy
+## Design Philosophy
 
 ### Single Source of Truth
 
@@ -135,7 +134,7 @@ The contract evolves **additively**:
 
 ---
 
-## 🧱 Core Concepts
+## Core Concepts
 
 ### Canonical Success Envelope
 
@@ -230,7 +229,7 @@ This module does NOT implement error handling.
 
 ---
 
-## 🔗 Relationship with the Platform
+## Relationship with the Platform
 
 This module is intentionally **independent but central**.
 
@@ -262,7 +261,7 @@ This module is intentionally **independent but central**.
 
 ---
 
-## 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This module does NOT:
 
@@ -276,7 +275,7 @@ Those responsibilities belong to other platform layers.
 
 ---
 
-## 📦 Dependency
+## Dependency
 
 ```xml
 <dependency>
@@ -293,7 +292,7 @@ Usage:
 
 ---
 
-## 🔧 Compatibility Matrix
+## Compatibility Matrix
 
 | Component | Supported Versions |
 |----------|-------------------|
@@ -301,7 +300,7 @@ Usage:
 
 ---
 
-## 🔐 Versioning Strategy
+## Versioning Strategy
 
 Current state: **pre-1.0**
 
@@ -316,7 +315,7 @@ Meaning:
 
 ---
 
-## 🧩 When Should You Use This?
+## When Should You Use This?
 
 Use this module if:
 
@@ -327,7 +326,7 @@ Use this module if:
 
 ---
 
-## ⚖️ Design Trade-offs
+## Design Trade-offs
 
 ### Limited Scope
 
@@ -362,7 +361,7 @@ Gain:
 
 ---
 
-## 💥 Failure Philosophy
+## Failure Philosophy
 
 This module avoids hidden behavior.
 
@@ -372,7 +371,7 @@ If something breaks:
 
 ---
 
-## 🧠 Mental Model
+## Mental Model
 
 Think of this module as:
 
@@ -385,7 +384,7 @@ Not:
 
 ---
 
-## 🧾 Summary
+## Summary
 
 `openapi-generics-contract` is:
 
@@ -401,12 +400,6 @@ Nothing more.
 
 ---
 
-## 📜 License
+## License
 
-MIT License.
-
----
-
-**Maintained by:**
-**Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
+MIT — see [LICENSE](../LICENSE)

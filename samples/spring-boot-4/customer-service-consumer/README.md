@@ -101,9 +101,3 @@ curl http://localhost:8095/customer-service-consumer/customers/1
 Adapter is the boundary
 Contract flows unchanged
 ```
-
----
-
-## 🛡 License
-
-MIT

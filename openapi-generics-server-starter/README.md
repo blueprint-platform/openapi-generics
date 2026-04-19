@@ -25,10 +25,8 @@ The role of this module is precise:
 8. [Compatibility](#compatibility)
 9. [Determinism Guarantees](#determinism-guarantees)
 10. [Failure Philosophy](#failure-philosophy)
-11. [Relationship to Other Modules](#relationship-to-other-modules)
-12. [When To Use](#when-to-use)
-13. [Mental Model](#mental-model)
-14. [License](#license)
+11. [When To Use](#when-to-use)
+12. [Mental Model](#mental-model)
 
 ---
 
@@ -260,17 +258,6 @@ Principle:
 
 ---
 
-## Relationship to Other Modules
-
-| Module                                 | Role                                |
-| -------------------------------------- | ----------------------------------- |
-| `openapi-generics-contract`            | Canonical contract authority        |
-| `openapi-generics-server-starter`      | Runtime projection layer            |
-| `openapi-generics-java-codegen`        | Contract-aware client generation    |
-| `openapi-generics-java-codegen-parent` | Build-time generation orchestration |
-
----
-
 ## When To Use
 
 Use this module if:
@@ -299,4 +286,4 @@ Not:
 
 ## License
 
-MIT License
+MIT — see [LICENSE](../LICENSE)

@@ -167,9 +167,3 @@ OpenAPI → generated client → adapter → application
 
 Generated code is replaceable.
 Your adapter is the stable boundary.
-
----
-
-## 📜 License
-
-MIT

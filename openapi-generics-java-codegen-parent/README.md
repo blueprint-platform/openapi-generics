@@ -28,8 +28,6 @@ This is the primary integration surface for consumers.
 10. [Determinism Guarantees](#determinism-guarantees)
 11. [Failure Philosophy](#failure-philosophy)
 12. [Mental Model](#mental-model)
-13. [Related Modules](#related-modules)
-14. [License](#license)
 
 ---
 
@@ -289,17 +287,6 @@ Not:
 
 ---
 
-## Related Modules
-
-| Module                                 | Role                                   |
-| -------------------------------------- | -------------------------------------- |
-| `openapi-generics-contract`            | Canonical contract authority           |
-| `openapi-generics-server-starter`      | Runtime OpenAPI projection             |
-| `openapi-generics-java-codegen`        | Contract-aware generator extension     |
-| `openapi-generics-java-codegen-parent` | Consumer entry point and orchestration |
-
----
-
 ## License
 
-MIT License
+MIT — see [LICENSE](../LICENSE)

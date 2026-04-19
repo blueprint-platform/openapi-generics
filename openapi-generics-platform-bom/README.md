@@ -10,20 +10,19 @@ It ensures the platform runs as a **single, coherent system**—not a collection
 
 ## Table of Contents
 
-1. [Purpose](#-purpose)
-2. [What It Controls](#-what-it-controls)
-3. [How It Is Used](#-how-it-is-used)
-4. [Not Intended For Direct Consumption](#-not-intended-for-direct-consumption)
-5. [Why This Matters](#-why-this-matters)
-6. [Architectural Role](#-architectural-role)
-7. [Design Constraints](#-design-constraints)
-8. [Versioning Strategy](#-versioning-strategy)
-9. [Mental Model](#-mental-model)
-10. [License](#-license)
+1. [Purpose](#purpose)
+2. [What It Controls](#what-it-controls)
+3. [How It Is Used](#how-it-is-used)
+4. [Not Intended For Direct Consumption](#not-intended-for-direct-consumption)
+5. [Why This Matters](#why-this-matters)
+6. [Architectural Role](#architectural-role)
+7. [Design Constraints](#design-constraints)
+8. [Versioning Strategy](#versioning-strategy)
+9. [Mental Model](#mental-model)
 
 ---
 
-## 🎯 Purpose
+## Purpose
 
 OpenAPI Generics is a **multi-layered system**:
 
@@ -44,7 +43,7 @@ This BOM exists to:
 
 ---
 
-## 🧠 What It Controls
+## What It Controls
 
 The BOM defines versions for the **minimum set of components required for consistency**.
 
@@ -64,7 +63,7 @@ Only **version-critical dependencies** are included.
 
 ---
 
-## ⚙️ How It Is Used
+## How It Is Used
 
 This BOM is **consumed indirectly**.
 
@@ -82,7 +81,7 @@ Example (internal usage):
     <dependency>
       <groupId>io.github.blueprintplatform</groupId>
       <artifactId>openapi-generics-platform-bom</artifactId>
-      <version>0.9.x</version>
+      <version>1.0.0</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -94,7 +93,7 @@ End users typically never interact with it directly.
 
 ---
 
-## 🚫 Not Intended For Direct Consumption
+## Not Intended For Direct Consumption
 
 Consumers of the platform should **not import this BOM manually**.
 
@@ -111,7 +110,7 @@ These entry points already:
 
 ---
 
-## 🔒 Why This Matters
+## Why This Matters
 
 Without a BOM:
 
@@ -129,7 +128,7 @@ With the BOM:
 
 ---
 
-## 🧩 Architectural Role
+## Architectural Role
 
 Within the platform:
 
@@ -148,7 +147,7 @@ It contains **no runtime behavior** and **no API surface**.
 
 ---
 
-## ⚠️ Design Constraints
+## Design Constraints
 
 The BOM is intentionally constrained.
 
@@ -163,7 +162,7 @@ This prevents the BOM from becoming a hidden source of complexity.
 
 ---
 
-## 🔄 Versioning Strategy
+## Versioning Strategy
 
 The BOM version represents a **coherent platform snapshot**.
 
@@ -181,7 +180,7 @@ Mixing versions breaks these guarantees.
 
 ---
 
-## 🧠 Mental Model
+## Mental Model
 
 Think of this module as:
 
@@ -197,12 +196,6 @@ Not:
 
 ---
 
-## 📜 License
+## License
 
-MIT License
-
----
-
-**Maintained by:**
-**Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)
+MIT — see [LICENSE](../LICENSE)
