@@ -1,4 +1,4 @@
-package consumer.service.client.mapper;
+package io.github.blueprintplatform.samples.customerservice.consumer.service.client.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,7 +6,6 @@ import io.github.blueprintplatform.samples.customerservice.client.generated.dto.
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerUpdateRequest;
 import io.github.blueprintplatform.samples.customerservice.consumer.api.dto.CustomerConsumerCreateRequest;
 import io.github.blueprintplatform.samples.customerservice.consumer.api.dto.CustomerConsumerUpdateRequest;
-import io.github.blueprintplatform.samples.customerservice.consumer.service.client.mapper.CustomerRequestMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

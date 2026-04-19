@@ -50,15 +50,31 @@ Do this:
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
 ### 2) Return contract types
 
+Default envelope:
+
 ```java
 ServiceResponse<CustomerDto>
 ServiceResponse<Page<CustomerDto>>
+```
+
+Or bring your own envelope (BYOE):
+
+```java
+ApiResponse<CustomerDto>
+```
+
+(Optional configuration for BYOE)
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.contract.ApiResponse
 ```
 
 ### 3) Expose OpenAPI
@@ -95,18 +111,26 @@ Everything else happens downstream.
 
 ## 🧩 The only rule that matters
 
-There is **one canonical success envelope**:
+There is **one canonical success model** — but not a single fixed type.
 
 ```text
-ServiceResponse<T>
+YourEnvelope<T>
 ```
 
-Supported shapes:
+> `ServiceResponse<T>` is the **default envelope provided by the platform**.
+
+Supported shapes (deterministic scope):
 
 ```text
 ServiceResponse<T>
 ServiceResponse<Page<T>>
+YourEnvelope<T>
 ```
+
+Constraints:
+
+* exactly **one direct generic payload** must exist
+* nested generic payloads in custom envelopes are **not supported**
 
 This constraint enables:
 
@@ -138,7 +162,7 @@ Requirements:
 
 You write **only your domain contract**.
 
-### Example
+### Default (platform-provided envelope)
 
 ```java
 @GetMapping("/{id}")
@@ -147,7 +171,7 @@ public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(...) {
 }
 ```
 
-### Pagination
+### Pagination (default envelope)
 
 ```java
 @GetMapping
@@ -156,6 +180,27 @@ public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(...) {
 }
 ```
 
+---
+
+### Using your own envelope (BYOE)
+
+```java
+@GetMapping("/{id}")
+public ResponseEntity<ApiResponse<CustomerDto>> getCustomer(...) {
+  return ResponseEntity.ok(ApiResponse.success(dto));
+}
+```
+
+Configuration:
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.contract.ApiResponse
+```
+
+---
+
 That’s it.
 
 No:
@@ -163,6 +208,8 @@ No:
 * annotations
 * schema config
 * wrapper DTOs
+
+The platform detects the envelope and projects it into OpenAPI deterministically.
 
 ---
 
@@ -174,15 +221,22 @@ From:
 ServiceResponse<CustomerDto>
 ```
 
-The system produces:
+or (BYOE):
+
+```java
+ApiResponse<CustomerDto>
+```
+
+The system produces a **deterministic wrapper schema**:
 
 ```text
 ServiceResponseCustomerDto
+ApiResponseCustomerDto
 ```
 
 Characteristics:
 
-* deterministic naming
+* deterministic naming (based on envelope + payload type)
 * `allOf` composition
 * vendor extensions for generation
 
@@ -190,10 +244,17 @@ Example extensions:
 
 ```text
 x-api-wrapper
+x-api-wrapper-datatype
 x-data-container
 x-data-item
 x-ignore-model
 ```
+
+Notes:
+
+* The **envelope itself is NOT generated** — it is treated as an external contract
+* Wrapper schemas exist only to **bind OpenAPI responses to the generic contract shape**
+* The same mechanism applies to both default and custom envelopes
 
 > OpenAPI is a **projection artifact**, not the source of truth.
 
@@ -209,7 +270,7 @@ Controller return types
         ↓
 Response type discovery
         ↓
-Contract-aware introspection
+Contract-aware introspection (envelope + payload)
         ↓
 Base schema registration
         ↓
@@ -223,12 +284,22 @@ Contract validation (fail-fast)
         ↓
 OpenAPI output
 ```
+---
+
+### What changed with BYOE
+
+* The pipeline dynamically resolves the **envelope type** (default or external)
+* Payload slot is discovered via **introspection rules** (single direct generic)
+* The same projection logic applies regardless of envelope origin
+
+---
 
 ### Key properties
 
 * single orchestrator (no ordering issues)
 * no patching / no overrides
 * deterministic output
+* envelope-agnostic (default or BYOE uses the same pipeline)
 
 ---
 
@@ -236,26 +307,43 @@ OpenAPI output
 
 These are **hard architectural constraints**.
 
-### 1. Only use the canonical envelope
+### 1. Use a single generic envelope model
 
 ```text
 ServiceResponse<T>
 ServiceResponse<Page<T>>
+YourEnvelope<T>
 ```
+
+Constraints:
+
+* exactly **one direct generic payload** must exist
+* nested generic payloads in custom envelopes are **not supported**
 
 ---
 
-### 2. Do NOT replace the envelope
+### 2. You MAY use your own envelope (BYOE)
 
-❌ Wrong:
+✔ Valid:
 
 ```text
-CustomerResponse
-ApiResponse
-PagedResult
+ApiResponse<T>
+CustomEnvelope<T>
 ```
 
-Breaks determinism and cross-layer alignment.
+Conditions:
+
+* must be a **concrete class**
+* must declare **exactly one type parameter**
+* must contain **exactly one direct payload field of type T**
+
+Violations (invalid):
+
+```text
+ApiResponse<Page<T>>      ❌ nested generic payload
+ApiResponse<T, M>         ❌ multiple type parameters
+WrapperWithoutPayload     ❌ no payload field
+```
 
 ---
 
@@ -265,20 +353,41 @@ Breaks determinism and cross-layer alignment.
 
 ```text
 ServiceResponse<CustomerDto>
-ServiceResponse<Anything>
+YourEnvelope<Anything>
 ```
 
 The system constrains structure — not domain.
 
 ---
 
-### 4. Errors are NOT wrapped
+### 4. Error model is NOT enforced by the platform
+
+Error handling is **not dictated by the starter**.
+
+It depends entirely on the **contract model defined by the service**.
+
+Two common patterns:
+
+#### 1. Separate error protocol (recommended default)
 
 ```text
-ProblemDetail (RFC 9457)
+Success → ServiceResponse<T>
+Error   → ProblemDetail (RFC 9457)
 ```
 
-Separate protocol.
+#### 2. Envelope-based error model (custom / BYOE)
+
+```text
+Success → YourEnvelope<T>
+Error   → YourEnvelope<T> (e.g. errors field)
+```
+
+#### Key point
+
+```text
+The platform enforces success envelope structure,
+but does not define or restrict error semantics.
+```
 
 ---
 
@@ -286,9 +395,9 @@ Separate protocol.
 
 No:
 
-* manual schemas
-* annotations
-* overrides
+* manual schemas (when using Springdoc mode)
+* annotations for schema shaping
+* overrides of generated structure
 
 The starter owns projection.
 
@@ -300,7 +409,17 @@ The starter owns projection.
 curl http://localhost:8084/.../v1/.../1
 ```
 
-Expected:
+Expected structure:
+
+```json
+{
+  "<payload-field>": { ... }
+}
+```
+
+Examples:
+
+Default envelope (`ServiceResponse`):
 
 ```json
 {
@@ -308,6 +427,21 @@ Expected:
   "meta": { ... }
 }
 ```
+
+Custom envelope (BYOE):
+
+```json
+{
+  "data": { ... },
+  "status": 200,
+  "message": "OK"
+}
+```
+
+Key check:
+
+* exactly **one payload field** carries the response data
+* envelope structure matches your contract (default or custom)
 
 If correct:
 
@@ -347,19 +481,37 @@ Not:
 * a schema designer
 * a customization layer
 
+What it compiles is not a specific class like `ServiceResponse` —
+
+it compiles a **contract shape**:
+
+```text
+YourEnvelope<T>
+```
+
+Where:
+
+* the envelope can be **default (ServiceResponse)** or **external (BYOE)**
+* the payload is discovered via **introspection (single direct generic slot)**
+
+The pipeline does not change based on the envelope.
+
+Only the **input contract type** changes — the projection model remains identical.
+
 ---
 
 ## 🧾 Summary
 
 ```text
-Input   = Java contract
-Process = projection pipeline
+Input   = Java contract (default or external envelope)
+Process = projection pipeline (envelope-agnostic)
 Output  = deterministic OpenAPI
 ```
 
 The system works because:
 
 * contract is never redefined
+* envelope is treated as a **first-class contract boundary**
 * projection is deterministic
 * downstream generation is predictable
 

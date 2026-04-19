@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
-        <version>0.9.0</version>
+        <version>1.0.0</version>
         <relativePath/>
     </parent>
 
@@ -31,7 +31,7 @@
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:bsayli/spring-boot-openapi-generics-clients.git
         </developerConnection>
-        <tag>v0.9.0</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <developers>
@@ -49,7 +49,7 @@
         <java.version>21</java.version>
         <spring-boot.version>4.0.5</spring-boot.version>
         <openapi-generator.version>7.21.0</openapi-generator.version>
-        <customer-contract.version>0.9.0</customer-contract.version>
+        <customer-contract.version>1.0.0</customer-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
@@ -188,13 +188,9 @@
 
                             <library>restclient</library>
 
-                            <apiPackage>io.github.blueprintplatform.samples.customerservice.client.generated.api
-                            </apiPackage>
-                            <modelPackage>io.github.blueprintplatform.samples.customerservice.client.generated.dto
-                            </modelPackage>
-                            <invokerPackage>
-                                io.github.blueprintplatform.samples.customerservice.client.generated.invoker
-                            </invokerPackage>
+                            <apiPackage>io.github.blueprintplatform.samples.customerservice.client.generated.api</apiPackage>
+                            <modelPackage>io.github.blueprintplatform.samples.customerservice.client.generated.dto</modelPackage>
+                            <invokerPackage>io.github.blueprintplatform.samples.customerservice.client.generated.invoker</invokerPackage>
 
                             <configOptions>
                                 <useSpringBoot4>true</useSpringBoot4>
@@ -202,6 +198,35 @@
                                 <useJackson3>true</useJackson3>
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
+
+                            <!--
+                             Optional contract alignment
+
+                             Use these properties only when you want the generated client to align with
+                             externally provided contract types.
+
+                             Notes:
+                             - `openapi-generics.envelope` is NOT required for the default ServiceResponse<T> model.
+                               Add it only when you use your own envelope type (BYOE).
+                             - If you configure a custom envelope, that envelope dependency must already be
+                               available on the client classpath.
+                             - `openapi-generics.response-contract.*` is optional and used only when DTOs are
+                               provided by an external/shared contract dependency.
+                           -->
+                            <additionalProperties>
+                                <!-- Example: custom envelope (BYOE) -->
+                                <!--
+                                <additionalProperty>
+                                    openapi-generics.envelope=io.example.contract.ApiResponse
+                                </additionalProperty>
+                                -->
+
+                                <!-- Example: external DTO reuse (BYOC)
+                                <additionalProperty>
+                                    openapi-generics.response-contract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto
+                                </additionalProperty>
+                                -->
+                            </additionalProperties>
 
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>

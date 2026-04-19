@@ -30,9 +30,21 @@ app:
   openapi:
     version: @project.version@
     base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
-    wrapper:
-      # Optional: extra annotation for generated client models
-      # class-extra-annotation: "@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)"
+
+# -------------------------------------------------------------------------
+# EXAMPLE CONFIGURATION (NOT ACTIVE BY DEFAULT)
+#
+# To use a custom response envelope, you MUST:
+# 1) Uncomment this section
+# 2) Provide your own envelope class (generic, single payload field)
+#
+# Example:
+# openapi-generics:
+#   envelope:
+#     type: io.example.ApiResponse
+#
+# If not configured, the default ServiceResponse<T> is used.
+# -------------------------------------------------------------------------
 
 springdoc:
   default-consumes-media-type: application/json

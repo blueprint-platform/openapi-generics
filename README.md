@@ -27,7 +27,7 @@
 ## 📑 Table of Contents
 
 * ⚡ [Why this exists (practical impact)](#why-this-exists-practical-impact)
-* 🆕 [What’s new in 0.9.x](#whats-new-in-09x)
+* 🆕 [What’s new in 1.0.0 (GA)](#whats-new-in-100-ga)
 * ⚡ [Real usage (what you actually do)](#real-usage-what-you-actually-do)
 * ⚡ [Quick start (2 minutes)](#quick-start-2-minutes)
 * 🔁 [Contract lifecycle model](#contract-lifecycle-model)
@@ -62,21 +62,112 @@ This project removes that entire class of problems.
 
 ---
 
-## What’s new in 0.9.x
+## What’s new in 1.0.0 (GA)
 
 This is no longer a template-level customization.
 
-It is now a **contract-aligned generation system with progressive adoption**.
+It is now a **contract-aligned generation system with progressive adoption** — designed to adapt to existing architectures instead of forcing new ones.
 
-### 1. Bring Your Own Contract (BYOC)
+---
+
+### 1. Bring Your Own Envelope (BYOE)
+
+Use your **existing response envelope** without migrating to `ServiceResponse`.
+
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapi-generics.envelope=io.example.contract.ApiResponse
+  </additionalProperty>
+</additionalProperties>
+```
+
+Result:
+
+* no forced migration to a new envelope type
+* your response model remains intact
+* existing contracts continue to work as-is
+
+Behavior:
+
+* If not configured → `ServiceResponse<T>` is used (default)
+* If configured → your envelope type becomes the base of generated wrappers
+
+This removes the most common adoption blocker:
+
+> "Do we need to change our response model to use this?"
+
+Answer: **No.**
+
+---
+
+#### How it works
+
+The platform does not generate your envelope.
+
+It **reuses it as a contract dependency** — both on the server and client side.
+
+Two usage paths are supported:
+
+**1. Springdoc-based (automatic)**
+
+* Server starter detects your envelope
+* OpenAPI is enriched with required semantics automatically
+* No manual schema work is required
+
+**2. Spec-first / manual OpenAPI**
+
+* Teams can define wrapper schemas directly in OpenAPI
+* The wrapper expresses the relationship between the envelope and the payload
+* Minimal semantics are added to indicate that the schema represents a generic wrapper
+* Client generation reconstructs the correct generic structure from this definition
+
+Example (simplified):
+
+```yaml
+ApiResponseLicenseAccessResponse:
+  type: object
+  properties:
+    data:
+      $ref: "#/components/schemas/LicenseAccessResponse"
+  x-api-wrapper: true
+  x-api-wrapper-datatype: LicenseAccessResponse
+```
+
+Optional: internal envelope-related models can be marked to avoid regeneration:
+
+```yaml
+ApiError:
+  type: object
+  properties:
+    errorCode:
+      type: string
+    message:
+      type: string
+  x-ignore-model: true
+```
+
+> Springdoc is the easiest path — not the only one.
+
+In both approaches, the outcome is the same:
+
+* the envelope remains your contract
+* OpenAPI acts as a projection
+* generated clients preserve the original type structure
+
+> Note: BYOE currently supports flat generic envelopes (e.g. `YourEnvelope<T>`).
+> More complex or nested generic shapes follow the platform’s default contract behavior.
+
+---
+
+### 2. Bring Your Own Contract (BYOC)
 
 Reuse your own domain models instead of generating them:
 
 ```xml
-<!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
   <additionalProperty>
-    openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto
+    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
   </additionalProperty>
 </additionalProperties>
 ```
@@ -88,7 +179,7 @@ Result:
 
 ---
 
-### 2. Progressive adoption (client-side only)
+### 3. Progressive adoption (client-side only)
 
 Switch generation modes through the client build configuration:
 
@@ -103,7 +194,7 @@ Switch generation modes through the client build configuration:
 
 ---
 
-### 3. Deterministic build pipeline
+### 4. Deterministic build pipeline
 
 Client generation is a **controlled execution system**:
 
@@ -113,7 +204,7 @@ Client generation is a **controlled execution system**:
 
 ---
 
-### 4. End-to-end samples (Spring Boot 3 & 4)
+### 5. End-to-end samples (Spring Boot 3 & 4)
 
 Full pipelines are included:
 
@@ -139,7 +230,7 @@ You only add two building blocks.
 <dependency>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -149,7 +240,7 @@ You only add two building blocks.
 <parent>
   <groupId>io.github.blueprintplatform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </parent>
 ```
 
@@ -225,17 +316,97 @@ Client (contract-aligned)
 The response envelope is a **shared contract**, not a generated model.
 
 ```text
-ServiceResponse<T>
+YourEnvelope<T>
 ```
 
-Supported:
+> `ServiceResponse<T>` is the **default contract provided by the platform** — not a restriction.
+
+The system is designed around a simple principle:
+
+> Define your contract once. Preserve it end-to-end.
+
+---
+
+### What this means in practice
+
+* The response envelope is **not regenerated per endpoint**
+* The same contract is reused across:
+
+  * server responses
+  * OpenAPI projection
+  * generated clients
+* Client models **extend the contract**, instead of redefining it
+
+Result:
+
+* no envelope duplication
+* no drift between server and client
+* a stable, predictable type system
+
+---
+
+### Supported shapes (deterministic scope)
 
 ```text
 ServiceResponse<T>
 ServiceResponse<Page<T>>
+YourEnvelope<T>
 ```
 
-Other cases follow standard OpenAPI behavior.
+These shapes are **explicitly supported and enforced** to guarantee:
+
+* deterministic OpenAPI generation
+* predictable client reconstruction
+* zero ambiguity in generic resolution
+
+> Note: Custom envelopes (BYOE) currently support a single direct generic payload (e.g. `YourEnvelope<T>`).
+> Nested generic payloads (e.g. `YourEnvelope<Page<T>>`) are intentionally out of scope.
+
+---
+
+### Important: default ≠ mandatory
+
+While `ServiceResponse<T>` is the canonical default, the platform does **not require you to use it**.
+
+With BYOE (Bring Your Own Envelope):
+
+```text
+YourEnvelope<T>
+```
+
+can be used instead, without changing the overall model.
+
+The behavior remains the same:
+
+* OpenAPI is still a projection
+* Generics are still preserved
+* Clients still reconstruct the contract shape
+
+---
+
+### Boundary of the system
+
+Outside the supported shapes, the system intentionally falls back to standard OpenAPI behavior.
+
+This is a **deliberate design decision**:
+
+* keeps the model simple and predictable
+* avoids partial or misleading generics support
+* ensures long-term stability of generated clients
+
+---
+
+### Mental model
+
+```text
+Contract (Java) → Projection (OpenAPI) → Reconstruction (Client)
+```
+
+The envelope is the anchor of this flow.
+
+It is not something the generator invents —
+
+it is something the system preserves.
 
 ---
 
@@ -289,9 +460,10 @@ public class ServiceResponsePageCustomerDto
 ## Design guarantees
 
 * ✔ Contract identity is preserved
+* ✔ Contract ownership is preserved (including the response envelope)
 * ✔ Generics are preserved (within supported scope)
 * ✔ Client generation is deterministic
-* ✔ External models are reusable
+* ✔ No contract duplication (external models are reused, not regenerated)
 * ✔ Upstream drift is detected early
 
 ---

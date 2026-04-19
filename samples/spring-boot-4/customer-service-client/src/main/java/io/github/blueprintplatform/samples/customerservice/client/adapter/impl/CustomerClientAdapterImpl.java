@@ -19,8 +19,7 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   private final CustomerDtoMapper mapper;
 
   public CustomerClientAdapterImpl(
-          CustomerControllerApi customerControllerApi,
-          CustomerDtoMapper mapper) {
+      CustomerControllerApi customerControllerApi, CustomerDtoMapper mapper) {
     this.api = customerControllerApi;
     this.mapper = mapper;
   }
@@ -44,13 +43,14 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
 
   @Override
   public ServiceResponse<Page<CustomerDto>> getCustomers(
-          String name,
-          String email,
-          Integer page,
-          Integer size,
-          CustomerSortField sortBy,
-          SortDirection direction) {
-    var response = api.getCustomers(
+      String name,
+      String email,
+      Integer page,
+      Integer size,
+      CustomerSortField sortBy,
+      SortDirection direction) {
+    var response =
+        api.getCustomers(
             name,
             email,
             page,
@@ -62,7 +62,7 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
 
   @Override
   public ServiceResponse<CustomerDto> updateCustomer(
-          Integer customerId, CustomerUpdateRequest request) {
+      Integer customerId, CustomerUpdateRequest request) {
     var response = api.updateCustomer(customerId, request);
     return mapData(response);
   }
@@ -74,21 +74,27 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   private ServiceResponse<CustomerDto> mapData(
-          ServiceResponse<io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto> response) {
+      ServiceResponse<
+              io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto>
+          response) {
     CustomerDto mapped = mapper.toContract(response.getData());
     return ServiceResponse.of(mapped, response.getMeta());
   }
 
   private ServiceResponse<Page<CustomerDto>> mapPageData(
-          ServiceResponse<Page<io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto>> response) {
-    Page<io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto> generatedPage = response.getData();
+      ServiceResponse<
+              Page<
+                  io.github.blueprintplatform.samples.customerservice.client.generated.dto
+                      .CustomerDto>>
+          response) {
+    Page<io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto>
+        generatedPage = response.getData();
     if (generatedPage == null) {
       return ServiceResponse.of(null, response.getMeta());
     }
-    var mappedContent = generatedPage.content().stream()
-            .map(mapper::toContract)
-            .toList();
-    Page<CustomerDto> mappedPage = Page.of(
+    var mappedContent = generatedPage.content().stream().map(mapper::toContract).toList();
+    Page<CustomerDto> mappedPage =
+        Page.of(
             mappedContent,
             generatedPage.page(),
             generatedPage.size(),

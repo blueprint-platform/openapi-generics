@@ -19,7 +19,6 @@ public enum CustomerSortField {
     throw new IllegalArgumentException("Unsupported sort field: " + s);
   }
 
-
   public String value() {
     return value;
   }

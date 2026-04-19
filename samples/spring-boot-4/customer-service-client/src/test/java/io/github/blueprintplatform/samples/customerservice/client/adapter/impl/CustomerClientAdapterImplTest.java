@@ -45,10 +45,10 @@ class CustomerClientAdapterImplTest {
     var req = new CustomerCreateRequest().name("Jane Doe").email("jane@example.com");
 
     var generatedDto =
-            new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
-                    .customerId(1)
-                    .name("Jane Doe")
-                    .email("jane@example.com");
+        new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
+            .customerId(1)
+            .name("Jane Doe")
+            .email("jane@example.com");
 
     var contractDto = new CustomerDto(1, "Jane Doe", "jane@example.com");
 
@@ -78,10 +78,10 @@ class CustomerClientAdapterImplTest {
   @DisplayName("getCustomer -> delegates to API and maps generated dto to contract dto")
   void getCustomer_delegates_and_returnsDto() {
     var generatedDto =
-            new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
-                    .customerId(42)
-                    .name("John Smith")
-                    .email("john.smith@example.com");
+        new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
+            .customerId(42)
+            .name("John Smith")
+            .email("john.smith@example.com");
 
     var contractDto = new CustomerDto(42, "John Smith", "john.smith@example.com");
 
@@ -109,16 +109,16 @@ class CustomerClientAdapterImplTest {
   @DisplayName("getCustomers -> delegates to API and maps generated page content to contract page")
   void getCustomers_delegates_and_returnsPage() {
     var generated1 =
-            new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
-                    .customerId(1)
-                    .name("A")
-                    .email("a@example.com");
+        new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
+            .customerId(1)
+            .name("A")
+            .email("a@example.com");
 
     var generated2 =
-            new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
-                    .customerId(2)
-                    .name("B")
-                    .email("b@example.com");
+        new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
+            .customerId(2)
+            .name("B")
+            .email("b@example.com");
 
     var contract1 = new CustomerDto(1, "A", "a@example.com");
     var contract2 = new CustomerDto(2, "B", "b@example.com");
@@ -135,7 +135,7 @@ class CustomerClientAdapterImplTest {
     when(mapper.toContract(generated2)).thenReturn(contract2);
 
     ServiceResponse<Page<CustomerDto>> res =
-            adapter.getCustomers(null, null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
+        adapter.getCustomers(null, null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
 
     assertNotNull(res);
     assertNotNull(res.getData());
@@ -158,10 +158,10 @@ class CustomerClientAdapterImplTest {
     var req = new CustomerUpdateRequest().name("Jane Updated").email("jane.updated@example.com");
 
     var generatedDto =
-            new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
-                    .customerId(1)
-                    .name("Jane Updated")
-                    .email("jane.updated@example.com");
+        new io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerDto()
+            .customerId(1)
+            .name("Jane Updated")
+            .email("jane.updated@example.com");
 
     var contractDto = new CustomerDto(1, "Jane Updated", "jane.updated@example.com");
 

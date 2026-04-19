@@ -4,84 +4,168 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
-import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
+@Tag("unit")
+@DisplayName("Unit Test: ResponseTypeIntrospector")
 class ResponseTypeIntrospectorTest {
 
-    private final ResponseTypeIntrospector introspector = new ResponseTypeIntrospector();
+  private static final ResponseIntrospectionPolicy DEFAULT_POLICY =
+      new ResponseIntrospectionPolicy(ServiceResponse.class, "data", Set.of(Page.class));
 
-    @Test
-    void shouldExtractSimpleDataType() {
-        ResolvableType type =
-                ResolvableType.forClassWithGenerics(ServiceResponse.class, CustomerDto.class);
+  private final ResponseTypeIntrospector introspector =
+      new ResponseTypeIntrospector(DEFAULT_POLICY);
 
-        Optional<String> result = introspector.extractDataRefName(type);
+  @Test
+  @DisplayName("extract -> should return simple descriptor for ServiceResponse<T>")
+  void extract_shouldReturnSimpleDescriptor_forSimpleEnvelope() {
+    ResolvableType type =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
 
-        assertTrue(result.isPresent());
-        assertEquals("CustomerDto", result.get());
-    }
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
-    @Test
-    void shouldExtractPageDataType() {
-        ResolvableType pageType =
-                ResolvableType.forClassWithGenerics(Page.class, CustomerDto.class);
+    assertEquals(ServiceResponse.class, descriptor.envelopeType());
+    assertEquals("data", descriptor.payloadPropertyName());
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertNull(descriptor.containerName());
+    assertNull(descriptor.itemRefName());
+    assertFalse(descriptor.isContainer());
+  }
 
-        ResolvableType type =
-                ResolvableType.forClassWithGenerics(ServiceResponse.class, pageType);
+  @Test
+  @DisplayName("extract -> should return container descriptor for ServiceResponse<Page<T>>")
+  void extract_shouldReturnContainerDescriptor_forPageEnvelope() {
+    ResolvableType pageType =
+        ResolvableType.forClassWithGenerics(Page.class, ResolvableType.forClass(CustomerDto.class));
 
-        Optional<String> result = introspector.extractDataRefName(type);
+    ResolvableType type = ResolvableType.forClassWithGenerics(ServiceResponse.class, pageType);
 
-        assertTrue(result.isPresent());
-        assertEquals("PageCustomerDto", result.get());
-    }
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
-    @Test
-    void shouldUnwrapResponseEntity() {
-        ResolvableType inner =
-                ResolvableType.forClassWithGenerics(ServiceResponse.class, CustomerDto.class);
+    assertEquals(ServiceResponse.class, descriptor.envelopeType());
+    assertEquals("data", descriptor.payloadPropertyName());
+    assertEquals("PageCustomerDto", descriptor.dataRefName());
+    assertEquals("Page", descriptor.containerName());
+    assertEquals("CustomerDto", descriptor.itemRefName());
+    assertTrue(descriptor.isContainer());
+  }
 
-        ResolvableType type =
-                ResolvableType.forClassWithGenerics(ResponseEntity.class, inner);
+  @Test
+  @DisplayName("extract -> should unwrap ResponseEntity<ServiceResponse<T>>")
+  void extract_shouldUnwrapResponseEntity() {
+    ResolvableType envelopeType =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
 
-        Optional<String> result = introspector.extractDataRefName(type);
+    ResolvableType type = ResolvableType.forClassWithGenerics(ResponseEntity.class, envelopeType);
 
-        assertTrue(result.isPresent());
-        assertEquals("CustomerDto", result.get());
-    }
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
-    @Test
-    void shouldReturnEmptyForNonServiceResponse() {
-        ResolvableType type = ResolvableType.forClass(CustomerDto.class);
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertFalse(descriptor.isContainer());
+  }
 
-        Optional<String> result = introspector.extractDataRefName(type);
+  @Test
+  @DisplayName("extract -> should unwrap CompletionStage<ServiceResponse<T>>")
+  void extract_shouldUnwrapCompletionStage() {
+    ResolvableType envelopeType =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
 
-        assertTrue(result.isEmpty());
-    }
+    ResolvableType type =
+        ResolvableType.forClassWithGenerics(CompletableFuture.class, envelopeType);
 
-    @Test
-    void shouldReturnEmptyForMissingGeneric() {
-        ResolvableType type = ResolvableType.forClass(ServiceResponse.class);
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
-        Optional<String> result = introspector.extractDataRefName(type);
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertFalse(descriptor.isContainer());
+  }
 
-        assertTrue(result.isEmpty());
-    }
+  @Test
+  @DisplayName("extract -> should unwrap Future<ServiceResponse<T>>")
+  void extract_shouldUnwrapFuture() {
+    ResolvableType envelopeType =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
 
-    @Test
-    void shouldReturnEmptyForUnsupportedNestedGenerics() {
-        ResolvableType listType =
-                ResolvableType.forClassWithGenerics(java.util.List.class, CustomerDto.class);
+    ResolvableType type = ResolvableType.forClassWithGenerics(Future.class, envelopeType);
 
-        ResolvableType type =
-                ResolvableType.forClassWithGenerics(ServiceResponse.class, listType);
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
-        Optional<String> result = introspector.extractDataRefName(type);
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertFalse(descriptor.isContainer());
+  }
 
-        assertTrue(result.isEmpty());
-    }
+  @Test
+  @DisplayName("extract -> should unwrap DeferredResult<ServiceResponse<T>>")
+  void extract_shouldUnwrapDeferredResult() {
+    ResolvableType envelopeType =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
 
-    static class CustomerDto {}
+    ResolvableType type = ResolvableType.forClassWithGenerics(DeferredResult.class, envelopeType);
+
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
+
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertFalse(descriptor.isContainer());
+  }
+
+  @Test
+  @DisplayName("extract -> should unwrap WebAsyncTask<ServiceResponse<T>>")
+  void extract_shouldUnwrapWebAsyncTask() {
+    ResolvableType envelopeType =
+        ResolvableType.forClassWithGenerics(
+            ServiceResponse.class, ResolvableType.forClass(CustomerDto.class));
+
+    ResolvableType type = ResolvableType.forClassWithGenerics(WebAsyncTask.class, envelopeType);
+
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
+
+    assertEquals("CustomerDto", descriptor.dataRefName());
+    assertFalse(descriptor.isContainer());
+  }
+
+  @Test
+  @DisplayName("extract -> should return empty for unsupported root type")
+  void extract_shouldReturnEmpty_forUnsupportedRootType() {
+    ResolvableType type = ResolvableType.forClass(CustomerDto.class);
+
+    assertTrue(introspector.extract(type).isEmpty());
+  }
+
+  @Test
+  @DisplayName("extract -> should return empty for unsupported nested generic payload")
+  void extract_shouldReturnEmpty_forUnsupportedNestedGenericPayload() {
+    ResolvableType nestedType =
+        ResolvableType.forClassWithGenerics(
+            Wrapper.class, ResolvableType.forClass(CustomerDto.class));
+
+    ResolvableType type = ResolvableType.forClassWithGenerics(ServiceResponse.class, nestedType);
+
+    assertTrue(introspector.extract(type).isEmpty());
+  }
+
+  @Test
+  @DisplayName("extract -> should return empty when container item type is unresolved")
+  void extract_shouldReturnEmpty_whenContainerItemTypeUnresolved() {
+    ResolvableType rawPageType = ResolvableType.forClass(Page.class);
+    ResolvableType type = ResolvableType.forClassWithGenerics(ServiceResponse.class, rawPageType);
+
+    assertTrue(introspector.extract(type).isEmpty());
+  }
+
+  private static final class CustomerDto {}
+
+  private static final class Wrapper<T> {}
 }

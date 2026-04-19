@@ -55,9 +55,9 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.contract
  * <h2>Generation control</h2>
  *
  * <ul>
- *   <li>{@link #IGNORE_MODEL} disables model generation for a schema</li>
- *   <li>Used for infrastructure / externally provided types</li>
- *   <li>Schema remains in OpenAPI but is excluded from code generation</li>
+ *   <li>{@link #IGNORE_MODEL} disables model generation for a schema
+ *   <li>Used for infrastructure / externally provided types
+ *   <li>Schema remains in OpenAPI but is excluded from code generation
  * </ul>
  *
  * <pre>
@@ -79,9 +79,6 @@ public final class VendorExtensions {
   /** Carries the underlying data type of the wrapper. */
   public static final String API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
 
-  /** Optional extension to inject additional annotations into generated models. */
-  public static final String CLASS_EXTRA_ANNOTATION = "x-class-extra-annotation";
-
   // -------------------------------------------------------------------------
   // Container semantics
   // -------------------------------------------------------------------------
@@ -102,9 +99,9 @@ public final class VendorExtensions {
    * <p>Use this for:
    *
    * <ul>
-   *   <li>Shared contract types (e.g. {@code ServiceResponse}, {@code Meta})</li>
-   *   <li>Externally provided models</li>
-   *   <li>Infrastructure-level schemas not meant to be generated per client</li>
+   *   <li>Shared contract types (e.g. {@code ServiceResponse}, {@code Meta})
+   *   <li>Externally provided models
+   *   <li>Infrastructure-level schemas not meant to be generated per client
    * </ul>
    *
    * <p>The schema remains part of the OpenAPI document but will be ignored by templates.

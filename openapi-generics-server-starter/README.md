@@ -2,278 +2,301 @@
 
 > Deterministic OpenAPI projection for contract-first Spring Boot services
 
-`openapi-generics-server-starter` is a **zero-configuration Spring Boot starter** that turns your Java API contract into a **stable, generics-aware OpenAPI specification**.
+`openapi-generics-server-starter` is a Spring Boot starter that projects your Java API contract into a stable, generics-aware OpenAPI document.
 
-It does not generate a new model.
-It **projects the existing contract** into OpenAPI — deterministically and without loss.
+It does not redefine the contract.
+It publishes it as OpenAPI — deterministically and without schema drift.
 
 The role of this module is precise:
 
-> Take the canonical contract and publish it as OpenAPI **without redefining it**.
+> Take the canonical runtime contract and project it into OpenAPI without changing its meaning.
 
 ---
 
 ## Table of Contents
 
-1. [What Problem It Solves](#-what-problem-it-solves)
-2. [What It Does (Automatically)](#-what-it-does-automatically)
-3. [How It Works (High Level)](#-how-it-works-high-level)
-4. [What You Write vs What You Get](#-what-you-write-vs-what-you-get)
-5. [Compatibility Matrix](#-compatibility-matrix)
-6. [Usage (Zero Configuration)](#-usage-zero-configuration)
-7. [Supported Contract Shapes](#-supported-contract-shapes)
-8. [What It Does NOT Do](#-what-it-does-not-do)
-9. [Determinism Guarantees](#-determinism-guarantees)
-10. [Failure Philosophy](#-failure-philosophy)
-11. [Relationship to Other Modules](#-relationship-to-other-modules)
-12. [When To Use](#-when-to-use)
-13. [Further Reading](#-further-reading)
-14. [Mental Model](#-mental-model)
-15. [License](#-license)
----
-
-## 🎯 What Problem It Solves
-
-In typical OpenAPI setups:
-
-* response envelopes are duplicated per endpoint
-* generators reconstruct models inconsistently
-* generic type information is flattened or lost
-* client models drift from server contracts
-
-This creates long-term instability:
-
-* duplicated DTO hierarchies
-* fragile client regeneration
-* unclear contract ownership
-
-This starter eliminates that class of problems by enforcing:
-
-> **Contract → deterministic OpenAPI projection (no duplication, no drift)**
+1. [What Problem It Solves](#what-problem-it-solves)
+2. [What It Does](#what-it-does)
+3. [How It Works](#how-it-works)
+4. [Usage](#usage)
+5. [Bring Your Own Envelope (BYOE)](#bring-your-own-envelope-byoe)
+6. [Supported Contract Shapes](#supported-contract-shapes)
+7. [What It Does NOT Do](#what-it-does-not-do)
+8. [Compatibility](#compatibility)
+9. [Determinism Guarantees](#determinism-guarantees)
+10. [Failure Philosophy](#failure-philosophy)
+11. [Relationship to Other Modules](#relationship-to-other-modules)
+12. [When To Use](#when-to-use)
+13. [Mental Model](#mental-model)
+14. [License](#license)
 
 ---
 
-## 🧠 What It Does (Automatically)
+## What Problem It Solves
+
+In typical OpenAPI workflows:
+
+* response envelopes are regenerated per endpoint
+* generic structure is flattened or lost
+* shared models are duplicated across layers
+* generated clients drift from the actual server contract
+
+Over time, this creates unstable OpenAPI output and fragile client generation.
+
+This starter solves that by enforcing one rule:
+
+> Java contract is the source of truth. OpenAPI is only its projection.
+
+---
+
+## What It Does
 
 Once added, the starter:
 
-* detects `ServiceResponse<T>` return types
-* resolves nested shapes like `ServiceResponse<Page<T>>`
-* generates deterministic wrapper schemas
-* injects vendor extensions required for code generation
-* guarantees stable schema naming across builds
+* discovers supported response envelopes from controller return types
+* projects deterministic wrapper schemas into OpenAPI
+* preserves supported generic shapes
+* adds vendor extensions required by the client codegen layer
+* marks contract-owned infrastructure schemas to avoid duplicate generation downstream
 
-No annotations. No configuration. No manual schema editing.
-
----
-
-## ⚙️ How It Works (High Level)
-
-```
-Java Contract (ServiceResponse<T>)
-        ↓
-Runtime Projection Pipeline (this module)
-        ↓
-OpenAPI (deterministic, lossless)
-```
-
-Key constraint:
-
-> OpenAPI is NOT the source of truth — it is a projection of the Java contract
+No schema annotations.
+No manual wrapper DTOs.
+No patching OpenAPI by hand.
 
 ---
 
-## ✍️ What You Write vs What You Get
+## How It Works
 
-### You write
-
-```java
-ServiceResponse<CustomerDto>
+```text
+Java Contract
+    ↓
+Runtime Projection Pipeline
+    ↓
+OpenAPI Document
 ```
 
-### OpenAPI gets
+For the default contract:
 
+```text
+ServiceResponse<T>
+ServiceResponse<Page<T>>
 ```
+
+the starter publishes deterministic wrapper schemas such as:
+
+```text
 ServiceResponseCustomerDto
+ServiceResponsePageCustomerDto
 ```
 
-With:
-
-* correct `allOf` composition
-* canonical `{ data, meta }` structure
-* vendor extensions for contract-aware code generation
-
-No duplication of the envelope.
-No loss of generic semantics.
+If a custom envelope is configured, the same projection model applies, but the wrapper name is derived from that envelope type instead.
 
 ---
 
-## 🔧 Compatibility Matrix
-
-This module is designed to work with the following baseline while remaining forward-compatible within the same major ecosystem.
-
-| Component           | Supported Versions              |
-|--------------------|--------------------------------|
-| Java               | 17+                            |
-| Spring Boot        | 3.4.x, 3.5.x                   |
-| springdoc-openapi  | 2.8.x (WebMvc starter)         |
----
-
-## 🚀 Usage (Zero Configuration)
+## Usage
 
 ### 1. Add dependency
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.9.x</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
-### 2. Use contract types
+### 2. Return your contract from controllers
+
+Default envelope:
 
 ```java
-@GetMapping
-public ServiceResponse<CustomerDto> getCustomer() {
-  return ServiceResponse.of(customer);
+@GetMapping("/{id}")
+public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(Long id) {
+  return ResponseEntity.ok(ServiceResponse.of(customer));
 }
 ```
 
-### 3. Done
+Pagination:
 
-OpenAPI is automatically enriched.
+```java
+@GetMapping
+public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers() {
+  return ResponseEntity.ok(ServiceResponse.of(page));
+}
+```
+
+### 3. Expose OpenAPI through springdoc
+
+```text
+/v3/api-docs
+/v3/api-docs.yaml
+```
+
+That is enough.
 
 ---
 
-## 📦 Supported Contract Shapes
+## Bring Your Own Envelope (BYOE)
+
+The starter also supports custom success envelopes.
+
+Example configuration:
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.ApiResponse
+```
+
+Example controller signature:
+
+```java
+@GetMapping("/{id}")
+public ResponseEntity<ApiResponse<CustomerDto>> getCustomer(Long id) {
+  return ResponseEntity.ok(ApiResponse.ok(customer));
+}
+```
+
+Custom envelopes must satisfy these rules:
+
+* must be a concrete class
+* must declare exactly one type parameter
+* must expose exactly one direct payload field of type `T`
+* nested generic payloads are not supported
+
+This means the starter supports:
+
+```text
+YourEnvelope<T>
+```
+
+but not:
+
+```text
+YourEnvelope<Page<T>>
+```
+
+The default platform envelope remains the only built-in path with container support.
+
+---
+
+## Supported Contract Shapes
+
+### Default platform envelope
 
 Supported:
 
 * `ServiceResponse<T>`
 * `ServiceResponse<Page<T>>`
 
-Out of scope:
+### Custom envelope (BYOE)
 
-* arbitrary nested generics
-* collections as root wrappers
-* maps
+Supported:
 
-Rationale:
+* `YourEnvelope<T>`
 
-> keep schema generation deterministic and predictable
+Not supported:
 
----
+* nested generic payloads in custom envelopes
+* arbitrary collection wrappers
+* map-based generic shapes
+* multi-parameter envelope types
 
-## 🧱 What It Does NOT Do
-
-This module intentionally does NOT:
-
-* define API contracts (handled by `openapi-generics-contract`)
-* generate clients (handled by codegen layer)
-* require annotations or configuration
-* modify runtime HTTP behavior
-
-It only:
-
-> transforms contract semantics into OpenAPI
+The scope is intentionally narrow to keep projection deterministic.
 
 ---
 
-## 🔒 Determinism Guarantees
+## What It Does NOT Do
 
-The starter guarantees:
+This module does not:
 
-* ✔ Same input → same OpenAPI output
-* ✔ Stable schema naming
-* ✔ No ordering issues
-* ✔ No runtime variability
-* ✔ No partial schema mutation
+* define the canonical contract library
+* generate clients
+* own DTOs
+* change runtime HTTP behavior
+* define service-specific error semantics
 
-Mechanisms:
-
-* single projection pipeline
-* authoritative schema derivation
-* fail-fast validation
+It only projects success-envelope contract structure into OpenAPI.
 
 ---
 
-## ⚠️ Failure Philosophy
+## Compatibility
 
-Invalid contract or inconsistent schema state results in:
+| Component         | Supported Versions  |
+| ----------------- | ------------------- |
+| Java              | 17+                 |
+| Spring Boot       | 3.4.x, 3.5.x, 4.x   |
+| springdoc-openapi | 2.8.x, 3.x (WebMvc) |
 
-```
+---
+
+## Determinism Guarantees
+
+The starter is designed to provide:
+
+* same contract → same OpenAPI output
+* stable wrapper naming
+* fixed projection behavior
+* no scattered customizer ordering issues
+* no contract reinterpretation
+
+OpenAPI output is generated through a single runtime pipeline, then validated before completion.
+
+---
+
+## Failure Philosophy
+
+If the contract shape is unsupported or the projected schema becomes inconsistent, the starter fails fast.
+
+Typical failure mode:
+
+```text
 IllegalStateException
 ```
 
-No:
-
-* silent fallback
-* partial generation
-
 Principle:
 
-> Broken contract must fail, not degrade
+> Incorrect projection is worse than no projection.
 
 ---
 
-## 🔗 Relationship to Other Modules
+## Relationship to Other Modules
 
-| Module                            | Role                               |
-| --------------------------------- | ---------------------------------- |
-| `openapi-generics-contract`       | Authority (defines response model) |
-| `openapi-generics-server-starter` | Projection (this module)           |
-| `openapi-generics-java-codegen`   | Client generation                  |
-
----
-
-## 🧩 When To Use
-
-Use this starter if:
-
-* you return `ServiceResponse<T>` from controllers
-* you use Springdoc for OpenAPI
-* you generate clients from OpenAPI
-* you want a single shared contract across services
+| Module                                 | Role                                |
+| -------------------------------------- | ----------------------------------- |
+| `openapi-generics-contract`            | Canonical contract authority        |
+| `openapi-generics-server-starter`      | Runtime projection layer            |
+| `openapi-generics-java-codegen`        | Contract-aware client generation    |
+| `openapi-generics-java-codegen-parent` | Build-time generation orchestration |
 
 ---
 
-## 📚 Further Reading
+## When To Use
 
-* **[Platform Architecture](../docs/architecture/platform.md)**
-  End-to-end system model covering authority → projection → generation → consumption.
+Use this module if:
 
-* **[Server Architecture](../docs/architecture/server.md)**
-  Runtime projection pipeline transforming contract semantics into a deterministic OpenAPI specification.
-
-* **[Client Architecture](../docs/architecture/client.md)**
-  Build-time generation pipeline producing contract-aligned clients from the OpenAPI projection.
-
-* **[Error Handling Strategy](../docs/architecture/error-handling.md)**
-  RFC 9457-based canonical error model (runtime-first, protocol-driven, OpenAPI-independent).
+* your service is Spring Boot based
+* you publish OpenAPI with springdoc
+* you want contract-first OpenAPI output
+* you generate clients from published OpenAPI
+* you want to avoid wrapper duplication and generic type loss
 
 ---
 
-## 🧠 Mental Model
+## Mental Model
 
 Think of this module as:
 
-> A deterministic compiler from Java contract → OpenAPI
+> a deterministic projector from Java contract to OpenAPI
 
 Not:
 
-* a helper library
-* an annotation toolkit
-* a best-effort enhancer
+* a documentation helper
+* a schema customization toolkit
+* a model generator
 
 ---
 
-## 📜 License
+## License
 
 MIT License
-
----
-
-**Maintained by:**
-**Barış Saylı**
-[GitHub](https://github.com/bsayli) · [Medium](https://medium.com/@baris.sayli) · [LinkedIn](https://www.linkedin.com/in/bsayli)

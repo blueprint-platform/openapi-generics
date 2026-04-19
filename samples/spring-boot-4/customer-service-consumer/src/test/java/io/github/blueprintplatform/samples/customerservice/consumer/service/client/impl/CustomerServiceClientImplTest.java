@@ -1,4 +1,4 @@
-package consumer.service.client.impl;
+package io.github.blueprintplatform.samples.customerservice.consumer.service.client.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -8,15 +8,11 @@ import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceRes
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.contract.paging.SortDirection;
 import io.github.blueprintplatform.samples.customerservice.client.adapter.CustomerClientAdapter;
-import io.github.blueprintplatform.samples.customerservice.client.common.problem.ApiProblemException;
 import io.github.blueprintplatform.samples.customerservice.client.customer.CustomerSortField;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerCreateRequest;
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerUpdateRequest;
 import io.github.blueprintplatform.samples.customerservice.consumer.api.dto.CustomerConsumerCreateRequest;
 import io.github.blueprintplatform.samples.customerservice.consumer.api.dto.CustomerConsumerUpdateRequest;
-import io.github.blueprintplatform.samples.customerservice.consumer.common.exception.CustomerConsumerException;
-import io.github.blueprintplatform.samples.customerservice.consumer.common.mapper.CustomerConsumerExceptionMapper;
-import io.github.blueprintplatform.samples.customerservice.consumer.service.client.impl.CustomerServiceClientImpl;
 import io.github.blueprintplatform.samples.customerservice.consumer.service.client.mapper.CustomerRequestMapper;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -28,12 +24,10 @@ import org.junit.jupiter.api.Test;
 class CustomerServiceClientImplTest {
 
   private final CustomerClientAdapter adapter = mock(CustomerClientAdapter.class);
-  private final CustomerConsumerExceptionMapper exceptionMapper =
-      mock(CustomerConsumerExceptionMapper.class);
   private final CustomerRequestMapper requestMapper = mock(CustomerRequestMapper.class);
 
   private final CustomerServiceClientImpl service =
-      new CustomerServiceClientImpl(adapter, exceptionMapper, requestMapper);
+      new CustomerServiceClientImpl(adapter, requestMapper);
 
   @Test
   @DisplayName("createCustomer -> maps request and returns response")
@@ -57,22 +51,19 @@ class CustomerServiceClientImplTest {
   }
 
   @Test
-  @DisplayName("createCustomer -> maps exception")
+  @DisplayName("createCustomer -> propagates adapter exception")
   void createCustomer_exception() {
     var consumerReq = new CustomerConsumerCreateRequest("John", "john@mail.com");
     var mappedReq = new CustomerCreateRequest();
 
-    var apiEx = mock(ApiProblemException.class);
-    var mappedEx = mock(CustomerConsumerException.class);
+    RuntimeException ex = new RuntimeException("upstream failure");
 
     when(requestMapper.from(consumerReq)).thenReturn(mappedReq);
-    when(adapter.createCustomer(mappedReq)).thenThrow(apiEx);
-    when(exceptionMapper.from(apiEx)).thenReturn(mappedEx);
+    when(adapter.createCustomer(mappedReq)).thenThrow(ex);
 
-    var thrown =
-        assertThrows(CustomerConsumerException.class, () -> service.createCustomer(consumerReq));
+    var thrown = assertThrows(RuntimeException.class, () -> service.createCustomer(consumerReq));
 
-    assertSame(mappedEx, thrown);
+    assertSame(ex, thrown);
   }
 
   @Test
@@ -90,6 +81,18 @@ class CustomerServiceClientImplTest {
   }
 
   @Test
+  @DisplayName("getCustomer -> propagates adapter exception")
+  void getCustomer_exception() {
+    RuntimeException ex = new RuntimeException("upstream failure");
+
+    when(adapter.getCustomer(1)).thenThrow(ex);
+
+    var thrown = assertThrows(RuntimeException.class, () -> service.getCustomer(1));
+
+    assertSame(ex, thrown);
+  }
+
+  @Test
   @DisplayName("getCustomers -> success")
   void getCustomers_success() {
     var dto = new CustomerDto(1, "John", "john@mail.com");
@@ -103,6 +106,26 @@ class CustomerServiceClientImplTest {
 
     assertNotNull(result);
     assertEquals(1, result.getData().content().size());
+
+    verify(adapter)
+        .getCustomers("John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
+  }
+
+  @Test
+  @DisplayName("getCustomers -> propagates adapter exception")
+  void getCustomers_exception() {
+    RuntimeException ex = new RuntimeException("upstream failure");
+
+    when(adapter.getCustomers(any(), any(), any(), any(), any(), any())).thenThrow(ex);
+
+    var thrown =
+        assertThrows(
+            RuntimeException.class,
+            () ->
+                service.getCustomers(
+                    "John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC));
+
+    assertSame(ex, thrown);
   }
 
   @Test
@@ -126,6 +149,22 @@ class CustomerServiceClientImplTest {
   }
 
   @Test
+  @DisplayName("updateCustomer -> propagates adapter exception")
+  void updateCustomer_exception() {
+    var consumerReq = new CustomerConsumerUpdateRequest("Jane", "jane@mail.com");
+    var mappedReq = new CustomerUpdateRequest();
+
+    RuntimeException ex = new RuntimeException("upstream failure");
+
+    when(requestMapper.from(consumerReq)).thenReturn(mappedReq);
+    when(adapter.updateCustomer(1, mappedReq)).thenThrow(ex);
+
+    var thrown = assertThrows(RuntimeException.class, () -> service.updateCustomer(1, consumerReq));
+
+    assertSame(ex, thrown);
+  }
+
+  @Test
   @DisplayName("deleteCustomer -> success")
   void deleteCustomer_success() {
     ServiceResponse<Void> response = ServiceResponse.of(null);
@@ -139,16 +178,14 @@ class CustomerServiceClientImplTest {
   }
 
   @Test
-  @DisplayName("deleteCustomer -> exception mapped")
+  @DisplayName("deleteCustomer -> propagates adapter exception")
   void deleteCustomer_exception() {
-    var apiEx = mock(ApiProblemException.class);
-    var mappedEx = mock(CustomerConsumerException.class);
+    RuntimeException ex = new RuntimeException("upstream failure");
 
-    when(adapter.deleteCustomer(1)).thenThrow(apiEx);
-    when(exceptionMapper.from(apiEx)).thenReturn(mappedEx);
+    when(adapter.deleteCustomer(1)).thenThrow(ex);
 
-    var thrown = assertThrows(CustomerConsumerException.class, () -> service.deleteCustomer(1));
+    var thrown = assertThrows(RuntimeException.class, () -> service.deleteCustomer(1));
 
-    assertSame(mappedEx, thrown);
+    assertSame(ex, thrown);
   }
 }

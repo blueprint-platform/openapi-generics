@@ -1,45 +1,53 @@
 # customer-service-client
 
-> **Reference integration: generating and using a contract-aligned, generics-aware OpenAPI client in a Spring Boot application**
+> Minimal reference consumer for **contract-aligned, generics-aware OpenAPI clients**
 
-[![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../../LICENSE)
+This sample shows only one thing:
 
----
-
-## 📑 Table of Contents
-
-* 🚀 [TL;DR (Start Here)](#-tldr-start-here)
-* 🧩 [Adapter Pattern](#-adapter-pattern-recommended)
-* 🌐 [HTTP Client Setup](#-http-client-setup-production-ready)
-* ⚖️ [Error Handling](#-error-handling-model)
-* 🔗 [Related Modules](#-related-modules)
-* 🧪 [Testing](#-testing)
-* 🛡️ [License](#-license)
+> How to generate a Java client from the published OpenAPI and use it safely behind an adapter.
 
 ---
 
-> This is a minimal reference implementation.  
-> See the [Adoption Guides](../../../docs/adoption/client-side-adoption.md) for rules, constraints, and architecture.
-
-## 🚀 TL;DR (Start Here)
+## 🚀 Quick Start
 
 ### 1. Inherit the parent
 
 ```xml
 <parent>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </parent>
 ```
 
-### 2. Provide OpenAPI
+### 2. Configure generator
 
-```text
-src/main/resources/your-api-docs.yaml
+```xml
+<plugin>
+  <groupId>org.openapitools</groupId>
+  <artifactId>openapi-generator-maven-plugin</artifactId>
+
+  <executions>
+    <execution>
+      <id>generate-client</id>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+
+      <configuration>
+        <generatorName>java-generics-contract</generatorName>
+        <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
+
+        <library>restclient</library>
+
+        <apiPackage>com.example.generated.api</apiPackage>
+        <modelPackage>com.example.generated.dto</modelPackage>
+        <invokerPackage>com.example.generated.invoker</invokerPackage>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
 ```
 
 ### 3. Build
@@ -50,23 +58,69 @@ mvn clean install
 
 ---
 
-### Notes
+## 📌 Rules (only these matter)
 
-* The parent provides generator, templates, and contract mappings
-* You only supply input (OpenAPI) and structure (packages, client choice)
-* Generated code is written to `target/generated-sources/openapi`
+✔ Generate with:
+
+```text
+java-generics-contract
+```
+
+✔ Keep generated code behind an adapter
+
+✔ Reuse external contract DTOs with BYOC when needed
+
+❌ Do NOT:
+
+* call generated APIs directly from application code
+* duplicate envelope models
+* let generated types leak into your domain boundary
 
 ---
 
-## 🧩 Adapter Pattern (Recommended)
+## 🧩 Optional contract alignment
 
-Generated code is replaceable. Your application should not be.
+### BYOC — external DTO reuse
 
-Introduce a thin adapter as a stability boundary:
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
+  </additionalProperty>
+</additionalProperties>
+```
+
+### BYOE — custom envelope
+
+```xml
+<additionalProperties>
+  <additionalProperty>
+    openapi-generics.envelope=io.example.contract.ApiResponse
+  </additionalProperty>
+</additionalProperties>
+```
+
+Notes:
+
+* BYOE is needed only if the service uses a custom envelope
+* the custom envelope must already be available as a dependency
+* if not configured, the default `ServiceResponse<T>` path is used
+
+---
+
+## 🔍 What to look at
+
+### Generated client
+
+```text
+target/generated-sources/openapi/src/gen/java
+```
+
+### Adapter boundary
 
 ```java
 public interface CustomerClientAdapter {
-  ServiceResponse<CustomerDto> getCustomer(Integer id);
+  ServiceResponse<CustomerDto> getCustomer(Integer customerId);
 }
 ```
 
@@ -81,71 +135,41 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   @Override
-  public ServiceResponse<CustomerDto> getCustomer(Integer id) {
-    return api.getCustomer(id);
+  public ServiceResponse<CustomerDto> getCustomer(Integer customerId) {
+    return api.getCustomer(customerId);
   }
 }
 ```
 
-This ensures:
-
-* generated code stays isolated
-* contract types (`ServiceResponse<T>`) flow unchanged
-* client regeneration is safe
-
 ---
 
-## 🌐 HTTP Client Setup (Production Ready)
+## ⚠️ Error handling
 
-This module demonstrates:
-
-* Apache HttpClient 5
-* connection pooling
-* timeouts
-* explicit behavior (no hidden retries)
-
-You may simplify or replace this depending on your environment.
-
----
-
-## ⚖️ Error Handling Model
-
-Errors follow a runtime protocol:
+This sample handles upstream errors as:
 
 ```text
-ProblemDetail (RFC 9457)
+ProblemDetail → ApiProblemException
 ```
 
-Behavior:
+It also includes fallbacks for:
 
-* parsed into structured objects
-* surfaced via `ApiProblemException`
-
-Fallbacks handled:
-
-* empty response
-* invalid JSON
-* unexpected formats
+* empty error body
+* non-JSON error response
+* unparsable problem response
 
 ---
 
-## 🔗 Related Modules
+## 🧠 Mental Model
 
-* **[Contract](../../../openapi-generics-contract/README.md)**
-* **[Server Starter](../../../openapi-generics-server-starter/README.md)**
-* **[Client Codegen](../../../openapi-generics-java-codegen-parent/README.md)**
-* **[Server Sample](../customer-service/README.md)**
-
----
-
-## 🧪 Testing
-
-```bash
-mvn verify
+```text
+OpenAPI → generated client → adapter → application
 ```
 
+Generated code is replaceable.
+Your adapter is the stable boundary.
+
 ---
 
-## 🛡️ License
+## 📜 License
 
-MIT License
+MIT

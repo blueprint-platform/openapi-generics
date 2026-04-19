@@ -28,7 +28,7 @@ We currently provide security fixes for the latest minor release line and the `m
 |-----------| --------------- |
 | `main`    | ✅ Supported     |
 | `0.9.x`   | ✅ Supported     |
-| `< 0.9.0` | ❌ Not supported |
+| `< 1.0.0` | ❌ Not supported |
 
 > **Note**
 > This project is **pre-1.0**. Public APIs and contracts may evolve quickly.

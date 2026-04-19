@@ -186,7 +186,7 @@ class CustomerClientIT {
 
     assertDoesNotThrow(() -> api.deleteCustomer(1));
   }
-  
+
   @Configuration
   static class TestBeans {
 
@@ -197,9 +197,7 @@ class CustomerClientIT {
 
     @Bean
     ObjectMapper objectMapper() {
-      return JsonMapper.builder()
-              .findAndAddModules()
-              .build();
+      return JsonMapper.builder().findAndAddModules().build();
     }
   }
 }

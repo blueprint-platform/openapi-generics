@@ -1,73 +1,38 @@
-# customer-service-consumer (Spring Boot 4)
+# customer-service-consumer
 
-> **Reference consumer (SB4): consuming a contract-aligned, generics-aware client with an alternative configuration style (no BYOC mapping)**
-
----
-
-## 📑 Table of Contents
-
-* 🎯 [What this module shows](#-what-this-module-shows)
-* 🧠 [Why this variant exists](#-why-this-variant-exists)
-* 🏗️ [Structure](#-structure)
-* 🔌 [Integration boundary (unchanged)](#-integration-boundary-unchanged)
-* 🧩 [Adapter model](#-adapter-model)
-* ⚖️ [Error handling](#-error-handling)
-* 🔄 [Contract preservation](#-contract-preservation)
-* ⚙️ [Configuration highlights](#-configuration-highlights)
-* 🧪 [Verify quickly](#-verify-quickly)
-* 🔑 [Key takeaway](#-key-takeaway)
-* 🧾 [Summary](#-summary)
-* 🛡 [License](#-license)
+> Minimal reference: consume a generated client and expose it without breaking the contract
 
 ---
 
-## 🎯 What this module shows
+## 🎯 Purpose
 
-This module demonstrates the **same contract pipeline** as SB3, with one intentional difference:
-
-> It shows a **pure contract reuse setup without explicit BYOC mapping**
+Show the **last step**:
 
 ```text
-Producer → OpenAPI → Generated Client → Adapter → Consumer Service
+Producer → OpenAPI → Client → Consumer
 ```
+
+Goal:
+
+* use generated client safely
+* keep `ServiceResponse<T>` intact
+* expose it directly
 
 ---
 
-## 🧠 Why this variant exists
-
-In SB3 examples, you saw:
-
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapiGenerics.responseContract.CustomerDto=...
-  </additionalProperty>
-</additionalProperties>
-```
-
-In this SB4 version:
-
-❌ This mapping is NOT used
-
-This demonstrates that:
-
-> Contract alignment can still work **without explicit BYOC configuration**, depending on setup and classpath alignment
-
----
-
-## 🏗️ Structure
+## ⚡ How it works
 
 ```text
 Controller → Service → Client → Adapter → Generated API
 ```
 
-Same architecture, same guarantees.
+Key point:
+
+> Application never talks to generated code directly
 
 ---
 
-## 🔌 Integration boundary (unchanged)
-
-The boundary remains:
+## 🔌 Boundary (important)
 
 ```text
 CustomerServiceClient
@@ -75,65 +40,40 @@ CustomerServiceClient
 
 Responsibilities:
 
-* isolates generated code
-* maps requests if needed
-* handles exceptions
-* preserves `ServiceResponse<T>`
+* delegates to adapter
+* isolates generated client
+* keeps contract types
 
 ---
 
-## 🧩 Adapter model
+## ⚖️ Errors
 
-Generated client is still NOT used directly.
-
-```java
-adapter.getCustomer(customerId)
-```
-
-This ensures:
-
-* regeneration safety
-* no coupling to generator internals
-* stable application layer
-
----
-
-## ⚖️ Error handling
-
-Same model:
+Upstream errors:
 
 ```text
-ProblemDetail (RFC 9457)
+ProblemDetail → ApiProblemException
 ```
 
-Handled via:
+Handled in controller advice.
 
-```java
-ApiProblemException → mapped to domain exceptions
-```
+No wrapping.
 
 ---
 
-## 🔄 Contract preservation
+## 🔄 Contract
 
-End-to-end contract remains identical:
+Always preserved:
 
-```java
-ServiceResponse<CustomerDto>
-ServiceResponse<Page<CustomerDto>>
+```text
+ServiceResponse<T>
+ServiceResponse<Page<T>>
 ```
 
-No:
-
-* DTO duplication
-* envelope rewriting
-* semantic drift
+No mapping. No duplication.
 
 ---
 
-## ⚙️ Configuration highlights
-
-### Upstream API
+## ⚙️ Config
 
 ```yaml
 customer:
@@ -141,76 +81,29 @@ customer:
     base-url: http://localhost:8094/customer-service
 ```
 
-### Differences vs SB3
-
-* Uses **Spring Boot 4.x**
-* Uses newer Springdoc version
-* Demonstrates **versioned endpoints (V1)**
-* Shows **contract reuse without explicit mapping**
-
 ---
 
-## 🧪 Verify quickly
-
-Run consumer:
+## 🧪 Run
 
 ```bash
 mvn spring-boot:run
 ```
 
-Call:
-
 ```bash
 curl http://localhost:8095/customer-service-consumer/customers/1
 ```
 
-Expected:
-
-```json
-{
-  "data": { ... },
-  "meta": { ... }
-}
-```
-
 ---
 
-## 🔑 Key takeaway
-
-There are now **two valid integration styles** in the repo:
-
-### 1. Explicit mapping (BYOC)
-
-* full control
-* explicit ownership
-
-### 2. Implicit reuse (this module)
-
-* simpler setup
-* fewer config points
-
-Both preserve:
+## 🧠 Mental model
 
 ```text
-Contract identity → end-to-end
+Adapter is the boundary
+Contract flows unchanged
 ```
-
----
-
-## 🧾 Summary
-
-```text
-Same pipeline
-Same guarantees
-Different configuration strategy
-```
-
-This module exists to show:
-
-> The system is flexible in adoption — not tied to a single configuration path
 
 ---
 
 ## 🛡 License
 
-MIT License
+MIT

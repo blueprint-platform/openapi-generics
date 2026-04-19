@@ -18,9 +18,9 @@ class ExternalModelRegistryTest {
 
     Map<String, Object> props =
         Map.of(
-            "openapiGenerics.responseContract.CustomerDto",
+            "openapi-generics.response-contract.CustomerDto",
             "io.example.CustomerDto",
-            "openapiGenerics.responseContract.OrderDto",
+            "openapi-generics.response-contract.OrderDto",
             "io.example.OrderDto");
 
     registry.register(props);
@@ -70,10 +70,10 @@ class ExternalModelRegistryTest {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
     registry.register(
-        Map.of("openapiGenerics.responseContract.CustomerDto", "io.example.CustomerDtoV1"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV1"));
 
     registry.register(
-        Map.of("openapiGenerics.responseContract.CustomerDto", "io.example.CustomerDtoV2"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV2"));
 
     assertEquals("io.example.CustomerDtoV2", registry.getFqcn("CustomerDto"));
   }

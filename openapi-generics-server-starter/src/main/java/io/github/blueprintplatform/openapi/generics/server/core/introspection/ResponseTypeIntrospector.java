@@ -1,8 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
-import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
-import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
@@ -13,85 +12,56 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
- * Framework-independent introspector that detects contract-aware response shapes from {@link
- * ResolvableType} representations.
+ * Extracts contract-aware response type metadata from controller return types.
  *
- * <p>This component operates purely on type information and is intentionally decoupled from any
- * specific web framework (e.g. Spring MVC or WebFlux). Framework-specific layers are responsible
- * for discovering response types and providing them as {@link ResolvableType}.
+ * <p>Unwraps framework-level wrappers (e.g. {@code ResponseEntity}, async types) and identifies
+ * supported envelope structures such as {@code ServiceResponse<T>} or {@code
+ * ServiceResponse<Page<T>>}.
  *
- * <p>Supported contract-aware shapes:
- *
- * <ul>
- *   <li>{@code ServiceResponse<T>} where {@code T} is a plain non-generic DTO
- *   <li>{@code ServiceResponse<Page<T>>}
- * </ul>
- *
- * <p>All other shapes (e.g. {@code ServiceResponse<List<T>>}, nested generics, maps, etc.) are
- * intentionally ignored and left to default OpenAPI generation.
- *
- * <p>This class defines the boundary of what is considered "contract-aware" in the published
- * OpenAPI specification.
+ * <p>Produces a {@link ResponseTypeDescriptor} only for valid, supported shapes.
  */
 public final class ResponseTypeIntrospector {
 
   private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);
-
   private static final int MAX_UNWRAP_DEPTH = 8;
 
-  /**
-   * Extracts a deterministic schema reference name for the {@code data} field inside {@code
-   * ServiceResponse<T>}.
-   *
-   * <p>Examples:
-   *
-   * <ul>
-   *   <li>{@code ServiceResponse<CustomerDto>} → {@code CustomerDto}
-   *   <li>{@code ServiceResponse<Page<CustomerDto>>} → {@code PageCustomerDto}
-   * </ul>
-   *
-   * <p>If the provided type does not match a supported contract-aware shape, {@link
-   * Optional#empty()} is returned.
-   *
-   * @param type response type (framework-agnostic)
-   * @return deterministic schema suffix or empty if unsupported
-   */
-  public Optional<String> extractDataRefName(ResolvableType type) {
-    if (type == null) return Optional.empty();
+  private final Class<?> envelopeType;
+  private final Set<Class<?>> supportedContainers;
+  private final String payloadPropertyName;
 
-    type = unwrapToServiceResponse(type);
+  public ResponseTypeIntrospector(ResponseIntrospectionPolicy policy) {
+    this.envelopeType = policy.envelopeType();
+    this.supportedContainers = policy.supportedContainers();
+    this.payloadPropertyName = policy.payloadPropertyName();
+  }
+
+  public Optional<ResponseTypeDescriptor> extract(ResolvableType type) {
+    type = unwrap(type);
 
     Class<?> raw = type.resolve();
-    if (raw == null || !ServiceResponse.class.isAssignableFrom(raw)) {
-      return Optional.empty();
-    }
-
-    if (!type.hasGenerics()) {
+    if (raw == null || !envelopeType.isAssignableFrom(raw)) {
       return Optional.empty();
     }
 
     ResolvableType dataType = type.getGeneric(0);
-    Optional<String> refOpt = buildGuaranteedRefName(dataType);
+    Optional<ResponseTypeDescriptor> descriptorOpt = buildDescriptor(dataType);
 
     if (log.isDebugEnabled()) {
       log.debug(
-          "Introspected type [{}]: dataType={}, resolvedRef={}",
+          "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}",
           safeToString(type),
+          envelopeType.getSimpleName(),
           safeToString(dataType),
-          refOpt.orElse("<default>"));
+          descriptorOpt.map(Object::toString).orElse("<empty>"));
     }
 
-    return refOpt;
+    return descriptorOpt;
   }
 
-  /**
-   * Unwraps known wrapper types until {@code ServiceResponse<?>} is reached or no further
-   * unwrapping is possible.
-   */
-  private ResolvableType unwrapToServiceResponse(ResolvableType type) {
+  private ResolvableType unwrap(ResolvableType type) {
     for (int i = 0; i < MAX_UNWRAP_DEPTH; i++) {
       Class<?> raw = type.resolve();
-      if (raw == null || ServiceResponse.class.isAssignableFrom(raw)) {
+      if (raw == null || envelopeType.isAssignableFrom(raw)) {
         return type;
       }
 
@@ -102,12 +72,11 @@ public final class ResponseTypeIntrospector {
 
       type = next;
     }
+
     return type;
   }
 
-  /** Resolves the next inner layer for supported wrapper types. */
   private ResolvableType nextLayer(ResolvableType current, Class<?> raw) {
-
     if (ResponseEntity.class.isAssignableFrom(raw)) {
       return current.getGeneric(0);
     }
@@ -123,40 +92,42 @@ public final class ResponseTypeIntrospector {
     return null;
   }
 
-  /** Builds deterministic schema name only for explicitly supported shapes. */
-  private Optional<String> buildGuaranteedRefName(ResolvableType dataType) {
-    if (dataType == null) return Optional.empty();
-
+  private Optional<ResponseTypeDescriptor> buildDescriptor(ResolvableType dataType) {
     Class<?> raw = dataType.resolve();
-    if (raw == null) return Optional.empty();
+    if (raw == null) {
+      return Optional.empty();
+    }
 
-    if (Page.class.isAssignableFrom(raw)) {
-      ResolvableType itemType = safeGeneric(dataType, 0);
-      Class<?> itemRaw = itemType.resolve();
-      if (itemRaw == null) return Optional.empty();
+    for (Class<?> containerType : supportedContainers) {
+      if (containerType.isAssignableFrom(raw)) {
+        ResolvableType itemType = safeGeneric(dataType);
+        Class<?> itemRaw = itemType.resolve();
+        if (itemRaw == null) {
+          return Optional.empty();
+        }
 
-      return Optional.of(raw.getSimpleName() + itemRaw.getSimpleName());
+        return Optional.of(
+            ResponseTypeDescriptor.container(
+                envelopeType,
+                payloadPropertyName,
+                containerType.getSimpleName(),
+                itemRaw.getSimpleName()));
+      }
     }
 
     if (!dataType.hasGenerics()) {
-      return Optional.of(raw.getSimpleName());
+      return Optional.of(
+          ResponseTypeDescriptor.simple(envelopeType, payloadPropertyName, raw.getSimpleName()));
     }
 
     return Optional.empty();
   }
 
-  private ResolvableType safeGeneric(ResolvableType type, int index) {
-    if (type == null || !type.hasGenerics()) {
-      return ResolvableType.forClass(Object.class);
+  private ResolvableType safeGeneric(ResolvableType type) {
+    if (!type.hasGenerics()) {
+      return ResolvableType.NONE;
     }
-
-    ResolvableType[] generics = type.getGenerics();
-    if (index < 0 || index >= generics.length) {
-      return ResolvableType.forClass(Object.class);
-    }
-
-    ResolvableType generic = generics[index];
-    return generic.resolve() == null ? ResolvableType.forClass(Object.class) : generic;
+    return type.getGeneric(0);
   }
 
   private String safeToString(ResolvableType type) {

@@ -1,10 +1,10 @@
 package io.github.blueprintplatform.openapi.generics.server.core.pipeline;
 
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.base.BaseSchemaRegistrar;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.base.SchemaGenerationControlMarker;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.Collections;
@@ -15,134 +15,86 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Central orchestrator for the generics-aware OpenAPI system.
+ * Orchestrates the full OpenAPI projection pipeline for contract-aware responses.
  *
- * <p>This class defines the <b>explicit and deterministic execution flow</b> for transforming
- * runtime API contracts into enriched OpenAPI schemas.
+ * <p>This is the single entry point that coordinates all processing steps:
  *
- * <h2>Pipeline Execution</h2>
+ * <ol>
+ *   <li>Discover response types from the application layer
+ *   <li>Extract contract-aware descriptors via introspection
+ *   <li>Generate wrapper schemas (default or BYOE)
+ *   <li>Mark non-authoritative schemas to be ignored
+ *   <li>Validate final OpenAPI contract integrity
+ * </ol>
  *
- * <pre>
- * 1. Base Schema Registration   → ensure canonical envelope schemas exist
- * 2. Discovery                 → collect response types from runtime
- * 3. Introspection             → extract contract-aware type references
- * 4. Wrapper Processing        → generate wrapper schemas (ServiceResponse&lt;T&gt;, etc.)
- * 5. Ignore Marking            → mark infrastructure schemas as non-generatable
- * 6. Validation                → enforce contract correctness (fail-fast)
- * </pre>
+ * <p>The pipeline is executed exactly once per OpenAPI instance.
  *
- * <h2>Design Guarantees</h2>
+ * <p><b>Design principles:</b>
  *
  * <ul>
- *   <li><b>Deterministic</b> → same input always produces identical OpenAPI output
- *   <li><b>Single execution path</b> → no distributed lifecycle across beans
- *   <li><b>Separation of concerns</b> → orchestration vs schema logic separation
- *   <li><b>Fail-fast</b> → invalid contract state causes immediate failure
+ *   <li>Deterministic execution order
+ *   <li>Contract-first enforcement (no drift allowed)
+ *   <li>OpenAPI is treated as a projection, not a source of truth
  * </ul>
  *
- * <h2>Pipeline Semantics</h2>
- *
- * <ul>
- *   <li>{@link BaseSchemaRegistrar} → creates canonical base schemas
- *   <li>{@link WrapperSchemaProcessor} → composes generics-aware wrappers
- *   <li>{@link SchemaGenerationControlMarker} → controls generation policy (not structure)
- *   <li>{@link OpenApiContractGuard} → validates final contract integrity
- * </ul>
- *
- * <h2>Important</h2>
- *
- * <ul>
- *   <li>This class coordinates execution and does not implement schema logic
- *   <li>All schema-related behavior is delegated to dedicated components
- *   <li>Ignore marking is applied <b>after schema creation</b> but <b>before validation</b>
- * </ul>
+ * <p>Acts as the integration point between discovery, schema generation, control marking, and
+ * contract validation phases.
  */
 public class OpenApiPipelineOrchestrator {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenApiPipelineOrchestrator.class);
+  private static final Logger log = LoggerFactory.getLogger(OpenApiPipelineOrchestrator.class);
 
-    /**
-     * Internal execution guard to prevent multiple pipeline runs on the same OpenAPI instance.
-     *
-     * <p>Uses identity-based tracking to avoid leaking runtime state into the OpenAPI model.
-     */
-    private final Set<OpenAPI> processed =
-            Collections.newSetFromMap(new IdentityHashMap<>());
+  private final Set<OpenAPI> processed = Collections.newSetFromMap(new IdentityHashMap<>());
 
-    private final BaseSchemaRegistrar baseSchemaRegistrar;
   private final SchemaGenerationControlMarker schemaGenerationControlMarker;
-    private final ResponseTypeDiscoveryStrategy discoveryStrategy;
-    private final ResponseTypeIntrospector introspector;
-    private final WrapperSchemaProcessor wrapperSchemaProcessor;
-    private final OpenApiContractGuard contractGuard;
+  private final ResponseTypeDiscoveryStrategy discoveryStrategy;
+  private final ResponseTypeIntrospector introspector;
+  private final WrapperSchemaProcessor wrapperSchemaProcessor;
+  private final OpenApiContractGuard contractGuard;
 
   public OpenApiPipelineOrchestrator(
-      BaseSchemaRegistrar baseSchemaRegistrar,
       SchemaGenerationControlMarker schemaGenerationControlMarker,
       ResponseTypeDiscoveryStrategy discoveryStrategy,
       ResponseTypeIntrospector introspector,
       WrapperSchemaProcessor wrapperSchemaProcessor,
       OpenApiContractGuard contractGuard) {
 
-        this.baseSchemaRegistrar = baseSchemaRegistrar;
     this.schemaGenerationControlMarker = schemaGenerationControlMarker;
-        this.discoveryStrategy = discoveryStrategy;
-        this.introspector = introspector;
-        this.wrapperSchemaProcessor = wrapperSchemaProcessor;
-        this.contractGuard = contractGuard;
+    this.discoveryStrategy = discoveryStrategy;
+    this.introspector = introspector;
+    this.wrapperSchemaProcessor = wrapperSchemaProcessor;
+    this.contractGuard = contractGuard;
+  }
+
+  public void run(OpenAPI openApi) {
+    if (!processed.add(openApi)) {
+      log.debug("Pipeline already executed → skipping");
+      return;
     }
 
-    /**
-     * Executes the full OpenAPI transformation pipeline.
-     *
-     * @param openApi the OpenAPI document
-     */
-    public void run(OpenAPI openApi) {
+    log.debug("OpenAPI pipeline started");
 
-        if (!processed.add(openApi)) {
-            log.debug("Pipeline already executed → skipping");
-            return;
-        }
+    Set<ResponseTypeDescriptor> descriptors = discoverDescriptors();
+    log.debug("Discovered {} contract-aware response types", descriptors.size());
 
-        log.debug("OpenAPI pipeline started");
+    descriptors.forEach(descriptor -> wrapperSchemaProcessor.process(openApi, descriptor));
+    log.debug("Processed {} wrapper schemas", descriptors.size());
 
-        // 1. Base schemas
-        baseSchemaRegistrar.register(openApi);
+    schemaGenerationControlMarker.mark(openApi, descriptors);
+    log.debug("Applied ignore markers to managed schemas");
 
-        // 2–3. Discovery + Introspection
-        Set<String> refs = discoverRefs();
-        log.debug("Discovered {} contract-aware response types", refs.size());
+    contractGuard.validate(openApi, descriptors);
 
-        // 4. Wrapper processing
-        refs.forEach(ref -> wrapperSchemaProcessor.process(openApi, ref));
-        log.debug("Processed {} wrapper schemas", refs.size());
+    log.debug("OpenAPI pipeline completed successfully");
+  }
 
-    // 5. Ignore marking
-    schemaGenerationControlMarker.mark(openApi);
-        log.debug("Applied ignore markers to base schemas");
+  private Set<ResponseTypeDescriptor> discoverDescriptors() {
+    Set<ResponseTypeDescriptor> discovered = new LinkedHashSet<>();
 
-        // 6. Validation
-        contractGuard.validate(openApi);
+    discoveryStrategy
+        .discover()
+        .forEach(type -> introspector.extract(type).ifPresent(discovered::add));
 
-        log.debug("OpenAPI pipeline completed successfully");
-    }
-
-  /**
-   * Discovers and extracts contract-aware schema reference names.
-   *
-   * <p>This method represents the combined discovery + introspection stage.
-   *
-   * @return discovered schema reference names derived from contract types
-   */
-  private Set<String> discoverRefs() {
-        Set<String> discoveredRefs = new LinkedHashSet<>();
-
-        discoveryStrategy
-                .discover()
-                .forEach(type ->
-                        introspector.extractDataRefName(type)
-                                .ifPresent(discoveredRefs::add));
-
-        return discoveredRefs;
-    }
+    return discovered;
+  }
 }

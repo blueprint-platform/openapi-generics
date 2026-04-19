@@ -1,18 +1,12 @@
 package io.github.blueprintplatform.openapi.generics.contract.paging;
 
-/**
- * Supported sorting directions.
- */
+/** Supported sorting directions. */
 public enum SortDirection {
 
-  /**
-   * Ascending order.
-   */
+  /** Ascending order. */
   ASC("asc"),
 
-  /**
-   * Descending order.
-   */
+  /** Descending order. */
   DESC("desc");
 
   private final String value;

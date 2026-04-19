@@ -1,162 +1,190 @@
 package io.github.blueprintplatform.openapi.generics.server.core.validation;
 
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.PropertyNames.DATA;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.SchemaNames.*;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.*;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.API_WRAPPER;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.API_WRAPPER_DATATYPE;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.DATA_CONTAINER;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.DATA_ITEM;
 
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Fail-fast validator ensuring that generated OpenAPI output adheres to
- * the generics-aware response contract.
+ * Validates that generated OpenAPI schemas conform to the contract defined by the response
+ * descriptors.
  *
- * <p>This component represents the <b>final validation stage</b> of the
- * OpenAPI processing pipeline.
+ * <p>This guard enforces that wrapper schemas are structurally correct and contain all required
+ * vendor extensions expected by the client generator.
  *
- * <h2>Responsibilities</h2>
- *
- * <ul>
- *   <li>Validate presence of required base schemas</li>
- *   <li>Validate structural correctness of wrapper schemas</li>
- *   <li>Ensure required vendor extensions are present</li>
- * </ul>
- *
- * <h2>Pipeline Role</h2>
- *
- * <p>This class is invoked by {@code OpenApiPipelineOrchestrator}
- * after all schema generation and enrichment steps are completed.
- *
- * <h2>Design Principles</h2>
+ * <p>Specifically, it verifies:
  *
  * <ul>
- *   <li><b>Fail-fast</b> → throws exception on any contract violation</li>
- *   <li><b>Minimal</b> → validates only critical invariants</li>
- *   <li><b>Deterministic</b> → no heuristics or reflection</li>
+ *   <li>Wrapper schema exists for each descriptor
+ *   <li>{@code x-api-wrapper=true} is present
+ *   <li>{@code x-api-wrapper-datatype} matches the payload type
+ *   <li>Wrapper contains the expected payload property
+ *   <li>Container metadata ({@code x-data-container}, {@code x-data-item}) is correct when
+ *       applicable
  * </ul>
  *
- * <h2>Non-goals</h2>
- *
- * <ul>
- *   <li>No deep schema graph validation</li>
- *   <li>No attempt to fix invalid schemas</li>
- * </ul>
- *
- * <p>This class is framework-independent and operates purely on the OpenAPI model.
+ * <p>This is a fail-fast validation step in the OpenAPI projection pipeline. Any inconsistency
+ * results in an exception to prevent invalid client generation.
  */
 public class OpenApiContractGuard {
 
   private static final Logger log = LoggerFactory.getLogger(OpenApiContractGuard.class);
 
-  /**
-   * Executes validation on the given OpenAPI document.
-   *
-   * @param openApi OpenAPI document
-   */
-  public void validate(OpenAPI openApi) {
+  public void validate(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
     log.debug("OpenAPI contract validation started");
 
     Map<String, Schema> schemas = getSchemas(openApi);
-
-    validateBaseSchemas(schemas);
-    validateWrapperSchemas(schemas);
+    validateDescriptors(schemas, descriptors);
 
     log.debug("OpenAPI contract validation completed successfully");
   }
 
-  // -------------------------------------------------------------------------
-  // Base schema validation
-  // -------------------------------------------------------------------------
+  private void validateDescriptors(
+      Map<String, Schema> schemas, Set<ResponseTypeDescriptor> descriptors) {
+    if (descriptors == null || descriptors.isEmpty()) {
+      return;
+    }
 
-  private void validateBaseSchemas(Map<String, Schema> schemas) {
-
-    requireSchema(schemas, SERVICE_RESPONSE);
-    requireSchema(schemas, SERVICE_RESPONSE_VOID);
-    requireSchema(schemas, META);
-    requireSchema(schemas, SORT);
-  }
-
-  private void requireSchema(Map<String, Schema> schemas, String name) {
-    if (!schemas.containsKey(name)) {
-      log.error("Missing required base schema '{}'", name);
-      throw new IllegalStateException(
-              "Missing required OpenAPI schema: '" + name + "'");
+    for (ResponseTypeDescriptor descriptor : descriptors) {
+      validateWrapperSchema(schemas, descriptor);
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Wrapper validation
-  // -------------------------------------------------------------------------
+  private void validateWrapperSchema(
+      Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
-  private void validateWrapperSchemas(Map<String, Schema> schemas) {
+    String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
+    Schema<?> wrapper = schemas.get(wrapperName);
 
-    schemas.forEach((name, schema) -> {
+    if (wrapper == null) {
+      failMissingSchema("wrapper", wrapperName);
+    }
 
-      if (!isWrapper(schema)) {
-        return;
-      }
+    validateWrapperExtensions(wrapperName, wrapper, descriptor);
+    validateWrapperStructure(wrapperName, wrapper, descriptor);
 
-      validateWrapperExtensions(name, schema);
-      validateWrapperStructure(name, schema);
-    });
-  }
-
-  private boolean isWrapper(Schema<?> schema) {
-    return schema.getExtensions() != null
-            && Boolean.TRUE.equals(schema.getExtensions().get(API_WRAPPER));
-  }
-
-  private void validateWrapperExtensions(String name, Schema<?> schema) {
-
-    Object dataType = schema.getExtensions().get(API_WRAPPER_DATATYPE);
-
-    if (dataType == null) {
-      log.error("Wrapper '{}' missing required extension '{}'", name, API_WRAPPER_DATATYPE);
-      throw new IllegalStateException(
-              "Wrapper schema '" + name +
-                      "' is missing required extension: " + API_WRAPPER_DATATYPE);
+    if (descriptor.isContainer()) {
+      validateContainerExtensions(wrapperName, wrapper, descriptor);
     }
   }
 
-  private void validateWrapperStructure(String name, Schema<?> schema) {
+  private void validateWrapperExtensions(
+      String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
 
-    if (schema.getAllOf() == null || schema.getAllOf().isEmpty()) {
-      log.error("Wrapper '{}' has invalid structure: missing allOf composition", name);
-      throw new IllegalStateException(
-              "Wrapper schema '" + name + "' must use allOf composition");
+    Map<String, Object> extensions = requireExtensions(wrapperName, wrapper, "required extensions");
+
+    requireTrueExtension(wrapperName, extensions, API_WRAPPER);
+    requireMatchingExtension(
+        wrapperName, extensions, API_WRAPPER_DATATYPE, descriptor.dataRefName());
+  }
+
+  private void validateWrapperStructure(
+      String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
+
+    boolean hasPayloadProperty = false;
+
+    if (wrapper.getAllOf() != null && !wrapper.getAllOf().isEmpty()) {
+      hasPayloadProperty =
+          wrapper.getAllOf().stream()
+              .filter(schema -> schema.getProperties() != null)
+              .anyMatch(
+                  schema -> schema.getProperties().containsKey(descriptor.payloadPropertyName()));
+    } else if (wrapper.getProperties() != null) {
+      hasPayloadProperty = wrapper.getProperties().containsKey(descriptor.payloadPropertyName());
     }
 
-    boolean hasDataProperty =
-            schema.getAllOf().stream()
-                    .filter(s -> s.getProperties() != null)
-                    .anyMatch(s -> s.getProperties().containsKey(DATA));
-
-    if (!hasDataProperty) {
-      log.error("Wrapper '{}' missing required property '{}'", name, DATA);
-      throw new IllegalStateException(
-              "Wrapper schema '" + name +
-                      "' must define '" + DATA + "' property");
+    if (!hasPayloadProperty) {
+      failMissingProperty(wrapperName, descriptor.payloadPropertyName());
     }
   }
 
-  // -------------------------------------------------------------------------
-  // Helpers
-  // -------------------------------------------------------------------------
+  private void validateContainerExtensions(
+      String wrapperName, Schema<?> wrapper, ResponseTypeDescriptor descriptor) {
+
+    Map<String, Object> extensions =
+        requireExtensions(wrapperName, wrapper, "required container extensions");
+
+    requireMatchingExtension(wrapperName, extensions, DATA_CONTAINER, descriptor.containerName());
+    requireMatchingExtension(wrapperName, extensions, DATA_ITEM, descriptor.itemRefName());
+  }
 
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
-
-    if (openApi.getComponents() == null
-            || openApi.getComponents().getSchemas() == null) {
-
+    if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
       log.error("OpenAPI validation failed: components.schemas is missing");
-
-      throw new IllegalStateException(
-              "OpenAPI components.schemas is missing");
+      throw new IllegalStateException("OpenAPI components.schemas is missing");
     }
 
     return openApi.getComponents().getSchemas();
+  }
+
+  private Map<String, Object> requireExtensions(
+      String wrapperName, Schema<?> wrapper, String detail) {
+
+    Map<String, Object> extensions = wrapper.getExtensions();
+    if (extensions == null) {
+      failMissingExtensions(wrapperName, detail);
+    }
+
+    return extensions;
+  }
+
+  private void requireTrueExtension(
+      String wrapperName, Map<String, Object> extensions, String extensionName) {
+
+    Object actual = extensions.get(extensionName);
+    if (!Boolean.TRUE.equals(actual)) {
+      failInvalidExtension(wrapperName, extensionName, Boolean.TRUE, actual);
+    }
+  }
+
+  private void requireMatchingExtension(
+      String wrapperName,
+      Map<String, Object> extensions,
+      String extensionName,
+      Object expectedValue) {
+
+    Object actualValue = extensions.get(extensionName);
+    if (!expectedValue.equals(actualValue)) {
+      failInvalidExtension(wrapperName, extensionName, expectedValue, actualValue);
+    }
+  }
+
+  private void failMissingSchema(String schemaType, String schemaName) {
+    log.error("Missing {} schema '{}'", schemaType, schemaName);
+    throw new IllegalStateException(
+        "Missing required " + schemaType + " schema: '" + schemaName + "'");
+  }
+
+  private void failMissingExtensions(String wrapperName, String detail) {
+    log.error("Wrapper '{}' missing {}", wrapperName, detail);
+    throw new IllegalStateException("Wrapper schema '" + wrapperName + "' is missing " + detail);
+  }
+
+  private void failInvalidExtension(
+      String wrapperName, String extensionName, Object expectedValue, Object actualValue) {
+
+    log.error(
+        "Wrapper '{}' has invalid '{}': expected '{}', actual '{}'",
+        wrapperName,
+        extensionName,
+        expectedValue,
+        actualValue);
+
+    throw new IllegalStateException(
+        "Wrapper schema '" + wrapperName + "' has invalid extension: " + extensionName);
+  }
+
+  private void failMissingProperty(String wrapperName, String propertyName) {
+    log.error("Wrapper '{}' missing required property '{}'", wrapperName, propertyName);
+    throw new IllegalStateException(
+        "Wrapper schema '" + wrapperName + "' must define '" + propertyName + "' property");
   }
 }
