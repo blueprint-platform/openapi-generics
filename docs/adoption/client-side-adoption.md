@@ -59,7 +59,7 @@ Do this:
 
 ```xml
 <parent>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>1.0.0</version>
 </parent>
@@ -170,7 +170,7 @@ You provide exactly two inputs. Everything else is handled by the platform.
 
 ```xml
 <parent>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>1.0.0</version>
 </parent>

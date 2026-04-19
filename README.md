@@ -228,7 +228,7 @@ You only add two building blocks.
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
   <version>1.0.0</version>
 </dependency>
@@ -238,7 +238,7 @@ You only add two building blocks.
 
 ```xml
 <parent>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
   <version>1.0.0</version>
 </parent>

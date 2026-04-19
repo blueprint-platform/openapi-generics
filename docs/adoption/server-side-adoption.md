@@ -46,7 +46,7 @@ Do this:
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
   <version>1.0.0</version>
 </dependency>
@@ -144,7 +144,7 @@ No configuration required.
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
 </dependency>
 ```
