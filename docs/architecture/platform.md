@@ -1,5 +1,5 @@
 ---
-title: openapi-generics-platform — Architecture (0.9.x)
+title: openapi-generics-platform — Architecture (1.0.0)
 nav_exclude: true
 ---
 

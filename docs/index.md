@@ -17,6 +17,7 @@ has_toc: false
 - [Why this exists](#why-this-exists)
 - [What you actually do](#what-you-actually-do)
 - [Setup](#setup)
+- [Compatibility](#compatibility)
 - [Result](#result)
 - [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
 - [What is actually generated](#what-is-actually-generated)
@@ -133,6 +134,20 @@ Generate the client:
 ```bash
 mvn clean install
 ```
+
+---
+
+## Compatibility
+
+OpenAPI Generics is currently verified with:
+
+- **Java:** 17+
+- **Spring Boot:** 3.4.x, 3.5.x, 4.x
+- **springdoc-openapi:** 2.8.x (Spring Boot 3.x), 3.x (Spring Boot 4.x)
+- **OpenAPI Generator:** 7.x
+- **Server scope:** Spring WebMvc (`springdoc-openapi-starter-webmvc-ui`)
+
+See the full compatibility matrix and support policy: [Compatibility & Support Policy](compatibility.md)
 
 ---
 
