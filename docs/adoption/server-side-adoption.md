@@ -12,27 +12,27 @@ has_toc: false
 
 This is a **contract-first projection system**, not a documentation tool.
 
-You define your contract in Java.  
+You define your contract in Java.
 The platform guarantees a **stable, generator-ready OpenAPI projection**.
 
 ---
 
 ## Contents
 
-- [60-second quick start](#-60-second-quick-start)
-- [What the server actually does](#-what-the-server-actually-does)
-- [The only rule that matters](#-the-only-rule-that-matters)
-- [Minimal dependencies](#-minimal-dependencies)
-- [What you actually write](#-what-you-actually-write)
-- [What gets published to OpenAPI](#-what-gets-published-to-openapi)
-- [Projection pipeline (what really happens)](#-projection-pipeline-what-really-happens)
-- [Rules (do NOT break these)](#-rules-do-not-break-these)
-- [Quick verification](#-quick-verification)
-- [Samples](#-samples-recommended)
+- [60-second quick start](#60-second-quick-start)
+- [What the server actually does](#what-the-server-actually-does)
+- [The only rule that matters](#the-only-rule-that-matters)
+- [Minimal dependencies](#minimal-dependencies)
+- [What you actually write](#what-you-actually-write)
+- [What gets published to OpenAPI](#what-gets-published-to-openapi)
+- [Projection pipeline (what really happens)](#projection-pipeline-what-really-happens)
+- [Rules (do NOT break these)](#rules-do-not-break-these)
+- [Quick verification](#quick-verification)
+- [Samples](#samples)
 
 ---
 
-## ⚡ 60-second quick start
+## 60-second quick start
 
 You want:
 
@@ -85,7 +85,7 @@ Done.
 
 ---
 
-## 🎯 What the server actually does
+## What the server actually does
 
 The server has **one responsibility**:
 
@@ -107,15 +107,13 @@ Everything else happens downstream.
 
 ---
 
-## 🧩 The only rule that matters
+## The only rule that matters
 
 There is **one canonical success model** — but not a single fixed type.
 
 ```text
 YourEnvelope<T>
 ```
-
-> `ServiceResponse<T>` is the **default envelope provided by the platform**.
 
 Supported shapes (deterministic scope):
 
@@ -125,20 +123,13 @@ ServiceResponse<Page<T>>
 YourEnvelope<T>
 ```
 
-Constraints:
+`ServiceResponse<T>` is the default envelope provided by the platform. BYOE (Bring Your Own Envelope) lets you substitute any envelope that meets the constraints.
 
-* exactly **one direct generic payload** must exist
-* nested generic payloads in custom envelopes are **not supported**
-
-This constraint enables:
-
-* deterministic schema naming
-* stable projection
-* type-safe client reconstruction
+Detailed constraints and violation examples are defined in [Rules (do NOT break these)](#rules-do-not-break-these).
 
 ---
 
-## 📦 Minimal dependencies
+## Minimal dependencies
 
 No configuration required.
 
@@ -156,7 +147,7 @@ Requirements:
 
 ---
 
-## ✍️ What you actually write
+## What you actually write
 
 You write **only your domain contract**.
 
@@ -178,8 +169,6 @@ public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers(...) {
 }
 ```
 
----
-
 ### Using your own envelope (BYOE)
 
 ```java
@@ -197,21 +186,20 @@ openapi-generics:
     type: io.example.contract.ApiResponse
 ```
 
+No annotations. No schema config. No wrapper DTOs. The platform detects the envelope and projects it into OpenAPI deterministically.
+
+### Note on payload flexibility
+
+The system constrains envelope structure — not payload content. You can place any domain type inside your envelope:
+
+```text
+ServiceResponse<CustomerDto>
+YourEnvelope<Anything>
+```
+
 ---
 
-That’s it.
-
-No:
-
-* annotations
-* schema config
-* wrapper DTOs
-
-The platform detects the envelope and projects it into OpenAPI deterministically.
-
----
-
-## 🧠 What gets published to OpenAPI
+## What gets published to OpenAPI
 
 From:
 
@@ -258,10 +246,9 @@ Notes:
 
 ---
 
-## 🔁 Projection pipeline (what really happens)
+## Projection pipeline (what really happens)
 
-The server is not "configurable".
-It is a **fixed execution pipeline**.
+The server is not "configurable". It is a **fixed execution pipeline**.
 
 ```text
 Controller return types
@@ -282,15 +269,8 @@ Contract validation (fail-fast)
         ↓
 OpenAPI output
 ```
----
 
-### What changed with BYOE
-
-* The pipeline dynamically resolves the **envelope type** (default or external)
-* Payload slot is discovered via **introspection rules** (single direct generic)
-* The same projection logic applies regardless of envelope origin
-
----
+The pipeline is **envelope-agnostic** — the same stages run for the default `ServiceResponse<T>` and for BYOE-configured external envelopes. The only difference is envelope resolution at the introspection stage; all downstream logic remains identical.
 
 ### Key properties
 
@@ -301,11 +281,11 @@ OpenAPI output
 
 ---
 
-## ⚠️ Rules (do NOT break these)
+## Rules (do NOT break these)
 
 These are **hard architectural constraints**.
 
-### 1. Use a single generic envelope model
+### Rule 1: Use a single generic envelope model
 
 ```text
 ServiceResponse<T>
@@ -318,11 +298,9 @@ Constraints:
 * exactly **one direct generic payload** must exist
 * nested generic payloads in custom envelopes are **not supported**
 
----
+### Rule 2: You MAY use your own envelope (BYOE)
 
-### 2. You MAY use your own envelope (BYOE)
-
-✔ Valid:
+Valid:
 
 ```text
 ApiResponse<T>
@@ -335,61 +313,40 @@ Conditions:
 * must declare **exactly one type parameter**
 * must contain **exactly one direct payload field of type T**
 
-Violations (invalid):
+Violations — these fail fast at application startup with a clear error message:
 
 ```text
 ApiResponse<Page<T>>      ❌ nested generic payload
 ApiResponse<T, M>         ❌ multiple type parameters
 WrapperWithoutPayload     ❌ no payload field
+InterfaceEnvelope<T>      ❌ not a concrete class
+RecordEnvelope<T>         ❌ records are not supported
+AbstractEnvelope<T>       ❌ not a concrete class
 ```
 
----
+### Rule 3: Error model is NOT enforced by the platform
 
-### 3. Payload is fully flexible
-
-✔ Valid:
-
-```text
-ServiceResponse<CustomerDto>
-YourEnvelope<Anything>
-```
-
-The system constrains structure — not domain.
-
----
-
-### 4. Error model is NOT enforced by the platform
-
-Error handling is **not dictated by the starter**.
-
-It depends entirely on the **contract model defined by the service**.
+Error handling is **not dictated by the starter**. It depends entirely on the **contract model defined by the service**.
 
 Two common patterns:
 
-#### 1. Separate error protocol (recommended default)
+**Pattern A — Separate error protocol (recommended default):**
 
 ```text
 Success → ServiceResponse<T>
 Error   → ProblemDetail (RFC 9457)
 ```
 
-#### 2. Envelope-based error model (custom / BYOE)
+**Pattern B — Envelope-based error model (custom / BYOE):**
 
 ```text
 Success → YourEnvelope<T>
 Error   → YourEnvelope<T> (e.g. errors field)
 ```
 
-#### Key point
+**Key point:** The platform enforces success envelope structure, but does not define or restrict error semantics.
 
-```text
-The platform enforces success envelope structure,
-but does not define or restrict error semantics.
-```
-
----
-
-### 5. Do NOT customize OpenAPI
+### Rule 4: Do NOT customize OpenAPI
 
 No:
 
@@ -401,21 +358,11 @@ The starter owns projection.
 
 ---
 
-## 🔍 Quick verification
+## Quick verification
 
 ```bash
 curl http://localhost:8084/.../v1/.../1
 ```
-
-Expected structure:
-
-```json
-{
-  "<payload-field>": { ... }
-}
-```
-
-Examples:
 
 Default envelope (`ServiceResponse`):
 
@@ -449,7 +396,7 @@ Server → OpenAPI → Client is aligned
 
 ---
 
-## 📦 Samples (recommended)
+## Samples
 
 Full end-to-end examples are provided:
 
@@ -465,7 +412,3 @@ These demonstrate:
 * how it is consumed safely
 
 > If anything is unclear, inspect samples instead of guessing.
-
----
-
-🛡 MIT License

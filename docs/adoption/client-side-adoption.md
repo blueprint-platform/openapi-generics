@@ -30,22 +30,22 @@ It focuses on four things:
 
 ---
 
-## 📑 Contents
+## Contents
 
-- [60-second quick start](#-60-second-quick-start)
-- [What the client actually does](#-what-the-client-actually-does)
-- [Input: OpenAPI (not your contract)](#-input-openapi-not-your-contract)
-- [Minimal setup](#-minimal-setup)
-- [Progressive adoption modes](#-progressive-adoption-modes)
-- [Build pipeline (what really happens)](#-build-pipeline-what-really-happens)
-- [Output: what gets generated](#-output-what-gets-generated)
-- [Usage: how the client enters your system](#-usage-how-the-client-enters-your-system)
-- [Quick verification](#-quick-verification)
-- [Error handling](#-error-handling)
+- [60-second quick start](#60-second-quick-start)
+- [What the client actually does](#what-the-client-actually-does)
+- [Input: OpenAPI (not your contract)](#input-openapi-not-your-contract)
+- [Minimal setup](#minimal-setup)
+- [Progressive adoption modes](#progressive-adoption-modes)
+- [Build pipeline (what really happens)](#build-pipeline-what-really-happens)
+- [Output: what gets generated](#output-what-gets-generated)
+- [Usage: how the client enters your system](#usage-how-the-client-enters-your-system)
+- [Quick verification](#quick-verification)
+- [Error handling](#error-handling)
 
 ---
 
-## ⚡ 60-second quick start
+## 60-second quick start
 
 You want:
 
@@ -99,7 +99,7 @@ Reuse your existing models:
 mvn clean install
 ```
 
-That’s it.
+That's it.
 
 ---
 
@@ -121,7 +121,7 @@ The generated client preserves the same contract shape published by the server.
 
 ---
 
-## 🎯 What the client actually does
+## What the client actually does
 
 The client has **one responsibility**:
 
@@ -141,7 +141,7 @@ OpenAPI → deterministic Java client
 
 ---
 
-## 📥 Input: OpenAPI (not your contract)
+## Input: OpenAPI (not your contract)
 
 Client generation always starts from an **existing OpenAPI document**.
 
@@ -160,11 +160,9 @@ Implication:
 
 ---
 
-## 📦 Minimal setup
+## Minimal setup
 
 You provide exactly two inputs. Everything else is handled by the platform.
-
----
 
 ### 1. Build-time orchestration (MANDATORY)
 
@@ -185,10 +183,6 @@ It provides:
 * deterministic execution model
 * generated sources registration
 
-> You do not invoke the generator directly — the parent defines the execution model.
-
----
-
 ### 2. OpenAPI Generator plugin (USER INPUT ONLY)
 
 You control the **input and integration surface only**.
@@ -202,12 +196,7 @@ At minimum:
 
 Everything else (templates, contract behavior, wrapper logic) is handled by the platform.
 
----
-
 ### Full example configuration
-
-<details>
-<summary>Show complete plugin configuration</summary>
 
 ```xml
 <plugin>
@@ -279,10 +268,6 @@ Everything else (templates, contract behavior, wrapper logic) is handled by the 
 </plugin>
 ```
 
-</details>
-
----
-
 ### What you control here
 
 * which OpenAPI spec is used
@@ -292,8 +277,6 @@ Everything else (templates, contract behavior, wrapper logic) is handled by the 
 * optional external contract mappings (BYOC)
 * optional envelope override (BYOE)
 
----
-
 ### What you do NOT control
 
 * generator internals
@@ -302,8 +285,6 @@ Everything else (templates, contract behavior, wrapper logic) is handled by the 
 * wrapper generation rules
 
 > The generator is **contract-driven**, not schema-driven.
-
----
 
 ### Reference implementations
 
@@ -319,7 +300,7 @@ These show real configurations for both Spring Boot 3 and Spring Boot 4.
 
 ---
 
-## 🧠 Progressive adoption modes
+## Progressive adoption modes
 
 The system defines **explicit build-time modes** and **separate alignment inputs**.
 
@@ -328,13 +309,11 @@ These are **not the same concern**.
 * Modes control **how the generator behaves**
 * Alignment inputs define **how the contract is resolved**
 
----
-
-## 1. Build-time modes (execution behavior)
+### 1. Build-time modes (execution behavior)
 
 These control whether the contract-aware system is active.
 
-### 1.1 Contract-aligned mode (default)
+#### 1.1 Contract-aligned mode (default)
 
 ```xml
 <openapi.generics.skip>false</openapi.generics.skip>
@@ -349,9 +328,7 @@ Behavior:
 
 This is the **standard operating mode**.
 
----
-
-### 1.2 Compatibility mode (fallback)
+#### 1.2 Compatibility mode (fallback)
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
@@ -370,17 +347,13 @@ Use this when:
 * debugging generation issues
 * migrating incrementally
 
----
-
-## 2. Contract alignment inputs (orthogonal to modes)
+### 2. Contract alignment inputs (orthogonal to modes)
 
 These do **not change the execution mode**.
 
 They define how the **contract is resolved during generation**.
 
----
-
-### 2.1 BYOE — Bring Your Own Envelope (PRIMARY)
+#### 2.1 BYOE — Bring Your Own Envelope (PRIMARY)
 
 Define which envelope type represents your contract.
 
@@ -411,9 +384,7 @@ Constraints:
 * must declare exactly one type parameter
 * must expose a single direct payload of type `T`
 
----
-
-### 2.2 BYOC — Bring Your Own Contract Models
+#### 2.2 BYOC — Bring Your Own Contract Models
 
 Reuse externally owned DTOs instead of generating them.
 
@@ -437,9 +408,7 @@ Example output:
 class ServiceResponseCustomerDto extends ServiceResponse<CustomerDto>
 ```
 
----
-
-## 3. How they work together
+### 3. How they work together
 
 These mechanisms are **composable**.
 
@@ -464,52 +433,11 @@ DTO       → external (BYOC)
 Wrappers  → generated (thin bindings)
 ```
 
----
-
-## 4. Mental model
+### 4. Summary
 
 ```text
-Mode controls execution
-Inputs control alignment
-```
-
-More concretely:
-
-```text
-openapi.generics.skip = ON/OFF   → system behavior
-openapi-generics.*              → contract resolution
-```
-
----
-
-## 5. Key insight
-
-```text
-This is not “generation configuration”
-
-This is contract reconstruction control
-```
-
-The generator does not invent models.
-
-It resolves:
-
-* which envelope to use (BYOE)
-* which DTOs to reuse (BYOC)
-* how to bind them deterministically
-
----
-
-## 6. Summary
-
-```text
-Modes:
-  ON  → contract-aware generation
-  OFF → standard generator
-
-Alignment:
-  BYOE → envelope
-  BYOC → DTOs
+Mode controls execution    →  openapi.generics.skip = ON/OFF
+Inputs control alignment   →  openapi-generics.envelope / response-contract.*
 ```
 
 The system works because:
@@ -519,15 +447,15 @@ The system works because:
 * generation remains deterministic
 * adoption is fully reversible
 
+The generator does not invent models. It resolves which envelope to use (BYOE), which DTOs to reuse (BYOC), and how to bind them deterministically.
+
 ---
 
-## 🏗 Build pipeline (what really happens)
+## Build pipeline (what really happens)
 
 This system is a **controlled, contract-aware execution pipeline**.
 
-It does not simply generate code from OpenAPI.
-
-It **reconstructs the contract shape deterministically**.
+It does not simply generate code from OpenAPI. It **reconstructs the contract shape deterministically**.
 
 ```text
 OpenAPI spec (input)
@@ -547,30 +475,24 @@ Contract-aware model resolution (BYOC / BYOE)
 Generated sources (contract-aligned)
 ```
 
----
-
 ### What actually changes vs standard OpenAPI generation
 
+Standard OpenAPI Generator materializes schemas into models directly — every schema becomes a class, generics collapse into flat wrappers, and envelope types are duplicated per endpoint.
 
-The difference is critical:
+The contract-aware pipeline changes this:
 
 * models are **not blindly materialized**
 * contract semantics are **interpreted and enforced**
 * wrappers are generated as **type bindings**, not structures
-
----
+* external contract models are resolved from the classpath, not regenerated
 
 ### Contract-aware steps (the core difference)
-
-#### Template patch (contract semantics injection)
 
 The platform modifies upstream templates to:
 
 * detect wrapper schemas (`x-api-wrapper`)
 * inject required imports
 * bind models to contract types
-
----
 
 ### Output characteristics
 
@@ -592,8 +514,6 @@ No:
 * DTO regeneration (if BYOC used)
 * structural reinterpretation
 
----
-
 ### Key properties of the pipeline
 
 * single orchestrator (no ordering issues)
@@ -604,13 +524,11 @@ No:
 
 ---
 
-## 🧠 Output: what gets generated
+## Output: what gets generated
 
 The system does **not generate models** in the traditional sense.
 
 It generates **thin, contract-aligned wrapper types** that bind OpenAPI responses back to your canonical contract.
-
----
 
 ### From OpenAPI schema
 
@@ -618,8 +536,6 @@ It generates **thin, contract-aligned wrapper types** that bind OpenAPI response
 ServiceResponseCustomerDto
 ApiResponseCustomerDto
 ```
-
----
 
 ### Generated code
 
@@ -634,8 +550,6 @@ Custom envelope (BYOE):
 ```java
 class ApiResponseCustomerDto extends ApiResponse<CustomerDto>
 ```
-
----
 
 ### Deterministic naming
 
@@ -661,7 +575,7 @@ This guarantees:
 
 ---
 
-## 🚀 Usage: how the client enters your system
+## Usage: how the client enters your system
 
 Generated sources are added to your project automatically:
 
@@ -672,8 +586,6 @@ target/generated-sources/openapi
 These sources are **not your domain layer**.
 
 They are an **integration boundary**.
-
----
 
 ### What you actually use
 
@@ -692,8 +604,6 @@ ApiResponse<CustomerDto>
 ```
 
 This is the only type your application should depend on.
-
----
 
 ### How the client enters your system
 
@@ -726,19 +636,25 @@ public class CustomerClientImpl implements CustomerClient {
 }
 ```
 
----
-
 ### Why this boundary matters
 
-The adapter layer ensures:
+Generated code is a **transport concern**, not a domain concern.
+The adapter is where you translate between them.
 
-* generated code does not leak into your domain
-* contract shape remains stable
-* generator changes do not break your application
+Without this boundary, generated types leak into your application —
+binding your domain to OpenAPI output, generator conventions, and the transport itself.
+
+With the adapter in place:
+
+* **Domain purity** — your app depends on contract types, not generated artifacts
+* **Testability** — business logic is tested against the contract, not the HTTP client
+* **Contract stability** — generator updates do not ripple into domain code
+* **Replaceability** — the underlying transport can change without touching the app
+
+The adapter is not boilerplate.
+It is the seam between *what your system means* and *how it talks to the outside*.
 
 This is **not optional in real systems**.
-
----
 
 ### What flows through your system
 
@@ -751,8 +667,6 @@ Not:
 ```text
 Controller → Generated Models → ???
 ```
-
----
 
 ### Reference implementation
 
@@ -772,7 +686,7 @@ These demonstrate:
 
 ---
 
-## 🔍 Quick verification
+## Quick verification
 
 After generation, verify the following:
 
@@ -795,7 +709,7 @@ OpenAPI → Client → Contract alignment is correct
 
 ---
 
-## ⚠️ Error handling
+## Error handling
 
 Error handling is **not enforced by the client generator**.
 
@@ -823,7 +737,3 @@ Error   → YourEnvelope<T> (e.g. errors field)
 The generator does not define error semantics.
 It preserves whatever contract the service exposes.
 ```
-
----
-
-🛡 MIT License

@@ -6,27 +6,25 @@ has_toc: false
 ---
 
 # OpenAPI Generics — Keep Your API Contract Intact End-to-End
+
 > Define your API once in Java.
 > Preserve it across OpenAPI and generated clients — without duplication or drift.
 
 ---
 
-## 📑 Contents
+## Contents
 
 - [Why this exists](#why-this-exists)
 - [What you actually do](#what-you-actually-do)
-- [Quick Start](#quick-start)
+- [Setup](#setup)
 - [Result](#result)
-- [Compatibility Matrix](#compatibility-matrix)
 - [Proof — Generated Client (Before vs After)](#proof--generated-client-before-vs-after)
-- [What changed](#what-changed)
 - [What is actually generated](#what-is-actually-generated)
 - [How you actually use it](#how-you-actually-use-it)
 - [What this gives you](#what-this-gives-you)
-- [Why this matters](#why-this-matters)
 - [Mental model](#mental-model)
 - [Next steps](#next-steps)
-- [References](#references--external-links)
+- [References](#references)
 
 ---
 
@@ -51,9 +49,9 @@ This platform removes that entire class of problems.
 
 ## What you actually do
 
-You don’t configure OpenAPI.
-You don’t maintain templates.
-You don’t fight generator behavior.
+You don't configure OpenAPI.
+You don't maintain templates.
+You don't fight generator behavior.
 
 You only do three things:
 
@@ -61,13 +59,13 @@ You only do three things:
 2. optionally reuse your own shared contract models on the client side
 3. generate clients from OpenAPI
 
-That’s it.
+That's it.
 
 The platform handles projection, generation, and contract alignment automatically.
 
 ---
 
-## Quick Start
+## Setup
 
 ### 1. Server (producer)
 
@@ -159,25 +157,6 @@ The exact same contract shape flows from server to client.
 
 ---
 
-
-## Compatibility Matrix
-
-### Runtime (Server)
-
-| Component         | Supported Versions          |
-| ----------------- |-----------------------------|
-| Java              | 17+                         |
-| Spring Boot       | 3.4.x, 3.5.x, 4.x           |
-| springdoc-openapi | 2.8.x, 3.x (WebMvc starter) |
-
-### Build-time (Client Generation)
-
-| Component         | Supported Versions |
-| ----------------- | ------------------ |
-| OpenAPI Generator | 7.x                |
-
----
-
 ## Proof — Generated Client (Before vs After)
 
 ### Before (default OpenAPI behavior)
@@ -209,7 +188,7 @@ public class ServiceResponsePageCustomerDto
 
 ---
 
-## What changed
+### What changed
 
 Instead of generating new models from OpenAPI:
 
@@ -217,8 +196,6 @@ Instead of generating new models from OpenAPI:
 * external contract models can be explicitly mapped and reused
 * wrappers are generated as thin type bindings
 * the generator enforces contract alignment instead of passively materializing schemas
-
-Result:
 
 ```text
 Java Contract (SSOT)
@@ -230,9 +207,7 @@ Generator (deterministic reconstruction)
 Client (contract-aligned types)
 ```
 
-No reinterpretation.
-No duplication.
-No drift.
+No reinterpretation. No duplication. No drift.
 
 ---
 
@@ -337,29 +312,7 @@ You do **not** have to deal with common issues produced by default OpenAPI gener
 
 If you reuse shared contract DTOs, the system also avoids regenerating models you already own.
 
-* No reinterpretation
-* No duplication
-* No drift
-
 The result is a consistent, predictable contract model — whether you use the default envelope or your own.
-
----
-
-## Why this matters
-
-Traditional OpenAPI generation often produces:
-
-* duplicated response envelopes
-* flattened generics
-* unstable model graphs
-* regenerated shared models that the client should not own
-
-This approach guarantees:
-
-* a single contract shape shared across all layers
-* stable and predictable client generation
-* optional reuse of shared external contract models
-* zero drift between server and client semantics
 
 ---
 
@@ -391,17 +344,12 @@ Everything else is infrastructure.
 * [Server Adoption](adoption/server-side-adoption.md)
 * [Client Adoption](adoption/client-side-adoption.md)
 
----
-
-## References & External Links
-
-* 🌐 **GitHub Repository** — [openapi-generics](https://github.com/blueprint-platform/openapi-generics)
-* 📘 **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
-
----
-
-## Final note
-
 If the contract stays consistent, everything stays consistent.
-
 This system works by keeping that boundary intact.
+
+---
+
+## References
+
+* **GitHub Repository** — [openapi-generics](https://github.com/blueprint-platform/openapi-generics)
+* **Medium** — [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)

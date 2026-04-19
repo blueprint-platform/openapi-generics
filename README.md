@@ -12,33 +12,25 @@
 
 <p align="center">
   <img src="docs/images/cover/cover.png" alt="Generics-Aware OpenAPI Contract Lifecycle" width="720"/>
-  <br/>
-  <strong>
-    OpenAPI shouldn’t redefine your contract.
-  </strong>
-  <br/>
-  <em>
-   Preserve it end-to-end.
-  </em>
 </p>
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
-* ⚡ [Why this exists (practical impact)](#why-this-exists-practical-impact)
-* 🆕 [What’s new in 1.0.0 (GA)](#whats-new-in-100-ga)
-* ⚡ [Real usage (what you actually do)](#real-usage-what-you-actually-do)
-* ⚡ [Quick start (2 minutes)](#quick-start-2-minutes)
-* 🔁 [Contract lifecycle model](#contract-lifecycle-model)
-* 💡 [Core idea](#core-idea)
-* 🏗 [System Architecture Overview](#system-architecture-overview)
-* 🔎 [Proof — before vs after](#proof--before-vs-after)
-* 🧠 [Design guarantees](#design-guarantees)
-* 📦 [Modules](#modules)
-* 🔗 [References](#references)
-* 🤝 [Contributing](#contributing)
-* 🛡 [License](#license)
+* [Why this exists (practical impact)](#why-this-exists-practical-impact)
+* [Key features in 1.0.0 (GA)](#key-features-in-100-ga)
+* [Real usage (what you actually do)](#real-usage-what-you-actually-do)
+* [Quick start (2 minutes)](#quick-start-2-minutes)
+* [Contract lifecycle model](#contract-lifecycle-model)
+* [Core idea](#core-idea)
+* [System Architecture Overview](#system-architecture-overview)
+* [Proof — before vs after](#proof--before-vs-after)
+* [Design guarantees](#design-guarantees)
+* [Modules](#modules)
+* [References](#references)
+* [Contributing](#contributing)
+* [License](#license)
 
 ---
 
@@ -62,7 +54,7 @@ This project removes that entire class of problems.
 
 ---
 
-## What’s new in 1.0.0 (GA)
+## Key features in 1.0.0 (GA)
 
 This is no longer a template-level customization.
 
@@ -154,9 +146,6 @@ In both approaches, the outcome is the same:
 * the envelope remains your contract
 * OpenAPI acts as a projection
 * generated clients preserve the original type structure
-
-> Note: BYOE currently supports flat generic envelopes (e.g. `YourEnvelope<T>`).
-> More complex or nested generic shapes follow the platform’s default contract behavior.
 
 ---
 
@@ -359,8 +348,10 @@ These shapes are **explicitly supported and enforced** to guarantee:
 * predictable client reconstruction
 * zero ambiguity in generic resolution
 
-> Note: Custom envelopes (BYOE) currently support a single direct generic payload (e.g. `YourEnvelope<T>`).
-> Nested generic payloads (e.g. `YourEnvelope<Page<T>>`) are intentionally out of scope.
+> **Note:** BYOE supports envelopes with a single direct generic payload <br>
+> (e.g. `YourEnvelope<T>`). <br>
+> Nested payloads like `YourEnvelope<Page<T>>` are out of scope <br>
+> and fail fast at application startup.
 
 ---
 
@@ -384,32 +375,6 @@ The behavior remains the same:
 
 ---
 
-### Boundary of the system
-
-Outside the supported shapes, the system intentionally falls back to standard OpenAPI behavior.
-
-This is a **deliberate design decision**:
-
-* keeps the model simple and predictable
-* avoids partial or misleading generics support
-* ensures long-term stability of generated clients
-
----
-
-### Mental model
-
-```text
-Contract (Java) → Projection (OpenAPI) → Reconstruction (Client)
-```
-
-The envelope is the anchor of this flow.
-
-It is not something the generator invents —
-
-it is something the system preserves.
-
----
-
 ## System Architecture Overview
 
 <p align="center">
@@ -418,13 +383,7 @@ it is something the system preserves.
        style="max-width:900px; width:100%;"/>
 </p>
 
----
-
-### Dive deeper
-
-Explore internal architecture and design decisions:
-
-- [Architecture](docs/architecture/platform.md)
+For internal architecture and design decisions, see [Architecture](docs/architecture/platform.md).
 
 ---
 
@@ -474,18 +433,19 @@ public class ServiceResponsePageCustomerDto
 * [openapi-generics-server-starter](openapi-generics-server-starter/README.md)
 * [openapi-generics-java-codegen](openapi-generics-java-codegen/README.md)
 * [openapi-generics-java-codegen-parent](openapi-generics-java-codegen-parent/README.md)
+* [openapi-generics-platform-bom](openapi-generics-platform-bom/README.md)
 
 ---
 
 ## References
 
-- 📘 **Adoption Guide (GitHub Pages)**  
+- **Adoption Guide (GitHub Pages)**  
   [Spring Boot OpenAPI Generics — Adoption Guide](https://blueprint-platform.github.io/openapi-generics/)
 
-- ✍️ **Medium Article**  
+- **Medium Article**  
   [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
 
-- 📄 **RFC 9457**  
+- **RFC 9457**  
   [Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
 
 ---
@@ -500,8 +460,8 @@ Contributions are welcome — especially:
 
 If you're evaluating or using the project, your perspective is valuable.
 
-👉 Open an issue: https://github.com/blueprint-platform/openapi-generics/issues  
-👉 Start a discussion: https://github.com/blueprint-platform/openapi-generics/discussions
+- Open an issue: https://github.com/blueprint-platform/openapi-generics/issues
+- Start a discussion: https://github.com/blueprint-platform/openapi-generics/discussions
 
 ---
 
