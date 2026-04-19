@@ -2,9 +2,9 @@ openapi: 3.1.0
 info:
   title: Customer Service API
   description: Customer Service API with type-safe generic responses using OpenAPI
-  version: 0.9.0
+  version: 1.0.0
 servers:
-  - url: http://localhost:8085/customer-service
+  - url: http://localhost:8094/customer-service
     description: Local service URL
 paths:
   /customers/{customerId}:
@@ -181,12 +181,12 @@ components:
             $ref: "#/components/schemas/Sort"
       x-ignore-model: true
     ServiceResponseCustomerDto:
-      allOf:
-        - $ref: "#/components/schemas/ServiceResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/CustomerDto"
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CustomerDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
       x-api-wrapper-datatype: CustomerDto
     Sort:
@@ -239,33 +239,13 @@ components:
           type: boolean
       x-ignore-model: true
     ServiceResponsePageCustomerDto:
-      allOf:
-        - $ref: "#/components/schemas/ServiceResponse"
-        - type: object
-          properties:
-            data:
-              $ref: "#/components/schemas/PageCustomerDto"
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PageCustomerDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
       x-api-wrapper-datatype: PageCustomerDto
       x-data-container: Page
       x-data-item: CustomerDto
-    ServiceResponse:
-      type: object
-      properties:
-        data:
-          type: object
-        meta:
-          $ref: "#/components/schemas/Meta"
-      required:
-        - meta
-      x-ignore-model: true
-    ServiceResponseVoid:
-      type: object
-      properties:
-        data:
-          type: object
-        meta:
-          $ref: "#/components/schemas/Meta"
-      required:
-        - meta
-      x-ignore-model: true

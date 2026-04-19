@@ -11,6 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
+/**
+ * Extracts contract-aware response type metadata from controller return types.
+ *
+ * <p>Unwraps framework-level wrappers (e.g. {@code ResponseEntity}, async types) and identifies
+ * supported envelope structures such as {@code ServiceResponse<T>} or {@code
+ * ServiceResponse<Page<T>>}.
+ *
+ * <p>Produces a {@link ResponseTypeDescriptor} only for valid, supported shapes.
+ */
 public final class ResponseTypeIntrospector {
 
   private static final Logger log = LoggerFactory.getLogger(ResponseTypeIntrospector.class);

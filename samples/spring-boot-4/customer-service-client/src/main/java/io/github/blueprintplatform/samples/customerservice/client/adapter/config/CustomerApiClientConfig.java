@@ -27,62 +27,60 @@ public class CustomerApiClientConfig {
 
   @Bean(destroyMethod = "close")
   CloseableHttpClient customerHttpClient(
-          @Value("${customer.api.max-connections-total:64}") int maxTotal,
-          @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute,
-          @Value("${customer.api.connect-timeout-seconds:10}") long connect,
-          @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
-          @Value("${customer.api.read-timeout-seconds:15}") long read) {
+      @Value("${customer.api.max-connections-total:64}") int maxTotal,
+      @Value("${customer.api.max-connections-per-route:16}") int maxPerRoute,
+      @Value("${customer.api.connect-timeout-seconds:10}") long connect,
+      @Value("${customer.api.connection-request-timeout-seconds:10}") long connReq,
+      @Value("${customer.api.read-timeout-seconds:15}") long read) {
 
     var connectionConfig =
-            ConnectionConfig.custom()
-                    .setConnectTimeout(Timeout.ofSeconds(connect))
-                    .build();
+        ConnectionConfig.custom().setConnectTimeout(Timeout.ofSeconds(connect)).build();
 
     var requestConfig =
-            RequestConfig.custom()
-                    .setConnectionRequestTimeout(Timeout.ofSeconds(connReq))
-                    .setResponseTimeout(Timeout.ofSeconds(read))
-                    .build();
+        RequestConfig.custom()
+            .setConnectionRequestTimeout(Timeout.ofSeconds(connReq))
+            .setResponseTimeout(Timeout.ofSeconds(read))
+            .build();
 
     var cm =
-            PoolingHttpClientConnectionManagerBuilder.create()
-                    .setMaxConnTotal(maxTotal)
-                    .setMaxConnPerRoute(maxPerRoute)
-                    .setDefaultConnectionConfig(connectionConfig)
-                    .build();
+        PoolingHttpClientConnectionManagerBuilder.create()
+            .setMaxConnTotal(maxTotal)
+            .setMaxConnPerRoute(maxPerRoute)
+            .setDefaultConnectionConfig(connectionConfig)
+            .build();
 
     return HttpClients.custom()
-            .setConnectionManager(cm)
-            .setDefaultRequestConfig(requestConfig)
-            .evictExpiredConnections()
-            .evictIdleConnections(TimeValue.ofSeconds(30))
-            .setUserAgent("customer-service-client")
-            .disableAutomaticRetries()
-            .build();
+        .setConnectionManager(cm)
+        .setDefaultRequestConfig(requestConfig)
+        .evictExpiredConnections()
+        .evictIdleConnections(TimeValue.ofSeconds(30))
+        .setUserAgent("customer-service-client")
+        .disableAutomaticRetries()
+        .build();
   }
 
   @Bean
   HttpComponentsClientHttpRequestFactory customerRequestFactory(
-          CloseableHttpClient customerHttpClient) {
+      CloseableHttpClient customerHttpClient) {
     return new HttpComponentsClientHttpRequestFactory(customerHttpClient);
   }
 
   @Bean
   RestClientCustomizer problemDetailStatusHandler(ObjectMapper objectMapper) {
     return builder ->
-            builder.defaultStatusHandler(
-                    HttpStatusCode::isError,
-                    (request, response) -> {
-                      ProblemDetail pd = ProblemDetailSupport.extract(objectMapper, response);
-                      throw new ApiProblemException(pd, response.getStatusCode().value());
-                    });
+        builder.defaultStatusHandler(
+            HttpStatusCode::isError,
+            (request, response) -> {
+              ProblemDetail pd = ProblemDetailSupport.extract(objectMapper, response);
+              throw new ApiProblemException(pd, response.getStatusCode().value());
+            });
   }
 
   @Bean
   RestClient customerRestClient(
-          RestClient.Builder builder,
-          HttpComponentsClientHttpRequestFactory requestFactory,
-          List<RestClientCustomizer> customizers) {
+      RestClient.Builder builder,
+      HttpComponentsClientHttpRequestFactory requestFactory,
+      List<RestClientCustomizer> customizers) {
 
     builder.requestFactory(requestFactory);
 
@@ -95,8 +93,7 @@ public class CustomerApiClientConfig {
 
   @Bean
   ApiClient customerApiClient(
-          RestClient customerRestClient,
-          @Value("${customer.api.base-url}") String baseUrl) {
+      RestClient customerRestClient, @Value("${customer.api.base-url}") String baseUrl) {
 
     return new ApiClient(customerRestClient).setBasePath(baseUrl);
   }

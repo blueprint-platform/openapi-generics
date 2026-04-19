@@ -29,21 +29,21 @@ public final class ProblemDetailSupport {
 
     if (!isJson(snap.contentType())) {
       return ProblemDetailFallbacks.nonJson(
-              snap.status(), snap.contentType(), snap.statusUnavailable());
+          snap.status(), snap.contentType(), snap.statusUnavailable());
     }
 
     try {
       return deserializeAndEnrich(om, snap);
     } catch (Exception e) {
       log.warn(
-              "Unable to deserialize ProblemDetail (status={}, contentType={}, bodyBytes={})",
-              snap.status(),
-              snap.contentType(),
-              snap.body().length,
-              e);
+          "Unable to deserialize ProblemDetail (status={}, contentType={}, bodyBytes={})",
+          snap.status(),
+          snap.contentType(),
+          snap.body().length,
+          e);
 
       return ProblemDetailFallbacks.unparsable(
-              snap.status(), snap.contentType(), snap.statusUnavailable(), e);
+          snap.status(), snap.contentType(), snap.statusUnavailable(), e);
     }
   }
 
@@ -58,9 +58,8 @@ public final class ProblemDetailSupport {
 
   private static ProblemDetail handleEmptyBody(ResponseSnapshot snap) {
     return snap.statusUnavailable()
-            ? ProblemDetailFallbacks.statusUnavailable(snap.contentType(), snap.statusReadError())
-            : ProblemDetailFallbacks.emptyBody(
-            snap.status(), snap.contentType(), snap.bodyReadError());
+        ? ProblemDetailFallbacks.statusUnavailable(snap.contentType(), snap.statusReadError())
+        : ProblemDetailFallbacks.emptyBody(snap.status(), snap.contentType(), snap.bodyReadError());
   }
 
   private static ProblemDetail deserializeAndEnrich(ObjectMapper om, ResponseSnapshot snap) {
@@ -100,6 +99,6 @@ public final class ProblemDetailSupport {
       return false;
     }
     return MediaType.APPLICATION_JSON.isCompatibleWith(contentType)
-            || MediaType.APPLICATION_PROBLEM_JSON.isCompatibleWith(contentType);
+        || MediaType.APPLICATION_PROBLEM_JSON.isCompatibleWith(contentType);
   }
 }

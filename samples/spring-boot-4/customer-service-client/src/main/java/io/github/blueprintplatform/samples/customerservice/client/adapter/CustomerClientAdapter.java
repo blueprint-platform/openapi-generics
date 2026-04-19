@@ -9,8 +9,8 @@ import io.github.blueprintplatform.samples.customerservice.client.generated.dto.
 import io.github.blueprintplatform.samples.customerservice.client.generated.dto.CustomerUpdateRequest;
 
 /**
- * Consumer-facing boundary for customer service remote calls.
- * Returns shared contract types — generated model internals stay inside the adapter.
+ * Consumer-facing boundary for customer service remote calls. Returns shared contract types —
+ * generated model internals stay inside the adapter.
  */
 public interface CustomerClientAdapter {
 
@@ -21,12 +21,12 @@ public interface CustomerClientAdapter {
   ServiceResponse<Page<CustomerDto>> getCustomers();
 
   ServiceResponse<Page<CustomerDto>> getCustomers(
-          String name,
-          String email,
-          Integer page,
-          Integer size,
-          CustomerSortField sortBy,
-          SortDirection direction);
+      String name,
+      String email,
+      Integer page,
+      Integer size,
+      CustomerSortField sortBy,
+      SortDirection direction);
 
   ServiceResponse<CustomerDto> updateCustomer(Integer customerId, CustomerUpdateRequest request);
 

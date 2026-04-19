@@ -8,6 +8,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Processes wrapper schemas during OpenAPI projection.
+ *
+ * <p>Builds the composed wrapper schema for the given response descriptor (applies to both default
+ * and custom envelopes).
+ *
+ * <p>If the envelope is the default ServiceResponse, additional schema enrichment is applied.
+ * Custom envelopes (BYOE) are not further enriched.
+ */
 public class WrapperSchemaProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(WrapperSchemaProcessor.class);
@@ -20,7 +29,6 @@ public class WrapperSchemaProcessor {
 
   public void process(OpenAPI openApi, ResponseTypeDescriptor descriptor) {
         Map<String, Schema> schemas = openApi.getComponents().getSchemas();
-
 
     Schema<?> wrapper =
         ServiceResponseSchemaFactory.enrichComposedWrapper(schemas, descriptor);

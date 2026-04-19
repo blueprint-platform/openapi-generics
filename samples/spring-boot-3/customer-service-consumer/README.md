@@ -1,157 +1,79 @@
 # customer-service-consumer
 
-> **Reference consumer: how a Spring Boot service consumes a contract-aligned, generics-aware client and exposes it safely**
+> Minimal reference: consume a generated client and expose it without breaking the contract
 
 ---
 
-## 📑 Table of Contents
+## 🎯 Purpose
 
-* 🎯 [What this module shows](#-what-this-module-shows)
-* 🧠 [Key idea](#-key-idea)
-* 🏗️ [Structure](#-structure)
-* 🔌 [Integration boundary (critical)](#-integration-boundary-critical)
-* 🧩 [Adapter usage](#-adapter-usage)
-* ⚖️ [Error handling](#-error-handling)
-* 🔄 [Contract preservation](#-contract-preservation)
-* ⚙️ [Configuration (important parts)](#-configuration-important-parts)
-* 🧪 [Verify quickly](#-verify-quickly)
-* 🔗 [Related modules](#-related-modules)
-* 🧾 [Summary](#-summary)
-* 🛡 [License](#-license)
-
----
-
-## 🎯 What this module shows
-
-This module demonstrates the **final stage of the pipeline**:
+Show the **last step**:
 
 ```text
-Producer → OpenAPI → Generated Client → Adapter → Consumer Service
+Producer → OpenAPI → Client → Consumer
 ```
 
-It answers one practical question:
+Goal:
 
-> How do you actually use the generated client inside a real service?
+* use generated client safely
+* keep `ServiceResponse<T>` intact
+* expose it directly
 
 ---
 
-## 🧠 Key idea
-
-The consumer does NOT:
-
-* regenerate models
-* reinterpret responses
-* unwrap contract types
-
-It simply:
-
-```text
-Delegates → preserves contract → exposes it
-```
-
----
-
-## 🏗️ Structure
+## ⚡ How it works
 
 ```text
 Controller → Service → Client → Adapter → Generated API
 ```
 
-### Flow
+Key point:
 
-```text
-HTTP Request
-   ↓
-Controller
-   ↓
-Service
-   ↓
-CustomerServiceClient (boundary)
-   ↓
-CustomerClientAdapter (generated client wrapper)
-   ↓
-Generated OpenAPI client
-```
+> Application never talks to generated code directly
 
 ---
 
-## 🔌 Integration boundary (critical)
+## 🔌 Boundary (important)
 
-The **real boundary** is here:
-
-```java
+```text
 CustomerServiceClient
 ```
 
-This layer:
+Responsibilities:
 
-* isolates generated code
-* handles exceptions
-* maps requests if needed
-* preserves `ServiceResponse<T>`
-
----
-
-## 🧩 Adapter usage
-
-Generated client is never used directly.
-
-Instead:
-
-```java
-adapter.getCustomer(customerId)
-```
-
-This ensures:
-
-* regeneration safety
-* stable application code
-* no coupling to generator internals
+* delegates to adapter
+* isolates generated client
+* keeps contract types
 
 ---
 
-## ⚖️ Error handling
+## ⚖️ Errors
 
-Errors follow:
+Upstream errors:
 
 ```text
-ProblemDetail (RFC 9457)
+ProblemDetail → ApiProblemException
 ```
 
-Handled via:
+Handled in controller advice.
 
-```java
-ApiProblemException
-```
-
-Mapped into domain exceptions using:
-
-```java
-CustomerConsumerExceptionMapper
-```
+No wrapping.
 
 ---
 
-## 🔄 Contract preservation
+## 🔄 Contract
 
-End-to-end shape remains:
+Always preserved:
 
-```java
-ServiceResponse<CustomerDto>
-ServiceResponse<Page<CustomerDto>>
+```text
+ServiceResponse<T>
+ServiceResponse<Page<T>>
 ```
 
-No:
-
-* DTO duplication
-* envelope rewriting
-* mapping layers for correctness
+No mapping. No duplication.
 
 ---
 
-## ⚙️ Configuration (important parts)
-
-### Upstream API
+## ⚙️ Config
 
 ```yaml
 customer:
@@ -159,62 +81,29 @@ customer:
     base-url: http://localhost:8084/customer-service
 ```
 
-### HTTP client behavior
-
-* connection pooling
-* timeouts
-* explicit configuration
-
 ---
 
-## 🧪 Verify quickly
-
-Run consumer:
+## 🧪 Run
 
 ```bash
 mvn spring-boot:run
 ```
 
-Call:
-
 ```bash
 curl http://localhost:8085/customer-service-consumer/customers/1
 ```
 
-Expected:
-
-```json
-{
-  "data": { ... },
-  "meta": { ... }
-}
-```
-
 ---
 
-## 🔗 Related modules
-
-* **[customer-service](../customer-service/README.md)**
-  Producer reference.
-
-* **[customer-service-client](../customer-service-client/README.md)**
-  Consumer example showing how the generated client is used.
-
-* **[openapi-generics-java-codegen-parent](../../openapi-generics-java-codegen-parent/README.md)**
-  Build-time orchestration.
-
----
-
-## 🧾 Summary
+## 🧠 Mental model
 
 ```text
-Generated client is not the boundary
 Adapter is the boundary
-Contract flows through unchanged
+Contract flows unchanged
 ```
 
 ---
 
 ## 🛡 License
 
-MIT License
+MIT

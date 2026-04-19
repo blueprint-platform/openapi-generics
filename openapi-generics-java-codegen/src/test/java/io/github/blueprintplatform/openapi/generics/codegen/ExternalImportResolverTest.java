@@ -31,10 +31,8 @@ class ExternalImportResolverTest {
     @DisplayName("apply -> injects import when wrapper and mapping exists (x-data-item)")
     void apply_shouldInjectImport_fromDataItem() {
         ExternalModelRegistry registry = new ExternalModelRegistry();
-        registry.register(
-                Map.of(
-                        "openapiGenerics.responseContract.CustomerDto",
-                        "io.example.CustomerDto"));
+    registry.register(
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto"));
 
         ExternalImportResolver resolver = new ExternalImportResolver(registry);
 
@@ -56,10 +54,8 @@ class ExternalImportResolverTest {
     @DisplayName("apply -> injects import when wrapper and mapping exists (x-api-wrapper-datatype)")
     void apply_shouldInjectImport_fromWrapperDatatype() {
         ExternalModelRegistry registry = new ExternalModelRegistry();
-        registry.register(
-                Map.of(
-                        "openapiGenerics.responseContract.CustomerDto",
-                        "io.example.CustomerDto"));
+    registry.register(
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto"));
 
         ExternalImportResolver resolver = new ExternalImportResolver(registry);
 

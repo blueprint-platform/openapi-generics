@@ -31,7 +31,7 @@ class ModelIgnoreDeciderTest {
   void shouldIgnore_byExternalRegistry() {
     ExternalModelRegistry registry = new ExternalModelRegistry();
     registry.register(
-        Map.of("openapiGenerics.responseContract.CustomerDto", "io.example.CustomerDto"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto"));
 
     ModelIgnoreDecider decider = new ModelIgnoreDecider(registry);
 
@@ -72,7 +72,7 @@ class ModelIgnoreDeciderTest {
   void shouldIgnore_extensionAndExternal() {
     ExternalModelRegistry registry = new ExternalModelRegistry();
     registry.register(
-        Map.of("openapiGenerics.responseContract.CustomerDto", "io.example.CustomerDto"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDto"));
 
     ModelIgnoreDecider decider = new ModelIgnoreDecider(registry);
 

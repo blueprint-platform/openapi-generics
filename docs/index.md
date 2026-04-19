@@ -77,7 +77,7 @@ Add the dependency:
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -85,6 +85,14 @@ Return your contract:
 
 ```java
 ServiceResponse<CustomerDto>
+```
+
+Optional: bring your own response envelope (BYOE)
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.contract.ApiResponse
 ```
 
 ---
@@ -97,7 +105,7 @@ Inherit the parent:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>0.9.0</version>
+  <version>1.0.0</version>
 </parent>
 ```
 
@@ -107,7 +115,17 @@ Optionally declare externally owned shared contract models:
 <!-- Map your DTOs to existing contract classes -->
 <additionalProperties>
     <additionalProperty>
-        openapiGenerics.responseContract.CustomerDto=io.example.contract.CustomerDto
+        openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
+    </additionalProperty>
+</additionalProperties>
+```
+
+If using a custom envelope, declare it for client generation:
+
+```xml
+<additionalProperties>
+    <additionalProperty>
+        openapi-generics.envelope=io.example.contract.ApiResponse
     </additionalProperty>
 </additionalProperties>
 ```
@@ -126,13 +144,21 @@ mvn clean install
 ServiceResponse<CustomerDto>
 ```
 
+Or with a custom envelope:
+
+```java
+ApiResponse<CustomerDto>
+```
+
 The exact same contract shape flows from server to client.
 
 * no duplicated envelope models
 * generics preserved end-to-end
 * external contract models reused instead of regenerated
+* existing response envelopes can be used without migration
 
 ---
+
 
 ## Compatibility Matrix
 
@@ -296,6 +322,12 @@ ServiceResponse<CustomerDto>
 ServiceResponse<Page<CustomerDto>>
 ```
 
+Or, when using BYOE:
+
+```java
+YourEnvelope<CustomerDto>
+```
+
 You do **not** have to deal with common issues produced by default OpenAPI generation:
 
 * duplicated envelope classes (one per endpoint)
@@ -305,9 +337,11 @@ You do **not** have to deal with common issues produced by default OpenAPI gener
 
 If you reuse shared contract DTOs, the system also avoids regenerating models you already own.
 
-- No reinterpretation
-- No duplication
-- No drift
+* No reinterpretation
+* No duplication
+* No drift
+
+The result is a consistent, predictable contract model — whether you use the default envelope or your own.
 
 ---
 
@@ -337,13 +371,16 @@ Think of generated classes as:
 
 They exist because OpenAPI cannot express Java generics directly — not because your domain model requires duplication.
 
-When shared contract models are provided, generated wrappers reference them directly. When they are not, the platform still preserves the success-envelope structure deterministically.
+When shared contract models are provided, generated wrappers reference them directly. When they are not, the platform still preserves the response-envelope structure deterministically.
 
-Your system always operates around:
+Your system always operates around a single envelope contract:
 
 ```text
-ServiceResponse<T>
+YourEnvelope<T>
 ```
+
+`ServiceResponse<T>` is the default platform contract.
+Your own envelope can be used as well.
 
 Everything else is infrastructure.
 

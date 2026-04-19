@@ -13,6 +13,27 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Validates that generated OpenAPI schemas conform to the contract defined by the response
+ * descriptors.
+ *
+ * <p>This guard enforces that wrapper schemas are structurally correct and contain all required
+ * vendor extensions expected by the client generator.
+ *
+ * <p>Specifically, it verifies:
+ *
+ * <ul>
+ *   <li>Wrapper schema exists for each descriptor
+ *   <li>{@code x-api-wrapper=true} is present
+ *   <li>{@code x-api-wrapper-datatype} matches the payload type
+ *   <li>Wrapper contains the expected payload property
+ *   <li>Container metadata ({@code x-data-container}, {@code x-data-item}) is correct when
+ *       applicable
+ * </ul>
+ *
+ * <p>This is a fail-fast validation step in the OpenAPI projection pipeline. Any inconsistency
+ * results in an exception to prevent invalid client generation.
+ */
 public class OpenApiContractGuard {
 
   private static final Logger log = LoggerFactory.getLogger(OpenApiContractGuard.class);
@@ -163,11 +184,6 @@ public class OpenApiContractGuard {
         "Wrapper schema '" + wrapperName + "' has invalid extension: " + extensionName);
   }
 
-  private void failInvalidStructure(String wrapperName, String detail) {
-    log.error("Wrapper '{}' has invalid structure: {}", wrapperName, detail);
-    throw new IllegalStateException(
-        "Wrapper schema '" + wrapperName + "' must use allOf composition");
-  }
 
   private void failMissingProperty(String wrapperName, String propertyName) {
     log.error("Wrapper '{}' missing required property '{}'", wrapperName, propertyName);

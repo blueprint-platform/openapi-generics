@@ -13,6 +13,21 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Set;
 
+/**
+ * Resolves and validates the response envelope type used for contract introspection.
+ *
+ * <p>Supports both the default {@code ServiceResponse<T>} and custom envelopes (BYOE), ensuring
+ * they comply with strict structural constraints:
+ *
+ * <ul>
+ *   <li>Must be a concrete class
+ *   <li>Must declare exactly one type parameter
+ *   <li>Must contain exactly one direct payload field of type T
+ *   <li>Nested generic payloads are not supported
+ * </ul>
+ *
+ * <p>Produces a {@link ResponseIntrospectionPolicy} used by the introspection pipeline.
+ */
 public class ResponseIntrospectionPolicyResolver {
 
   public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {

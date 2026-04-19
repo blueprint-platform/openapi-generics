@@ -43,16 +43,6 @@ class CustomerApiClientConfigStatusHandlerTest {
             .build();
   }
 
-  private static class TestContext {
-    final RestClient client;
-    final MockRestServiceServer server;
-
-    private TestContext(RestClient client, MockRestServiceServer server) {
-      this.client = client;
-      this.server = server;
-    }
-  }
-
   private TestContext buildClient(ObjectMapper om) {
     var config = new CustomerApiClientConfig();
 
@@ -157,4 +147,7 @@ class CustomerApiClientConfigStatusHandlerTest {
         }
         """;
   }
+
+    private record TestContext(RestClient client, MockRestServiceServer server) {
+    }
 }

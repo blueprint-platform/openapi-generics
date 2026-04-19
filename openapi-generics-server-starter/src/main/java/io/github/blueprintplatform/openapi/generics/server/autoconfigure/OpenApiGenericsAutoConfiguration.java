@@ -8,7 +8,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.Re
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.base.SchemaGenerationControlMarker;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;

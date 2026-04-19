@@ -1,12 +1,13 @@
 package io.github.blueprintplatform.samples.customerservice.consumer.api.error;
 
-import io.github.blueprintplatform.samples.customerservice.consumer.common.exception.CustomerConsumerException;
+import io.github.blueprintplatform.samples.customerservice.client.common.problem.ApiProblemException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,21 +27,31 @@ public class CustomerConsumerExceptionHandler {
   private static final String PROBLEM_BASE = "urn:customer-service-consumer:problem:";
   private static final String ERROR_CODE_INTERNAL_ERROR = "INTERNAL_ERROR";
 
-  @ExceptionHandler(CustomerConsumerException.class)
-  public ProblemDetail handleCustomerConsumerException(
-      CustomerConsumerException ex, HttpServletRequest req) {
+  @ExceptionHandler(ApiProblemException.class)
+  public ProblemDetail handleApiProblem(ApiProblemException ex, HttpServletRequest req) {
+    ProblemDetail upstream = ex.getProblem();
 
-    log.warn("Consumer error [status={}, code={}]", ex.getStatus(), ex.getErrorCode());
+    if (upstream != null) {
+      if (upstream.getInstance() == null) {
+        upstream.setInstance(instance(req));
+      }
+      return upstream;
+    }
 
-    ProblemDetail pd = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
-
-    pd.setType(URI.create(PROBLEM_BASE + "upstream-error"));
-    pd.setTitle("Upstream Error");
+    ProblemDetail pd =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatusCode.valueOf(ex.getStatus()), "Upstream API problem occurred.");
+    pd.setType(URI.create(PROBLEM_BASE + "upstream-api-problem"));
+    pd.setTitle("Upstream API Problem");
     pd.setInstance(instance(req));
-    pd.setProperty(KEY_ERROR_CODE, ex.getErrorCode());
+
+    if (ex.getErrorCode() != null && !ex.getErrorCode().isBlank()) {
+      pd.setProperty(KEY_ERROR_CODE, ex.getErrorCode());
+    }
 
     return pd;
   }
+
 
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleGeneric(Exception ex, HttpServletRequest req) {

@@ -9,20 +9,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Custom Java generator that integrates external contract models and generic response wrappers into
- * OpenAPI generation.
+ * Generics-aware extension of JavaClientCodegen.
  *
- * <p>Responsibilities:
+ * <p>Aligns generated client models with the canonical API contract by:
  *
  * <ul>
- *   <li>Register externally provided models (contract-first approach)
- *   <li>Exclude those models from generation
- *   <li>Inject required imports into wrapper models via vendor extensions
- *   <li>Keep generated code free of invalid/self imports
+ *   <li>Suppressing generation of shared/external models (BYOC)
+ *   <li>Injecting required imports for externally provided types
+ *   <li>Applying envelope metadata for wrapper models (BYOE)
  * </ul>
  *
- * <p>Design note: This class only orchestrates the flow. Actual decisions (ignore, import
- * resolution) are delegated to dedicated components.
+ * <p>Ensures generated clients remain contract-aligned, with no duplication or drift.
  */
 public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
@@ -31,17 +28,18 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ExternalModelRegistry registry = new ExternalModelRegistry();
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
+  private final EnvelopeMetadataResolver envelopeResolver = new EnvelopeMetadataResolver();
 
-  /** Registers external model mappings from additionalProperties. */
   @Override
   public void processOpts() {
     super.processOpts();
     registry.register(additionalProperties);
+    envelopeResolver.register(additionalProperties);
 
-    log.debug("Generic-aware codegen initialized with external model registry");
+    log.debug(
+        "Generic-aware codegen initialized with external model registry and envelope metadata");
   }
 
-  /** Marks models that should be ignored and cleans their imports. */
   @Override
   public CodegenModel fromModel(String name, Schema model) {
     CodegenModel cm = super.fromModel(name, model);
@@ -54,7 +52,6 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     return cm;
   }
 
-  /** Removes ignored models and injects external imports into wrapper models. */
   @Override
   public ModelsMap postProcessModels(ModelsMap modelsMap) {
     ModelsMap result = super.postProcessModels(modelsMap);
@@ -86,13 +83,13 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
               CodegenModel model = m.getModel();
               if (model != null) {
                 importResolver.apply(model);
+                envelopeResolver.apply(model);
               }
             });
 
     return result;
   }
 
-  /** Ensures ignored models are fully removed from the generation graph. */
   @Override
   public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
     Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
@@ -115,9 +112,10 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     return "java-generics-contract";
   }
 
-  /** Removes imports that reference ignored models. */
   private void cleanImports(CodegenModel model) {
-    if (model.imports == null || model.imports.isEmpty()) return;
+    if (model.imports == null || model.imports.isEmpty()) {
+      return;
+    }
     model.imports.removeIf(ignoreDecider::isIgnored);
   }
 }

@@ -1,40 +1,16 @@
 # customer-service
 
-> **Reference implementation: exposing a Spring Boot API that produces a clean, deterministic OpenAPI for contract-aligned, generics-aware clients**
+> Minimal reference producer for **contract-first, generics-aware OpenAPI**
 
-[![Java 21](https://img.shields.io/badge/Java-21-red?logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.x-green?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Springdoc](https://img.shields.io/badge/Springdoc-3.x-brightgreen)](https://springdoc.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../../../LICENSE)
+This sample shows only one thing:
 
----
-
-## 📑 Table of Contents
-
-* [🚀 Start here (what you actually want)](#-start-here-what-you-actually-want)
-* [🔗 Related Modules](#-related-modules)
-* [🧪 Verify quickly](#-verify-quickly)
-* [🌐 OpenAPI endpoints](#-openapi-endpoints)
-* [🛡️ License](#-license)
+> How to expose a Spring Boot API using `ServiceResponse<T>` so that OpenAPI stays deterministic and clients stay aligned.
 
 ---
 
-> This is a minimal reference implementation.  
-> See the [Adoption Guides](../../../docs/adoption/server-side-adoption.md) for rules, constraints, and architecture.
+## 🚀 Quick Start
 
-## 🚀 Start here (what you actually want)
-
-You have a Spring Boot service.
-
-You want a **reliable downstream outcome**:
-
-* OpenAPI is **clean and stable** (no schema noise)
-* Client generation is **type-safe** (no envelope duplication)
-* `ServiceResponse<T>` is **preserved end-to-end** (not flattened)
-
-Do this:
-
-### 1. Add ONE dependency
+### 1. Add dependency
 
 ```xml
 <dependency>
@@ -43,71 +19,120 @@ Do this:
 </dependency>
 ```
 
-That’s it.
+### 2. Use contract in controllers
 
-> You write your controller contract. The starter ensures a deterministic OpenAPI projection.
-
----
-
-### 2. Do NOT customize OpenAPI manually
-
-* No annotations
-* No schema hacks
-* No manual overrides
-
-Everything is handled by the starter.
-
----
-
-## 🔗 Related Modules
-
-* **[Contract](../../../openapi-generics-contract/README.md)**
-* **[Server Starter](../../../openapi-generics-server-starter/README.md)**
-* **[Client Codegen](../../../openapi-generics-java-codegen-parent/README.md)**
-* **[Client Sample](../customer-service-client/README.md)**
-
----
-
-## 🧪 Verify quickly
-
-```bash
-curl http://localhost:8094/customer-service/customers/1
+```java
+ServiceResponse<CustomerDto>
+ServiceResponse<Page<CustomerDto>>
 ```
 
-Expected:
+### 3. Run
+
+```bash
+mvn spring-boot:run
+```
+
+---
+
+## 📌 Rules (only these matter)
+
+✔ Use only:
+
+```text
+ServiceResponse<T>
+ServiceResponse<Page<T>>
+```
+
+✔ `T` is yours (any DTO)
+
+❌ Do NOT:
+
+* create custom envelopes (unless explicitly configured)
+* wrap errors → use `ProblemDetail`
+* customize OpenAPI manually
+
+---
+
+## 🔍 Verify
+
+```bash
+curl http://localhost:8084/customer-service/customers/1
+```
+
+Expected shape:
 
 ```json
 {
-  "data": {
-    "customerId": 1,
-    "name": "Jane Doe",
-    "email": "jane@example.com"
-  },
-  "meta": {
-    "serverTime": "...",
-    "sort": []
-  }
+  "data": { ... },
+  "meta": { ... }
 }
 ```
 
-If this shape is correct:
-
-```text
-Contract → OpenAPI → Client will be correct
-```
+If this is correct → everything downstream works (OpenAPI → client).
 
 ---
 
-## 🌐 OpenAPI endpoints
+## 🌐 OpenAPI
 
 * Swagger UI
   [http://localhost:8094/customer-service/swagger-ui/index.html](http://localhost:8094/customer-service/swagger-ui/index.html)
 
-* OpenAPI YAML
+* YAML
   [http://localhost:8094/customer-service/v3/api-docs.yaml](http://localhost:8094/customer-service/v3/api-docs.yaml)
 
 ---
 
-## 🛡️ License
+## ⚙️ Config (minimal)
 
-MIT License
+```yaml
+server:
+  port: 8094
+  servlet:
+    context-path: /customer-service
+
+spring:
+  mvc:
+    problemdetails:
+      enabled: true
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+```
+
+---
+
+## 🧩 BYOE (optional)
+
+You can replace the default envelope:
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.ApiResponse
+```
+
+Requirements:
+
+* must be generic (`<T>`)
+* must have a single payload field
+* must be available as a dependency
+
+If not configured → `ServiceResponse<T>` is used.
+
+---
+
+## 🧠 Mental Model
+
+```text
+Controller → ServiceResponse<T> → OpenAPI (projection)
+```
+
+You define the contract.
+The starter projects it deterministically.
+
+---
+
+## 📜 License
+
+MIT

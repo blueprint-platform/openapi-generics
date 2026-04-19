@@ -4,7 +4,7 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.Re
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.base.SchemaGenerationControlMarker;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.Collections;
@@ -14,6 +14,32 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Orchestrates the full OpenAPI projection pipeline for contract-aware responses.
+ *
+ * <p>This is the single entry point that coordinates all processing steps:
+ *
+ * <ol>
+ *   <li>Discover response types from the application layer
+ *   <li>Extract contract-aware descriptors via introspection
+ *   <li>Generate wrapper schemas (default or BYOE)
+ *   <li>Mark non-authoritative schemas to be ignored
+ *   <li>Validate final OpenAPI contract integrity
+ * </ol>
+ *
+ * <p>The pipeline is executed exactly once per OpenAPI instance.
+ *
+ * <p><b>Design principles:</b>
+ *
+ * <ul>
+ *   <li>Deterministic execution order
+ *   <li>Contract-first enforcement (no drift allowed)
+ *   <li>OpenAPI is treated as a projection, not a source of truth
+ * </ul>
+ *
+ * <p>Acts as the integration point between discovery, schema generation,
+ * control marking, and contract validation phases.
+ */
 public class OpenApiPipelineOrchestrator {
 
   private static final Logger log = LoggerFactory.getLogger(OpenApiPipelineOrchestrator.class);
