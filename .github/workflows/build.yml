@@ -33,7 +33,19 @@ jobs:
           cache: maven
 
       - name: Build core modules
-        run: mvn -B -q -ntp clean verify
+        run: mvn -B -ntp clean verify
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: >-
+            ./openapi-generics-contract/target/site/jacoco/jacoco.xml,
+            ./openapi-generics-server-starter/target/site/jacoco/jacoco.xml,
+            ./openapi-generics-java-codegen/target/site/jacoco/jacoco.xml
+          flags: unittests
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Build samples (end-to-end validation)
-        run: mvn -B -q -ntp -f samples/pom.xml clean verify
+        run: mvn -B -ntp -f samples/pom.xml clean verify

@@ -1,0 +1,52 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+      contract:
+        target: 80%
+        threshold: 2%
+        flags:
+          - contract
+      server-starter:
+        target: 50%
+        threshold: 2%
+        flags:
+          - server-starter
+      java-codegen:
+        target: 50%
+        threshold: 2%
+        flags:
+          - java-codegen
+    patch:
+      default:
+        target: 70%
+        threshold: 2%
+
+comment:
+  layout: "reach, diff, flags, files"
+  require_changes: true
+
+ignore:
+  - "samples/**"
+  - "**/target/**"
+  - "**/generated/**"
+  - "**/generated-sources/**"
+  - "**/*Application.java"
+  - "openapi-generics-platform-bom/**"
+  - "openapi-generics-java-codegen-parent/**"
+
+flags:
+  contract:
+    paths:
+      - openapi-generics-contract/
+    carryforward: true
+  server-starter:
+    paths:
+      - openapi-generics-server-starter/
+    carryforward: true
+  java-codegen:
+    paths:
+      - openapi-generics-java-codegen/
+    carryforward: true
