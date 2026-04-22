@@ -215,6 +215,219 @@ class WrapperSchemaEnricherTest {
     assertDoesNotThrow(() -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", null));
   }
 
+  @Test
+  @DisplayName("enrich -> should do nothing when components are null")
+  void enrich_shouldDoNothing_whenComponentsNull() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+    OpenAPI openApi = new OpenAPI();
+
+    assertDoesNotThrow(
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+  }
+
+  @Test
+  @DisplayName("enrich -> should do nothing when schemas map is empty")
+  void enrich_shouldDoNothing_whenSchemasEmpty() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+    OpenAPI openApi = new OpenAPI().components(new Components());
+
+    assertDoesNotThrow(
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+  }
+
+  @Test
+  @DisplayName("constructor -> should fall back to default container when null is provided")
+  void constructor_shouldFallBackToDefault_whenNull() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher(null);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertEquals("Page", wrapper.getExtensions().get(VendorExtensions.DATA_CONTAINER));
+  }
+
+  @Test
+  @DisplayName("constructor -> should fall back to default container when empty set provided")
+  void constructor_shouldFallBackToDefault_whenEmpty() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher(Set.of());
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertEquals("Page", wrapper.getExtensions().get(VendorExtensions.DATA_CONTAINER));
+  }
+
+  @Test
+  @DisplayName("enrich -> should handle circular $ref without infinite loop")
+  void enrich_shouldHandleCircularRef() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    Schema<?> circularA = new Schema<>().$ref("#/components/schemas/PageCustomerDto");
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", circularA),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    assertDoesNotThrow(
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
+  @Test
+  @DisplayName("enrich -> should extract item from schema with type=array but no ArraySchema instance")
+  void enrich_shouldExtractItem_fromTypeArraySchema() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    Schema<Object> content = new Schema<>();
+    content.setType("array");
+    content.setItems(new Schema<>().$ref("#/components/schemas/CustomerDto"));
+
+    ObjectSchema pageSchema = new ObjectSchema();
+    pageSchema.addProperty("content", content);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchema),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertEquals("Page", wrapper.getExtensions().get(VendorExtensions.DATA_CONTAINER));
+    assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.DATA_ITEM));
+  }
+
+  @Test
+  @DisplayName("enrich -> should ignore when items $ref is missing")
+  void enrich_shouldIgnore_whenItemsRefMissing() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    ArraySchema content = new ArraySchema();
+    content.setItems(new Schema<>().type("string"));
+
+    ObjectSchema pageSchema = new ObjectSchema();
+    pageSchema.addProperty("content", content);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchema),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
+  @Test
+  @DisplayName("enrich -> should ignore when items $ref is not a schema reference")
+  void enrich_shouldIgnore_whenItemsRefIsInvalid() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    ArraySchema content = new ArraySchema();
+    content.setItems(new Schema<>().$ref("http://external.com/schema"));
+
+    ObjectSchema pageSchema = new ObjectSchema();
+    pageSchema.addProperty("content", content);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchema),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
+  @Test
+  @DisplayName("enrich -> should ignore when array items are null")
+  void enrich_shouldIgnore_whenArrayItemsNull() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    ArraySchema content = new ArraySchema();
+    // items intentionally left null
+
+    ObjectSchema pageSchema = new ObjectSchema();
+    pageSchema.addProperty("content", content);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchema),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
+  @Test
+  @DisplayName("enrich -> should ignore allOf with no object-like branch")
+  void enrich_shouldIgnore_whenAllOfHasNoObjectBranch() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    ComposedSchema composed = new ComposedSchema();
+    composed.addAllOfItem(new Schema<>().type("string"));
+    composed.addAllOfItem(new Schema<>().type("integer"));
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", composed),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
+  @Test
+  @DisplayName("enrich -> should handle JsonSchema array without types")
+  void enrich_shouldHandleJsonSchema_withoutTypes() {
+    WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
+
+    JsonSchema content = new JsonSchema();
+    content.setItems(new Schema<>().$ref("#/components/schemas/CustomerDto"));
+    // types intentionally left null
+
+    ObjectSchema pageSchema = new ObjectSchema();
+    pageSchema.addProperty("content", content);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("PageCustomerDto", pageSchema),
+                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
+
+    assertNull(wrapper.getExtensions());
+  }
+
   private OpenAPI openApi(NamedSchema... namedSchemas) {
     Map<String, Schema> schemas = new LinkedHashMap<>();
     for (NamedSchema namedSchema : namedSchemas) {
