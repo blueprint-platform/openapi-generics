@@ -180,6 +180,96 @@ class ResponseIntrospectionPolicyResolverTest {
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }
 
+  @Test
+  @DisplayName("resolve -> should reject enum envelope")
+  void resolve_shouldRejectEnumEnvelope() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()));
+
+    IllegalStateException ex =
+            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+
+    assertTrue(ex.getMessage().contains("must be a class, not an enum"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should reject annotation envelope (treated as interface)")
+  void resolve_shouldRejectAnnotationEnvelope() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()));
+
+    IllegalStateException ex =
+            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+
+    assertTrue(ex.getMessage().contains("must be a concrete class, not an interface"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should reject envelope with zero type parameters")
+  void resolve_shouldRejectEnvelopeWithZeroTypeParameters() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()));
+
+    IllegalStateException ex =
+            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+
+    assertTrue(ex.getMessage().contains("must declare exactly one type parameter"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should ignore static fields when resolving payload slot")
+  void resolve_shouldIgnoreStaticFields() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(EnvelopeWithStaticField.class.getName()));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+
+    assertEquals(EnvelopeWithStaticField.class, policy.envelopeType());
+    assertEquals("payload", policy.payloadPropertyName());
+  }
+
+  @Test
+  @DisplayName("resolve -> should detect nested payload in generic array")
+  void resolve_shouldDetectNestedPayloadInGenericArray() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()));
+
+    IllegalStateException ex =
+            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+
+    assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should detect nested payload in deeply nested parameterized type")
+  void resolve_shouldDetectDeeplyNestedPayload() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()));
+
+    IllegalStateException ex =
+            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+
+    assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should accept envelope where non-payload fields use unrelated generics")
+  void resolve_shouldAcceptEnvelopeWithUnrelatedGenerics() {
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(
+                    new EnvelopeProperties(EnvelopeWithUnrelatedGenericField.class.getName()));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+
+    assertEquals(EnvelopeWithUnrelatedGenericField.class, policy.envelopeType());
+    assertEquals("payload", policy.payloadPropertyName());
+  }
+
   interface InvalidEnvelopeInterface<T> {
     T payload();
   }
@@ -215,5 +305,33 @@ class ResponseIntrospectionPolicyResolverTest {
 
   static final class Wrapper<T> {
     T value;
+  }
+
+  enum InvalidEnvelopeEnum {
+    A, B
+  }
+
+  @interface InvalidEnvelopeAnnotation {}
+
+  static final class InvalidEnvelopeNoGenerics {
+    Object payload;
+  }
+
+  static final class EnvelopeWithStaticField<T> {
+    static String CONSTANT = "x";
+    T payload;
+  }
+
+  static final class InvalidEnvelopeGenericArrayPayload<T> {
+    T[] payload;
+  }
+
+  static final class InvalidEnvelopeDeeplyNestedPayload<T> {
+    java.util.Map<String, java.util.List<T>> payload;
+  }
+
+  static final class EnvelopeWithUnrelatedGenericField<T> {
+    T payload;
+    java.util.List<String> tags; // String is not T, should not be classified as payload
   }
 }
