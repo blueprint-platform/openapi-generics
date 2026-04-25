@@ -42,19 +42,12 @@
     </developers>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <openapi-generics-java-codegen.version>1.0.0</openapi-generics-java-codegen.version>
         <openapi-generator.version>7.21.0</openapi-generator.version>
 
-        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
-        <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
-
-        <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
 
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
         <openapi.generator.output>${project.build.directory}/generated-sources/openapi</openapi.generator.output>
@@ -88,12 +81,9 @@
         <pluginManagement>
             <plugins>
 
-                <!-- EXTRACT TEMPLATE -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven.dependency.plugin.version}</version>
-
                     <executions>
                         <execution>
                             <id>extract-openapi-model-template</id>
@@ -101,7 +91,6 @@
                             <goals>
                                 <goal>unpack</goal>
                             </goals>
-
                             <configuration>
                                 <skip>${openapi.generics.skip}</skip>
                                 <artifactItems>
@@ -116,14 +105,12 @@
                                 </artifactItems>
                             </configuration>
                         </execution>
-
                         <execution>
                             <id>extract-codegen-templates</id>
                             <phase>generate-sources</phase>
                             <goals>
                                 <goal>unpack</goal>
                             </goals>
-
                             <configuration>
                                 <skip>${openapi.generics.skip}</skip>
                                 <artifactItems>
@@ -140,7 +127,6 @@
                     </executions>
                 </plugin>
 
-                <!-- PATCH -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
@@ -164,7 +150,6 @@
                             <goals>
                                 <goal>run</goal>
                             </goals>
-
                             <configuration>
                                 <skip>${openapi.generics.skip}</skip>
                                 <target>
@@ -202,12 +187,10 @@
                     </executions>
                 </plugin>
 
-                <!-- TEMPLATE OVERLAY -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven.resources.plugin.version}</version>
-
                     <executions>
                         <execution>
                             <id>overlay-local-templates</id>
@@ -215,11 +198,9 @@
                             <goals>
                                 <goal>copy-resources</goal>
                             </goals>
-
                             <configuration>
                                 <skip>${openapi.generics.skip}</skip>
                                 <outputDirectory>${openapi.templates.effective}/Java</outputDirectory>
-
                                 <resources>
                                     <resource>
                                         <directory>${openapi.templates.codegen}/META-INF/openapi-generics/templates</directory>
@@ -228,7 +209,6 @@
                                 </resources>
                             </configuration>
                         </execution>
-
                     </executions>
                 </plugin>
 
@@ -236,7 +216,6 @@
                     <groupId>org.openapitools</groupId>
                     <artifactId>openapi-generator-maven-plugin</artifactId>
                     <version>${openapi-generator.version}</version>
-
                     <dependencies>
                         <dependency>
                             <groupId>io.github.blueprint-platform</groupId>
@@ -244,26 +223,19 @@
                             <version>${openapi-generics-java-codegen.version}</version>
                         </dependency>
                     </dependencies>
-
                     <configuration>
-
                         <output>${openapi.generator.output}</output>
-
                         <templateDirectory>${openapi.templates.effective}/Java</templateDirectory>
-
                         <configOptions>
                             <sourceFolder>${openapi.generator.sourceFolder}</sourceFolder>
                         </configOptions>
-
                     </configuration>
                 </plugin>
 
-                <!-- GENERATED SOURCES -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>${build.helper.plugin.version}</version>
-
                     <executions>
                         <execution>
                             <id>add-generated-sources</id>
@@ -271,7 +243,6 @@
                             <goals>
                                 <goal>add-source</goal>
                             </goals>
-
                             <configuration>
                                 <sources>
                                     <source>${openapi.generated.sources}</source>
@@ -280,6 +251,7 @@
                         </execution>
                     </executions>
                 </plugin>
+
             </plugins>
         </pluginManagement>
 
@@ -288,16 +260,42 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract-openapi-model-template</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>extract-codegen-templates</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>ensure-template-dir</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>patch-openapi-model-template</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>overlay-local-templates</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -308,32 +306,17 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-generated-sources</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
             </plugin>
 
-            <!-- ✅ FLATTEN -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>${flatten-maven-plugin.version}</version>
-                <configuration>
-                    <flattenMode>ossrh</flattenMode>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten-clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

@@ -13,6 +13,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client-sb3</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
     <name>customer-service-client-sb3</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -42,26 +43,23 @@
     </developers>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <java.version>21</java.version>
-        <spring-boot.version>3.5.13</spring-boot.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <customer-contract.version>1.0.0</customer-contract.version>
-        <openapi-generator.version>7.21.0</openapi-generator.version>
-
+        <spring-boot.version>3.5.14</spring-boot.version>
+        <customer-contract.version>1.0.1-SNAPSHOT</customer-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
         <httpclient5.version>5.5.2</httpclient5.version>
-        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
-        <maven.dependency.plugin.version>3.9.0</maven.dependency.plugin.version>
-        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <logback.version>1.5.32</logback.version>
+
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+
         <argLine/>
         <openapi.generics.skip>false</openapi.generics.skip>
     </properties>
@@ -109,6 +107,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <version>${spring-boot.version}</version>
@@ -120,13 +125,6 @@
             <artifactId>mockwebserver</artifactId>
             <version>${mockwebserver.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -153,7 +151,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-
                 <executions>
                     <execution>
                         <id>resolve-mockito-agent</id>
@@ -167,7 +164,6 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-
                 <executions>
                     <execution>
                         <id>generate-client</id>
@@ -175,7 +171,6 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
-
                         <configuration>
                             <generatorName>java-generics-contract</generatorName>
                             <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
@@ -228,7 +223,6 @@
                             <generateModelDocumentation>false</generateModelDocumentation>
                             <generateModelTests>false</generateModelTests>
                         </configuration>
-
                     </execution>
                 </executions>
             </plugin>
@@ -236,14 +230,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.version}</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>${java.version}</release>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
 
-            <!-- TEST -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -256,7 +249,6 @@
                 </configuration>
             </plugin>
 
-            <!-- IT -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -278,7 +270,6 @@
                 </executions>
             </plugin>
 
-            <!-- COVERAGE -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -290,14 +281,12 @@
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>prepare-agent-integration</id>
                         <goals>
                             <goal>prepare-agent-integration</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>report</id>
                         <phase>verify</phase>
@@ -305,7 +294,6 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>report-integration</id>
                         <phase>verify</phase>
