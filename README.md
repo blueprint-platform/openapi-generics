@@ -24,6 +24,7 @@
 * [Real usage (what you actually do)](#real-usage-what-you-actually-do)
 * [Quick start (2 minutes)](#quick-start-2-minutes)
 * [Compatibility](#compatibility)
+* [Relationship to OpenAPI Generator](#relationship-to-openapi-generator)
 * [Contract lifecycle model](#contract-lifecycle-model)
 * [Core idea](#core-idea)
 * [System Architecture Overview](#system-architecture-overview)
@@ -297,6 +298,39 @@ OpenAPI Generics is currently verified with:
 - **Server scope:** Spring WebMvc (`springdoc-openapi-starter-webmvc-ui`)
 
 See the full compatibility matrix and support policy: [Compatibility & Support Policy](docs/compatibility.md)
+
+---
+
+## Relationship to OpenAPI Generator
+
+This is **not a fork** of OpenAPI Generator. It uses the upstream tool
+as a Maven dependency and adds a Java/Spring Boot specialization layer
+on top.
+
+What stays upstream:
+
+- OpenAPI Generator (used as-is, fresh extraction on every build)
+- OpenAPI 3.x spec (only `x-` vendor extensions added)
+- The full upstream template chain
+
+What this project adds:
+
+- A custom generator extending `JavaClientCodegen`
+- A surgical patch to upstream `model.mustache` that injects a single
+  generic-aware branch — the rest is untouched
+- Vendor extensions (`x-api-wrapper`, `x-data-container`) carrying
+  generic semantics through the spec
+- Server-side `OpenApiCustomizer` for contract introspection
+
+Why not just drop a custom `model.mustache` into `templateDirectory`?
+That approach freezes a snapshot of the upstream template and quietly
+falls behind as upstream evolves. This project keeps upstream as the
+source of structure, injects only the generic-aware branch, and fails
+the build fast if upstream changes invalidate the patch.
+
+Cross-language parity is an explicit non-goal. Java generics deserve a
+generics-aware solution; other languages may benefit from different
+specializations on top of the same upstream.
 
 ---
 
