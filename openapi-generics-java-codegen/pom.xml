@@ -47,6 +47,8 @@
     <properties>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <junit.jupiter.version>5.14.3</junit.jupiter.version>
+        <rhino.version>1.7.15.1</rhino.version>
+        <commons-codec.version>1.17.2</commons-codec.version>
     </properties>
 
     <dependencies>
@@ -59,6 +61,22 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>${rhino.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -86,6 +104,16 @@
                 <version>1.0.1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>${rhino.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

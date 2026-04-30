@@ -210,21 +210,6 @@
                               - `openapi-generics.response-contract.*` is optional and used only when DTOs are
                                 provided by an external/shared contract dependency.
                             -->
-                            <additionalProperties>
-                                <!-- Example: custom envelope (BYOE) -->
-                                <!--
-                                <additionalProperty>
-                                    openapi-generics.envelope=io.example.contract.ApiResponse
-                                </additionalProperty>
-                                -->
-
-                                <!-- Example: external DTO reuse (BYOC) -->
-                                <!--
-                                <additionalProperty>
-                                    openapi-generics.response-contract.CustomerDto=io.github.blueprintplatform.contracts.customer.CustomerDto
-                                </additionalProperty>
-                                -->
-                            </additionalProperties>
 
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>
