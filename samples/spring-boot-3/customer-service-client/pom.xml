@@ -7,13 +7,13 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client-sb3</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>customer-service-client-sb3</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
     <packaging>jar</packaging>
@@ -31,7 +31,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>v1.0.0</tag>
+        <tag>v1.0.1</tag>
     </scm>
 
     <developers>
@@ -48,7 +48,7 @@
 
         <spring-boot.version>3.5.14</spring-boot.version>
         <openapi-generator.version>7.22.0</openapi-generator.version>
-        <customer-contract.version>1.0.1-SNAPSHOT</customer-contract.version>
+        <customer-contract.version>1.0.1</customer-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>

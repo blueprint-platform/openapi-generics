@@ -61,6 +61,17 @@ Out of scope:
 | ---- | ----------------- | ---------- | --------- |
 | 17+  | 7.x               | Maven      | Supported |
 
+#### Upstream Template Governance (Zero-Drift Guarantee)
+
+The platform does **not** rely on static template forks or brittle manual overrides for the OpenAPI Generator.
+
+To ensure long-term compatibility with the `7.x` line, the client generation pipeline employs a **build-time surgical patch**:
+* The generator's core upstream templates are dynamically extracted during the build.
+* A semantic, non-destructive patch is applied to inject wrapper logic into the foundational schema loop.
+* **Fail-Fast Safety:** The pipeline verifies the patch signature immediately. If an upstream OpenAPI Generator upgrade alters the foundational template structure, the system does not produce silent errors or corrupted clients — **the build fails fast and explicitly.**
+
+This guarantees that the generated client is always correctly aligned with the upstream generator version you choose to run.
+
 ---
 
 ## 3. Verification Basis

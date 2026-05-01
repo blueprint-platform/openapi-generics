@@ -61,7 +61,7 @@ Do this:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </parent>
 ```
 
@@ -170,7 +170,7 @@ You provide exactly two inputs. Everything else is handled by the platform.
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </parent>
 ```
 

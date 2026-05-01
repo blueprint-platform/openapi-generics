@@ -99,7 +99,7 @@ If a custom envelope is configured, the same projection model applies, but the w
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 

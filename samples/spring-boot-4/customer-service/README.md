@@ -56,7 +56,7 @@ ServiceResponse<Page<T>>
 ## 🔍 Verify
 
 ```bash
-curl http://localhost:8084/customer-service/customers/1
+curl http://localhost:8094/customer-service/customers/1
 ```
 
 Expected shape:

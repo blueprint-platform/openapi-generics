@@ -91,7 +91,7 @@ If the upstream `model.mustache` structure changes in a way that breaks wrapper 
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <relativePath/>
 </parent>
 ```
