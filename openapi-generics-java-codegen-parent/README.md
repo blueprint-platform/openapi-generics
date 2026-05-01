@@ -239,7 +239,7 @@ Those parts are what make the generation deterministic and contract-aware.
 
 Notes:
 
-* the parent defaults to OpenAPI Generator `7.21.0`
+* the parent defaults to OpenAPI Generator `7.22.0`
 * `restclient` requires OpenAPI Generator `7.6.0+`
 
 ---
