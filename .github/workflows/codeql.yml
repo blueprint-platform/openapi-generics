@@ -34,15 +34,15 @@ jobs:
           cache: maven
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: java-kotlin
 
-      - name: Build core modules
-        run: mvn -B -ntp -DskipTests clean verify
+      - name: Build and install core modules
+        run: mvn -B -ntp -DskipTests clean install
 
       - name: Build samples
         run: mvn -B -ntp -DskipTests -f samples/pom.xml clean verify
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4

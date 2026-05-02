@@ -32,8 +32,8 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build core modules
-        run: mvn -B -ntp clean verify
+      - name: Build and install core modules
+        run: mvn -B -ntp clean install
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5

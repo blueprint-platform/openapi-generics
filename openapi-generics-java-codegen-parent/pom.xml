@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
@@ -30,7 +30,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>v1.0.1</tag>
+       <tag>HEAD</tag>
     </scm>
 
     <developers>
@@ -42,9 +42,7 @@
     </developers>
 
     <properties>
-        <openapi-generics-java-codegen.version>1.0.1</openapi-generics-java-codegen.version>
         <openapi-generator.version>7.22.0</openapi-generator.version>
-
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
@@ -70,7 +68,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>1.0.1</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -117,7 +115,7 @@
                                     <artifactItem>
                                         <groupId>io.github.blueprint-platform</groupId>
                                         <artifactId>openapi-generics-java-codegen</artifactId>
-                                        <version>${openapi-generics-java-codegen.version}</version>
+                                        <version>${project.version}</version>
                                         <includes>META-INF/openapi-generics/templates/**</includes>
                                         <outputDirectory>${openapi.templates.codegen}</outputDirectory>
                                     </artifactItem>
@@ -220,7 +218,7 @@
                         <dependency>
                             <groupId>io.github.blueprint-platform</groupId>
                             <artifactId>openapi-generics-java-codegen</artifactId>
-                            <version>${openapi-generics-java-codegen.version}</version>
+                            <version>${project.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>
