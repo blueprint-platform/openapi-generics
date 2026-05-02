@@ -48,7 +48,7 @@
 
         <spring-boot.version>3.5.14</spring-boot.version>
         <openapi-generator.version>7.22.0</openapi-generator.version>
-        <customer-contract.version>1.0.1</customer-contract.version>
+        <customer-contract.version>1.0.2-SNAPSHOT</customer-contract.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>
