@@ -1,6 +1,9 @@
 package io.github.blueprintplatform.samples.customerservice.consumer.config;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -15,6 +18,7 @@ public class JacksonConfig {
   @Bean
   public SimpleModule sortDirectionModule() {
     SimpleModule module = new SimpleModule();
+
     module.addSerializer(
         SortDirection.class,
         new JsonSerializer<>() {
@@ -25,6 +29,17 @@ public class JacksonConfig {
             gen.writeString(value.value());
           }
         });
+
+    module.addDeserializer(
+        SortDirection.class,
+        new JsonDeserializer<>() {
+          @Override
+          public SortDirection deserialize(JsonParser parser, DeserializationContext context)
+              throws IOException {
+            return SortDirection.from(parser.getValueAsString());
+          }
+        });
+
     return module;
   }
 }

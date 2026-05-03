@@ -2,16 +2,34 @@ FROM maven:3.9.12-eclipse-temurin-21-noble AS builder
 WORKDIR /workspace
 
 COPY pom.xml pom.xml
-COPY domain-contracts domain-contracts
-COPY spring-boot-3 spring-boot-3
+
+COPY openapi-generics-contract openapi-generics-contract
+COPY openapi-generics-platform-bom openapi-generics-platform-bom
+COPY openapi-generics-server-starter openapi-generics-server-starter
+COPY openapi-generics-java-codegen openapi-generics-java-codegen
+COPY openapi-generics-java-codegen-parent openapi-generics-java-codegen-parent
+
+COPY samples/pom.xml samples/pom.xml
+COPY samples/domain-contracts samples/domain-contracts
+COPY samples/spring-boot-3 samples/spring-boot-3
 
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    mvn -f spring-boot-3/pom.xml -U -q -T 2C -DskipTests --no-transfer-progress \
-    -pl customer-service-consumer -am clean package && \
-    JAR="$(ls -1 spring-boot-3/customer-service-consumer/target/customer-service-consumer-*.jar | head -n 1)" && \
+    mvn -U -q -T 2C -DskipTests --no-transfer-progress \
+        -pl openapi-generics-contract,\
+openapi-generics-platform-bom,\
+openapi-generics-server-starter,\
+openapi-generics-java-codegen,\
+openapi-generics-java-codegen-parent \
+        -am clean install && \
+    mvn -f samples/spring-boot-3/pom.xml \
+        -U -q -T 2C -DskipTests --no-transfer-progress \
+        -pl customer-service-consumer \
+        -am clean package && \
+    JAR="$(ls -1 samples/spring-boot-3/customer-service-consumer/target/customer-service-consumer-*.jar | head -n 1)" && \
     mkdir -p /layers && \
     cd /layers && \
-    java -Djarmode=layertools -jar "/workspace/$JAR" extract
+    java -Djarmode=layertools \
+         -jar "/workspace/$JAR" extract
 
 FROM eclipse-temurin:21.0.10_7-jre-noble
 WORKDIR /app

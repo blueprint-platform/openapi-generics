@@ -169,5 +169,4 @@ class CustomerControllerTest {
 
     verify(customerService).deleteCustomer(1);
   }
-
 }

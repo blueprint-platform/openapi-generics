@@ -33,14 +33,13 @@ class CustomerApiClientConfigStatusHandlerTest {
   private static final String DETAIL_VALIDATION = "Validation failed";
 
   private static final String TITLE_EMPTY = "Empty problem response body";
-  private static final String DETAIL_EMPTY =
-          "Upstream returned an empty error response body.";
+  private static final String DETAIL_EMPTY = "Upstream returned an empty error response body.";
 
   private ObjectMapper objectMapper() {
     return JsonMapper.builder()
-            .findAndAddModules()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
+        .findAndAddModules()
+        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        .build();
   }
 
   private TestContext buildClient(ObjectMapper om) {
@@ -50,15 +49,15 @@ class CustomerApiClientConfigStatusHandlerTest {
     var requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
 
     RestClient.Builder builder =
-            RestClient.builder()
-                    .baseUrl(BASE_URL)
-                    .requestFactory(requestFactory)
-                    .defaultStatusHandler(
-                            org.springframework.http.HttpStatusCode::isError,
-                            (request, response) -> {
-                              var pd = ProblemDetailSupport.extract(om, response);
-                              throw new ApiProblemException(pd, response.getStatusCode().value());
-                            });
+        RestClient.builder()
+            .baseUrl(BASE_URL)
+            .requestFactory(requestFactory)
+            .defaultStatusHandler(
+                org.springframework.http.HttpStatusCode::isError,
+                (request, response) -> {
+                  var pd = ProblemDetailSupport.extract(om, response);
+                  throw new ApiProblemException(pd, response.getStatusCode().value());
+                });
 
     MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
@@ -70,11 +69,12 @@ class CustomerApiClientConfigStatusHandlerTest {
   void handler_parses_problem_detail_on_4xx() {
     var ctx = buildClient(objectMapper());
 
-    ctx.server.expect(once(), requestTo(BASE_URL + URI_400))
-            .andRespond(
-                    withStatus(HttpStatus.BAD_REQUEST)
-                            .contentType(MediaType.APPLICATION_PROBLEM_JSON)
-                            .body(problemJson()));
+    ctx.server
+        .expect(once(), requestTo(BASE_URL + URI_400))
+        .andRespond(
+            withStatus(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(problemJson()));
 
     ApiProblemException ex = performGetExpectingException(ctx.client, URI_400);
 
@@ -89,8 +89,9 @@ class CustomerApiClientConfigStatusHandlerTest {
   void handler_handles_empty_body_on_5xx() {
     var ctx = buildClient(objectMapper());
 
-    ctx.server.expect(once(), requestTo(BASE_URL + URI_500))
-            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+    ctx.server
+        .expect(once(), requestTo(BASE_URL + URI_500))
+        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 
     ApiProblemException ex = performGetExpectingException(ctx.client, URI_500);
 
@@ -103,12 +104,11 @@ class CustomerApiClientConfigStatusHandlerTest {
 
   private ApiProblemException performGetExpectingException(RestClient client, String uri) {
     return assertThrows(
-            ApiProblemException.class,
-            () -> client.get().uri(uri).retrieve().body(String.class));
+        ApiProblemException.class, () -> client.get().uri(uri).retrieve().body(String.class));
   }
 
   private void assertBasicProblem(
-          ApiProblemException ex, int status, String expectedTitle, String expectedDetail) {
+      ApiProblemException ex, int status, String expectedTitle, String expectedDetail) {
 
     assertEquals(status, ex.getStatus());
 
@@ -148,6 +148,5 @@ class CustomerApiClientConfigStatusHandlerTest {
         """;
   }
 
-    private record TestContext(RestClient client, MockRestServiceServer server) {
-    }
+  private record TestContext(RestClient client, MockRestServiceServer server) {}
 }

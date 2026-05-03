@@ -27,7 +27,7 @@ class CustomerServiceClientImplTest {
   private final CustomerRequestMapper requestMapper = mock(CustomerRequestMapper.class);
 
   private final CustomerServiceClientImpl service =
-          new CustomerServiceClientImpl(adapter, requestMapper);
+      new CustomerServiceClientImpl(adapter, requestMapper);
 
   @Test
   @DisplayName("createCustomer -> maps request and returns response")
@@ -102,13 +102,13 @@ class CustomerServiceClientImplTest {
     when(adapter.getCustomers(any(), any(), any(), any(), any(), any())).thenReturn(response);
 
     var result =
-            service.getCustomers("John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
+        service.getCustomers("John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
 
     assertNotNull(result);
     assertEquals(1, result.getData().content().size());
 
     verify(adapter)
-            .getCustomers("John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
+        .getCustomers("John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC);
   }
 
   @Test
@@ -119,11 +119,11 @@ class CustomerServiceClientImplTest {
     when(adapter.getCustomers(any(), any(), any(), any(), any(), any())).thenThrow(ex);
 
     var thrown =
-            assertThrows(
-                    RuntimeException.class,
-                    () ->
-                            service.getCustomers(
-                                    "John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC));
+        assertThrows(
+            RuntimeException.class,
+            () ->
+                service.getCustomers(
+                    "John", null, 0, 5, CustomerSortField.CUSTOMER_ID, SortDirection.ASC));
 
     assertSame(ex, thrown);
   }

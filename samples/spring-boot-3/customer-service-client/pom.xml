@@ -8,7 +8,6 @@
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
         <version>1.0.2-SNAPSHOT</version>
-        <relativePath/>
     </parent>
 
     <groupId>io.github.blueprint-platform.samples</groupId>

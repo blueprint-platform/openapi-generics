@@ -2,8 +2,8 @@ services:
   customer-service:
     container_name: customer-service-sb4
     build:
-      context: ..
-      dockerfile: spring-boot-4/customer-service/Dockerfile
+      context: ../..
+      dockerfile: samples/spring-boot-4/customer-service/Dockerfile
     image: customer-service-sb4:latest
     restart: on-failure
     environment:
@@ -15,8 +15,8 @@ services:
   customer-service-consumer:
     container_name: customer-service-consumer-sb4
     build:
-      context: ..
-      dockerfile: spring-boot-4/customer-service-consumer/Dockerfile
+      context: ../..
+      dockerfile: samples/spring-boot-4/customer-service-consumer/Dockerfile
     image: customer-service-consumer-sb4:latest
     restart: on-failure
     depends_on:
