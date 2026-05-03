@@ -3,10 +3,10 @@
 [![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
-[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
+[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics?label=release\&logo=github)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 
 [![Java](https://img.shields.io/badge/Java-17%2B-lightgrey?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x%20%E2%86%92%204.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.x%20%E2%86%92%204.x-6DB33F?logo=springboot\&logoColor=white)](https://spring.io/projects/spring-boot)
 [![OpenAPI Generator](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](https://openapi-generator.tech/)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -20,6 +20,7 @@
 ## Table of Contents
 
 * [Why this exists (practical impact)](#why-this-exists-practical-impact)
+* [Proof — before vs after](#proof--before-vs-after)
 * [Key features in 1.0.0 (GA)](#key-features-in-100-ga)
 * [Real usage (what you actually do)](#real-usage-what-you-actually-do)
 * [Quick start (2 minutes)](#quick-start-2-minutes)
@@ -28,7 +29,6 @@
 * [Contract lifecycle model](#contract-lifecycle-model)
 * [Core idea](#core-idea)
 * [System Architecture Overview](#system-architecture-overview)
-* [Proof — before vs after](#proof--before-vs-after)
 * [Design guarantees](#design-guarantees)
 * [Modules](#modules)
 * [References](#references)
@@ -38,6 +38,76 @@
 ---
 
 ## Why this exists (practical impact)
+
+### The actual problem
+
+OpenAPI Generator typically **duplicates response models per endpoint** and **loses generic structure**.
+
+Instead of a single reusable contract:
+
+```java
+ServiceResponse<Page<CustomerDto>>
+```
+
+You get multiple generated models:
+
+```java
+class ServiceResponsePageCustomerDto {
+  PageCustomerDto data;
+  Meta meta;
+}
+```
+
+This leads to:
+
+* duplicated envelope definitions
+* flattened generics
+* unstable client models over time
+
+---
+
+### What this project does
+
+It keeps your original contract intact:
+
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
+```
+
+No duplication. No drift. The same contract — end-to-end.
+
+---
+
+## Proof — before vs after
+
+### Before
+
+<p align="center">
+  <img src="docs/images/proof/generated-client-wrapper-before.png" width="820"/>
+</p>
+
+```java
+class ServiceResponsePageCustomerDto {
+  PageCustomerDto data;
+  Meta meta;
+}
+```
+
+### After
+
+<p align="center">
+  <img src="docs/images/proof/generated-client-wrapper-after.png" width="820"/>
+</p>
+
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
+```
+
+---
+
+### Why it matters in practice
 
 In most OpenAPI-based systems:
 
@@ -434,35 +504,6 @@ The behavior remains the same:
 </p>
 
 For internal architecture and design decisions, see [Architecture](docs/architecture/platform.md).
-
----
-
-
-## Proof — before vs after
-
-### Before
-
-<p align="center">
-  <img src="docs/images/proof/generated-client-wrapper-before.png" width="820"/>
-</p>
-
-```java
-class ServiceResponsePageCustomerDto {
-  PageCustomerDto data;
-  Meta meta;
-}
-```
-
-### After
-
-<p align="center">
-  <img src="docs/images/proof/generated-client-wrapper-after.png" width="820"/>
-</p>
-
-```java
-public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {}
-```
 
 ---
 
