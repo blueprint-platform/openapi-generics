@@ -55,7 +55,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <openapi-generics.version>${project.version}</openapi-generics.version>
+        <openapi-generics.version>1.0.2-SNAPSHOT</openapi-generics.version>
 
         <!-- Build Plugins -->
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
