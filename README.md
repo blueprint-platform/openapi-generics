@@ -251,7 +251,7 @@ In practice this means:
 
 The diagram shows two parallel phases — **projection** (server → spec) and **enforcement** (spec → client) — both rooted in a single shared authority layer. The adapter boundary keeps generated code isolated from application logic.
 
-For internal architecture and design decisions: [docs/architecture/platform.md](docs/architecture/platform.md)
+For internal architecture and design decisions: [architecture](docs/architecture/architecture.md)
 
 ### Guarantees
 

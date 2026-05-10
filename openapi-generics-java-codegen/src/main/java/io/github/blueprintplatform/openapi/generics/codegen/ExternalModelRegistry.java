@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * <p>Configuration format:
  *
  * <pre>
- * openapiGenerics.externalModel.CustomerDto=io.example.contract.CustomerDto
+ * "openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
  * </pre>
  */
 public class ExternalModelRegistry {

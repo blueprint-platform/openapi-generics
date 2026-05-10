@@ -68,7 +68,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${openapi-generics.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -115,7 +115,7 @@
                                     <artifactItem>
                                         <groupId>io.github.blueprint-platform</groupId>
                                         <artifactId>openapi-generics-java-codegen</artifactId>
-                                        <version>${project.version}</version>
+                                        <version>${openapi-generics.version}</version>
                                         <includes>META-INF/openapi-generics/templates/**</includes>
                                         <outputDirectory>${openapi.templates.codegen}</outputDirectory>
                                     </artifactItem>
@@ -218,7 +218,7 @@
                         <dependency>
                             <groupId>io.github.blueprint-platform</groupId>
                             <artifactId>openapi-generics-java-codegen</artifactId>
-                            <version>${project.version}</version>
+                            <version>${openapi-generics.version}</version>
                         </dependency>
                     </dependencies>
                     <configuration>

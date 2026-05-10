@@ -54,7 +54,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>${project.version}</version>
+                <version>${openapi-generics.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

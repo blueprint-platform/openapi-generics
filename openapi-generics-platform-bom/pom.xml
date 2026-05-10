@@ -55,7 +55,7 @@
             <dependency>
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-contract</artifactId>
-                <version>${project.version}</version>
+                <version>${openapi-generics.version}</version>
             </dependency>
 
             <dependency>
