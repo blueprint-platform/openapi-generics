@@ -77,8 +77,8 @@ OpenAPI spec, and in every generated client.
 <td align="center"><b>After</b><br/><sub>with openapi-generics</sub></td>
 </tr>
 <tr>
-<td><img src="docs/images/proof/generated-client-wrapper-before.png" width="420"/></td>
-<td><img src="docs/images/proof/generated-client-wrapper-after.png" width="420"/></td>
+<td><img src="docs/images/proof/generated-client-wrapper-before.png" width="480"/></td>
+<td><img src="docs/images/proof/generated-client-wrapper-after.png" width="480"/></td>
 </tr>
 </table>
 

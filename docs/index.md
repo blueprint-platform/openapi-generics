@@ -47,6 +47,37 @@ This is what OpenAPI Generics fixes.
 
 ---
 
+## Proof — generated client, before vs after
+
+The two screenshots below are from a real generated client module — same OpenAPI document, same generator version, only the contract-aware pipeline is toggled.
+
+### Before — default OpenAPI Generator
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-before.png" width="700" alt="Generated client without openapi-generics — duplicated envelope models, flattened generics"/>
+</p>
+
+- envelope materialized as a full class per endpoint
+- `<T>` flattened — `getData()` returns a fused type that needs casting
+- model graph grows linearly with the number of endpoints
+
+### After — with openapi-generics
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-after.png" width="700" alt="Generated client with openapi-generics — thin wrappers extending the contract envelope"/>
+</p>
+
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
+```
+
+- one shared envelope, imported from the contract module
+- generics preserved end-to-end — `ServiceResponse<Page<CustomerDto>>` survives intact
+- externally owned DTOs reused directly via BYOC — no duplication
+
+---
+
 ## What you get instead
 
 The same controller, with openapi-generics:
@@ -54,10 +85,10 @@ The same controller, with openapi-generics:
 ```java
 // Generated client — generics preserved, envelope shared
 public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {}
+        extends ServiceResponse<Page<CustomerDto>> {}
 
 public class ServiceResponsePageOrderDto
-    extends ServiceResponse<Page<OrderDto>> {}
+        extends ServiceResponse<Page<OrderDto>> {}
 ```
 
 One envelope, one `Meta`, one `Page`. Wrappers are thin type bindings. Your DTOs come from your existing classpath, not from regeneration. The contract on the server, in the OpenAPI document, and in every generated wrapper is the same shape.
