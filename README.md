@@ -189,18 +189,31 @@ Point the platform at it — no rewrites:
 
 ### BYOC — Bring Your Own Contract
 
-Stop regenerating DTOs you already own. Map them once:
+Stop regenerating DTOs you already own. Map each OpenAPI model name to the
+Java type you want the generated client to reuse:
 
 ```xml
 <additionalProperties>
   <additionalProperty>
     openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
   </additionalProperty>
+  <additionalProperty>
+    openapi-generics.response-contract.AddressDto=io.example.contract.AddressDto
+  </additionalProperty>
+  <additionalProperty>
+    openapi-generics.response-contract.OrderDto=io.example.contract.OrderDto
+  </additionalProperty>
 </additionalProperties>
 ```
 
-The generated client references your existing `CustomerDto` directly
-instead of producing a near-duplicate model.
+Each property maps:
+
+```text
+openapi-generics.response-contract.<OpenAPI model name> = <fully-qualified Java type>
+```
+
+The generated client imports those existing contract types directly instead of
+producing near-duplicate DTO models.
 
 ---
 
@@ -240,6 +253,15 @@ In practice this means:
 * generated client classes **extend** that contract instead of redefining it
 * OpenAPI carries metadata (`x-api-wrapper`, `x-data-container`), not authority
 * clients and servers stay aligned even as the spec evolves
+
+### Projection paths
+
+The same contract-aware pipeline supports two ways of publishing wrapper semantics:
+
+1. **Springdoc-based (automatic)** — the server starter detects your generic envelope and enriches the OpenAPI document automatically.
+2. **Spec-first (manual)** — teams can define wrapper schemas directly in OpenAPI using the same vendor extensions (`x-api-wrapper`, `x-data-item`, `x-ignore-model`).
+
+Both approaches produce the same result: the envelope remains your contract, OpenAPI acts as a projection, and generated clients preserve the original generic structure.
 
 ### Architecture
 

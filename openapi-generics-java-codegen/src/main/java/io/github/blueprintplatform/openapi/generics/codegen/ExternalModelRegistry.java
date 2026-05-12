@@ -26,16 +26,51 @@ public class ExternalModelRegistry {
 
   /** Registers external models from generator additionalProperties. */
   public void register(Map<String, Object> additionalProperties) {
-    for (Map.Entry<String, Object> e : additionalProperties.entrySet()) {
-      if (e.getKey().startsWith(PREFIX)) {
-        String modelName = e.getKey().substring(PREFIX.length());
-        String fqcn = String.valueOf(e.getValue());
-
-        externalModels.put(modelName, fqcn);
-
-        log.debug("Registered external model: {} -> {}", modelName, fqcn);
-      }
+    if (additionalProperties == null || additionalProperties.isEmpty()) {
+      return;
     }
+
+    additionalProperties.forEach(this::registerIfExternalModelProperty);
+  }
+
+  private void registerIfExternalModelProperty(String key, Object raw) {
+    if (key == null || !key.startsWith(PREFIX)) {
+      return;
+    }
+
+    String modelName = key.substring(PREFIX.length());
+    String fqcn = normalizeFqcn(modelName, raw);
+
+    if (fqcn != null) {
+      externalModels.put(modelName, fqcn);
+      log.debug("Registered external model: {} -> {}", modelName, fqcn);
+    }
+  }
+
+  private String normalizeFqcn(String modelName, Object raw) {
+    if (raw == null) {
+      log.warn("Skipping external model '{}' because value is null", modelName);
+      return null;
+    }
+
+    String fqcn = String.valueOf(raw).trim();
+
+    if (fqcn.isEmpty() || "null".equalsIgnoreCase(fqcn)) {
+      log.warn(
+          "Skipping external model '{}' because configured FQCN is empty or 'null'", modelName);
+      return null;
+    }
+
+    if (!fqcn.contains(".")) {
+      log.warn(
+          "Skipping external model '{}' because value '{}' does not appear to be a fully-qualified"
+              + " class name",
+          modelName,
+          fqcn);
+      return null;
+    }
+
+    return fqcn;
   }
 
   /**

@@ -187,7 +187,8 @@ class GenericAwareJavaCodegenTest {
 
   @Test
   @DisplayName(
-      "postProcessModels -> should keep non-wrapper model unchanged when no contract metadata applies")
+      "postProcessModels -> should keep non-wrapper model unchanged when no contract metadata"
+          + " applies")
   void shouldKeepNonWrapperModelUnchanged() {
     GenericAwareJavaCodegen codegen = new GenericAwareJavaCodegen();
     codegen.processOpts();

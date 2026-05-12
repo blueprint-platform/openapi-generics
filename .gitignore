@@ -69,7 +69,4 @@ generated-classes/
 # allow samples if needed
 !samples/**/generated-sources/
 
-# =========================
-# AI / Local context
-# =========================
-.ai-context.md
+!/AGENTS.md

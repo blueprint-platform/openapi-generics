@@ -184,10 +184,10 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject enum envelope")
   void resolve_shouldRejectEnumEnvelope() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()));
+        new OpenApiGenericsProperties(new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()));
 
     IllegalStateException ex =
-            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a class, not an enum"));
   }
@@ -196,11 +196,11 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject annotation envelope (treated as interface)")
   void resolve_shouldRejectAnnotationEnvelope() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()));
 
     IllegalStateException ex =
-            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must be a concrete class, not an interface"));
   }
@@ -209,11 +209,11 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject envelope with zero type parameters")
   void resolve_shouldRejectEnvelopeWithZeroTypeParameters() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()));
 
     IllegalStateException ex =
-            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("must declare exactly one type parameter"));
   }
@@ -222,8 +222,8 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should ignore static fields when resolving payload slot")
   void resolve_shouldIgnoreStaticFields() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(EnvelopeWithStaticField.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(EnvelopeWithStaticField.class.getName()));
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -235,11 +235,11 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should detect nested payload in generic array")
   void resolve_shouldDetectNestedPayloadInGenericArray() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()));
 
     IllegalStateException ex =
-            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }
@@ -248,11 +248,11 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should detect nested payload in deeply nested parameterized type")
   void resolve_shouldDetectDeeplyNestedPayload() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()));
 
     IllegalStateException ex =
-            assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
+        assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
 
     assertTrue(ex.getMessage().contains("contains unsupported nested generic payload slot"));
   }
@@ -261,8 +261,8 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should accept envelope where non-payload fields use unrelated generics")
   void resolve_shouldAcceptEnvelopeWithUnrelatedGenerics() {
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(
-                    new EnvelopeProperties(EnvelopeWithUnrelatedGenericField.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(EnvelopeWithUnrelatedGenericField.class.getName()));
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -308,7 +308,8 @@ class ResponseIntrospectionPolicyResolverTest {
   }
 
   enum InvalidEnvelopeEnum {
-    A, B
+    A,
+    B
   }
 
   @interface InvalidEnvelopeAnnotation {}

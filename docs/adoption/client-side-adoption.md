@@ -124,6 +124,8 @@ Reuse your DTOs (BYOC):
 </additionalProperties>
 ```
 
+Add one `openapi-generics.response-contract.<OpenAPI model name>` property per externally provided DTO you want the generated client to reuse.
+
 Use your own envelope (BYOE):
 
 ```xml
@@ -296,11 +298,15 @@ Everything else (template chain, contract behavior, wrapper logic) is handled by
         </configOptions>
 
         <!-- Optional: Bring Your Own Contract (external DTOs) -->
+        <!-- Add one property per externally provided OpenAPI model. -->
         <!--
         <additionalProperties>
-          <additionalProperty>
-            openapi-generics.response-contract.CustomerDto=com.example.contract.CustomerDto
-          </additionalProperty>
+            <additionalProperty>
+              openapi-generics.response-contract.CustomerDto=com.example.contract.CustomerDto
+            </additionalProperty>
+            <additionalProperty>
+              openapi-generics.response-contract.AddressDto=com.example.contract.AddressDto
+            </additionalProperty>
         </additionalProperties>
         -->
 

@@ -40,21 +40,21 @@ public class OpenApiGenericsMissingDependencyAutoConfiguration {
 
   private static final String MESSAGE =
       """
-                -------------------------------------------------------------------------
-                OpenAPI Generics Starter is inactive
+      -------------------------------------------------------------------------
+      OpenAPI Generics Starter is inactive
 
-                Reason:
-                  Springdoc OpenAPI is not detected on the classpath.
+      Reason:
+        Springdoc OpenAPI is not detected on the classpath.
 
-                This starter activates only when Springdoc is present.
+      This starter activates only when Springdoc is present.
 
-                To enable OpenAPI customization, add one of the following:
+      To enable OpenAPI customization, add one of the following:
 
-                  - org.springdoc:springdoc-openapi-starter-webmvc-ui
-                  - org.springdoc:springdoc-openapi-starter-webflux-ui
+        - org.springdoc:springdoc-openapi-starter-webmvc-ui
+        - org.springdoc:springdoc-openapi-starter-webflux-ui
 
-                -------------------------------------------------------------------------
-                """;
+      -------------------------------------------------------------------------
+      """;
 
   /**
    * Logs a warning message indicating that Springdoc is missing.

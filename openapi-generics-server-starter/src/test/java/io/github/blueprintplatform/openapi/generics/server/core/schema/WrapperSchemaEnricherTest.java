@@ -222,7 +222,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = new OpenAPI();
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+        () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
   }
 
   @Test
@@ -232,7 +232,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = new OpenAPI().components(new Components());
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+        () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
   }
 
   @Test
@@ -241,9 +241,9 @@ class WrapperSchemaEnricherTest {
     WrapperSchemaEnricher enricher = new WrapperSchemaEnricher(null);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -258,9 +258,9 @@ class WrapperSchemaEnricherTest {
     WrapperSchemaEnricher enricher = new WrapperSchemaEnricher(Set.of());
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -277,12 +277,12 @@ class WrapperSchemaEnricherTest {
     Schema<?> circularA = new Schema<>().$ref("#/components/schemas/PageCustomerDto");
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", circularA),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", circularA),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
+        () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto"));
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -290,7 +290,8 @@ class WrapperSchemaEnricherTest {
   }
 
   @Test
-  @DisplayName("enrich -> should extract item from schema with type=array but no ArraySchema instance")
+  @DisplayName(
+      "enrich -> should extract item from schema with type=array but no ArraySchema instance")
   void enrich_shouldExtractItem_fromTypeArraySchema() {
     WrapperSchemaEnricher enricher = new WrapperSchemaEnricher();
 
@@ -302,9 +303,9 @@ class WrapperSchemaEnricherTest {
     pageSchema.addProperty("content", content);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchema),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchema),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -326,9 +327,9 @@ class WrapperSchemaEnricherTest {
     pageSchema.addProperty("content", content);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchema),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchema),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -349,9 +350,9 @@ class WrapperSchemaEnricherTest {
     pageSchema.addProperty("content", content);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchema),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchema),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -372,9 +373,9 @@ class WrapperSchemaEnricherTest {
     pageSchema.addProperty("content", content);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchema),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchema),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -393,9 +394,9 @@ class WrapperSchemaEnricherTest {
     composed.addAllOfItem(new Schema<>().type("integer"));
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", composed),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", composed),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
@@ -417,9 +418,9 @@ class WrapperSchemaEnricherTest {
     pageSchema.addProperty("content", content);
 
     OpenAPI openApi =
-            openApi(
-                    schema("PageCustomerDto", pageSchema),
-                    schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
+        openApi(
+            schema("PageCustomerDto", pageSchema),
+            schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
 
