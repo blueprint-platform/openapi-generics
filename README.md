@@ -147,19 +147,19 @@ You don't copy code from this repo — you add two building blocks.
 
 That's it. Run your service, generate the client, get contract-aligned wrappers.
 
-For BYOE, BYOC, and progressive adoption flags, see [Key features](#key-features-in-100-ga).
+For BYOE, BYOC, and fallback-to-standard-generation options, continue with the feature overview below.
 
 ---
 
 ## Key features in 1.0.x (GA)
 
-| Feature | What it does | Default |
-|---|---|---|
-| **BYOE** — Bring Your Own Envelope | Use your existing response envelope (e.g. `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required. | `ServiceResponse<T>` |
-| **BYOC** — Bring Your Own Contract | Reuse your own domain DTOs instead of generating new copies. | Generate from spec |
-| **Progressive adoption** | Toggle contract-aware generation per client module via a single Maven property. Mix old and new clients in the same repo. | Enabled |
-| **Deterministic generation** | Upstream OpenAPI Generator templates are extracted fresh every build, patched with a single generic-aware branch, and the build fails fast if upstream drifts. | — |
-| **End-to-end samples** | Producer + client pipelines for both Spring Boot 3 and Spring Boot 4. | See [`samples/`](samples/) |
+| Feature                             | What it does                                                                                                                                                                                                                              | Default                           |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| **BYOE** — Bring Your Own Envelope  | Use your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                                                                | `ServiceResponse<T>`              |
+| **BYOC** — Bring Your Own Contract  | Reuse your own domain DTOs instead of generating duplicate models.                                                                                                                                                                        | Generate from spec                |
+| **Fallback to standard generation** | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`. Useful for comparison, debugging, or temporary opt-out. | Generics-aware generation enabled |
+| **Deterministic generation**        | Upstream OpenAPI Generator templates are extracted on every build, patched with a single generics-aware branch, and the build fails fast if the upstream template structure changes.                                                      | —                                 |
+| **End-to-end samples**              | Complete producer and client pipelines for Spring Boot 3 and Spring Boot 4.                                                                                                                                                               | See [`samples/`](samples/)        |
 
 ---
 
@@ -222,19 +222,32 @@ nested generic structures such as `ServiceResponse<Page<CustomerDto>>`.
 
 ---
 
-### Progressive adoption
+### Fallback to standard generation
 
-Generate some clients with contract-aware behavior, others with stock
-OpenAPI Generator — same repo, same parent, no fork:
+Disable the generics-aware template patching with a single Maven property:
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
 ```
 
-| `openapi.generics.skip` | Behavior                    |
-| ----------------------- | --------------------------- |
-| `false` (default)       | Contract-aware generation   |
-| `true`                  | Standard OpenAPI generation |
+This skips the template extraction, patching, and overlay steps provided by
+`openapi-generics-java-codegen-parent`.
+
+To fully revert to stock OpenAPI Generator behavior, also change the client
+module configuration to:
+
+```xml
+<generatorName>java</generatorName>
+```
+
+| `openapi.generics.skip` | Behavior                               |
+| ----------------------- | -------------------------------------- |
+| `false` (default)       | Apply generics-aware template patching |
+| `true`                  | Skip generics-aware template patching  |
+
+Use this mode to compare generated output, troubleshoot generation issues, or
+temporarily opt out of the generics-aware customization for a specific client
+module.
 
 ---
 
