@@ -27,7 +27,7 @@
 
 * [The problem in 30 seconds](#the-problem-in-30-seconds)
 * [Get started](#get-started)
-* [Key features in 1.0.0 (GA)](#key-features-in-100-ga)
+* [Key features in 1.0.x (GA)](#key-features-in-10x-ga)
 * [How it works](#how-it-works)
 * [Compatibility](#compatibility)
 * [Relationship to OpenAPI Generator](#relationship-to-openapi-generator)
@@ -151,7 +151,7 @@ For BYOE, BYOC, and progressive adoption flags, see [Key features](#key-features
 
 ---
 
-## Key features in 1.0.0 (GA)
+## Key features in 1.0.x (GA)
 
 | Feature | What it does | Default |
 |---|---|---|
@@ -183,7 +183,9 @@ Point the platform at it — no rewrites:
 
 > **Scope:** BYOE supports envelopes with a single direct generic payload
 > (`YourEnvelope<T>`). Nested forms like `YourEnvelope<Page<T>>` are
-> out of scope and fail fast at startup — see the BYOE guide for rationale.
+> out of scope and fail fast at startup — see
+> [Restricted generic depth](./docs/architecture/architecture.md#restricted-generic-depth)
+> for the design rationale.
 
 ---
 
@@ -214,6 +216,9 @@ openapi-generics.response-contract.<OpenAPI model name> = <fully-qualified Java 
 
 The generated client imports those existing contract types directly instead of
 producing near-duplicate DTO models.
+
+BYOC applies to the payload types used inside generated wrappers, including
+nested generic structures such as `ServiceResponse<Page<CustomerDto>>`.
 
 ---
 

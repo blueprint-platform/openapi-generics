@@ -325,11 +325,25 @@ Default path supports `T` and `Page<T>`. BYOE supports only `T`.
 
 ### Vendor extensions over `$dynamicRef`
 
-OpenAPI 3.1 introduced `$dynamicRef` / `$dynamicAnchor` for parametric polymorphism. We don't use them.
+OpenAPI 3.1 introduced `$dynamicRef` / `$dynamicAnchor`, which can theoretically
+model parametric schemas.
 
-- **Why**: as of OpenAPI Generator 7.x, `$dynamicRef` support is partial across language generators. Vendor extensions work today, on every 7.x release, with no waiting on upstream support.
-- **Cost**: the projection isn't "pure" OpenAPI 3.1 generic-modeling. It's standard OpenAPI 3.x with a documented vendor-extension overlay. Spec validators don't reject it; foreign tools just ignore the extensions.
-- **Future**: if `$dynamicRef` becomes well-supported across generators, the protocol could be migrated. The server-side projection logic doesn't change — only the encoding format does.
+openapi-generics does not use them because the current toolchain does not provide
+reliable end-to-end support:
+
+- `springdoc` does not emit generic response models using `$dynamicRef`
+- OpenAPI Generator 7.x does not consistently preserve `$dynamicRef` semantics
+  across language generators
+- Tooling support remains partial across the broader OpenAPI ecosystem
+
+Instead, openapi-generics encodes generic semantics using a small, documented set
+of `x-*` vendor extensions.
+
+- **Benefit:** Works today with Spring Boot, springdoc, and OpenAPI Generator 7.x.
+- **Cost:** The projection is not "pure" OpenAPI 3.1 generic modeling.
+- **Future:** If the toolchain gains stable `$dynamicRef` support, only the
+  encoding format would change; the projection and code generation architecture
+  would remain the same.
 
 ### Fail-fast over silent degradation
 

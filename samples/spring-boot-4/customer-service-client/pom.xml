@@ -196,21 +196,6 @@
                                 <openApiNullable>false</openApiNullable>
                             </configOptions>
 
-                            <!--
-                              Optional contract alignment
-
-                              Use these properties only when you want the generated client to align with
-                              externally provided contract types.
-
-                              Notes:
-                              - `openapi-generics.envelope` is NOT required for the default ServiceResponse<T> model.
-                                Add it only when you use your own envelope type (BYOE).
-                              - If you configure a custom envelope, that envelope dependency must already be
-                                available on the client classpath.
-                              - `openapi-generics.response-contract.*` is optional and used only when DTOs are
-                                provided by an external/shared contract dependency.
-                            -->
-
                             <cleanupOutput>true</cleanupOutput>
                             <skipValidateSpec>false</skipValidateSpec>
 

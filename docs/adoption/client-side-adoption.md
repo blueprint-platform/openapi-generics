@@ -490,6 +490,9 @@ public class ServiceResponseCustomerDto
 
 The `CustomerDto` referenced here is **your** `com.example.contract.CustomerDto` — not a regenerated copy.
 
+BYOC applies to payload types used inside generated wrappers, including nested
+generic structures such as `ServiceResponse<Page<CustomerDto>>`.
+
 ### 3. How they compose
 
 Modes and alignment inputs are independent. A typical production setup uses both:
