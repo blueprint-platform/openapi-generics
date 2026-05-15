@@ -114,8 +114,9 @@ No dependency on:
 * Spring
 * Jakarta Web
 * OpenAPI annotations
+* Jackson
 
-Only minimal JSON annotations are used.
+The module consists entirely of plain Java types and has no runtime framework dependencies.
 
 Result:
 
@@ -302,16 +303,19 @@ Usage:
 
 ## Versioning Strategy
 
-Current state: **pre-1.0**
+Current state: **1.0.x GA**
 
-Meaning:
+The contract module is treated as the stable authority layer of the platform.
 
-* API may evolve
-* breaking changes are possible but controlled
+Patch and minor releases may add fields or helper APIs, but response semantics
+should evolve conservatively and remain backward-compatible whenever possible.
 
 ### Important Rule
 
 > Server and client MUST use the same contract version.
+
+For strict contract alignment, use the same `openapi-generics-contract` version
+across producer and generated client modules.
 
 ---
 
