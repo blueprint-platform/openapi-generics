@@ -104,7 +104,7 @@ One envelope, one `Meta`, one `Page`. Wrappers are thin type bindings. Your DTOs
 | **BYOE — Bring Your Own Envelope** | Use `ServiceResponse<T>` out of the box, or plug in your own envelope (`ApiResponse<T>`, `Result<T>`, …). Validated at startup, no silent degradation. |
 | **BYOC — Bring Your Own Contract** | Reuse externally owned DTOs from a shared contract module instead of regenerating them client-side. Zero duplication. |
 | **Deterministic & fail-fast** | Same input + same configuration → byte-identical output across builds. Misconfiguration fails at boot or build time, never silently. |
-| **Progressive adoption** | Single switch (`openapi.generics.skip`) flips between contract-aware and stock OpenAPI Generator behavior. No fork to unwind. |
+| **Fallback to standard generation** | Disable the generics-aware pipeline with `openapi.generics.skip`, or switch to `generatorName=java` for full stock OpenAPI Generator behavior. |
 | **Zero-drift template patching** | The codegen pipeline patches the upstream `model.mustache` at build time — no frozen template snapshots, no silent drift across generator versions. |
 
 ---

@@ -166,7 +166,19 @@ For BYOE, BYOC, and fallback-to-standard-generation options, continue with the f
 ### BYOE — Bring Your Own Envelope
 
 Already have an `ApiResponse<T>` (or any other envelope) across your services?
-Point the platform at it — no rewrites:
+Use it as the shared contract on both sides — no rewrites.
+
+On the **server/producer** side, configure the envelope so the starter can project
+it into the OpenAPI document:
+
+```yaml
+openapi-generics:
+  envelope:
+    type: io.example.contract.ApiResponse
+```
+
+On the **client/codegen** side, configure the same envelope so generated wrappers
+extend your contract type:
 
 ```xml
 <additionalProperties>
@@ -176,10 +188,13 @@ Point the platform at it — no rewrites:
 </additionalProperties>
 ```
 
-- If unset → `ServiceResponse<T>` is used as the default envelope.
-- If set → your envelope becomes the base of every generated wrapper.
-- Server side picks it up automatically when using Springdoc; spec-first
-  pipelines can declare it via `x-api-wrapper` extensions in OpenAPI directly.
+* If unset → `ServiceResponse<T>` is used as the default envelope.
+* If set → your envelope becomes the base of every generated wrapper.
+* The envelope type must be available on the client module classpath, usually via
+  a shared contract dependency.
+* With Springdoc, the server starter projects wrapper semantics automatically.
+  Spec-first pipelines can declare the same semantics via `x-api-wrapper`
+  extensions in OpenAPI directly.
 
 > **Scope:** BYOE supports envelopes with a single direct generic payload
 > (`YourEnvelope<T>`). Nested forms like `YourEnvelope<Page<T>>` are
@@ -274,9 +289,9 @@ In practice this means:
 
 ### Projection paths
 
-The same contract-aware pipeline supports two ways of publishing wrapper semantics:
+Wrapper semantics can be published in two ways:
 
-1. **Springdoc-based (automatic)** — the server starter detects your generic envelope and enriches the OpenAPI document automatically.
+1. **Springdoc-based (automatic)** — the server starter detects your generic envelope, creates wrapper schemas, and marks contract-owned infrastructure models so the client does not regenerate them.
 2. **Spec-first (manual)** — teams can define wrapper schemas directly in OpenAPI using the same vendor extensions (`x-api-wrapper`, `x-data-item`, `x-ignore-model`).
 
 Both approaches produce the same result: the envelope remains your contract, OpenAPI acts as a projection, and generated clients preserve the original generic structure.
