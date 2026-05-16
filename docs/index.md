@@ -161,6 +161,11 @@ Add the starter to your Spring Boot service:
 </dependency>
 ```
 
+> [!IMPORTANT]
+> `openapi-generics-server-starter` does not intercept application requests or change endpoint runtime behavior.
+> It is invoked only when Springdoc generates the OpenAPI document, for example when `/v3/api-docs` or `/v3/api-docs.yaml` is requested, or when the document is generated in CI.
+> If the OpenAPI document is never generated, this component does nothing.
+
 Write your controllers normally — `ResponseEntity<ServiceResponse<CustomerDto>>`, `ResponseEntity<ServiceResponse<Page<CustomerDto>>>`, async variants — and the projection runs automatically. No annotations, no customizer registration, no OpenAPI hand-editing.
 
 → [Server-Side Adoption Guide](adoption/server-side-adoption.md)

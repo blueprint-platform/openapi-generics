@@ -135,6 +135,11 @@ You don't copy code from this repo — you add two building blocks.
 </dependency>
 ```
 
+> [!IMPORTANT]
+> `openapi-generics-server-starter` does not intercept application requests or change endpoint runtime behavior.
+> It is invoked only when Springdoc generates the OpenAPI document, for example when `/v3/api-docs` or `/v3/api-docs.yaml` is requested, or when the document is generated in CI.
+> If the OpenAPI document is never generated, this component does nothing.
+
 **Client (consumer):**
 
 ```xml
@@ -145,7 +150,7 @@ You don't copy code from this repo — you add two building blocks.
 </parent>
 ```
 
-That's it. Run your service, generate the client, get contract-aligned wrappers.
+That's it. Run your service, generate the OpenAPI document, generate the client, and get contract-aligned wrappers.
 
 For BYOE, BYOC, and fallback-to-standard-generation options, continue with the feature overview below.
 
