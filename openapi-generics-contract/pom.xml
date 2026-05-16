@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
     </parent>
 
     <artifactId>openapi-generics-contract</artifactId>
@@ -33,11 +33,8 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-       <tag>HEAD</tag>
+      <tag>v1.0.2</tag>
     </scm>
-    <properties>
-        <junit-jupiter-engine.version>5.14.3</junit-jupiter-engine.version>
-    </properties>
 
     <developers>
         <developer>
@@ -55,6 +52,10 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <properties>
+        <junit-jupiter-engine.version>5.14.3</junit-jupiter-engine.version>
+    </properties>
 
     <build>
         <plugins>

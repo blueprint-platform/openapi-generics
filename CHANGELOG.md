@@ -10,6 +10,39 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [1.0.2] - 2026-05-16
+
+### Patch release
+
+OpenAPI Generics 1.0.2 is a maintenance and quality update for the 1.0.x GA line.
+
+No contract changes.  
+No public API behavior changes.  
+No generated client structure changes.
+
+Fully compatible with the 1.0.0 and 1.0.1 GA contracts.
+
+### Changed
+
+- Reworked README and documentation site content for clearer problem-to-proof-to-adoption flow.
+- Clarified server-side and client-side adoption guides.
+- Documented that `openapi-generics-server-starter` runs only during Springdoc OpenAPI document generation.
+- Clarified Bring Your Own Envelope (BYOE) and Bring Your Own Contract (BYOC) semantics and configuration.
+- Clarified fallback behavior for reverting to standard OpenAPI Generator output.
+- Improved sample documentation and run-and-verify instructions.
+- Centralized version management and strengthened parent POM alignment.
+- Added Spotless-based source formatting to the build.
+
+### Quality & Verification
+
+- Hardened external model registry validation for BYOC mappings, including invalid and empty FQCN detection with diagnostic warnings.
+- Added unit tests for invalid and edge-case external model configurations.
+- Stabilized Spring Boot 3 and Spring Boot 4 sample pipelines.
+- Improved Docker-based sample builds for self-contained local verification.
+- Strengthened CI workflows for snapshot and local-install validation.
+
+---
+
 ## [1.0.1] - 2026-05-01
 
 ### Patch release

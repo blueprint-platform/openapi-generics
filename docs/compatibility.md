@@ -5,7 +5,7 @@ nav_exclude: true
 
 # Compatibility & Support Policy
 
-This page defines the officially supported runtime and build-time combinations for **OpenAPI Generics 1.0.1**.
+This page defines the officially supported runtime and build-time combinations for **OpenAPI Generics 1.0.2**.
 
 It is the authoritative compatibility reference for the platform — the contract between what we test, what we publish, and what consumers can rely on.
 
@@ -183,7 +183,7 @@ The contract-aware client generation pipeline is currently packaged and supporte
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </parent>
 ```
 

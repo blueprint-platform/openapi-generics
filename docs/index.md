@@ -157,7 +157,7 @@ Add the starter to your Spring Boot service:
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 
@@ -178,7 +178,7 @@ Inherit the codegen parent in your client module:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </parent>
 ```
 
