@@ -27,6 +27,7 @@
 
 * [The problem in 30 seconds](#the-problem-in-30-seconds)
 * [Get started](#get-started)
+* [Real-World Example](#real-world-example)
 * [Key features in 1.0.x (GA)](#key-features-in-10x-ga)
 * [How it works](#how-it-works)
 * [Compatibility](#compatibility)
@@ -156,6 +157,23 @@ For BYOE, BYOC, and fallback-to-standard-generation options, continue with the f
 
 ---
 
+## Real-World Example
+
+See the Licensing Project for a complete end-to-end implementation of
+**BYOE (Bring Your Own Envelope)** using a shared `ApiResponse<T>` contract.
+
+The project demonstrates:
+
+- Spring Boot server integration with `openapi-generics-server-starter`
+- Contract-first OpenAPI projection
+- Generated Java client using `openapi-generics-java-codegen-parent`
+- Shared `ApiResponse<T>` reuse across service, client, SDK, and CLI
+- Docker-based end-to-end verification
+
+🔗 https://github.com/bsayli/licensing
+
+---
+
 ## Key features in 1.0.x (GA)
 
 | Feature                             | What it does                                                                                                                                                                                                                              | Default                           |
@@ -197,6 +215,9 @@ extend your contract type:
 * If set → your envelope becomes the base of every generated wrapper.
 * The envelope type must be available on the client module classpath, usually via
   a shared contract dependency.
+* Custom envelope types are used as generated wrapper base classes, so they
+  should be subclass-friendly: provide a public no-argument constructor and
+  public accessors for the envelope properties. 
 * With Springdoc, the server starter projects wrapper semantics automatically.
   Spec-first pipelines can declare the same semantics via `x-api-wrapper`
   extensions in OpenAPI directly.

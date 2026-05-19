@@ -447,6 +447,7 @@ Behavior:
 - generated wrappers extend your envelope
 - no envelope class is generated client-side
 - the system becomes **envelope-agnostic** — the same pipeline serves the default and BYOE cases
+- custom envelope types are used as generated wrapper base classes, so they should provide a public no-argument constructor and public accessors for the envelope properties
 
 Example output:
 
