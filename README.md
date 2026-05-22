@@ -173,8 +173,8 @@ For BYOE, BYOC, and fallback-to-standard-generation options, see the [Key featur
 
 ## Real-World Example
 
-See the Licensing Project for a complete end-to-end implementation of
-**BYOE (Bring Your Own Envelope)** using a shared `ApiResponse<T>` contract.
+See the Licensing Project for a complete end-to-end BYOE example
+using a shared `ApiResponse<T>` contract.
 
 The project demonstrates:
 
