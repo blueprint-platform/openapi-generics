@@ -19,30 +19,6 @@
         Spring Boot starter for generics-aware OpenAPI projection.
         Provides contract-to-OpenAPI translation while preserving generic type semantics.
     </description>
-    <url>https://github.com/blueprint-platform/openapi-generics</url>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/blueprint-platform/openapi-generics</url>
-        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <developers>
-        <developer>
-            <id>bsayli</id>
-            <name>Baris Sayli</name>
-            <url>https://github.com/bsayli</url>
-        </developer>
-    </developers>
 
     <properties>
         <spring-boot.version>3.5.14</spring-boot.version>

@@ -37,6 +37,10 @@
             <id>bsayli</id>
             <name>Baris Sayli</name>
             <url>https://github.com/bsayli</url>
+            <roles>
+                <role>creator</role>
+                <role>maintainer</role>
+            </roles>
         </developer>
     </developers>
 

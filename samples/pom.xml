@@ -11,14 +11,46 @@
     <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>openapi-generics-samples</name>
+    <description>
+        Reference implementations and end-to-end sample applications for the OpenAPI Generics platform.
+        Includes Spring Boot 3 and Spring Boot 4 producer, generated client, and consumer pipelines.
+    </description>
+    <url>https://github.com/blueprint-platform/openapi-generics</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/blueprint-platform/openapi-generics</url>
+        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>bsayli</id>
+            <name>Baris Sayli</name>
+            <url>https://github.com/bsayli</url>
+            <roles>
+                <role>creator</role>
+                <role>maintainer</role>
+            </roles>
+        </developer>
+    </developers>
+
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
-        <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
-        <google-java-format.version>1.35.0</google-java-format.version>
     </properties>
 
     <modules>

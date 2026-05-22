@@ -14,9 +14,10 @@
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-client-sb3</artifactId>
     <version>1.0.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
     <name>customer-service-client-sb3</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
-    <packaging>jar</packaging>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <licenses>
@@ -39,6 +40,10 @@
             <id>bsayli</id>
             <name>Baris Sayli</name>
             <url>https://github.com/bsayli</url>
+            <roles>
+                <role>creator</role>
+                <role>maintainer</role>
+            </roles>
         </developer>
     </developers>
 

@@ -14,12 +14,13 @@
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>customer-service-consumer-sb4</artifactId>
     <version>1.0.3-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
     <name>customer-service-consumer-sb4</name>
     <description>
         Sample consumer service demonstrating end-to-end contract-aligned API consumption
         using customer-service-client with type-safe generic responses.
     </description>
-    <packaging>jar</packaging>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <licenses>
@@ -42,6 +43,10 @@
             <id>bsayli</id>
             <name>Baris Sayli</name>
             <url>https://github.com/bsayli</url>
+            <roles>
+                <role>creator</role>
+                <role>maintainer</role>
+            </roles>
         </developer>
     </developers>
 
