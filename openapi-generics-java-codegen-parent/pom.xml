@@ -43,6 +43,7 @@
 
     <properties>
         <openapi-generator.version>7.22.0</openapi-generator.version>
+
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
@@ -78,7 +79,6 @@
     <build>
         <pluginManagement>
             <plugins>
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
@@ -95,6 +95,7 @@
                                     <artifactItem>
                                         <groupId>org.openapitools</groupId>
                                         <artifactId>openapi-generator</artifactId>
+                                        <version>${openapi-generator.version}</version>
                                         <type>jar</type>
                                         <overWrite>true</overWrite>
                                         <includes>**/Java/model.mustache</includes>
@@ -215,6 +216,18 @@
                     <artifactId>openapi-generator-maven-plugin</artifactId>
                     <version>${openapi-generator.version}</version>
                     <dependencies>
+                        <dependency>
+                            <groupId>org.openapitools</groupId>
+                            <artifactId>openapi-generator-core</artifactId>
+                            <version>${openapi-generator.version}</version>
+                        </dependency>
+
+                        <dependency>
+                            <groupId>org.openapitools</groupId>
+                            <artifactId>openapi-generator</artifactId>
+                            <version>${openapi-generator.version}</version>
+                        </dependency>
+
                         <dependency>
                             <groupId>io.github.blueprint-platform</groupId>
                             <artifactId>openapi-generics-java-codegen</artifactId>

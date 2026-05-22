@@ -45,7 +45,6 @@
     </developers>
 
     <properties>
-        <openapi.generator.version>7.22.0</openapi.generator.version>
         <springdoc.version>2.8.17</springdoc.version>
     </properties>
 
@@ -56,18 +55,6 @@
                 <groupId>io.github.blueprint-platform</groupId>
                 <artifactId>openapi-generics-contract</artifactId>
                 <version>${openapi-generics.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-core</artifactId>
-                <version>${openapi.generator.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator</artifactId>
-                <version>${openapi.generator.version}</version>
             </dependency>
 
             <dependency>

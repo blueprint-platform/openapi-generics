@@ -45,6 +45,7 @@
     </developers>
 
     <properties>
+        <openapi-generator.version>7.22.0</openapi-generator.version>
         <slf4j-api.version>2.0.17</slf4j-api.version>
         <junit.jupiter.version>5.14.3</junit.jupiter.version>
         <rhino.version>1.7.15.1</rhino.version>
@@ -56,29 +57,21 @@
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator-core</artifactId>
+            <scope>provided</scope>
+            <version>${openapi-generator.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator</artifactId>
             <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mozilla</groupId>
-            <artifactId>rhino</artifactId>
-            <version>${rhino.version}</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
-            <scope>provided</scope>
-            <optional>true</optional>
+            <version>${openapi-generator.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -94,6 +87,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <dependencyManagement>
@@ -104,16 +104,6 @@
                 <version>${openapi-generics.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mozilla</groupId>
-                <artifactId>rhino</artifactId>
-                <version>${rhino.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-                <version>${commons-codec.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
