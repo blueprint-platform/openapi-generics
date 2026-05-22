@@ -167,7 +167,7 @@ instead of the standard `java` generator to preserve generic wrapper semantics.
 
 That's it. Run your service, generate the OpenAPI document, generate the client, and get contract-aligned wrappers.
 
-For BYOE, BYOC, and fallback-to-standard-generation options, continue with the feature section below.
+For BYOE, BYOC, and fallback-to-standard-generation options, see the [Key features](#key-features-in-10x-ga) section below.
 
 ---
 
