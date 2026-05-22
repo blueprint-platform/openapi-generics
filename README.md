@@ -91,6 +91,17 @@ OpenAPI spec, and in every generated client.
 
 ### 1. Try it in 2 minutes
 
+Runnable end-to-end sample stacks are available under [samples](samples/).
+
+Each stack contains:
+
+* a producer service,
+* a generated client,
+* and a downstream consumer.
+
+See [samples/README.md](samples/README.md) for the full topology,
+Docker-based setup, and stack overview.
+
 Run a sample producer (Spring Boot 3; equivalent pipeline under `samples/spring-boot-4/`):
 
 ```bash
@@ -151,9 +162,12 @@ You don't copy code from this repo — you add two building blocks.
 </parent>
 ```
 
+The client generation flow uses the `java-generics-contract` generator
+instead of the standard `java` generator to preserve generic wrapper semantics.
+
 That's it. Run your service, generate the OpenAPI document, generate the client, and get contract-aligned wrappers.
 
-For BYOE, BYOC, and fallback-to-standard-generation options, continue with the feature overview below.
+For BYOE, BYOC, and fallback-to-standard-generation options, continue with the feature section below.
 
 ---
 
@@ -176,13 +190,13 @@ The project demonstrates:
 
 ## Key features in 1.0.x (GA)
 
-| Feature                             | What it does                                                                                                                                                                                                                              | Default                           |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| **BYOE** — Bring Your Own Envelope  | Use your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                                                                | `ServiceResponse<T>`              |
-| **BYOC** — Bring Your Own Contract  | Reuse your own domain DTOs instead of generating duplicate models.                                                                                                                                                                        | Generate from spec                |
+| Feature                             | What it does                                                                                                                                                                                                                              | Default                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| **BYOE** — Bring Your Own Envelope  | Use your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                                                                | `ServiceResponse<T>`           |
+| **BYOC** — Bring Your Own Contract  | Reuse your own domain DTOs instead of generating duplicate models.                                                                                                                                                                        | Generate from spec             |
 | **Fallback to standard generation** | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`. Useful for comparison, debugging, or temporary opt-out. | Generics-aware generation enabled |
-| **Deterministic generation**        | Upstream OpenAPI Generator templates are extracted on every build, patched with a single generics-aware branch, and the build fails fast if the upstream template structure changes.                                                      | —                                 |
-| **End-to-end samples**              | Complete producer and client pipelines for Spring Boot 3 and Spring Boot 4.                                                                                                                                                               | See [`samples/`](samples/)        |
+| **Deterministic generation**        | Upstream OpenAPI Generator templates are extracted on every build, patched with a single generics-aware branch, and the build fails fast if the upstream template structure changes.                                                      | —                              |
+| **End-to-end samples**              | Complete producer and client pipelines for Spring Boot 3 and Spring Boot 4.                                                                                                                                                               | See [samples](samples/)        |
 
 ---
 
