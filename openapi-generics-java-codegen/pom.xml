@@ -16,8 +16,9 @@
 
     <name>openapi-generics-java-codegen</name>
     <description>
-        Generics-aware OpenAPI Generator extension providing contract-aligned
-        metadata enrichment and deterministic model suppression.
+        Internal OpenAPI Generator extension used by openapi-generics-java-codegen-parent.
+        Provides the java-generics-contract generator for contract-aligned wrapper generation.
+        Not intended to be used directly as an application dependency.
     </description>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
 
@@ -81,36 +82,23 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <version>${slf4j-api.version}</version>
             <scope>test</scope>
         </dependency>
 
-    </dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.github.blueprint-platform</groupId>
-                <artifactId>openapi-generics-platform-bom</artifactId>
-                <version>${openapi-generics.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    </dependencies>
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -130,7 +118,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
-
         </plugins>
     </build>
 
