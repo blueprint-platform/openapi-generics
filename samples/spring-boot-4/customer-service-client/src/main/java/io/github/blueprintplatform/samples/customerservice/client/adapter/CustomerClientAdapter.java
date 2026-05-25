@@ -30,5 +30,5 @@ public interface CustomerClientAdapter {
 
   ServiceResponse<CustomerDto> updateCustomer(Integer customerId, CustomerUpdateRequest request);
 
-  ServiceResponse<Void> deleteCustomer(Integer customerId);
+  void deleteCustomer(Integer customerId);
 }

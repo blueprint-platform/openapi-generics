@@ -68,9 +68,8 @@ public class CustomerClientAdapterImpl implements CustomerClientAdapter {
   }
 
   @Override
-  public ServiceResponse<Void> deleteCustomer(Integer customerId) {
+  public void deleteCustomer(Integer customerId) {
     api.deleteCustomer(customerId);
-    return ServiceResponse.of(null);
   }
 
   private ServiceResponse<CustomerDto> mapData(

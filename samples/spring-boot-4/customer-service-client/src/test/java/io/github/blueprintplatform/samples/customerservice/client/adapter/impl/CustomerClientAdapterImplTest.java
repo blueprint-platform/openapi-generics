@@ -2,8 +2,8 @@ package io.github.blueprintplatform.samples.customerservice.client.adapter.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import io.github.blueprintplatform.contracts.customer.CustomerDto;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.Meta;
@@ -185,15 +185,14 @@ class CustomerClientAdapterImplTest {
   }
 
   @Test
-  @DisplayName("deleteCustomer -> returns empty ServiceResponse")
-  void deleteCustomer_delegates_and_wrapsVoidResponse() {
-    doNothing().when(api).deleteCustomer(any());
+  @DisplayName("deleteCustomer -> delegates directly without synthetic wrapper")
+  void deleteCustomer_delegatesDirectly() {
+    Integer targetId = 7;
+    doNothing().when(api).deleteCustomer(targetId);
 
-    ServiceResponse<Void> res = adapter.deleteCustomer(7);
-
-    assertNotNull(res);
-    assertNull(res.getData());
-    assertNotNull(res.getMeta());
+    adapter.deleteCustomer(targetId);
+    verify(api).deleteCustomer(targetId);
+    verifyNoMoreInteractions(api);
   }
 
   @Test

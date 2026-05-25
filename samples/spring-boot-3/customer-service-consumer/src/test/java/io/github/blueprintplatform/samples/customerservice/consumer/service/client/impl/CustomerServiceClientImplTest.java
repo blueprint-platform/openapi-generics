@@ -167,13 +167,10 @@ class CustomerServiceClientImplTest {
   @Test
   @DisplayName("deleteCustomer -> success")
   void deleteCustomer_success() {
-    ServiceResponse<Void> response = ServiceResponse.of(null);
+    doNothing().when(adapter).deleteCustomer(1);
 
-    when(adapter.deleteCustomer(1)).thenReturn(response);
+    service.deleteCustomer(1);
 
-    var result = service.deleteCustomer(1);
-
-    assertNotNull(result);
     verify(adapter).deleteCustomer(1);
   }
 
@@ -181,8 +178,7 @@ class CustomerServiceClientImplTest {
   @DisplayName("deleteCustomer -> propagates adapter exception")
   void deleteCustomer_exception() {
     RuntimeException ex = new RuntimeException("upstream failure");
-
-    when(adapter.deleteCustomer(1)).thenThrow(ex);
+    doThrow(ex).when(adapter).deleteCustomer(1);
 
     var thrown = assertThrows(RuntimeException.class, () -> service.deleteCustomer(1));
 

@@ -78,7 +78,6 @@ public class CustomerController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponse(responseCode = "204", description = "Customer deleted")
   public ResponseEntity<Void> deleteCustomer(@PathVariable @Min(1) Integer customerId) {
-
     customerService.deleteCustomer(customerId);
     return ResponseEntity.noContent().build();
   }

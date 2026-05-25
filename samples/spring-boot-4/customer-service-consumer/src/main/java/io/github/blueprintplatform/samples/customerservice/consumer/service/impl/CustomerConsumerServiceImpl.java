@@ -48,7 +48,7 @@ public class CustomerConsumerServiceImpl implements CustomerConsumerService {
   }
 
   @Override
-  public ServiceResponse<Void> deleteCustomer(Integer customerId) {
-    return customerServiceClient.deleteCustomer(customerId);
+  public void deleteCustomer(Integer customerId) {
+    customerServiceClient.deleteCustomer(customerId);
   }
 }
