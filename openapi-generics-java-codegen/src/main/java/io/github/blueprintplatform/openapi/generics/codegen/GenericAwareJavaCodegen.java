@@ -92,19 +92,17 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
   @Override
   public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> allModels) {
-    Map<String, ModelsMap> result = super.postProcessAllModels(allModels);
+    int before = allModels.size();
 
-    int before = result.size();
+    allModels.entrySet().removeIf(e -> ignoreDecider.isIgnored(e.getKey()));
 
-    result.entrySet().removeIf(e -> ignoreDecider.isIgnored(e.getKey()));
-
-    int after = result.size();
+    int after = allModels.size();
 
     if (before != after) {
       log.debug("Removed ignored models from global model graph: {} -> {}", before, after);
     }
 
-    return result;
+    return super.postProcessAllModels(allModels);
   }
 
   @Override
