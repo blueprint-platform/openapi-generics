@@ -16,8 +16,8 @@
 
     <name>openapi-generics-platform-bom</name>
     <description>
-        Internal platform BOM for OpenAPI Generics.
-        Defines version alignment across platform modules (contract, server, codegen).
+        Internal dependency alignment BOM for OpenAPI Generics.
+        Provides shared version management for platform-owned dependencies.
         Not intended for direct consumption by external projects.
     </description>
 

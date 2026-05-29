@@ -1,14 +1,19 @@
 # openapi-generics-java-codegen-parent
 
-> Build-time orchestration for deterministic, contract-aligned OpenAPI client generation
+> Build-time orchestration layer for deterministic, contract-aware OpenAPI client generation
 
-`openapi-generics-java-codegen-parent` is the parent POM that wires the full client-generation pipeline for `openapi-generics`.
+`openapi-generics-java-codegen-parent` is the build-time orchestration layer of the OpenAPI Generics client-generation platform.
 
-It turns OpenAPI client generation from ad hoc plugin configuration into a controlled build process.
+It assembles and controls the complete generation pipeline by combining:
+
+* upstream OpenAPI Generator
+* openapi-generics-java-codegen
+* platform templates
+* deterministic build orchestration
 
 Its role is precise:
 
-> Inherit one parent, provide your OpenAPI spec and normal client settings, and get contract-aligned Java client generation.
+> Inherit one parent, provide your OpenAPI specification and standard generator configuration, and get deterministic, contract-aware Java client generation.
 
 This is the primary integration surface for consumers.
 
@@ -33,16 +38,17 @@ This is the primary integration surface for consumers.
 
 ## What Problem It Solves
 
-Plain OpenAPI Generator setups usually become inconsistent across projects.
+Plain OpenAPI Generator setups tend to evolve differently across projects.
 
-That leads to:
+That often leads to:
 
 * duplicated envelope models
-* different template behavior between consumers
-* fragile regeneration
-* drift between published contract and generated client
+* inconsistent template behavior
+* fragile regeneration workflows
+* contract drift between producers and consumers
+* generation logic scattered across multiple build configurations
 
-This parent removes that variability by centralizing the build pipeline.
+This parent removes that variability by centralizing the entire generation workflow.
 
 ---
 
@@ -50,13 +56,15 @@ This parent removes that variability by centralizing the build pipeline.
 
 By inheriting this parent, a consumer gets:
 
+* upstream template extraction
+* deterministic template patching
+* template overlay orchestration
 * custom generator wiring (`java-generics-contract`)
-* template extraction from upstream OpenAPI Generator
-* deterministic template patching for wrapper support
-* local template overlay
-* generated source registration in the Maven build
+* generated source registration
+* fail-fast validation of generation assumptions
+* optional contract alignment (BYOC / BYOE)
 
-This means the consumer does not assemble the pipeline manually.
+The consumer does not assemble or maintain the generation pipeline manually.
 
 ---
 
@@ -67,19 +75,24 @@ At build time, the parent orchestrates this flow:
 ```text
 OpenAPI spec
    ↓
-Extract upstream model.mustache
+Extract upstream templates
    ↓
-Patch wrapper insertion hook
+Validate template structure
    ↓
-Overlay openapi-generics templates
+Patch wrapper insertion points
    ↓
-Run custom generator
+Overlay platform templates
    ↓
-Add generated sources to compilation
+Execute contract-aware generator
+   ↓
+Register generated sources
+   ↓
+Compile
 ```
 
 The patch step is validated.
-If the upstream `model.mustache` structure changes in a way that breaks wrapper insertion, the build fails fast.
+
+If the upstream template structure changes in a way that prevents wrapper integration, the build fails fast instead of generating potentially incorrect client code.
 
 ---
 
@@ -96,51 +109,11 @@ If the upstream `model.mustache` structure changes in a way that breaks wrapper 
 </parent>
 ```
 
-### 2. Configure the OpenAPI Generator plugin normally
+### 2. Configure OpenAPI Generator normally
 
-```xml
-<plugin>
-  <groupId>org.openapitools</groupId>
-  <artifactId>openapi-generator-maven-plugin</artifactId>
+Use the standard OpenAPI Generator plugin and configure your client as usual.
 
-  <executions>
-    <execution>
-      <id>generate-client</id>
-      <phase>generate-sources</phase>
-      <goals>
-        <goal>generate</goal>
-      </goals>
-
-      <configuration>
-        <generatorName>java-generics-contract</generatorName>
-        <inputSpec>${project.basedir}/src/main/resources/your-api-docs.yaml</inputSpec>
-
-        <library>your-library-choice</library>
-
-        <apiPackage>com.example.generated.api</apiPackage>
-        <modelPackage>com.example.generated.dto</modelPackage>
-        <invokerPackage>com.example.generated.invoker</invokerPackage>
-
-        <configOptions>
-          <!-- Spring Boot 4 -->
-          <!-- <useSpringBoot4>true</useSpringBoot4> -->
-          <useSpringBoot3>true</useSpringBoot3>
-          <serializationLibrary>your-choice</serializationLibrary>
-          <openApiNullable>false</openApiNullable>
-        </configOptions>
-
-        <cleanupOutput>true</cleanupOutput>
-        <skipValidateSpec>false</skipValidateSpec>
-
-        <generateApiDocumentation>false</generateApiDocumentation>
-        <generateApiTests>false</generateApiTests>
-        <generateModelDocumentation>false</generateModelDocumentation>
-        <generateModelTests>false</generateModelTests>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
-```
+The parent supplies the orchestration layer and contract-aware generator infrastructure.
 
 ### 3. Build
 
@@ -148,15 +121,13 @@ If the upstream `model.mustache` structure changes in a way that breaks wrapper 
 mvn clean install
 ```
 
-Generated sources are added automatically.
+Generated sources are registered automatically.
 
 ---
 
 ## Optional Contract Alignment
 
-The parent supports optional alignment with externally owned contract types.
-
-### BYOC — reuse external DTOs
+### BYOC — Bring Your Own Contract Models
 
 ```xml
 <additionalProperties>
@@ -166,7 +137,13 @@ The parent supports optional alignment with externally owned contract types.
 </additionalProperties>
 ```
 
-### BYOE — use your own envelope
+Effect:
+
+* externally owned DTOs are reused
+* DTO regeneration is suppressed
+* generated wrappers reference the contract type directly
+
+### BYOE — Bring Your Own Envelope
 
 ```xml
 <additionalProperties>
@@ -176,29 +153,29 @@ The parent supports optional alignment with externally owned contract types.
 </additionalProperties>
 ```
 
-Notes:
+Effect:
 
-* `openapi-generics.envelope` is not needed for the default `ServiceResponse<T>` path
-* if you configure a custom envelope, that envelope dependency must already exist on the client classpath
-* DTO mappings are optional and only needed when models come from an external/shared contract module
+* wrapper classes extend the configured envelope
+* envelope metadata is injected into generation templates
+* the envelope itself is not regenerated
 
 ---
 
 ## Compatibility Mode
 
-The parent also supports fallback mode.
+Fallback mode can be enabled:
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
 ```
 
-When enabled, the orchestration steps are skipped and the build falls back to standard OpenAPI Generator behavior.
+When enabled, orchestration steps are skipped and generation falls back to standard OpenAPI Generator behavior.
 
-Use this for:
+Typical use cases:
 
-* debugging generation differences
-* comparing outputs
-* incremental migration
+* debugging
+* migration validation
+* output comparison
 
 ---
 
@@ -206,41 +183,44 @@ Use this for:
 
 Consumers should control only the normal integration surface:
 
-* `inputSpec`
-* `library`
+* input specification
+* library selection
 * package names
-* standard generator config options
-* optional BYOC / BYOE properties
-* optional OpenAPI Generator version within supported range
+* standard OpenAPI Generator configuration
+* BYOC properties
+* BYOE properties
+* OpenAPI Generator version (within supported ranges)
 
-These are safe customization points.
+The parent provides defaults but does not require consumers to use a specific OpenAPI Generator version.
 
 ---
 
 ## What Users Should Not Override
 
-Consumers should not override the platform-controlled execution path, including:
+Consumers should not override platform-controlled orchestration steps:
 
-* generator name
-* template directory
-* patch pipeline behavior
-* local wrapper template wiring
+* template extraction workflow
+* template patching workflow
+* wrapper insertion mechanism
+* template overlay path
+* generator registration strategy
 
-Those parts are what make the generation deterministic and contract-aware.
+These components collectively define the deterministic generation pipeline.
 
 ---
 
 ## Compatibility
 
-| Component         | Supported Versions |
-| ----------------- | ------------------ |
-| Java              | 17+                |
-| OpenAPI Generator | 7.x                |
+| Component | Supported Versions |
+|------------|-------------------|
+| Java | 17+ |
+| OpenAPI Generator | Supported 7.x releases |
 
 Notes:
 
-* the parent defaults to OpenAPI Generator `7.22.0`
-* `restclient` requires OpenAPI Generator `7.6.0+`
+* the parent ships with a default OpenAPI Generator version
+* consumers may override the generator version when required
+* compatibility is validated against supported 7.x releases
 
 ---
 
@@ -249,11 +229,12 @@ Notes:
 The parent is designed to provide:
 
 * stable build phases
-* stable wrapper template injection
-* repeatable generated source layout
-* controlled generator wiring across consumers
+* repeatable template patching
+* consistent wrapper generation
+* deterministic source registration
+* controlled generator wiring
 
-This is how multiple client projects get the same contract-aligned behavior instead of drifting through local configuration.
+Multiple client projects therefore receive the same contract-aware behavior rather than diverging through local customization.
 
 ---
 
@@ -261,11 +242,11 @@ This is how multiple client projects get the same contract-aligned behavior inst
 
 The parent fails fast when structural assumptions break.
 
-Typical reasons:
+Typical causes:
 
-* upstream template structure changed
-* wrapper patch marker could not be inserted
-* generation path no longer matches platform expectations
+* upstream template structure changes
+* wrapper insertion markers cannot be applied
+* platform generation assumptions no longer hold
 
 Principle:
 
@@ -277,13 +258,13 @@ Principle:
 
 Think of this module as:
 
-> the build-time orchestrator for contract-safe Java client generation
+> the orchestration layer that turns OpenAPI Generator into a contract-aware client-generation pipeline
 
 Not:
 
 * a runtime library
 * a template bundle by itself
-* a convenience wrapper around OpenAPI Generator
+* a general-purpose OpenAPI Generator replacement
 
 ---
 

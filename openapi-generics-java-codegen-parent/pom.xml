@@ -15,7 +15,10 @@
     <packaging>pom</packaging>
 
     <name>openapi-generics-java-codegen-parent</name>
-    <description>Parent POM for deterministic, generics-aware OpenAPI client generation. Provides build-time orchestration and standardized generator configuration.</description>
+    <description>
+        Parent POM for contract-aware Java client generation.
+        Orchestrates OpenAPI Generator template extraction, patching, overlay, execution, and generated source registration.
+    </description>
 
     <properties>
         <openapi-generator.version>7.22.0</openapi-generator.version>
