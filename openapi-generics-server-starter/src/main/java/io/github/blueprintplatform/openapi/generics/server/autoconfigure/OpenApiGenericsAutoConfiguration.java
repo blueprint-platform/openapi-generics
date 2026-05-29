@@ -21,6 +21,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+/**
+ * Spring Boot auto-configuration for the OpenAPI Generics server starter.
+ *
+ * <p>Registers the beans required to connect Springdoc's {@link OpenApiCustomizer} extension point
+ * to the OpenAPI Generics projection pipeline.
+ *
+ * <p>This configuration is activated only when Springdoc is present and the application runs in a
+ * web environment. For servlet-based applications, it provides the Spring MVC response discovery
+ * strategy used to inspect controller return types.
+ *
+ * <p>The actual projection logic is implemented by the pipeline components registered here. This
+ * class is responsible only for conditional Spring Boot wiring and default bean composition.
+ */
 @AutoConfiguration
 @ConditionalOnClass(OpenApiCustomizer.class)
 @ConditionalOnWebApplication

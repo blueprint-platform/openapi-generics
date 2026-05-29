@@ -5,6 +5,12 @@ import io.github.blueprintplatform.openapi.generics.server.core.schema.contract.
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 
+/**
+ * Applies canonical wrapper metadata to generated OpenAPI wrapper schemas.
+ *
+ * <p>Enriches projected response wrapper schemas with the vendor extensions required by the
+ * OpenAPI Generics code generation contract.
+ */
 public final class ServiceResponseSchemaFactory {
 
   private ServiceResponseSchemaFactory() {}

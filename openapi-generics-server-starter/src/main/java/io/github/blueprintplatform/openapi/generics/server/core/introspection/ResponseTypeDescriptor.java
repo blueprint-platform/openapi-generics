@@ -2,6 +2,22 @@ package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
 import java.util.Objects;
 
+/**
+ /**
+ * Describes a supported contract-aware response shape discovered during introspection.
+ *
+ * <p>Acts as the semantic bridge between response type analysis and OpenAPI schema generation.
+ *
+ * <p>A descriptor may represent either:
+ *
+ * <ul>
+ *   <li>a simple response shape (for example, {@code ServiceResponse<CustomerDto>})
+ *   <li>a container response shape (for example, {@code ServiceResponse<Page<CustomerDto>>})
+ * </ul>
+ *
+ * <p>The extracted metadata is later used to generate wrapper schemas, apply vendor extensions,
+ * and validate the projected OpenAPI contract.
+ */
 public final class ResponseTypeDescriptor {
 
   private final Class<?> envelopeType;
