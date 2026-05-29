@@ -6,11 +6,13 @@ description: "OpenAPI Generics for Spring Boot — keep your API contract intact
 permalink: /
 ---
 
-# OpenAPI Generics for Spring Boot
+# OpenAPI Generics for Spring Boot — Keep Your API Contract Intact End-to-End
 
 > Keep your API contract intact end-to-end — Java types, OpenAPI document, generated clients.
 
-OpenAPI Generics is a deterministic, generics-aware API platform for Spring Boot. It treats your Java code as the source of truth for the contract, and OpenAPI as a faithful projection of it. The result: generic response shapes survive intact across the server, the spec, and every generated client — without duplicated envelope models, lost type parameters, or drift between layers.
+OpenAPI Generics is a contract-preserving OpenAPI generation platform for Spring Boot. It treats your Java code as the source of truth, OpenAPI as a projection of that contract, and client generation as a deterministic reconstruction of it.
+
+The result: shared envelopes and DTOs remain reusable across service boundaries, generic response shapes survive intact from producer to consumer, and generated clients stay aligned with the original contract without duplication or drift.
 
 [Get started](#get-started) · [View on GitHub](https://github.com/blueprint-platform/openapi-generics)
 
@@ -29,13 +31,13 @@ Springdoc projects it into OpenAPI. OpenAPI Generator produces a Java client. An
 ```java
 // Generated client — generics gone, envelope duplicated per endpoint
 public class ServiceResponsePageCustomerDto {
-  private List<CustomerDto> data;
+  private PageCustomerDto data;
   private Meta meta;
   // getters, setters, @JsonProperty, full envelope re-implementation...
 }
 
 public class ServiceResponsePageOrderDto {
-  private List<OrderDto> data;        // same shape
+  private PageOrderDto data;        // same shape
   private Meta meta;                  // same Meta
   // ...regenerated again, per endpoint
 }
@@ -78,7 +80,7 @@ public class ServiceResponsePageCustomerDto
 
 ---
 
-## What you get instead
+## Contract Reconstruction Without Redefinition
 
 The same controller, with openapi-generics:
 

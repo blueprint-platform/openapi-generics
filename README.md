@@ -16,10 +16,11 @@
 </p>
 
 <p align="center">
-  <strong>Stop generating duplicate <code>ServiceResponseXxxDto</code> classes when your Spring Boot APIs use generic envelopes.</strong>
+  <strong>Prevent OpenAPI Generator from redefining your Java contract.</strong>
   <br/>
-  <sub>A drop-in OpenAPI Generator specialization for Java/Spring that preserves <code>ServiceResponse&lt;Page&lt;T&gt;&gt;</code> end-to-end — no model explosion, no manual templates, no fork.</sub>
+  <sub>A contract-preserving OpenAPI Generator specialization for Java/Spring that keeps shared envelopes and DTOs reusable across service boundaries — no model explosion, no manual templates, no fork.</sub>
 </p>
+
 
 ---
 
