@@ -57,9 +57,9 @@ class ServiceResponsePageCustomerDto {
 }
 ```
 
-The envelope is duplicated per endpoint, generics are flattened,
-and `getData()` returns a flattened type that needs casting. Multiply by every
-endpoint and every service — the model graph quietly explodes.
+The envelope is duplicated per endpoint, generics are flattened, and the generated model becomes a reconstruction of the contract rather than the contract itself.
+
+As services multiply, a second model universe emerges: generated envelopes, generated DTOs, and service-specific wrapper types that must be mapped back and forth across service boundaries.
 
 With **openapi-generics**, the same client looks like this:
 
@@ -69,21 +69,41 @@ public class ServiceResponsePageCustomerDto
     extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-One envelope. Generics preserved. Same contract on the server, in the
-OpenAPI spec, and in every generated client.
+The difference is not simply fewer generated classes.
 
-<table>
-<tr>
-<td align="center"><b>Before</b><br/><sub>default OpenAPI Generator</sub></td>
-<td align="center"><b>After</b><br/><sub>with openapi-generics</sub></td>
-</tr>
-<tr>
-<td><img src="docs/images/proof/generated-client-wrapper-before.png" width="480"/></td>
-<td><img src="docs/images/proof/generated-client-wrapper-after.png" width="480"/></td>
-</tr>
-</table>
+The original contract remains reusable across the entire service lifecycle:
 
-> Define your contract once in Java — reuse it everywhere without drift.
+```text
+Producer Service
+      ↓
+Java Contract
+      ↓
+OpenAPI Projection
+      ↓
+Generated Client
+      ↓
+Consumer Service
+      ↓
+Consumer API
+```
+
+Instead of generating a new envelope hierarchy at every service boundary, the generated client reconstructs the original contract shape so downstream services can continue using the same envelope and payload types.
+
+This becomes increasingly important in microservice architectures.
+
+A BFF, aggregator, or downstream service may consume dozens of generated clients. Without contract reuse, every hop introduces duplicated envelopes, duplicated DTOs, and additional mapping layers whose only purpose is translating between structurally equivalent models.
+
+OpenAPI Generics takes a different approach.
+
+Contract-owned types remain contract-owned.
+
+The envelope is reused rather than regenerated. External DTOs can be reused through BYOC. Generated clients become thin transport adapters instead of alternative contract definitions.
+
+The result is that contract identity survives service boundaries without being continuously redefined.
+
+One contract-owned envelope. Generics preserved. Contract ownership remains intact from producer to consumer without recreating the model at every hop.
+
+> Define your contract once in Java, project it through OpenAPI, and reconstruct it deterministically across every generated client and downstream service.
 
 ---
 
@@ -308,7 +328,15 @@ module.
 
 ## How it works
 
-**openapi-generics** is built on one principle: **the Java contract is the source of truth, OpenAPI is a projection of it.**
+OpenAPI Generics is not primarily a generics solution.
+
+It is a contract preservation system that happens to use Java generics as the mechanism.
+
+The project is built on one principle:
+
+> The Java contract is the source of truth.
+> OpenAPI is a projection of that contract.
+> Client generation is a deterministic reconstruction of it.
 
 ```text
 Java Contract (SSOT)
@@ -403,6 +431,42 @@ the build fast if upstream changes invalidate the patch.
 Cross-language parity is an explicit non-goal. Java generics deserve a
 generics-aware solution; other languages may benefit from different
 specializations on top of the same upstream.
+
+### Generator version ownership
+
+OpenAPI Generics does not lock consumers to a specific OpenAPI Generator release.
+
+The `openapi-generics-java-codegen-parent` provides a tested default through the
+`openapi-generator.version` Maven property. Consumers can override that property
+in their own client module:
+
+```xml
+<properties>
+    <openapi-generator.version>7.22.0</openapi-generator.version>
+</properties>
+```
+
+The same property is used by the parent for:
+
+* extracting the upstream `model.mustache`
+* wiring `openapi-generator-maven-plugin`
+* resolving `openapi-generator` and `openapi-generator-core` plugin dependencies
+
+This keeps the client generation execution context version-coherent while still
+allowing consumers to choose the OpenAPI Generator version within the supported
+7.x line.
+
+For example, a client project may inherit
+`openapi-generics-java-codegen-parent` while selecting its own OpenAPI Generator
+version through the standard Maven property mechanism.
+
+This is intentional.
+
+OpenAPI Generics specializes generation behavior; it does not take ownership of
+the OpenAPI Generator lifecycle itself.
+
+> OpenAPI Generics owns the contract semantics.
+> Consumers own the generator version they choose to run.
 
 ---
 

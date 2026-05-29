@@ -378,13 +378,25 @@ For contributors navigating the codebase:
 | [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md)          | Runtime | Auto-configures the projection pipeline. Loaded into Spring Boot apps that use springdoc. |
 | [`openapi-generics-java-codegen`](../..//openapi-generics-java-codegen/README.md)             | Build-time | The `GenericAwareJavaCodegen` extension. Activated when the generator name is `java-generics-contract`. |
 | [`openapi-generics-java-codegen-parent`](../../openapi-generics-java-codegen-parent/README.md) | Build-time (parent POM) | The orchestration layer described in [Client-side: the build pipeline](#client-side-the-build-pipeline). |
-| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md)             | Build-time (BOM) | Aligned versions for all of the above. Imported in `dependencyManagement`. |
+| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md) | Build-time (BOM) | Internal version alignment for platform-owned dependencies such as contract and Springdoc integration. Does not control OpenAPI Generator or Spring Boot versions. |
 
 Live entry points:
 
 - Server pipeline: `OpenApiGenericsAutoConfiguration` → `OpenApiPipelineOrchestrator`
 - Client codegen: `GenericAwareJavaCodegen` (registered via `META-INF/services/org.openapitools.codegen.CodegenConfig`)
 - Build orchestration: `openapi-generics-java-codegen-parent/pom.xml`, `<pluginManagement>` block
+
+### Version ownership
+
+The platform intentionally separates platform-owned dependencies from
+consumer-owned dependencies.
+
+Platform-owned versions are aligned through
+`openapi-generics-platform-bom`.
+
+Consumer-owned dependencies, including Spring Boot and OpenAPI Generator,
+remain under consumer control and may be overridden independently within
+the supported compatibility range.
 
 ---
 
