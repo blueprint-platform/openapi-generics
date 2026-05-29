@@ -57,10 +57,6 @@ class ServiceResponsePageCustomerDto {
 }
 ```
 
-The envelope is duplicated per endpoint, generics are flattened, and the generated model becomes a reconstruction of the contract rather than the contract itself.
-
-As services multiply, a second model universe emerges: generated envelopes, generated DTOs, and service-specific wrapper types that must be mapped back and forth across service boundaries.
-
 With **openapi-generics**, the same client looks like this:
 
 ```java
@@ -69,9 +65,26 @@ public class ServiceResponsePageCustomerDto
     extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-The difference is not simply fewer generated classes.
+The difference looks small.
 
-The original contract remains reusable across the entire service lifecycle:
+Architecturally, it is not.
+
+<table>
+<tr>
+<td align="center"><b>Before</b><br/><sub>default OpenAPI Generator</sub></td>
+<td align="center"><b>After</b><br/><sub>with openapi-generics</sub></td>
+</tr>
+<tr>
+<td><img src="docs/images/proof/generated-client-wrapper-before.png" width="480"/></td>
+<td><img src="docs/images/proof/generated-client-wrapper-after.png" width="480"/></td>
+</tr>
+</table>
+
+The generated class on the left owns the envelope structure.
+
+The generated class on the right only binds generic parameters to an existing contract.
+
+That distinction changes how contracts move across service boundaries.
 
 ```text
 Producer Service
