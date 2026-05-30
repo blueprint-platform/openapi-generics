@@ -8,14 +8,14 @@ plugins:
 
 baseurl: "/openapi-generics"
 
-# TOC davranışı (Home sayfa için kritik)
 toc:
   min_level: 2
   max_level: 2
 
-# Üst sağ link
 aux_links:
   "GitHub":
     - "https://github.com/blueprint-platform/openapi-generics"
 
 search_enabled: true
+
+ga_tracking: G-4NH21XZLBN
