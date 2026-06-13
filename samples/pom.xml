@@ -13,8 +13,8 @@
 
     <name>openapi-generics-samples</name>
     <description>
-        Reference implementations and end-to-end sample applications for the OpenAPI Generics platform.
-        Includes Spring Boot 3 and Spring Boot 4 producer, generated client, and consumer pipelines.
+        Reference implementations and end-to-end validation samples for the OpenAPI Generics platform.
+        Includes Spring Boot integration samples, canonical ServiceResponse coverage, and BYOE contract validation scenarios.
     </description>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
 
@@ -61,6 +61,8 @@
         <module>spring-boot-4/customer-service</module>
         <module>spring-boot-4/customer-service-client</module>
         <module>spring-boot-4/customer-service-consumer</module>
+        <module>type-coverage/service-response</module>
+        <module>type-coverage/byoe-response</module>
     </modules>
 
     <build>

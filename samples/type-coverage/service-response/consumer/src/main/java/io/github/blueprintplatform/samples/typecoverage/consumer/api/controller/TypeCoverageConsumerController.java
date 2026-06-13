@@ -1,0 +1,94 @@
+package io.github.blueprintplatform.samples.typecoverage.consumer.api.controller;
+
+import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.AddressDto;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.CoverageStatus;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
+import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
+public class TypeCoverageConsumerController {
+
+  private final TypeCoverageConsumerService service;
+
+  public TypeCoverageConsumerController(TypeCoverageConsumerService service) {
+    this.service = service;
+  }
+
+  @GetMapping("/scalars/string")
+  public ResponseEntity<ServiceResponse<String>> stringValue() {
+    return ResponseEntity.ok(service.stringValue());
+  }
+
+  @GetMapping("/scalars/boolean")
+  public ResponseEntity<ServiceResponse<Boolean>> booleanValue() {
+    return ResponseEntity.ok(service.booleanValue());
+  }
+
+  @GetMapping("/scalars/integer")
+  public ResponseEntity<ServiceResponse<Integer>> integerValue() {
+    return ResponseEntity.ok(service.integerValue());
+  }
+
+  @GetMapping("/scalars/long")
+  public ResponseEntity<ServiceResponse<Long>> longValue() {
+    return ResponseEntity.ok(service.longValue());
+  }
+
+  @GetMapping("/scalars/decimal")
+  public ResponseEntity<ServiceResponse<BigDecimal>> decimalValue() {
+    return ResponseEntity.ok(service.decimalValue());
+  }
+
+  @GetMapping("/values/uuid")
+  public ResponseEntity<ServiceResponse<UUID>> uuidValue() {
+    return ResponseEntity.ok(service.uuidValue());
+  }
+
+  @GetMapping("/values/date")
+  public ResponseEntity<ServiceResponse<LocalDate>> dateValue() {
+    return ResponseEntity.ok(service.dateValue());
+  }
+
+  @GetMapping("/values/datetime")
+  public ResponseEntity<ServiceResponse<OffsetDateTime>> dateTimeValue() {
+    return ResponseEntity.ok(service.dateTimeValue());
+  }
+
+  @GetMapping("/values/enum")
+  public ResponseEntity<ServiceResponse<CoverageStatus>> enumValue() {
+    return ResponseEntity.ok(service.enumValue());
+  }
+
+  @GetMapping("/objects/address")
+  public ResponseEntity<ServiceResponse<AddressDto>> address() {
+    return ResponseEntity.ok(service.address());
+  }
+
+  @GetMapping("/objects/profile")
+  public ResponseEntity<ServiceResponse<TypeProfileDto>> profile() {
+    return ResponseEntity.ok(service.profile());
+  }
+
+  @GetMapping("/pages/summaries")
+  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> summaries() {
+    return ResponseEntity.ok(service.summaries());
+  }
+
+  @GetMapping("/pages/statuses")
+  public ResponseEntity<ServiceResponse<Page<CoverageStatus>>> statuses() {
+    return ResponseEntity.ok(service.statuses());
+  }
+}

@@ -1,0 +1,423 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://localhost:8074/type-coverage/service-response
+    description: Generated server url
+paths:
+  /types/values/uuid:
+    get:
+      tags:
+        - value-payload-controller
+      operationId: uuidValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseUUID"
+  /types/values/enum:
+    get:
+      tags:
+        - value-payload-controller
+      operationId: enumValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseCoverageStatus"
+  /types/values/datetime:
+    get:
+      tags:
+        - value-payload-controller
+      operationId: dateTimeValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseOffsetDateTime"
+  /types/values/date:
+    get:
+      tags:
+        - value-payload-controller
+      operationId: dateValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseLocalDate"
+  /types/scalars/string:
+    get:
+      tags:
+        - scalar-payload-controller
+      operationId: stringValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseString"
+  /types/scalars/long:
+    get:
+      tags:
+        - scalar-payload-controller
+      operationId: longValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseLong"
+  /types/scalars/integer:
+    get:
+      tags:
+        - scalar-payload-controller
+      operationId: integerValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseInteger"
+  /types/scalars/decimal:
+    get:
+      tags:
+        - scalar-payload-controller
+      operationId: decimalValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseBigDecimal"
+  /types/scalars/boolean:
+    get:
+      tags:
+        - scalar-payload-controller
+      operationId: booleanValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseBoolean"
+  /types/pages/summaries:
+    get:
+      tags:
+        - paged-payload-controller
+      operationId: summaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponsePageTypeSummaryDto"
+  /types/pages/statuses:
+    get:
+      tags:
+        - paged-payload-controller
+      operationId: statuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponsePageCoverageStatus"
+  /types/objects/profile:
+    get:
+      tags:
+        - object-payload-controller
+      operationId: profile
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseTypeProfileDto"
+  /types/objects/address:
+    get:
+      tags:
+        - object-payload-controller
+      operationId: address
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseAddressDto"
+components:
+  schemas:
+    Meta:
+      type: object
+      properties:
+        serverTime:
+          type: string
+          format: date-time
+        sort:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sort"
+      x-ignore-model: true
+    ServiceResponseUUID:
+      type: object
+      properties:
+        data:
+          type: string
+          format: uuid
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: UUID
+    Sort:
+      type: object
+      properties:
+        field:
+          type: string
+        direction:
+          type: string
+          enum:
+            - ASC
+            - DESC
+      x-ignore-model: true
+    CoverageStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - PASSIVE
+        - EXPERIMENTAL
+    ServiceResponseCoverageStatus:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CoverageStatus"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CoverageStatus
+    ServiceResponseOffsetDateTime:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date-time
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: OffsetDateTime
+    ServiceResponseLocalDate:
+      type: object
+      properties:
+        data:
+          type: string
+          format: date
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: LocalDate
+    ServiceResponseString:
+      type: object
+      properties:
+        data:
+          type: string
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: String
+    ServiceResponseLong:
+      type: object
+      properties:
+        data:
+          type: integer
+          format: int64
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Long
+    ServiceResponseInteger:
+      type: object
+      properties:
+        data:
+          type: integer
+          format: int32
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Integer
+    ServiceResponseBigDecimal:
+      type: object
+      properties:
+        data:
+          type: number
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: BigDecimal
+    ServiceResponseBoolean:
+      type: object
+      properties:
+        data:
+          type: boolean
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Boolean
+    PageTypeSummaryDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponsePageTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PageTypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PageTypeSummaryDto
+      x-data-container: Page
+      x-data-item: TypeSummaryDto
+    TypeSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+    PageCoverageStatus:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+      x-ignore-model: true
+    ServiceResponsePageCoverageStatus:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/PageCoverageStatus"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PageCoverageStatus
+      x-data-container: Page
+      x-data-item: CoverageStatus
+    AddressDto:
+      type: object
+      properties:
+        city:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
+    ServiceResponseTypeProfileDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TypeProfileDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: TypeProfileDto
+    TypeProfileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        enabled:
+          type: boolean
+        priority:
+          type: integer
+          format: int32
+        version:
+          type: integer
+          format: int64
+        score:
+          type: number
+        effectiveDate:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+        address:
+          $ref: "#/components/schemas/AddressDto"
+        tags:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+    ServiceResponseAddressDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/AddressDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: AddressDto

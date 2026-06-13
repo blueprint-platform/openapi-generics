@@ -1,0 +1,34 @@
+server:
+  port: ${APP_PORT:8076}
+  servlet:
+    context-path: /type-coverage/byoe-response
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+spring:
+  application:
+    name: byoe-response-producer
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    io.github.blueprintplatform: DEBUG
+
+app:
+  openapi:
+    version: @project.version@
+    base-url: "http://localhost:${server.port}${server.servlet.context-path:}"
+
+openapi-generics:
+  envelope:
+    type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
+
+springdoc:
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

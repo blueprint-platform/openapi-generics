@@ -37,12 +37,19 @@ Behavior is identical. Only runtime differs.
 samples
 ├── domain-contracts
 ├── spring-boot-3
-└── spring-boot-4
+├── spring-boot-4
+└── type-coverage
 ```
 
 Each stack is self-contained and runnable.
 
 ---
+
+## Type Coverage Samples
+
+The `type-coverage` directory contains focused validation samples used to verify OpenAPI projection, wrapper reconstruction, generated client behavior, and regression scenarios.
+
+See the individual sample documentation for details.
 
 ## Prerequisites
 

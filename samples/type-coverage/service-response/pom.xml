@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.blueprint-platform.samples</groupId>
+        <artifactId>samples</artifactId>
+        <version>1.0.3-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>service-response-type-coverage</artifactId>
+    <packaging>pom</packaging>
+
+    <name>service-response-type-coverage</name>
+    <description>
+        Type coverage sample for the canonical ServiceResponse&lt;T&gt; envelope.
+        Validates scalar, value, DTO, enum, and paged DTO payload projection.
+    </description>
+
+    <modules>
+        <module>producer</module>
+        <module>client</module>
+        <module>consumer</module>
+    </modules>
+
+</project>

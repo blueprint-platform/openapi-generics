@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.blueprint-platform.samples</groupId>
+        <artifactId>samples</artifactId>
+        <version>1.0.3-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>byoe-response-type-coverage</artifactId>
+    <packaging>pom</packaging>
+
+    <name>byoe-response-type-coverage</name>
+    <description>
+        Type coverage sample for a custom BYOE response envelope.
+        Validates simple payload projection and client reconstruction with a user-defined ApiResponse&lt;T&gt; contract.
+    </description>
+
+    <modules>
+        <module>contract</module>
+        <module>producer</module>
+        <module>client</module>
+    </modules>
+
+</project>
