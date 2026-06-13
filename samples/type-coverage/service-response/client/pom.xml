@@ -21,13 +21,12 @@
     <description>
         Generated client for ServiceResponse&lt;T&gt; type coverage validation.
     </description>
-    <url>https://github.com/blueprint-platform/openapi-generics</url>
 
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.5.14</spring-boot.version>
-        <openapi-generator.version>7.22.0</openapi-generator.version>
+        <spring-boot.version>3.5.15</spring-boot.version>
+        <openapi-generator.version>7.23.0</openapi-generator.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <slf4j-api.version>2.0.18</slf4j-api.version>

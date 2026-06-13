@@ -18,34 +18,6 @@
 
     <name>customer-service-client-sb4</name>
     <description>Generated client (RestClient) using generics-aware OpenAPI templates</description>
-    <url>https://github.com/blueprint-platform/openapi-generics</url>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/blueprint-platform/openapi-generics</url>
-        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <developers>
-        <developer>
-            <id>bsayli</id>
-            <name>Baris Sayli</name>
-            <url>https://github.com/bsayli</url>
-            <roles>
-                <role>creator</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
 
     <properties>
         <java.version>21</java.version>
@@ -53,7 +25,7 @@
 
         <customer-contract.version>1.0.3-SNAPSHOT</customer-contract.version>
         <spring-boot.version>4.0.6</spring-boot.version>
-        <openapi-generator.version>7.22.0</openapi-generator.version>
+        <openapi-generator.version>7.23.0</openapi-generator.version>
         <jakarta.validation.version>3.1.1</jakarta.validation.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
         <mockwebserver.version>5.3.2</mockwebserver.version>

@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>3.5.15</version>
         <relativePath/>
     </parent>
 
@@ -19,34 +19,6 @@
 
     <name>customer-service-sb3</name>
     <description>Spring Boot reference producer for the OpenAPI Generics platform</description>
-    <url>https://github.com/blueprint-platform/openapi-generics</url>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/blueprint-platform/openapi-generics</url>
-        <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <developers>
-        <developer>
-            <id>bsayli</id>
-            <name>Baris Sayli</name>
-            <url>https://github.com/bsayli</url>
-            <roles>
-                <role>creator</role>
-                <role>maintainer</role>
-            </roles>
-        </developer>
-    </developers>
 
     <properties>
         <java.version>21</java.version>

@@ -60,8 +60,8 @@ Fully compatible with the 1.0.0 GA contract.
 - Refined Maven POM hygiene across platform modules.
 - Kept the root aggregator lifecycle-safe while preserving shared plugin management.
 - Clarified build ownership between the root aggregator, platform modules, and the codegen parent.
-- Updated OpenAPI Generator alignment to 7.22.0.
-- Upgraded Spring Boot baseline from 3.5.13 to 3.5.14 across platform modules and samples.
+- Updated OpenAPI Generator alignment to 7.23.0.
+- Upgraded Spring Boot baseline from 3.5.13 to 3.5.15 across platform modules and samples.
 - Documented upstream template governance and fail-fast patch validation.
 - Strengthened dependency alignment and explicitly controlled transitive versions where necessary.
 
