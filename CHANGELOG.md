@@ -10,6 +10,51 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [1.0.3] - 2026-06-13
+
+### Patch release
+
+OpenAPI Generics 1.0.3 is a platform hardening and verification update for the 1.0.x GA line.
+
+No contract changes.  
+No public API behavior changes.  
+No generated client structure changes.
+
+Fully compatible with the 1.0.0, 1.0.1, and 1.0.2 GA contracts.
+
+### Changed
+
+- Added dedicated type coverage sample suites for canonical `ServiceResponse<T>` and custom BYOE response envelopes.
+- Added focused validation scenarios covering generic wrapper reconstruction, projection correctness, and generated client behavior.
+- Expanded sample documentation with dedicated type coverage guides and verification flows.
+- Added missing BYOE OpenAPI specifications required for complete sample validation.
+- Upgraded platform modules and samples to Spring Boot 3.5.15.
+- Upgraded OpenAPI Generator alignment to 7.23.0.
+- Upgraded Spring Boot 4 samples to Spring Boot 4.0.7.
+- Simplified sample module metadata and improved sample build structure consistency.
+- Added direct enum payload support documentation and clarified enum component requirements.
+
+### Quality & Verification
+
+- Enforced reusable OpenAPI component requirements for direct enum generic payloads through `@Schema(enumAsRef = true)` validation.
+- Prevented unsupported inline enum payloads from producing generic wrapper reconstruction metadata.
+- Fixed generator lifecycle handling by removing ignored models before upstream global model graph processing.
+- Eliminated misleading null-model warnings caused by intentionally ignored schemas during client generation.
+- Ensured deterministic OpenAPI Generator version alignment across plugin execution, runtime dependencies, and template extraction.
+- Added regression coverage for enum payload discovery, ignored model processing, and generator version consistency.
+- Verified Spring Boot 3 and Spring Boot 4 sample pipelines after framework upgrades.
+- Verified Docker-based sample execution and end-to-end producer/client/consumer flows.
+- Closed all known 1.0.x platform issues related to enum payload validation, ignored model processing, and generator version alignment.
+
+### Compatibility
+
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Maven-based client generation
+
+---
+
 ## [1.0.2] - 2026-05-16
 
 ### Patch release

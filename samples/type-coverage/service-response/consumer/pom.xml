@@ -14,7 +14,7 @@
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>service-response-consumer</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <name>service-response-consumer</name>
@@ -24,7 +24,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <service-response-client.version>1.0.3-SNAPSHOT</service-response-client.version>
+        <service-response-client.version>1.0.3</service-response-client.version>
     </properties>
 
     <dependencies>

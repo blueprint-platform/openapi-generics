@@ -8,13 +8,13 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>service-response-client</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <name>service-response-client</name>

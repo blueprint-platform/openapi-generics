@@ -187,7 +187,7 @@ You don't copy code from this repo — you add two building blocks.
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
@@ -202,7 +202,7 @@ You don't copy code from this repo — you add two building blocks.
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </parent>
 ```
 
