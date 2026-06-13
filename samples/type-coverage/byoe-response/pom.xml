@@ -26,6 +26,7 @@
         <module>contract</module>
         <module>producer</module>
         <module>client</module>
+        <module>consumer</module>
     </modules>
 
 </project>
