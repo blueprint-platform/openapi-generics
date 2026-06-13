@@ -126,6 +126,33 @@ public ResponseEntity<ApiResponse<CustomerDto>> getCustomer(@PathVariable Long i
 
 Generated OpenAPI is the same shape as the default case — only the wrapper class name and envelope identity change. `ApiResponse` itself is stamped ignored; the client imports it from your classpath.
 
+### Direct enum payloads
+
+Direct enum payloads are supported when the enum is published as a reusable OpenAPI schema component.
+
+For Springdoc users, annotate the enum with:
+
+```java
+@Schema(enumAsRef = true)
+public enum CoverageStatus {
+  ACTIVE,
+  PASSIVE,
+  EXPERIMENTAL
+}
+```
+
+Supported examples:
+
+```java
+ResponseEntity<ServiceResponse<CoverageStatus>>
+ResponseEntity<ServiceResponse<Page<CoverageStatus>>>
+ResponseEntity<ApiResponse<CoverageStatus>>
+```
+
+Inline enum payloads are intentionally not supported because openapi-generics does not extract inline schemas into reusable components.
+
+Enums inside DTOs are unaffected and continue to be handled by the regular OpenAPI toolchain.
+
 ### Mixed return types in the same controller
 
 ```java
