@@ -125,13 +125,23 @@ One contract-owned envelope. Generics preserved. Contract ownership remains inta
 
 ### 1. Try it in 2 minutes
 
-Runnable end-to-end sample stacks are available under [samples](samples/).
+Runnable end-to-end sample stacks are available under [samples](samples/), including Spring Boot 3, Spring Boot 4, and dedicated type-coverage samples covering supported payload types, wrapper shapes, and generic response patterns.
 
-Each stack contains:
-
-* a producer service,
-* a generated client,
-* and a downstream consumer.
+```text
+samples
+├── domain-contracts
+├── spring-boot-3
+│   ├── customer-service
+│   ├── customer-service-client
+│   └── customer-service-consumer
+├── spring-boot-4
+│   ├── customer-service
+│   ├── customer-service-client
+│   └── customer-service-consumer
+└── type-coverage
+    ├── service-response
+    └── byoe-response
+```
 
 See [samples/README.md](samples/README.md) for the full topology,
 Docker-based setup, and stack overview.
