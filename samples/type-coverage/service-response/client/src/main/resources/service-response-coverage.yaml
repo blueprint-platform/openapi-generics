@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OpenAPI definition
-  version: 1.0.3
+  version: 1.0.4-SNAPSHOT
 servers:
   - url: http://localhost:8074/type-coverage/service-response
     description: Generated server url
