@@ -29,8 +29,7 @@
         <module>domain-contracts</module>
         <module>spring-boot-3</module>
         <module>spring-boot-4</module>
-        <module>type-coverage/service-response</module>
-        <module>type-coverage/byoe-response</module>
+        <module>type-coverage</module>
     </modules>
     <build>
         <pluginManagement>

@@ -122,36 +122,49 @@ public final class ResponseTypeIntrospector {
 
     return null;
   }
-
   private Optional<ResponseTypeDescriptor> buildDescriptor(ResolvableType dataType) {
     Class<?> raw = dataType.resolve();
     if (raw == null) {
       return Optional.empty();
     }
 
-    for (Class<?> containerType : supportedContainers) {
-      if (containerType.isAssignableFrom(raw)) {
-        ResolvableType itemType = safeGeneric(dataType);
-        if (itemType.hasGenerics()) {
-          return Optional.empty();
-        }
-        Class<?> itemRaw = itemType.resolve();
-        if (!isSupportedPayloadType(itemRaw)) {
-          return Optional.empty();
-        }
-
-        return Optional.of(
-                ResponseTypeDescriptor.container(
-                        envelopeType,
-                        payloadPropertyName,
-                        containerType.getSimpleName(),
-                        itemRaw.getSimpleName()));
-      }
+    Optional<ResponseTypeDescriptor> containerDescriptor = buildContainerDescriptor(dataType, raw);
+    if (containerDescriptor.isPresent()) {
+      return containerDescriptor;
     }
 
     if (!dataType.hasGenerics() && isSupportedPayloadType(raw)) {
       return Optional.of(
               ResponseTypeDescriptor.simple(envelopeType, payloadPropertyName, raw.getSimpleName()));
+    }
+
+    return Optional.empty();
+  }
+
+  private Optional<ResponseTypeDescriptor> buildContainerDescriptor(
+          ResolvableType dataType, Class<?> raw) {
+
+    for (Class<?> containerType : supportedContainers) {
+      if (!containerType.isAssignableFrom(raw)) {
+        continue;
+      }
+
+      ResolvableType itemType = safeGeneric(dataType);
+      if (itemType.hasGenerics()) {
+        return Optional.empty();
+      }
+
+      Class<?> itemRaw = itemType.resolve();
+      if (!isSupportedPayloadType(itemRaw)) {
+        return Optional.empty();
+      }
+
+      return Optional.of(
+              ResponseTypeDescriptor.container(
+                      envelopeType,
+                      payloadPropertyName,
+                      containerType.getSimpleName(),
+                      itemRaw.getSimpleName()));
     }
 
     return Optional.empty();
