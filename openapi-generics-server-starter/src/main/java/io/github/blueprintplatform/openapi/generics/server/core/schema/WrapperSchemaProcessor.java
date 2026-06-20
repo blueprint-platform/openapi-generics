@@ -27,7 +27,7 @@ public class WrapperSchemaProcessor {
   public void process(OpenAPI openApi, ResponseTypeDescriptor descriptor) {
     Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-    Schema<?> wrapper = ServiceResponseSchemaFactory.enrichComposedWrapper(schemas, descriptor);
+    Schema<?> wrapper = WrapperSchemaMetadataApplier.apply(schemas, descriptor);
 
     log.debug("Wrapper schema '{}' enriched", wrapper.getName());
 

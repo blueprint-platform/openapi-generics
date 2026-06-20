@@ -143,7 +143,7 @@
                         </goals>
                         <configuration>
                             <generatorName>java-generics-contract</generatorName>
-                            <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../spec/customer-api-docs.yaml</inputSpec>
 
                             <library>restclient</library>
 

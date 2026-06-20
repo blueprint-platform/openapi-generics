@@ -16,7 +16,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>../domain-contracts</module>
         <module>customer-service</module>
         <module>customer-service-client</module>
         <module>customer-service-consumer</module>

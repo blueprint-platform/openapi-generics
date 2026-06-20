@@ -3,7 +3,6 @@ package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 import java.util.Objects;
 
 /**
- /**
  * Describes a supported contract-aware response shape discovered during introspection.
  *
  * <p>Acts as the semantic bridge between response type analysis and OpenAPI schema generation.

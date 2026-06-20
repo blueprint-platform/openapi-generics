@@ -27,16 +27,11 @@
 
     <modules>
         <module>domain-contracts</module>
-        <module>spring-boot-3/customer-service</module>
-        <module>spring-boot-3/customer-service-client</module>
-        <module>spring-boot-3/customer-service-consumer</module>
-        <module>spring-boot-4/customer-service</module>
-        <module>spring-boot-4/customer-service-client</module>
-        <module>spring-boot-4/customer-service-consumer</module>
+        <module>spring-boot-3</module>
+        <module>spring-boot-4</module>
         <module>type-coverage/service-response</module>
         <module>type-coverage/byoe-response</module>
     </modules>
-
     <build>
         <pluginManagement>
             <plugins>

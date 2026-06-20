@@ -1,15 +1,17 @@
 openapi: 3.1.0
 info:
-  title: OpenAPI definition
+  title: ServiceResponse Type Coverage API
+  description: "Type coverage sample for ServiceResponse<T>, ServiceResponse<List<T>>,\
+    \ and ServiceResponse<Page<T>> projection."
   version: 1.1.0-SNAPSHOT
 servers:
-  - url: http://localhost:8074/type-coverage/service-response
-    description: Generated server url
+- url: http://localhost:8074/type-coverage/service-response
+  description: Local service-response type coverage producer
 paths:
   /types/values/uuid:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: uuidValue
       responses:
         "200":
@@ -21,7 +23,7 @@ paths:
   /types/values/enum:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: enumValue
       responses:
         "200":
@@ -33,7 +35,7 @@ paths:
   /types/values/datetime:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: dateTimeValue
       responses:
         "200":
@@ -45,7 +47,7 @@ paths:
   /types/values/date:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: dateValue
       responses:
         "200":
@@ -57,7 +59,7 @@ paths:
   /types/scalars/string:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: stringValue
       responses:
         "200":
@@ -69,7 +71,7 @@ paths:
   /types/scalars/long:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: longValue
       responses:
         "200":
@@ -81,7 +83,7 @@ paths:
   /types/scalars/integer:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: integerValue
       responses:
         "200":
@@ -93,7 +95,7 @@ paths:
   /types/scalars/decimal:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: decimalValue
       responses:
         "200":
@@ -105,7 +107,7 @@ paths:
   /types/scalars/boolean:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: booleanValue
       responses:
         "200":
@@ -117,7 +119,7 @@ paths:
   /types/pages/summaries:
     get:
       tags:
-        - paged-payload-controller
+      - paged-payload-controller
       operationId: pagedSummaries
       responses:
         "200":
@@ -129,7 +131,7 @@ paths:
   /types/pages/statuses:
     get:
       tags:
-        - paged-payload-controller
+      - paged-payload-controller
       operationId: pagedStatuses
       responses:
         "200":
@@ -141,7 +143,7 @@ paths:
   /types/objects/profile:
     get:
       tags:
-        - object-payload-controller
+      - object-payload-controller
       operationId: profile
       responses:
         "200":
@@ -153,7 +155,7 @@ paths:
   /types/objects/address:
     get:
       tags:
-        - object-payload-controller
+      - object-payload-controller
       operationId: address
       responses:
         "200":
@@ -165,7 +167,7 @@ paths:
   /types/lists/summaries:
     get:
       tags:
-        - list-payload-controller
+      - list-payload-controller
       operationId: listSummaries
       responses:
         "200":
@@ -177,7 +179,7 @@ paths:
   /types/lists/statuses:
     get:
       tags:
-        - list-payload-controller
+      - list-payload-controller
       operationId: listStatuses
       responses:
         "200":
@@ -217,15 +219,15 @@ components:
         direction:
           type: string
           enum:
-            - ASC
-            - DESC
+          - ASC
+          - DESC
       x-ignore-model: true
     CoverageStatus:
       type: string
       enum:
-        - ACTIVE
-        - PASSIVE
-        - EXPERIMENTAL
+      - ACTIVE
+      - PASSIVE
+      - EXPERIMENTAL
     ServiceResponseCoverageStatus:
       type: object
       properties:

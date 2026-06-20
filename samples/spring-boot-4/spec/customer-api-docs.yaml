@@ -1,25 +1,26 @@
 openapi: 3.1.0
 info:
   title: Customer Service API
-  description: Customer Service API with type-safe generic responses using OpenAPI
+  description: Spring Boot 4 customer-service sample using ServiceResponse<T> and
+    ServiceResponse<Page<T>> projection.
   version: 1.1.0-SNAPSHOT
 servers:
-  - url: http://localhost:8084/customer-service
-    description: Local service URL
+- url: http://localhost:8094/customer-service
+  description: Local customer-service producer
 paths:
   /customers/{customerId}:
     get:
       tags:
-        - customer-controller
+      - customer-controller
       operationId: getCustomer
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
       responses:
         "200":
           description: OK
@@ -29,16 +30,16 @@ paths:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
     put:
       tags:
-        - customer-controller
+      - customer-controller
       operationId: updateCustomer
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
       requestBody:
         content:
           application/json:
@@ -54,71 +55,71 @@ paths:
                 $ref: "#/components/schemas/ServiceResponseCustomerDto"
     delete:
       tags:
-        - customer-controller
+      - customer-controller
       operationId: deleteCustomer
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
       responses:
         "204":
           description: Customer deleted
   /customers:
     get:
       tags:
-        - customer-controller
+      - customer-controller
       operationId: getCustomers
       parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: email
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 0
-            minimum: 0
-        - name: size
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 5
-            maximum: 10
-            minimum: 1
-        - name: sortBy
-          in: query
-          required: false
-          schema:
-            type: string
-            default: customerId
-            enum:
-              - customerId
-              - name
-              - email
-        - name: direction
-          in: query
-          required: false
-          schema:
-            type: string
-            default: ASC
-            enum:
-              - ASC
-              - DESC
+      - name: name
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: email
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+          minimum: 0
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 5
+          maximum: 10
+          minimum: 1
+      - name: sortBy
+        in: query
+        required: false
+        schema:
+          type: string
+          default: customerId
+          enum:
+          - customerId
+          - name
+          - email
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+          default: ASC
+          enum:
+          - ASC
+          - DESC
       responses:
         "200":
           description: OK
@@ -128,7 +129,7 @@ paths:
                 $ref: "#/components/schemas/ServiceResponsePageCustomerDto"
     post:
       tags:
-        - customer-controller
+      - customer-controller
       operationId: createCustomer
       requestBody:
         content:
@@ -157,8 +158,8 @@ components:
           format: email
           minLength: 1
       required:
-        - email
-        - name
+      - email
+      - name
     CustomerDto:
       type: object
       properties:
@@ -197,8 +198,8 @@ components:
         direction:
           type: string
           enum:
-            - ASC
-            - DESC
+          - ASC
+          - DESC
       x-ignore-model: true
     CustomerCreateRequest:
       type: object
@@ -212,8 +213,8 @@ components:
           format: email
           minLength: 1
       required:
-        - email
-        - name
+      - email
+      - name
     PageCustomerDto:
       type: object
       properties:

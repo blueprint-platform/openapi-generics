@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  title: OpenAPI definition
+  title: BYOE Response Type Coverage API
+  description: Type coverage sample for custom ApiResponse<T> envelope projection.
   version: 1.1.0-SNAPSHOT
 servers:
-  - url: http://localhost:8076/type-coverage/byoe-response
-    description: Generated server url
+- url: http://localhost:8076/type-coverage/byoe-response
+  description: Local BYOE response type coverage producer
 paths:
   /types/values/uuid:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: uuidValue
       responses:
         "200":
@@ -21,7 +22,7 @@ paths:
   /types/values/enum:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: enumValue
       responses:
         "200":
@@ -33,7 +34,7 @@ paths:
   /types/values/datetime:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: dateTimeValue
       responses:
         "200":
@@ -45,7 +46,7 @@ paths:
   /types/values/date:
     get:
       tags:
-        - value-payload-controller
+      - value-payload-controller
       operationId: dateValue
       responses:
         "200":
@@ -57,7 +58,7 @@ paths:
   /types/scalars/string:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: stringValue
       responses:
         "200":
@@ -69,7 +70,7 @@ paths:
   /types/scalars/long:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: longValue
       responses:
         "200":
@@ -81,7 +82,7 @@ paths:
   /types/scalars/integer:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: integerValue
       responses:
         "200":
@@ -93,7 +94,7 @@ paths:
   /types/scalars/decimal:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: decimalValue
       responses:
         "200":
@@ -105,7 +106,7 @@ paths:
   /types/scalars/boolean:
     get:
       tags:
-        - scalar-payload-controller
+      - scalar-payload-controller
       operationId: booleanValue
       responses:
         "200":
@@ -117,7 +118,7 @@ paths:
   /types/objects/profile:
     get:
       tags:
-        - object-payload-controller
+      - object-payload-controller
       operationId: profile
       responses:
         "200":
@@ -129,7 +130,7 @@ paths:
   /types/objects/address:
     get:
       tags:
-        - object-payload-controller
+      - object-payload-controller
       operationId: address
       responses:
         "200":
@@ -184,9 +185,9 @@ components:
     CoverageStatus:
       type: string
       enum:
-        - ACTIVE
-        - PASSIVE
-        - EXPERIMENTAL
+      - ACTIVE
+      - PASSIVE
+      - EXPERIMENTAL
     ApiResponseOffsetDateTime:
       type: object
       properties:
