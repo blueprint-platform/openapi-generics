@@ -1,5 +1,8 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema.extractor;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.COMPONENT_SCHEMA_REF_PREFIX;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.TYPE_ARRAY;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -11,7 +14,6 @@ import java.util.Map;
  */
 public class ListItemExtractor implements ItemExtractor {
 
-    private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
 
     @Override
     public String extractItemName(Schema<?> containerSchema, Map<String, Schema> allSchemas) {
@@ -21,21 +23,21 @@ public class ListItemExtractor implements ItemExtractor {
 
         if (containerSchema instanceof ArraySchema arraySchema) {
             items = arraySchema.getItems();
-        } else if ("array".equals(containerSchema.getType())) {
+        } else if (TYPE_ARRAY.equals(containerSchema.getType())) {
             items = containerSchema.getItems();
         } else if (containerSchema instanceof JsonSchema jsonSchema
                 && jsonSchema.getTypes() != null
-                && jsonSchema.getTypes().contains("array")) {
+                && jsonSchema.getTypes().contains(TYPE_ARRAY)) {
             items = jsonSchema.getItems();
         }
 
         if (items == null) return null;
 
         String itemRef = items.get$ref();
-        if (itemRef == null || !itemRef.startsWith(SCHEMA_REF_PREFIX)) {
+        if (itemRef == null || !itemRef.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) {
             return null;
         }
 
-        return itemRef.substring(SCHEMA_REF_PREFIX.length());
+        return itemRef.substring(COMPONENT_SCHEMA_REF_PREFIX.length());
     }
 }

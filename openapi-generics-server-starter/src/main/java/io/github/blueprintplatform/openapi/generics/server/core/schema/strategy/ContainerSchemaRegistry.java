@@ -1,23 +1,24 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema.strategy;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ContainerSchemaRegistry {
 
-    private final List<ContainerSchemaStrategy> strategies;
+  private final Map<String, ContainerSchemaStrategy> strategies = new LinkedHashMap<>();
 
     public ContainerSchemaRegistry(List<ContainerSchemaStrategy> strategies) {
-        this.strategies = List.copyOf(new ArrayList<>(strategies));
+    if (strategies != null) {
+      strategies.forEach(strategy -> this.strategies.put(strategy.containerName(), strategy));
+    }
+  }
+
+  public ContainerSchemaStrategy findByContainerName(String containerName) {
+    if (containerName == null || containerName.isBlank()) {
+      return null;
     }
 
-    public ContainerSchemaStrategy findByDataRefName(String dataRefName) {
-        for (ContainerSchemaStrategy strategy : strategies) {
-            if (strategy.matches(dataRefName)) {
-                return strategy;
-            }
-        }
-
-        return null;
+    return strategies.get(containerName);
     }
 }

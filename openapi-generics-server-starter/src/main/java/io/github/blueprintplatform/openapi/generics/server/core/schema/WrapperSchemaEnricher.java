@@ -7,6 +7,15 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 
+/**
+ * Enriches projected wrapper schemas with container metadata required for generic reconstruction.
+ *
+ * <p>This component resolves the container represented by a wrapper payload schema and applies the
+ * corresponding OpenAPI Generics vendor extensions to the wrapper schema.
+ *
+ * <p>The actual container-specific behavior is delegated to {@link ContainerSchemaStrategy}
+ * implementations registered in {@link ContainerSchemaRegistry}.
+ */
 public class WrapperSchemaEnricher {
 
   private final ContainerSchemaRegistry containerSchemaRegistry;
@@ -15,50 +24,68 @@ public class WrapperSchemaEnricher {
     this.containerSchemaRegistry = containerSchemaRegistry;
   }
 
-  public void enrich(OpenAPI openApi, String wrapperName, String dataRefName) {
-    if (openApi == null || dataRefName == null || wrapperName == null) {
-      return;
-    }
-
+  public void enrich(
+      OpenAPI openApi, String wrapperName, String dataRefName, String containerName) {
     Map<String, Schema> schemas = getSchemas(openApi);
 
-    if (schemas.isEmpty()) {
+    if (schemas.isEmpty() || wrapperName == null || dataRefName == null || containerName == null) {
       return;
     }
 
-    ContainerSchemaStrategy strategy = containerSchemaRegistry.findByDataRefName(dataRefName);
+    ContainerSchemaMetadata metadata =
+        resolveContainerMetadata(schemas, wrapperName, dataRefName, containerName);
+
+    if (metadata == null) {
+      return;
+    }
+
+    applyContainerMetadata(metadata);
+  }
+
+  private ContainerSchemaMetadata resolveContainerMetadata(
+      Map<String, Schema> schemas, String wrapperName, String dataRefName, String containerName) {
+    ContainerSchemaStrategy strategy = containerSchemaRegistry.findByContainerName(containerName);
 
     if (strategy == null) {
-      return;
+      return null;
     }
 
     Schema<?> containerSchema = strategy.resolver().resolve(schemas, dataRefName, wrapperName);
 
     if (containerSchema == null) {
-      return;
+      return null;
     }
 
     String itemName = strategy.extractor().extractItemName(containerSchema, schemas);
 
     if (itemName == null) {
-      return;
+      return null;
     }
 
     Schema<?> wrapper = schemas.get(wrapperName);
 
     if (wrapper == null) {
-      return;
+      return null;
     }
 
-    wrapper.addExtension(VendorExtensions.DATA_CONTAINER, strategy.containerName());
-    wrapper.addExtension(VendorExtensions.DATA_ITEM, itemName);
+    return new ContainerSchemaMetadata(wrapper, strategy.containerName(), itemName);
+  }
+
+  private void applyContainerMetadata(ContainerSchemaMetadata metadata) {
+    metadata.wrapper().addExtension(VendorExtensions.DATA_CONTAINER, metadata.containerName());
+    metadata.wrapper().addExtension(VendorExtensions.DATA_ITEM, metadata.itemName());
   }
 
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
-    if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
+    if (openApi == null
+        || openApi.getComponents() == null
+        || openApi.getComponents().getSchemas() == null) {
       return Map.of();
     }
 
     return openApi.getComponents().getSchemas();
   }
+
+  private record ContainerSchemaMetadata(
+      Schema<?> wrapper, String containerName, String itemName) {}
 }

@@ -481,34 +481,51 @@ See the full compatibility matrix and support policy: [Compatibility & Support P
 
 ## Relationship to OpenAPI Generator
 
-This is **not a fork** of OpenAPI Generator. It uses the upstream tool
-as a Maven dependency and adds a Java/Spring Boot specialization layer
-on top.
+OpenAPI Generics does not replace or mutate the OpenAPI contract.
+
+It enriches the contract with optional semantic metadata that generics-aware generators can use, while standard OpenAPI tooling continues to consume the document as valid OpenAPI.
+
+This is **not a fork** of OpenAPI Generator. It uses the upstream tool as a Maven dependency and adds a Java/Spring Boot specialization layer on top.
 
 What stays upstream:
 
 - OpenAPI Generator (used as-is, fresh extraction on every build)
-- OpenAPI 3.x spec (only `x-` vendor extensions added)
+- OpenAPI 3.x specification
 - The full upstream template chain
+- Standard OpenAPI tooling compatibility
 
 What this project adds:
 
 - A custom generator extending `JavaClientCodegen`
-- A surgical patch to upstream `model.mustache` that injects a single
-  generic-aware branch — the rest is untouched
-- Vendor extensions (`x-api-wrapper`, `x-data-container`) carrying
-  generic semantics through the spec
-- Server-side `OpenApiCustomizer` for contract introspection
+- A surgical patch to upstream `model.mustache` that injects a single generic-aware branch — the rest remains untouched
+- Vendor extensions (`x-api-wrapper`, `x-data-container`, `x-data-item`) that preserve generic semantics across the contract lifecycle
+- Server-side contract introspection and OpenAPI enrichment via `OpenApiCustomizer`
+
+The generated OpenAPI document remains valid OpenAPI.
+
+Consumers that do not understand OpenAPI Generics extensions simply ignore them and continue operating normally. Generics-aware generators can optionally consume those extensions to reconstruct contract-owned generic structures.
 
 Why not just drop a custom `model.mustache` into `templateDirectory`?
-That approach freezes a snapshot of the upstream template and quietly
-falls behind as upstream evolves. This project keeps upstream as the
-source of structure, injects only the generic-aware branch, and fails
-the build fast if upstream changes invalidate the patch.
 
-Cross-language parity is an explicit non-goal. Java generics deserve a
-generics-aware solution; other languages may benefit from different
-specializations on top of the same upstream.
+That approach freezes a snapshot of the upstream template and gradually diverges from OpenAPI Generator as upstream evolves.
+
+OpenAPI Generics keeps upstream as the source of structure, injects only the generics-aware branch, and fails the build fast if upstream changes invalidate the patch.
+
+Cross-language parity is an explicit non-goal.
+
+The project focuses on Java because Java contracts, generic type systems, and generated Java clients benefit directly from generic reconstruction. Other languages may choose different specializations while continuing to consume the same OpenAPI contract.
+
+In short:
+
+```text
+Valid OpenAPI
+      +
+Optional Generic Semantics
+      +
+Deterministic Java Reconstruction
+```
+
+OpenAPI Generics preserves contract semantics without requiring changes to the underlying OpenAPI specification.
 
 ### Generator version ownership
 

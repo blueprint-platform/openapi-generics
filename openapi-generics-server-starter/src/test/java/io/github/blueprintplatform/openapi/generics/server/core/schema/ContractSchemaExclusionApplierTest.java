@@ -1,4 +1,4 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.control;
+package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,13 +19,13 @@ import org.junit.jupiter.api.Test;
 
 @Tag("unit")
 @DisplayName("Unit Test: SchemaGenerationControlMarker")
-class SchemaGenerationControlMarkerTest {
+class ContractSchemaExclusionApplierTest {
 
-  private final SchemaGenerationControlMarker marker = new SchemaGenerationControlMarker();
+  private final ContractSchemaExclusionApplier marker = new ContractSchemaExclusionApplier();
 
   @Test
   @DisplayName("mark -> should ignore default envelope and internal contract schemas")
-  void mark_shouldIgnoreDefaultEnvelopeAndInternalSchemas() {
+  void apply_shouldIgnoreDefaultEnvelopeAndInternalSchemas() {
     OpenAPI openApi =
         openApi(
             schema("ServiceResponse", new ObjectSchema()),
@@ -39,7 +39,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    marker.mark(openApi, Set.of(descriptor));
+    marker.apply(openApi, Set.of(descriptor));
 
     assertIgnored(openApi, "ServiceResponse");
     assertIgnored(openApi, "Meta");
@@ -49,7 +49,7 @@ class SchemaGenerationControlMarkerTest {
 
   @Test
   @DisplayName("mark -> should ignore container schema for default envelope container response")
-  void mark_shouldIgnoreContainerSchema_forContainerResponse() {
+  void apply_shouldIgnoreContainerSchema_forContainerResponse() {
     OpenAPI openApi =
         openApi(
             schema("ServiceResponse", new ObjectSchema()),
@@ -63,7 +63,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
 
-    marker.mark(openApi, Set.of(descriptor));
+    marker.apply(openApi, Set.of(descriptor));
 
     assertIgnored(openApi, "ServiceResponse");
     assertIgnored(openApi, "Meta");
@@ -73,7 +73,7 @@ class SchemaGenerationControlMarkerTest {
 
   @Test
   @DisplayName("mark -> should ignore nested non-payload referenced schemas")
-  void mark_shouldIgnoreNestedNonPayloadReferencedSchemas() {
+  void apply_shouldIgnoreNestedNonPayloadReferencedSchemas() {
     OpenAPI openApi =
         openApi(
             schema("ApiResponse", new ObjectSchema()),
@@ -91,7 +91,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ApiResponse.class, "data", "CustomerDto");
 
-    marker.mark(openApi, Set.of(descriptor));
+    marker.apply(openApi, Set.of(descriptor));
 
     assertIgnored(openApi, "ApiResponse");
     assertIgnored(openApi, "ApiError");
@@ -101,7 +101,7 @@ class SchemaGenerationControlMarkerTest {
 
   @Test
   @DisplayName("mark -> should not ignore Meta and Sort for custom envelope")
-  void mark_shouldNotIgnoreMetaAndSort_forCustomEnvelope() {
+  void apply_shouldNotIgnoreMetaAndSort_forCustomEnvelope() {
     OpenAPI openApi =
         openApi(
             schema("ApiResponse", new ObjectSchema()),
@@ -115,7 +115,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ApiResponse.class, "payload", "CustomerDto");
 
-    marker.mark(openApi, Set.of(descriptor));
+    marker.apply(openApi, Set.of(descriptor));
 
     assertIgnored(openApi, "ApiResponse");
     assertNotIgnored(openApi, "Meta");
@@ -124,7 +124,7 @@ class SchemaGenerationControlMarkerTest {
 
   @Test
   @DisplayName("mark -> should do nothing when wrapper schema is missing")
-  void mark_shouldDoNothing_whenWrapperSchemaMissing() {
+  void apply_shouldDoNothing_whenWrapperSchemaMissing() {
     OpenAPI openApi =
         openApi(
             schema("ServiceResponse", new ObjectSchema()),
@@ -134,7 +134,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    assertDoesNotThrow(() -> marker.mark(openApi, Set.of(descriptor)));
+    assertDoesNotThrow(() -> marker.apply(openApi, Set.of(descriptor)));
 
     assertIgnored(openApi, "ServiceResponse");
     assertIgnored(openApi, "Meta");
@@ -143,15 +143,15 @@ class SchemaGenerationControlMarkerTest {
 
   @Test
   @DisplayName("mark -> should do nothing for null inputs")
-  void mark_shouldDoNothing_forNullInputs() {
-    assertDoesNotThrow(() -> marker.mark(null, Set.of()));
-    assertDoesNotThrow(() -> marker.mark(new OpenAPI(), null));
-    assertDoesNotThrow(() -> marker.mark(new OpenAPI(), Set.of()));
+  void apply_shouldDoNothing_forNullInputs() {
+    assertDoesNotThrow(() -> marker.apply(null, Set.of()));
+    assertDoesNotThrow(() -> marker.apply(new OpenAPI(), null));
+    assertDoesNotThrow(() -> marker.apply(new OpenAPI(), Set.of()));
   }
 
   @Test
   @DisplayName("mark -> should ignore nested array item references")
-  void mark_shouldIgnoreNestedArrayItemReferences() {
+  void apply_shouldIgnoreNestedArrayItemReferences() {
     OpenAPI openApi =
         openApi(
             schema("ApiResponse", new ObjectSchema()),
@@ -167,7 +167,7 @@ class SchemaGenerationControlMarkerTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ApiResponse.class, "payload", "CustomerDto");
 
-    marker.mark(openApi, Set.of(descriptor));
+    marker.apply(openApi, Set.of(descriptor));
 
     assertIgnored(openApi, "ApiResponse");
     assertIgnored(openApi, "WarningItem");

@@ -1,5 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.*;
+
 import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.LinkedHashSet;
@@ -35,9 +37,9 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
 
     private Schema<?> dereferenceIfNeeded(Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
         String ref = schema.get$ref();
-        if (ref == null || !ref.startsWith("#/components/schemas/")) return schema;
+        if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) return schema;
 
-        String name = ref.substring("#/components/schemas/".length());
+        String name = ref.substring(COMPONENT_SCHEMA_REF_PREFIX.length());
         if (!visited.add(name)) return null;
 
         return schemas.get(name);
@@ -45,7 +47,7 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
 
     private boolean isContainerLike(Schema<?> schema) {
         return schema instanceof io.swagger.v3.oas.models.media.ObjectSchema
-                || "object".equals(schema.getType())
+                || TYPE_OBJECT.equals(schema.getType())
                 || (schema.getProperties() != null && !schema.getProperties().isEmpty())
                 || isArrayLike(schema);
     }
@@ -53,8 +55,8 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
     private boolean isArrayLike(Schema<?> schema) {
         if (schema == null) return false;
         return schema instanceof io.swagger.v3.oas.models.media.ArraySchema
-                || "array".equals(schema.getType())
+                || TYPE_ARRAY.equals(schema.getType())
                 || (schema instanceof io.swagger.v3.oas.models.media.JsonSchema json
-                && json.getTypes() != null && json.getTypes().contains("array"));
+                && json.getTypes() != null && json.getTypes().contains(TYPE_ARRAY));
     }
 }

@@ -1,11 +1,11 @@
 package io.github.blueprintplatform.openapi.generics.codegen.external;
 
+import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenProperties.RESPONSE_CONTRACT_PREFIX;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenProperties.RESPONSE_CONTRACT_PREFIX;
 
 /**
  * Holds mappings between OpenAPI model names and external Java types (FQCN).

@@ -10,18 +10,4 @@ public interface ContainerSchemaStrategy {
     ContainerSchemaResolver resolver();
 
     ItemExtractor extractor();
-
-    default boolean matches(String dataRefName) {
-        String container = containerName();
-
-        if (dataRefName == null || !dataRefName.startsWith(container)) {
-            return false;
-        }
-
-        if (dataRefName.length() == container.length()) {
-            return true;
-        }
-
-        return Character.isUpperCase(dataRefName.charAt(container.length()));
-    }
 }

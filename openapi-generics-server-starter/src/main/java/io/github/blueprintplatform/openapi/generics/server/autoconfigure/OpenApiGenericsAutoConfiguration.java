@@ -6,9 +6,9 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.Re
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -56,8 +56,8 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public SchemaGenerationControlMarker schemaGenerationControlMarker() {
-    return new SchemaGenerationControlMarker();
+  public ContractSchemaExclusionApplier schemaGenerationControlMarker() {
+    return new ContractSchemaExclusionApplier();
   }
 
   @Bean
@@ -75,14 +75,14 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-          SchemaGenerationControlMarker schemaGenerationControlMarker,
+          ContractSchemaExclusionApplier contractSchemaExclusionApplier,
           ResponseTypeDiscoveryStrategy discoveryStrategy,
           ResponseTypeIntrospector introspector,
           WrapperSchemaProcessor wrapperSchemaProcessor,
           OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-            schemaGenerationControlMarker,
+            contractSchemaExclusionApplier,
             discoveryStrategy,
             introspector,
             wrapperSchemaProcessor,

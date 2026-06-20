@@ -32,7 +32,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     containerResolver.register(additionalProperties);
 
     log.debug(
-            "Generic-aware codegen initialized with external model registry, envelope metadata, and container metadata");
+        "Generic-aware codegen initialized with external model registry, envelope metadata, and container metadata");
   }
 
   @Override
@@ -58,12 +58,12 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     int before = result.getModels().size();
 
     result
-            .getModels()
-            .removeIf(
-                    m -> {
-                      CodegenModel model = m.getModel();
-                      return model != null && ignoreDecider.isIgnored(model.name);
-                    });
+        .getModels()
+        .removeIf(
+            m -> {
+              CodegenModel model = m.getModel();
+              return model != null && ignoreDecider.isIgnored(model.name);
+            });
 
     int after = result.getModels().size();
 
@@ -72,17 +72,17 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     }
 
     result
-            .getModels()
-            .forEach(
-                    m -> {
-                      CodegenModel model = m.getModel();
+        .getModels()
+        .forEach(
+            m -> {
+              CodegenModel model = m.getModel();
 
-                      if (model != null) {
-                        importResolver.apply(model);
-                        envelopeResolver.apply(model);
-                        containerResolver.apply(model);
-                      }
-                    });
+              if (model != null) {
+                importResolver.apply(model);
+                envelopeResolver.apply(model);
+                containerResolver.apply(model);
+              }
+            });
 
     return result;
   }

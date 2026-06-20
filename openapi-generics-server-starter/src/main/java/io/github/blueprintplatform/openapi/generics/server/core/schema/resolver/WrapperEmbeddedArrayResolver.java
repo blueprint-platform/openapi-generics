@@ -1,5 +1,8 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.PropertyNames.DATA;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.TYPE_ARRAY;
+
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -15,7 +18,7 @@ public class WrapperEmbeddedArrayResolver implements ContainerSchemaResolver {
         Map<String, Schema> properties = wrapper.getProperties();
         if (properties == null) return null;
 
-        Schema<?> dataProperty = properties.get("data");
+        Schema<?> dataProperty = properties.get(DATA);
         if (dataProperty == null) return null;
 
         if (isArrayLike(dataProperty)) {
@@ -27,8 +30,8 @@ public class WrapperEmbeddedArrayResolver implements ContainerSchemaResolver {
     private boolean isArrayLike(Schema<?> schema) {
         if (schema == null) return false;
         return schema instanceof ArraySchema
-                || "array".equals(schema.getType())
+                || TYPE_ARRAY.equals(schema.getType())
                 || (schema instanceof JsonSchema json
-                && json.getTypes() != null && json.getTypes().contains("array"));
+                && json.getTypes() != null && json.getTypes().contains(TYPE_ARRAY));
     }
 }

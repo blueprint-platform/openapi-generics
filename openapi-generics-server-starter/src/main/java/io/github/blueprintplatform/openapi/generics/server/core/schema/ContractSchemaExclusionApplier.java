@@ -1,4 +1,4 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.control;
+package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.Meta;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
@@ -13,28 +13,33 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Marks schemas to be ignored during OpenAPI generation based on response descriptors.
+ * Applies contract-owned schema exclusion rules to the projected OpenAPI document.
  *
- * <p>Prevents duplication of contract-owned models by marking envelope-related and nested schemas
- * with {@code x-ignore-model}.
+ * <p>Prevents generation of infrastructure and contract-owned models that should remain external to
+ * generated clients by marking them with {@code x-ignore-model}.
  *
- * <p>Behavior:
+ * <p>The exclusion rules are derived from discovered response type descriptors and ensure that only
+ * wrapper models required for generic reconstruction remain eligible for code generation.
+ *
+ * <p>Exclusion behavior:
  *
  * <ul>
- *   <li>Marks envelope type as ignored
- *   <li>For default envelope (ServiceResponse), also ignores internal contract types (Meta, Sort)
- *   <li>Traverses wrapper schemas to identify and ignore non-payload referenced schemas
- *   <li>For container responses, ignores the container schema (e.g. PageCustomerDto)
+ *   <li>Excludes the configured envelope schema
+ *   <li>For the default {@link ServiceResponse} envelope, excludes internal contract models such as
+ *       {@link Meta} and {@link Sort}
+ *   <li>Excludes non-payload schemas referenced by generated wrapper models
+ *   <li>Excludes intermediate container schemas for container-based responses (for example {@code
+ *       PageCustomerDto})
  * </ul>
  *
- * <p>This ensures that only relevant wrapper models are generated while shared contract structures
- * remain external.
+ * <p>This preserves contract ownership boundaries and prevents duplicate generation of shared
+ * infrastructure models.
  */
-public class SchemaGenerationControlMarker {
+public class ContractSchemaExclusionApplier {
 
   private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
 
-  public void mark(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
+  public void apply(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
     if (openApi == null
         || openApi.getComponents() == null
         || openApi.getComponents().getSchemas() == null

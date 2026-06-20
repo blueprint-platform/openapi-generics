@@ -1,5 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.codegen.filtering;
 
+import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions.IGNORE_MODEL;
+
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.HashSet;
@@ -7,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions.IGNORE_MODEL;
 
 /**
  * Decides whether a model should be excluded from generation.

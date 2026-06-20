@@ -7,9 +7,9 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.Re
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaRegistry;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
@@ -44,7 +44,7 @@ class OpenApiGenericsAutoConfigurationTest {
                     assertThat(context).hasSingleBean(ResponseIntrospectionPolicyResolver.class);
                     assertThat(context).hasSingleBean(ResponseIntrospectionPolicy.class);
                     assertThat(context).hasSingleBean(ResponseTypeIntrospector.class);
-                    assertThat(context).hasSingleBean(SchemaGenerationControlMarker.class);
+                    assertThat(context).hasSingleBean(ContractSchemaExclusionApplier.class);
                     assertThat(context).hasSingleBean(ContainerSchemaRegistry.class);
                     assertThat(context).hasSingleBean(WrapperSchemaEnricher.class);
                     assertThat(context).hasSingleBean(WrapperSchemaProcessor.class);

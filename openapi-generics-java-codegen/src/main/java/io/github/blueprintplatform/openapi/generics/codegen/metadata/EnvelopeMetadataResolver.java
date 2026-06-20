@@ -49,7 +49,7 @@ public class EnvelopeMetadataResolver {
     Map<String, Object> vendorExtensions = model.getVendorExtensions();
 
     return vendorExtensions != null
-            && Boolean.TRUE.equals(vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER));
+        && Boolean.TRUE.equals(vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER));
   }
 
   private String extractSimpleName(String fqcn) {

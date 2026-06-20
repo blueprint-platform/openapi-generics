@@ -29,8 +29,8 @@ public class ExternalImportResolver {
     }
 
     Optional<String> type =
-            extract(vendorExtensions, CodegenVendorExtensions.DATA_ITEM)
-                    .or(() -> extract(vendorExtensions, CodegenVendorExtensions.API_WRAPPER_DATATYPE));
+        extract(vendorExtensions, CodegenVendorExtensions.DATA_ITEM)
+            .or(() -> extract(vendorExtensions, CodegenVendorExtensions.API_WRAPPER_DATATYPE));
 
     if (type.isEmpty()) {
       log.debug("Wrapper model has no resolvable inner type: {}", model.name);
@@ -52,7 +52,7 @@ public class ExternalImportResolver {
   private boolean isWrapperModel(CodegenModel model) {
     Map<String, Object> vendorExtensions = model.getVendorExtensions();
     return vendorExtensions != null
-            && Boolean.TRUE.equals(vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER));
+        && Boolean.TRUE.equals(vendorExtensions.get(CodegenVendorExtensions.API_WRAPPER));
   }
 
   private Optional<String> extract(Map<String, Object> vendorExtensions, String key) {

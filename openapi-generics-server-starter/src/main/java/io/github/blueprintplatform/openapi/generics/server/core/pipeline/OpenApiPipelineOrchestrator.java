@@ -3,8 +3,8 @@ package io.github.blueprintplatform.openapi.generics.server.core.pipeline;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.util.Collections;
@@ -46,20 +46,20 @@ public class OpenApiPipelineOrchestrator {
 
   private final Set<OpenAPI> processed = Collections.newSetFromMap(new IdentityHashMap<>());
 
-  private final SchemaGenerationControlMarker schemaGenerationControlMarker;
+  private final ContractSchemaExclusionApplier contractSchemaExclusionApplier;
   private final ResponseTypeDiscoveryStrategy discoveryStrategy;
   private final ResponseTypeIntrospector introspector;
   private final WrapperSchemaProcessor wrapperSchemaProcessor;
   private final OpenApiContractGuard contractGuard;
 
   public OpenApiPipelineOrchestrator(
-      SchemaGenerationControlMarker schemaGenerationControlMarker,
+      ContractSchemaExclusionApplier contractSchemaExclusionApplier,
       ResponseTypeDiscoveryStrategy discoveryStrategy,
       ResponseTypeIntrospector introspector,
       WrapperSchemaProcessor wrapperSchemaProcessor,
       OpenApiContractGuard contractGuard) {
 
-    this.schemaGenerationControlMarker = schemaGenerationControlMarker;
+    this.contractSchemaExclusionApplier = contractSchemaExclusionApplier;
     this.discoveryStrategy = discoveryStrategy;
     this.introspector = introspector;
     this.wrapperSchemaProcessor = wrapperSchemaProcessor;
@@ -80,7 +80,7 @@ public class OpenApiPipelineOrchestrator {
     descriptors.forEach(descriptor -> wrapperSchemaProcessor.process(openApi, descriptor));
     log.debug("Processed {} wrapper schemas", descriptors.size());
 
-    schemaGenerationControlMarker.mark(openApi, descriptors);
+    contractSchemaExclusionApplier.apply(openApi, descriptors);
     log.debug("Applied ignore markers to managed schemas");
 
     contractGuard.validate(openApi, descriptors);
