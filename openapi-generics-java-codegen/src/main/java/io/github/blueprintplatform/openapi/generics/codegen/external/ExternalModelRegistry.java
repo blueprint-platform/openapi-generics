@@ -1,9 +1,11 @@
-package io.github.blueprintplatform.openapi.generics.codegen;
+package io.github.blueprintplatform.openapi.generics.codegen.external;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenProperties.RESPONSE_CONTRACT_PREFIX;
 
 /**
  * Holds mappings between OpenAPI model names and external Java types (FQCN).
@@ -20,8 +22,6 @@ public class ExternalModelRegistry {
 
   private static final Logger log = LoggerFactory.getLogger(ExternalModelRegistry.class);
 
-  private static final String PREFIX = "openapi-generics.response-contract.";
-
   private final Map<String, String> externalModels = new HashMap<>();
 
   /** Registers external models from generator additionalProperties. */
@@ -34,11 +34,11 @@ public class ExternalModelRegistry {
   }
 
   private void registerIfExternalModelProperty(String key, Object raw) {
-    if (key == null || !key.startsWith(PREFIX)) {
+    if (key == null || !key.startsWith(RESPONSE_CONTRACT_PREFIX)) {
       return;
     }
 
-    String modelName = key.substring(PREFIX.length());
+    String modelName = key.substring(RESPONSE_CONTRACT_PREFIX.length());
     String fqcn = normalizeFqcn(modelName, raw);
 
     if (fqcn != null) {

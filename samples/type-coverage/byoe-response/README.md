@@ -1,22 +1,34 @@
 # byoe-response-type-coverage
 
-> End-to-end reference sample for validating projection and client reconstruction using a custom user-defined response envelope.
+> End-to-end verification sample for OpenAPI projection, client generation, and runtime reconstruction using a custom response envelope.
 
 This sample demonstrates the Bring Your Own Envelope (BYOE) capabilities of OpenAPI Generics.
 
-Instead of using the platform-provided `ServiceResponse<T>` contract, the producer exposes endpoints using a completely custom response wrapper:
+Instead of the platform-provided `ServiceResponse<T>`, the producer exposes endpoints using a user-owned generic envelope:
 
 ```java
 ApiResponse<T>
 ```
 
-The sample validates that OpenAPI Generics can project, reconstruct, and generate clients from a user-owned generic envelope without requiring changes to the original contract model.
+The sample verifies that OpenAPI Generics can project, reconstruct, and generate clients from an existing response contract without requiring changes to the original model.
 
 ---
 
-## Architecture
+## Table of Contents
 
-The sample demonstrates the complete OpenAPI Generics BYOE flow:
+- [What This Sample Validates](#what-this-sample-validates)
+- [Modules](#modules)
+- [Custom Envelope](#custom-envelope)
+- [Covered Response Shapes](#covered-response-shapes)
+- [Running the Sample](#running-the-sample)
+- [Verification Endpoints](#verification-endpoints)
+- [Mental Model](#mental-model)
+
+---
+
+## What This Sample Validates
+
+The sample exercises the complete BYOE flow:
 
 ```text
 Custom Contract
@@ -30,9 +42,9 @@ Generated Client
 Consumer
 ```
 
-The consumer does not manually map response payloads.
+The generated client is used directly by the consumer application.
 
-All responses are deserialized directly into the generated generic-aware client types produced by the platform.
+No manual wrapper reconstruction or DTO mapping exists inside the consumer.
 
 ---
 
@@ -41,23 +53,23 @@ All responses are deserialized directly into the generated generic-aware client 
 ```text
 byoe-response-type-coverage
 ├── contract
-│   └── Custom ApiResponse<T> contract
-│
 ├── producer
-│   └── Exposes ApiResponse<T> endpoints
-│
 ├── client
-│   └── Generated Java client produced from the projected OpenAPI contract
-│
 └── consumer
-    └── Uses the generated client to call the producer
 ```
+
+| Module | Responsibility |
+|----------|----------------|
+| contract | User-owned ApiResponse contract |
+| producer | Publishes ApiResponse-based endpoints |
+| client | Generated Java client |
+| consumer | Uses the generated client |
 
 ---
 
 ## Custom Envelope
 
-The sample uses a user-defined response contract:
+The sample uses a completely user-owned response contract:
 
 ```java
 public class ApiResponse<T> {
@@ -70,8 +82,6 @@ public class ApiResponse<T> {
 }
 ```
 
-with:
-
 ```java
 public record ApiError(
     String code,
@@ -79,23 +89,15 @@ public record ApiError(
 ) {}
 ```
 
-This contract is owned entirely by the application and is not part of OpenAPI Generics.
+This contract is not provided by OpenAPI Generics.
 
 The platform only projects and reconstructs it.
 
 ---
 
-## What this sample covers
+## Covered Response Shapes
 
-The producer exposes endpoints using:
-
-```java
-ApiResponse<T>
-```
-
-and exercises multiple payload categories.
-
-### Scalar payloads
+### Scalar Payloads
 
 ```java
 ApiResponse<String>
@@ -105,7 +107,7 @@ ApiResponse<Long>
 ApiResponse<BigDecimal>
 ```
 
-### Value payloads
+### Value Payloads
 
 ```java
 ApiResponse<UUID>
@@ -114,7 +116,7 @@ ApiResponse<OffsetDateTime>
 ApiResponse<CoverageStatus>
 ```
 
-### Object payloads
+### Object Payloads
 
 ```java
 ApiResponse<AddressDto>
@@ -129,82 +131,39 @@ Including:
 - enums
 - temporal types
 
----
-
-## Sample Payload Categories
-
-### Scalars
-
-```text
-GET /types/scalars/string
-GET /types/scalars/boolean
-GET /types/scalars/integer
-GET /types/scalars/long
-GET /types/scalars/decimal
-```
-
-### Values
-
-```text
-GET /types/values/uuid
-GET /types/values/date
-GET /types/values/datetime
-GET /types/values/enum
-```
-
-### Objects
-
-```text
-GET /types/objects/address
-GET /types/objects/profile
-```
-
 > [!NOTE]
-> BYOE type coverage intentionally covers `ApiResponse<T>` only.
+>
+> BYOE currently supports:
+>
+> ```java
+> ApiResponse<T>
+> ```
 >
 > Nested container payloads such as:
 >
 > ```java
 > ApiResponse<Page<T>>
+> ApiResponse<List<T>>
 > ```
 >
-> are outside the current BYOE support scope and are therefore not included in this sample.
+> are intentionally outside the current BYOE support scope.
 
 ---
 
-## Quick Start
+## Running the Sample
 
-### Run producer
+### Start Producer
 
 ```bash
 cd producer
 mvn spring-boot:run
 ```
 
-Default URL:
+Producer URLs:
 
 ```text
 http://localhost:8076/type-coverage/byoe-response
 ```
-
-### Run consumer
-
-```bash
-cd consumer
-mvn spring-boot:run
-```
-
-Default URL:
-
-```text
-http://localhost:8077/type-coverage/byoe-response-consumer
-```
-
----
-
-## Verify Producer
-
-### OpenAPI
 
 Swagger UI:
 
@@ -212,153 +171,75 @@ Swagger UI:
 http://localhost:8076/type-coverage/byoe-response/swagger-ui/index.html
 ```
 
-YAML:
+OpenAPI:
 
 ```text
 http://localhost:8076/type-coverage/byoe-response/v3/api-docs.yaml
 ```
 
----
-
-## Verify Consumer
-
-The consumer calls the producer through the generated client and returns the deserialized response.
-
-### Scalar payload
+### Start Consumer
 
 ```bash
-curl http://localhost:8077/type-coverage/byoe-response-consumer/types/scalars/string
+cd consumer
+mvn spring-boot:run
 ```
 
-Expected shape:
+Consumer URL:
 
-```json
-{
-  "status": 200,
-  "message": "OK",
-  "data": "type-coverage",
-  "errors": []
-}
+```text
+http://localhost:8077/type-coverage/byoe-response-consumer
 ```
-
-### Enum payload
-
-```bash
-curl http://localhost:8077/type-coverage/byoe-response-consumer/types/values/enum
-```
-
-Expected shape:
-
-```json
-{
-  "status": 200,
-  "message": "OK",
-  "data": "EXPERIMENTAL",
-  "errors": []
-}
-```
-
-### Complex DTO payload
-
-```bash
-curl http://localhost:8077/type-coverage/byoe-response-consumer/types/objects/profile
-```
-
-Validates:
-
-- nested DTOs
-- collections
-- maps
-- enums
-- LocalDate
-- OffsetDateTime
 
 ---
 
-## What is being validated
-
-The sample verifies that OpenAPI Generics can correctly project and reconstruct a custom envelope containing:
+## Verification Endpoints
 
 ### Scalars
 
-```java
-String
-Boolean
-Integer
-Long
-BigDecimal
+```text
+/types/scalars/string
+/types/scalars/boolean
+/types/scalars/integer
+/types/scalars/long
+/types/scalars/decimal
 ```
 
-### Value Types
+### Values
 
-```java
-UUID
-LocalDate
-OffsetDateTime
-Enum
+```text
+/types/values/uuid
+/types/values/date
+/types/values/datetime
+/types/values/enum
 ```
 
 ### Objects
 
-```java
-DTO
-Nested DTO
-Collection
-Map
+```text
+/types/objects/address
+/types/objects/profile
 ```
 
-### Custom Envelope
+These endpoints validate that the generated client correctly reconstructs:
 
 ```java
 ApiResponse<T>
 ```
 
-including:
-
-```java
-status
-message
-data
-errors
-```
-
-without requiring any modifications to the original contract implementation.
-
----
-
-## Why this sample exists
-
-Most organizations already have an established response envelope.
-
-Replacing those contracts is often not feasible.
-
-This sample demonstrates that OpenAPI Generics can operate on top of an existing response model and still provide:
-
-- OpenAPI projection
-- generic type reconstruction
-- generated client compatibility
-- wrapper generation
-- vendor extension support
-- contract ownership preservation
-
-without forcing adoption of the platform's own envelope model.
+for primitive, value, enum, and DTO payload types.
 
 ---
 
 ## Mental Model
 
 ```text
-User Contract
-      ↓
 ApiResponse<T>
-      ↓
+        ↓
 OpenAPI Projection
-      ↓
-Vendor Extensions
-      ↓
+        ↓
 Generated Client
-      ↓
+        ↓
 Consumer Deserialization
 ```
 
-The sample focuses exclusively on validating this flow.
+The purpose of this sample is to verify that BYOE support remains stable across platform changes.

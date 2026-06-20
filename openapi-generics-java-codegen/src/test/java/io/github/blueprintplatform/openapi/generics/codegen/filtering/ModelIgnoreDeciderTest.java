@@ -1,7 +1,8 @@
-package io.github.blueprintplatform.openapi.generics.codegen;
+package io.github.blueprintplatform.openapi.generics.codegen.filtering;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;

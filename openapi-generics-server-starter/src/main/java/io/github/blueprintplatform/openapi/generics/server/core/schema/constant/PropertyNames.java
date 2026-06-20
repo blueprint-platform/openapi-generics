@@ -1,4 +1,4 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.contract;
+package io.github.blueprintplatform.openapi.generics.server.core.schema.constant;
 
 /**
  * Canonical JSON property names for the response envelope.

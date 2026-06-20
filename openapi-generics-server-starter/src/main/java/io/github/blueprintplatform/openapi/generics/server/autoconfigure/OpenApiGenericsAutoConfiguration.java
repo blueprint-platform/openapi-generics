@@ -21,19 +21,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-/**
- * Spring Boot auto-configuration for the OpenAPI Generics server starter.
- *
- * <p>Registers the beans required to connect Springdoc's {@link OpenApiCustomizer} extension point
- * to the OpenAPI Generics projection pipeline.
- *
- * <p>This configuration is activated only when Springdoc is present and the application runs in a
- * web environment. For servlet-based applications, it provides the Spring MVC response discovery
- * strategy used to inspect controller return types.
- *
- * <p>The actual projection logic is implemented by the pipeline components registered here. This
- * class is responsible only for conditional Spring Boot wiring and default bean composition.
- */
 @AutoConfiguration
 @ConditionalOnClass(OpenApiCustomizer.class)
 @ConditionalOnWebApplication
@@ -57,7 +44,7 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public ResponseIntrospectionPolicy responseIntrospectionPolicy(
-      OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
+          OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
     return resolver.resolve(properties);
   }
 
@@ -81,12 +68,6 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public WrapperSchemaEnricher wrapperSchemaEnricher() {
-    return new WrapperSchemaEnricher();
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
   public OpenApiContractGuard openApiContractGuard() {
     return new OpenApiContractGuard();
   }
@@ -94,18 +75,18 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-      SchemaGenerationControlMarker schemaGenerationControlMarker,
-      ResponseTypeDiscoveryStrategy discoveryStrategy,
-      ResponseTypeIntrospector introspector,
-      WrapperSchemaProcessor wrapperSchemaProcessor,
-      OpenApiContractGuard contractGuard) {
+          SchemaGenerationControlMarker schemaGenerationControlMarker,
+          ResponseTypeDiscoveryStrategy discoveryStrategy,
+          ResponseTypeIntrospector introspector,
+          WrapperSchemaProcessor wrapperSchemaProcessor,
+          OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-        schemaGenerationControlMarker,
-        discoveryStrategy,
-        introspector,
-        wrapperSchemaProcessor,
-        contractGuard);
+            schemaGenerationControlMarker,
+            discoveryStrategy,
+            introspector,
+            wrapperSchemaProcessor,
+            contractGuard);
   }
 
   @Bean

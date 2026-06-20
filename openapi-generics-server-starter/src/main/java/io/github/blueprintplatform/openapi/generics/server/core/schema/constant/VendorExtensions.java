@@ -1,4 +1,4 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.contract;
+package io.github.blueprintplatform.openapi.generics.server.core.schema.constant;
 
 /**
  * Canonical vendor extension keys used by the generics-aware OpenAPI contract.

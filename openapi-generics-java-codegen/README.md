@@ -1,14 +1,12 @@
 # openapi-generics-java-codegen
 
-> Contract-aware OpenAPI Generator extension for deterministic Java client generation
+> Contract-aware Java code generation for OpenAPI Generics
 
-`openapi-generics-java-codegen` is a custom OpenAPI Generator extension that augments the standard Java generator with contract-awareness.
+`openapi-generics-java-codegen` extends OpenAPI Generator with contract-awareness.
 
-Its responsibility is not orchestration, template management, or OpenAPI generation.
+Its purpose is simple:
 
-Its responsibility is precise:
-
-> Apply contract-aware generation rules inside OpenAPI Generator so generated clients remain aligned with the published contract.
+> Generate wrapper models while reusing contract-owned types instead of recreating them.
 
 This module is build-time only and is typically consumed through `openapi-generics-java-codegen-parent`.
 
@@ -16,238 +14,178 @@ This module is build-time only and is typically consumed through `openapi-generi
 
 ## Table of Contents
 
-1. [What Problem It Solves](#what-problem-it-solves)
-2. [What It Does](#what-it-does)
-3. [How It Works](#how-it-works)
-4. [BYOC — Bring Your Own Contract Models](#byoc--bring-your-own-contract-models)
-5. [BYOE — Bring Your Own Envelope](#byoe--bring-your-own-envelope)
-6. [What Gets Generated](#what-gets-generated)
-7. [How It Is Used](#how-it-is-used)
-8. [What It Does NOT Do](#what-it-does-not-do)
-9. [Compatibility](#compatibility)
-10. [Determinism Guarantees](#determinism-guarantees)
-11. [Architectural Role](#architectural-role)
-12. [Mental Model](#mental-model)
-
----
-
-## What Problem It Solves
-
-Default OpenAPI Generator behavior is schema-driven.
-
-In contract-first systems this commonly causes:
-
-* shared contract models to be regenerated
-* wrapper semantics to be flattened or duplicated
-* generated clients to drift from the server contract
-
-This module prevents that.
-
-It enforces a simple rule:
-
-> If a type already belongs to the contract, generation should reference it rather than recreate it.
+- [What It Does](#what-it-does)
+- [Generation Flow](#generation-flow)
+- [BYOC — Bring Your Own Contract Models](#byoc--bring-your-own-contract-models)
+- [BYOE — Bring Your Own Envelope](#byoe--bring-your-own-envelope)
+- [Container Support](#container-support)
+- [Generated Wrappers](#generated-wrappers)
+- [What Is Not Generated](#what-is-not-generated)
+- [Architectural Role](#architectural-role)
+- [Determinism](#determinism)
+- [Mental Model](#mental-model)
+- [License](#license)
 
 ---
 
 ## What It Does
 
-The extension builds on top of `JavaClientCodegen`.
+The generator augments standard Java generation with:
 
-It:
+- external model reuse (BYOC)
+- custom envelope support (BYOE)
+- container metadata support
+- model ownership enforcement
+- deterministic wrapper generation
 
-* suppresses generation of externally owned models
-* suppresses generation of explicitly ignored models
-* injects imports for externally mapped contract types
-* injects envelope metadata for wrapper templates
-* preserves wrapper semantics using OpenAPI vendor extensions
-
-The result is generated code that stays aligned with the server-side projection model.
+The result is a generated client that stays aligned with the published OpenAPI Generics contract.
 
 ---
 
-## How It Works
-
-At a high level:
+## Generation Flow
 
 ```text
 OpenAPI
    ↓
-GenericAwareJavaCodegen
+Ownership Resolution
    ↓
-Contract-aware filtering
+Model Filtering
    ↓
-Metadata enrichment
+Metadata Enrichment
    ↓
-Generated Java client
+Wrapper Generation
+   ↓
+Generated Java Client
 ```
 
-Internally the extension performs three core operations:
+The generator never reinterprets the contract.
 
-1. identify models that should not be generated
-2. remove ignored models from generation graphs
-3. enrich wrapper models with contract and envelope metadata
-
-Templates then consume that metadata to generate contract-aligned wrapper types.
+It consumes metadata already projected into OpenAPI by the server layer.
 
 ---
 
 ## BYOC — Bring Your Own Contract Models
 
-Use BYOC when DTOs already exist in a contract module.
-
-Configuration:
+Existing contract models can be reused directly.
 
 ```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
-  </additionalProperty>
-</additionalProperties>
+<additionalProperty>
+  openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
+</additionalProperty>
 ```
 
 Effect:
 
-* `CustomerDto` is treated as externally owned
-* it is not generated again
-* generated wrappers import and reuse it directly
-
-Requirements:
-
-* the key must match the OpenAPI model name
-* the value must be a fully-qualified class name
+- model generation is skipped
+- generated wrappers import the existing type
+- contract ownership remains explicit
 
 ---
 
 ## BYOE — Bring Your Own Envelope
 
-Use BYOE when the contract already defines a custom response envelope.
-
-Configuration:
+Custom response envelopes are supported.
 
 ```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.envelope=io.example.contract.ApiResponse
-  </additionalProperty>
-</additionalProperties>
+<additionalProperty>
+  openapi-generics.envelope=io.example.contract.ApiResponse
+</additionalProperty>
 ```
 
-Effect:
+Generated wrappers extend the configured envelope instead of the default platform envelope.
 
-* wrapper templates receive the configured envelope metadata
-* generated wrappers extend the configured envelope
-* the envelope itself is not generated
-
-This aligns client generation with the server-side BYOE projection model.
-
----
-
-## What Gets Generated
-
-The module generates thin wrapper types such as:
+Example:
 
 ```java
-public class ServiceResponseCustomerDto extends ServiceResponse<CustomerDto> {}
-public class ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>> {}
 public class ApiResponseCustomerDto extends ApiResponse<CustomerDto> {}
 ```
 
-The module intentionally avoids generating:
-
-* shared envelope classes
-* externally owned DTOs
-* duplicated contract models
-* infrastructure ownership boundaries
-
 ---
 
-## How It Is Used
+## Container Support
 
-This module is normally not consumed directly.
-
-The intended integration point is:
+Built-in container mappings:
 
 ```text
-openapi-generics-java-codegen-parent
+List<T>
+Page<T>
 ```
 
-The parent module is responsible for:
+The generator resolves container imports and type metadata automatically.
 
-* generator registration
-* template extraction
-* template patching and overlay
-* OpenAPI Generator plugin integration
-* generated source registration
-
-This module provides generation behavior.
-
-The parent provides execution orchestration.
+Additional containers may be registered through generator properties.
 
 ---
 
-## What It Does NOT Do
+## Generated Wrappers
 
-This module does not:
+Examples:
 
-* define the canonical contract
-* produce OpenAPI specifications
-* own runtime behavior
-* orchestrate the generation pipeline
-* manage template extraction
-* replace OpenAPI Generator
-* act as a general-purpose generator fork
+```java
+public class ServiceResponseCustomerDto
+    extends ServiceResponse<CustomerDto> {
+}
+```
 
-It is a focused contract-aware generator extension.
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {
+}
+```
+
+```java
+public class ApiResponseCustomerDto
+    extends ApiResponse<CustomerDto> {
+}
+```
+
+Generated wrappers are intentionally thin.
+
+Their purpose is type preservation, not behavior.
 
 ---
 
-## Compatibility
+## What Is Not Generated
 
-| Component | Supported Versions |
-|-----------|-------------------|
-| Java | 17+ |
-| OpenAPI Generator | 7.x |
+The generator intentionally does not generate:
 
-This module is build-time only.
+- external contract DTOs
+- shared envelope types
+- shared paging types
+- ignored infrastructure models
 
----
-
-## Determinism Guarantees
-
-The extension is designed to provide:
-
-* stable model suppression
-* deterministic wrapper generation
-* explicit contract reuse
-* repeatable generation results
-
-Its behavior is deterministic because model ownership is explicit and wrapper semantics are carried through stable vendor extensions.
+Ownership remains with the contract module.
 
 ---
 
 ## Architectural Role
 
-Within the generation stack:
-
 ```text
-openapi-generics-java-codegen-parent
+openapi-generics-server-starter
                 ↓
-      OpenAPI Generator
+           OpenAPI
                 ↓
- openapi-generics-java-codegen
+openapi-generics-java-codegen
                 ↓
-      Generated Java Client
+      Generated Client
 ```
 
-This module sits inside the generator layer.
+The server side publishes contract metadata.
 
-It determines:
+This generator consumes that metadata and reconstructs the correct Java type hierarchy.
 
-* what should be generated
-* what should be reused
-* how wrapper metadata is propagated
+---
 
-It does not own build orchestration.
+## Determinism
+
+The generator guarantees:
+
+- stable ownership rules
+- stable filtering behavior
+- stable wrapper generation
+- repeatable output from identical OpenAPI input
+
+Same OpenAPI contract → same generated wrappers.
 
 ---
 
@@ -255,14 +193,11 @@ It does not own build orchestration.
 
 Think of this module as:
 
-> a contract-aware decision layer inside OpenAPI Generator
+> a contract-aware layer on top of OpenAPI Generator
 
-Not:
+Its responsibility is not generating more models.
 
-* a standalone SDK generator
-* a template orchestration module
-* a contract definition layer
-* a runtime framework
+Its responsibility is generating fewer, but correct, models.
 
 ---
 

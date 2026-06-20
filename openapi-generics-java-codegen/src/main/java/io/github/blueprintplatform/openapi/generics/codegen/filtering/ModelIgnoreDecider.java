@@ -1,11 +1,14 @@
-package io.github.blueprintplatform.openapi.generics.codegen;
+package io.github.blueprintplatform.openapi.generics.codegen.filtering;
 
+import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.github.blueprintplatform.openapi.generics.codegen.contract.CodegenVendorExtensions.IGNORE_MODEL;
 
 /**
  * Decides whether a model should be excluded from generation.
@@ -22,8 +25,6 @@ import org.slf4j.LoggerFactory;
 public class ModelIgnoreDecider {
 
   private static final Logger log = LoggerFactory.getLogger(ModelIgnoreDecider.class);
-
-  private static final String EXT_IGNORE_MODEL = "x-ignore-model";
 
   private final Set<String> ignored = new HashSet<>();
   private final ExternalModelRegistry registry;
@@ -63,6 +64,6 @@ public class ModelIgnoreDecider {
     if (model == null) return false;
 
     Map<String, Object> ext = model.getExtensions();
-    return ext != null && Boolean.TRUE.equals(ext.get(EXT_IGNORE_MODEL));
+    return ext != null && Boolean.TRUE.equals(ext.get(IGNORE_MODEL));
   }
 }

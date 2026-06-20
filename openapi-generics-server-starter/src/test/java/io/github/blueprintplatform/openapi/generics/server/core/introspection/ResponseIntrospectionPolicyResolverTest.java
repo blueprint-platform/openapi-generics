@@ -6,6 +6,8 @@ import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceRes
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
+
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -25,7 +27,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class), policy.supportedContainers());
+    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
   }
 
   @Test
@@ -37,7 +39,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class), policy.supportedContainers());
+    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
   }
 
   @Test
@@ -50,7 +52,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class), policy.supportedContainers());
+    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
   }
 
   @Test

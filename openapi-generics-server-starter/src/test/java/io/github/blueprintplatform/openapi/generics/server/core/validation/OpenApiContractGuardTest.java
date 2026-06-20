@@ -1,9 +1,9 @@
 package io.github.blueprintplatform.openapi.generics.server.core.validation;
 
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.API_WRAPPER;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.API_WRAPPER_DATATYPE;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.DATA_CONTAINER;
-import static io.github.blueprintplatform.openapi.generics.server.core.schema.contract.VendorExtensions.DATA_ITEM;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER_DATATYPE;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_CONTAINER;
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_ITEM;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OpenAPI definition
-  version: 1.0.4-SNAPSHOT
+  version: 1.1.0-SNAPSHOT
 servers:
   - url: http://localhost:8074/type-coverage/service-response
     description: Generated server url
@@ -118,7 +118,7 @@ paths:
     get:
       tags:
         - paged-payload-controller
-      operationId: summaries
+      operationId: pagedSummaries
       responses:
         "200":
           description: OK
@@ -130,7 +130,7 @@ paths:
     get:
       tags:
         - paged-payload-controller
-      operationId: statuses
+      operationId: pagedStatuses
       responses:
         "200":
           description: OK
@@ -162,6 +162,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseAddressDto"
+  /types/lists/summaries:
+    get:
+      tags:
+        - list-payload-controller
+      operationId: listSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseListTypeSummaryDto"
+  /types/lists/statuses:
+    get:
+      tags:
+        - list-payload-controller
+      operationId: listStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseListCoverageStatus"
 components:
   schemas:
     Meta:
@@ -421,3 +445,29 @@ components:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
       x-api-wrapper-datatype: AddressDto
+    ServiceResponseListTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: ListTypeSummaryDto
+      x-data-container: List
+      x-data-item: TypeSummaryDto
+    ServiceResponseListCoverageStatus:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: ListCoverageStatus
+      x-data-container: List
+      x-data-item: CoverageStatus

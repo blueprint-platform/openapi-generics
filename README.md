@@ -32,6 +32,7 @@
 * [Get started](#get-started)
 * [Real-World Example](#real-world-example)
 * [Key features in 1.0.x (GA)](#key-features-in-10x-ga)
+* [Supported Generic Response Shapes](#supported-generic-response-shapes)
 * [How it works](#how-it-works)
 * [Compatibility](#compatibility)
 * [Relationship to OpenAPI Generator](#relationship-to-openapi-generator)
@@ -349,6 +350,57 @@ module configuration to:
 Use this mode to compare generated output, troubleshoot generation issues, or
 temporarily opt out of the generics-aware customization for a specific client
 module.
+
+---
+
+## Supported Generic Response Shapes
+
+The default platform envelope currently supports:
+
+```java
+ServiceResponse<T>
+ServiceResponse<Page<T>>
+ServiceResponse<List<T>>
+```
+
+This includes common payload categories such as:
+
+```java
+ServiceResponse<CustomerDto>
+
+ServiceResponse<Page<CustomerDto>>
+ServiceResponse<Page<CoverageStatus>>
+
+ServiceResponse<List<CustomerDto>>
+ServiceResponse<List<CoverageStatus>>
+```
+
+The generated client reconstructs these shapes as contract-aligned wrappers while preserving the original generic type information.
+
+### BYOE Scope
+
+Custom envelopes are intentionally limited to:
+
+```java
+YourEnvelope<T>
+```
+
+Examples:
+
+```java
+ApiResponse<CustomerDto>
+ApiResponse<CoverageStatus>
+ApiResponse<UUID>
+```
+
+Nested BYOE container forms are currently outside the supported scope:
+
+```java
+YourEnvelope<Page<T>>
+YourEnvelope<List<T>>
+```
+
+This restriction is intentional and helps keep projection and reconstruction deterministic across the entire contract lifecycle.
 
 ---
 

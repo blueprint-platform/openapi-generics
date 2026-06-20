@@ -4,13 +4,14 @@ import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceRes
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.contract.PropertyNames;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.PropertyNames;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -35,7 +36,7 @@ public class ResponseIntrospectionPolicyResolver {
 
     if (configuredType == null) {
       return new ResponseIntrospectionPolicy(
-          ServiceResponse.class, PropertyNames.DATA, Set.of(Page.class));
+          ServiceResponse.class, PropertyNames.DATA, Set.of(Page.class, List.class));
     }
 
     Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
