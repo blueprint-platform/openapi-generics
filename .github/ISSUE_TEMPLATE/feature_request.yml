@@ -3,37 +3,68 @@ description: "Suggest an enhancement or new capability"
 title: "feature: <short summary>"
 labels: ["enhancement"]
 assignees: []
+
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for helping evolve **openapi-generics**!  
-        Please share your idea and reasoning below.
+        Thanks for helping evolve **openapi-generics**!
+
+        Please describe the problem, the desired capability,
+        and the reasoning behind the proposal.
 
   - type: textarea
     id: problem
     attributes:
-      label: "Is your feature request related to a problem?"
-      description: "Describe what limitation or gap you're facing."
-      placeholder: "I'm always frustrated when I have to manually mark generic containers for registration..."
+      label: "Problem statement"
+      description: "What limitation, gap, or maintenance burden does this address?"
+      placeholder: |
+        Example:
+        Container support currently requires container-specific
+        handling across projection and reconstruction pipelines.
+
+    validations:
+      required: true
 
   - type: textarea
     id: solution
     attributes:
-      label: "Describe the solution you'd like"
-      description: "Describe the change or new capability you'd like to see."
-      placeholder: "Automatically detect Page<T> and Slice<T> containers without configuration."
+      label: "Proposed solution"
+      description: "Describe the capability, abstraction, or behavior you would like to introduce."
+      placeholder: |
+        Example:
+        Introduce a container resolution abstraction that allows
+        new container types to be supported through a common pipeline.
+
+    validations:
+      required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: "Describe alternatives you've considered"
-      description: "Mention any workarounds or similar ideas."
-      placeholder: "I've tried extending AutoWrapperSchemaCustomizer manually, but it’s verbose."
+      label: "Alternatives considered"
+      description: "Describe alternative designs, implementation approaches, workarounds, or reasons for keeping the current behavior."
+      placeholder: |
+        Example:
+        - Continue using container-specific branching
+        - Extend vendor extension processing
+        - Keep existing implementation unchanged
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: "Expected impact"
+      description: "What improvement does this provide for users, maintainers, or generated artifacts?"
+      placeholder: |
+        Example:
+        - Reduced platform complexity
+        - Easier future extensibility
+        - More consistent projection and code generation behavior
 
   - type: textarea
     id: additional
     attributes:
       label: "Additional context"
-      description: "Include screenshots, examples, or references."
-      placeholder: "Maybe integrate with Springdoc plugin system like openapi-kotlinx."
+      description: "Examples, OpenAPI fragments, generated code snippets, references, or related issues."
+      placeholder: |
+        Include any supporting material that helps explain the proposal.
