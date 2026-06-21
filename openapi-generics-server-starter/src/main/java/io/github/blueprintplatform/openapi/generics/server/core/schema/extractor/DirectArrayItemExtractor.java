@@ -6,7 +6,6 @@ import static io.github.blueprintplatform.openapi.generics.server.core.schema.co
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
-import java.util.Map;
 
 /**
  * Extracts item type from List<T> style schemas.
