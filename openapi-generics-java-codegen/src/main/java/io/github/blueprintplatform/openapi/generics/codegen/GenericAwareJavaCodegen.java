@@ -3,7 +3,7 @@ package io.github.blueprintplatform.openapi.generics.codegen;
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalImportResolver;
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.github.blueprintplatform.openapi.generics.codegen.filtering.ModelIgnoreDecider;
-import io.github.blueprintplatform.openapi.generics.codegen.metadata.ContainerMetadataResolver;
+import io.github.blueprintplatform.openapi.generics.codegen.metadata.ContainerImportResolver;
 import io.github.blueprintplatform.openapi.generics.codegen.metadata.EnvelopeMetadataResolver;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
@@ -23,7 +23,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
   private final EnvelopeMetadataResolver envelopeResolver = new EnvelopeMetadataResolver();
-  private final ContainerMetadataResolver containerResolver = new ContainerMetadataResolver();
+  private final ContainerImportResolver containerResolver = new ContainerImportResolver();
 
   @Override
   public void processOpts() {

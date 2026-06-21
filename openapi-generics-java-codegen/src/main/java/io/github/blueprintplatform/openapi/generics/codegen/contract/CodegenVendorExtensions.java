@@ -14,7 +14,6 @@ public final class CodegenVendorExtensions {
   public static final String ENVELOPE_TYPE = "x-envelope-type";
 
   public static final String DATA_CONTAINER_IMPORT = "x-data-container-import";
-  public static final String DATA_CONTAINER_TYPE = "x-data-container-type";
 
   public static final String EXTRA_IMPORTS = "x-extra-imports";
 
