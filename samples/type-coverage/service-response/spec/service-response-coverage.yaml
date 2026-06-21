@@ -3,7 +3,7 @@ info:
   title: ServiceResponse Type Coverage API
   description: "Type coverage sample for ServiceResponse<T>, ServiceResponse<List<T>>,\
     \ and ServiceResponse<Page<T>> projection."
-  version: 1.1.0
+  version: 1.1.1-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local service-response type coverage producer

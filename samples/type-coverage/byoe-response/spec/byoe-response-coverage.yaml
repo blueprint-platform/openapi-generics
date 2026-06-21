@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: BYOE Response Type Coverage API
   description: Type coverage sample for custom ApiResponse<T> envelope projection.
-  version: 1.1.0
+  version: 1.1.1-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
   description: Local BYOE response type coverage producer
