@@ -6,6 +6,8 @@ import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.openapitools.codegen.CodegenModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ public class ContainerMetadataResolver {
         "List", new ContainerMetadata(List.class.getSimpleName(), List.class.getCanonicalName()));
     containers.put(
         "Page", new ContainerMetadata(Page.class.getSimpleName(), Page.class.getCanonicalName()));
+    containers.put(
+            "Set", new ContainerMetadata(Set.class.getSimpleName(), Set.class.getCanonicalName()));
   }
 
   public void register(Map<String, Object> additionalProperties) {

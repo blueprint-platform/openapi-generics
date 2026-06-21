@@ -25,12 +25,13 @@ We provide security fixes for the latest stable release line and the `main` bran
 | Version   | Status                       |
 |-----------|------------------------------|
 | `main`    | Active development           |
-| `1.0.x`   | Supported (security fixes)   |
+| `1.1.x`   | Supported (security fixes)   |
+| `1.0.x`   | End of support               |
 | `< 1.0.0` | Not supported                |
 
 > **Note**
-> We strongly recommend running the latest stable `1.x` release before reporting issues.
-> Older `1.x` patch versions may miss recently fixed vulnerabilities.
+> We strongly recommend running the latest stable release before reporting security issues.
+> Security fixes are provided only for the current supported release line.
 
 ---
 

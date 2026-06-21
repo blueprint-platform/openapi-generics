@@ -1,9 +1,12 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -61,7 +64,11 @@ class ContractSchemaExclusionApplierTest {
             schema("PageCustomerDto", new ObjectSchema()));
 
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     marker.apply(openApi, Set.of(descriptor));
 

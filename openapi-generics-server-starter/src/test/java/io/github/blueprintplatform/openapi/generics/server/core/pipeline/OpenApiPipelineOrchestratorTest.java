@@ -1,12 +1,15 @@
 package io.github.blueprintplatform.openapi.generics.server.core.pipeline;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
@@ -42,8 +45,13 @@ class OpenApiPipelineOrchestratorTest {
 
     ResponseTypeDescriptor descriptor1 =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+
     ResponseTypeDescriptor descriptor2 =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "OrderDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "OrderDto");
 
     when(discoveryStrategy.discover()).thenReturn(Set.of(type1, type2));
     when(introspector.extract(type1)).thenReturn(Optional.of(descriptor1));

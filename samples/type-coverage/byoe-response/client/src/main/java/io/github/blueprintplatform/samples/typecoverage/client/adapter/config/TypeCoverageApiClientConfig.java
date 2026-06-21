@@ -1,7 +1,10 @@
 package io.github.blueprintplatform.samples.typecoverage.client.adapter.config;
 
+import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ListPayloadControllerApi;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ObjectPayloadControllerApi;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.api.PagedPayloadControllerApi;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ScalarPayloadControllerApi;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.api.SetPayloadControllerApi;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ValuePayloadControllerApi;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.invoker.ApiClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +22,7 @@ public class TypeCoverageApiClientConfig {
 
   @Bean
   ApiClient typeCoverageApiClient(
-      RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
+          RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
     return new ApiClient(typeCoverageRestClient).setBasePath(baseUrl);
   }
 
@@ -36,5 +39,20 @@ public class TypeCoverageApiClientConfig {
   @Bean
   ObjectPayloadControllerApi objectPayloadControllerApi(ApiClient typeCoverageApiClient) {
     return new ObjectPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  ListPayloadControllerApi listPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new ListPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  SetPayloadControllerApi setPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new SetPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  PagedPayloadControllerApi pagedPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new PagedPayloadControllerApi(typeCoverageApiClient);
   }
 }

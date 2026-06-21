@@ -9,6 +9,9 @@ import io.github.blueprintplatform.openapi.generics.server.autoconfigure.propert
 
 import java.util.List;
 import java.util.Set;
+
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -18,7 +21,33 @@ import org.junit.jupiter.api.Test;
 class ResponseIntrospectionPolicyResolverTest {
 
   private final ResponseIntrospectionPolicyResolver resolver =
-      new ResponseIntrospectionPolicyResolver();
+          new ResponseIntrospectionPolicyResolver(
+                  new DefaultSupportedContainerTypesResolver());
+
+  private static Set<SupportedContainerType> defaultContainers() {
+    return Set.of(
+            new SupportedContainerType(Page.class, "Page", "Page"),
+            new SupportedContainerType(List.class, "List", "List"),
+            new SupportedContainerType(Set.class, "Set", "Set"));
+  }
+
+  @Test
+  @DisplayName("resolve -> should use supported container resolver for default policy")
+  void resolve_shouldUseSupportedContainerResolverForDefaultPolicy() {
+
+    SupportedContainerType pageContainer =
+            new SupportedContainerType(Page.class, "Page", "Page");
+
+    ResponseIntrospectionPolicyResolver resolver =
+            new ResponseIntrospectionPolicyResolver(
+                    () -> Set.of(pageContainer));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(null);
+
+    assertEquals(
+            Set.of(pageContainer),
+            policy.supportedContainers());
+  }
 
   @Test
   @DisplayName("resolve -> should return default policy when properties are null")
@@ -27,7 +56,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
+    assertEquals(defaultContainers(), policy.supportedContainers());
   }
 
   @Test
@@ -39,7 +68,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
+    assertEquals(defaultContainers(), policy.supportedContainers());
   }
 
   @Test
@@ -52,7 +81,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ServiceResponse.class, policy.envelopeType());
     assertEquals("data", policy.payloadPropertyName());
-    assertEquals(Set.of(Page.class, List.class), policy.supportedContainers());
+    assertEquals(defaultContainers(), policy.supportedContainers());
   }
 
   @Test
@@ -65,7 +94,7 @@ class ResponseIntrospectionPolicyResolverTest {
 
     assertEquals(ValidEnvelope.class, policy.envelopeType());
     assertEquals("payload", policy.payloadPropertyName());
-    assertTrue(policy.supportedContainers().isEmpty());
+    assertEquals(defaultContainers(), policy.supportedContainers());
   }
 
   @Test
@@ -272,6 +301,25 @@ class ResponseIntrospectionPolicyResolverTest {
     assertEquals("payload", policy.payloadPropertyName());
   }
 
+  @Test
+  @DisplayName("resolve -> should use supported container resolver for custom envelope policy")
+  void resolve_shouldUseSupportedContainerResolverForCustomEnvelopePolicy() {
+    SupportedContainerType setContainer =
+            new SupportedContainerType(Set.class, "Set", "Set");
+
+    ResponseIntrospectionPolicyResolver resolver =
+            new ResponseIntrospectionPolicyResolver(() -> Set.of(setContainer));
+
+    OpenApiGenericsProperties properties =
+            new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+
+    assertEquals(ValidEnvelope.class, policy.envelopeType());
+    assertEquals("payload", policy.payloadPropertyName());
+    assertEquals(Set.of(setContainer), policy.supportedContainers());
+  }
+
   interface InvalidEnvelopeInterface<T> {
     T payload();
   }
@@ -321,7 +369,6 @@ class ResponseIntrospectionPolicyResolverTest {
   }
 
   static final class EnvelopeWithStaticField<T> {
-    static String CONSTANT = "x";
     T payload;
   }
 

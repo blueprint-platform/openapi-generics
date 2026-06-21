@@ -45,4 +45,9 @@ public class TypeCoverageApiClientConfig {
   ListPayloadControllerApi listPayloadControllerApi(ApiClient typeCoverageApiClient) {
     return new ListPayloadControllerApi(typeCoverageApiClient);
   }
+
+  @Bean
+  SetPayloadControllerApi setPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new SetPayloadControllerApi(typeCoverageApiClient);
+  }
 }

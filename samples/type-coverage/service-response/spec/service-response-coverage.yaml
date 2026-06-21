@@ -3,7 +3,7 @@ info:
   title: ServiceResponse Type Coverage API
   description: "Type coverage sample for ServiceResponse<T>, ServiceResponse<List<T>>,\
     \ and ServiceResponse<Page<T>> projection."
-  version: 1.1.0-SNAPSHOT
+  version: 1.1.0
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local service-response type coverage producer
@@ -56,6 +56,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseLocalDate"
+  /types/sets/summaries:
+    get:
+      tags:
+      - set-payload-controller
+      operationId: setSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseSetTypeSummaryDto"
+  /types/sets/statuses:
+    get:
+      tags:
+      - set-payload-controller
+      operationId: setStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseSetCoverageStatus"
   /types/scalars/string:
     get:
       tags:
@@ -257,6 +281,44 @@ components:
           $ref: "#/components/schemas/Meta"
       x-api-wrapper: true
       x-api-wrapper-datatype: LocalDate
+    ServiceResponseSetTypeSummaryDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+          uniqueItems: true
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: SetTypeSummaryDto
+      x-data-container: Set
+      x-data-item: TypeSummaryDto
+    TypeSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+    ServiceResponseSetCoverageStatus:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+          uniqueItems: true
+        meta:
+          $ref: "#/components/schemas/Meta"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: SetCoverageStatus
+      x-data-container: Set
+      x-data-item: CoverageStatus
     ServiceResponseString:
       type: object
       properties:
@@ -339,16 +401,6 @@ components:
       x-api-wrapper-datatype: PageTypeSummaryDto
       x-data-container: Page
       x-data-item: TypeSummaryDto
-    TypeSummaryDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        status:
-          $ref: "#/components/schemas/CoverageStatus"
     PageCoverageStatus:
       type: object
       properties:

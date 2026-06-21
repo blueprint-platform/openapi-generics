@@ -1,10 +1,9 @@
 package io.github.blueprintplatform.openapi.generics.server.autoconfigure;
 
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseIntrospectionPolicy;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseIntrospectionPolicyResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.*;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
@@ -37,8 +36,16 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver() {
-    return new ResponseIntrospectionPolicyResolver();
+  public SupportedContainerTypesResolver supportedContainerTypesResolver() {
+    return new DefaultSupportedContainerTypesResolver();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver(
+          SupportedContainerTypesResolver supportedContainerTypesResolver) {
+    return new ResponseIntrospectionPolicyResolver(
+            supportedContainerTypesResolver);
   }
 
   @Bean

@@ -93,6 +93,14 @@ ServiceResponse<List<TypeSummaryDto>>
 ServiceResponse<List<CoverageStatus>>
 ```
 
+### Set Payloads
+
+```java
+ServiceResponse<Set<TypeSummaryDto>>
+ServiceResponse<Set<CoverageStatus>>
+```
+
+
 ### Page Payloads
 
 ```java
@@ -144,6 +152,74 @@ http://localhost:8075/type-coverage/service-response-consumer
 
 ---
 
+## Quick Smoke Test
+
+After starting both producer and consumer, a small subset of endpoints can be called directly to verify that the generated client reconstructs the expected generic response types correctly.
+
+The goal of these requests is not to validate business behavior.
+
+They provide a fast end-to-end sanity check for:
+
+- OpenAPI projection
+- generated client generation
+- generic wrapper reconstruction
+- runtime deserialization
+- consumer integration
+
+### Producer Verification
+
+```bash
+curl http://localhost:8074/type-coverage/service-response/types/scalars/string
+
+curl http://localhost:8074/type-coverage/service-response/types/lists/summaries
+
+curl http://localhost:8074/type-coverage/service-response/types/sets/statuses
+
+curl http://localhost:8074/type-coverage/service-response/types/pages/summaries
+```
+
+Expected generic shapes:
+
+```java
+ServiceResponse<String>
+
+ServiceResponse<List<TypeSummaryDto>>
+
+ServiceResponse<Set<CoverageStatus>>
+
+ServiceResponse<Page<TypeSummaryDto>>
+```
+
+### Consumer Verification
+
+```bash
+curl http://localhost:8075/type-coverage/service-response-consumer/types/scalars/string
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/lists/summaries
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/sets/statuses
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/pages/summaries
+```
+
+The consumer uses only generated client artifacts.
+
+No manual DTO mapping or wrapper reconstruction exists in the consumer application.
+
+Successful responses verify that generic type information survives the complete pipeline:
+
+```text
+Producer
+    ↓
+OpenAPI Projection
+    ↓
+Generated Client
+    ↓
+Consumer Runtime
+```
+
+---
+
 ## Verification Endpoints
 
 ### Scalars
@@ -179,6 +255,13 @@ http://localhost:8075/type-coverage/service-response-consumer
 /types/lists/statuses
 ```
 
+### Sets
+
+```text
+/types/sets/summaries
+/types/sets/statuses
+```
+
 ### Pages
 
 ```text
@@ -191,10 +274,11 @@ These endpoints validate that the generated client correctly reconstructs:
 ```java
 ServiceResponse<T>
 ServiceResponse<List<T>>
+ServiceResponse<Set<T>>
 ServiceResponse<Page<T>>
 ```
 
-for primitive, value, enum, DTO, list, and paged payload types.
+for primitive, value, enum, DTO, list, set, and paged payload types.
 
 ---
 

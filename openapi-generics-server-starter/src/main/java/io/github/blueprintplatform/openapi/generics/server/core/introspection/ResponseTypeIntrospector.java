@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
@@ -57,7 +59,7 @@ public final class ResponseTypeIntrospector {
   private static final String SCHEMA_ANNOTATION = "io.swagger.v3.oas.annotations.media.Schema";
 
   private final Class<?> envelopeType;
-  private final Set<Class<?>> supportedContainers;
+  private final Set<SupportedContainerType> supportedContainers;
   private final String payloadPropertyName;
 
   public ResponseTypeIntrospector(ResponseIntrospectionPolicy policy) {
@@ -79,13 +81,13 @@ public final class ResponseTypeIntrospector {
 
     if (log.isDebugEnabled()) {
       log.debug(
-              "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}",
+              "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}, dataRefName={}",
               safeToString(type),
               envelopeType.getSimpleName(),
               safeToString(dataType),
-              descriptorOpt.map(Object::toString).orElse("<empty>"));
+              descriptorOpt.map(Object::toString).orElse("<empty>"),
+              descriptorOpt.map(ResponseTypeDescriptor::dataRefName).orElse("<empty>"));
     }
-
     return descriptorOpt;
   }
 
@@ -144,8 +146,8 @@ public final class ResponseTypeIntrospector {
   private Optional<ResponseTypeDescriptor> buildContainerDescriptor(
           ResolvableType dataType, Class<?> raw) {
 
-    for (Class<?> containerType : supportedContainers) {
-      if (!containerType.isAssignableFrom(raw)) {
+    for (SupportedContainerType containerType : supportedContainers) {
+      if (!containerType.matches(raw)) {
         continue;
       }
 
@@ -163,7 +165,7 @@ public final class ResponseTypeIntrospector {
               ResponseTypeDescriptor.container(
                       envelopeType,
                       payloadPropertyName,
-                      containerType.getSimpleName(),
+                      containerType,
                       itemRaw.getSimpleName()));
     }
 

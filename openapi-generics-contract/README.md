@@ -282,7 +282,7 @@ Those responsibilities belong to other platform layers.
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-contract</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -303,7 +303,7 @@ Usage:
 
 ## Versioning Strategy
 
-Current state: **1.0.x GA**
+Current state: **1.1.x GA**
 
 The contract module is treated as the stable authority layer of the platform.
 

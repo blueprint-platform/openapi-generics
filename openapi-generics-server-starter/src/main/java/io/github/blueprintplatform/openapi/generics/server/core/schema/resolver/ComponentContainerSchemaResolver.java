@@ -2,23 +2,31 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver
 
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.*;
 
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
+
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class DirectSchemaResolver implements ContainerSchemaResolver {
+public class ComponentContainerSchemaResolver implements ContainerSchemaResolver {
 
     @Override
-    public Schema<?> resolve(Map<String, Schema> schemas, String dataRefName, String wrapperName) {
+    public Schema<?> resolve(
+            Map<String, Schema> schemas,
+            String dataRefName,
+            String wrapperName,
+            String payloadPropertyName) {
+
         if (!schemas.containsKey(dataRefName)) {
             return null;
         }
+
         return resolveContainerSchema(schemas, schemas.get(dataRefName), new LinkedHashSet<>());
     }
 
-    private Schema<?> resolveContainerSchema(Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+    private Schema<?> resolveContainerSchema(
+            Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+
         if (schema == null) return null;
 
         Schema<?> current = dereferenceIfNeeded(schemas, schema, visited);
@@ -32,10 +40,13 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
                 if (resolved != null) return resolved;
             }
         }
+
         return null;
     }
 
-    private Schema<?> dereferenceIfNeeded(Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+    private Schema<?> dereferenceIfNeeded(
+            Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+
         String ref = schema.get$ref();
         if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) return schema;
 
@@ -46,7 +57,7 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
     }
 
     private boolean isContainerLike(Schema<?> schema) {
-        return schema instanceof io.swagger.v3.oas.models.media.ObjectSchema
+        return schema instanceof ObjectSchema
                 || TYPE_OBJECT.equals(schema.getType())
                 || (schema.getProperties() != null && !schema.getProperties().isEmpty())
                 || isArrayLike(schema);
@@ -54,9 +65,11 @@ public class DirectSchemaResolver implements ContainerSchemaResolver {
 
     private boolean isArrayLike(Schema<?> schema) {
         if (schema == null) return false;
-        return schema instanceof io.swagger.v3.oas.models.media.ArraySchema
+
+        return schema instanceof ArraySchema
                 || TYPE_ARRAY.equals(schema.getType())
-                || (schema instanceof io.swagger.v3.oas.models.media.JsonSchema json
-                && json.getTypes() != null && json.getTypes().contains(TYPE_ARRAY));
+                || (schema instanceof JsonSchema json
+                && json.getTypes() != null
+                && json.getTypes().contains(TYPE_ARRAY));
     }
 }

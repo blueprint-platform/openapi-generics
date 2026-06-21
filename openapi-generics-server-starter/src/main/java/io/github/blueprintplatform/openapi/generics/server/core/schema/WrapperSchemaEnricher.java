@@ -25,7 +25,7 @@ public class WrapperSchemaEnricher {
   }
 
   public void enrich(
-      OpenAPI openApi, String wrapperName, String dataRefName, String containerName) {
+      OpenAPI openApi, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
     Map<String, Schema> schemas = getSchemas(openApi);
 
     if (schemas.isEmpty() || wrapperName == null || dataRefName == null || containerName == null) {
@@ -33,7 +33,7 @@ public class WrapperSchemaEnricher {
     }
 
     ContainerSchemaMetadata metadata =
-        resolveContainerMetadata(schemas, wrapperName, dataRefName, containerName);
+        resolveContainerMetadata(schemas, wrapperName, dataRefName, containerName, payloadPropertyName);
 
     if (metadata == null) {
       return;
@@ -43,14 +43,14 @@ public class WrapperSchemaEnricher {
   }
 
   private ContainerSchemaMetadata resolveContainerMetadata(
-      Map<String, Schema> schemas, String wrapperName, String dataRefName, String containerName) {
+      Map<String, Schema> schemas, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
     ContainerSchemaStrategy strategy = containerSchemaRegistry.findByContainerName(containerName);
 
     if (strategy == null) {
       return null;
     }
 
-    Schema<?> containerSchema = strategy.resolver().resolve(schemas, dataRefName, wrapperName);
+    Schema<?> containerSchema = strategy.resolver().resolve(schemas, dataRefName, wrapperName, payloadPropertyName);
 
     if (containerSchema == null) {
       return null;

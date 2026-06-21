@@ -1,122 +1,163 @@
 # openapi-generics-server-starter
 
-> Deterministic OpenAPI projection for contract-first Spring Boot services
+> Contract-aware OpenAPI projection for Spring Boot services
 
-`openapi-generics-server-starter` projects Java response contracts into a stable, generics-aware OpenAPI document.
+`openapi-generics-server-starter` projects Java response contracts into OpenAPI while preserving supported generic response semantics.
 
-It does not define the contract.  
-It does not generate clients.  
-It does one thing:
+It does not define contracts.
 
-> Discover supported Java response shapes and project them into OpenAPI without losing generic semantics.
+It does not generate clients.
+
+Its responsibility is:
+
+> Discover supported response contracts and project them into OpenAPI in a form that can be deterministically reconstructed by client generators.
 
 ---
 
-## Table of Contents
+## Contents
 
-- [What It Solves](#what-it-solves)
-- [Supported Shapes](#supported-shapes)
-- [How It Works](#how-it-works)
-- [Generated OpenAPI Metadata](#generated-openapi-metadata)
-- [Schema Enrichment](#schema-enrichment)
+- [What It Does](#what-it-does)
+- [Supported Response Shapes](#supported-response-shapes)
+- [Projection Pipeline](#projection-pipeline)
+- [Generated Metadata](#generated-metadata)
 - [Usage](#usage)
 - [BYOE](#byoe)
-- [What This Module Does Not Do](#what-this-module-does-not-do)
-- [Determinism Guarantees](#determinism-guarantees)
+- [Out of Scope](#out-of-scope)
 - [Mental Model](#mental-model)
-- [License](#license)
 
 ---
 
-## What It Solves
+## What It Does
 
-Standard OpenAPI generation often loses or flattens generic response structure.
+The starter keeps Java contracts as the source of truth and treats OpenAPI as a projection layer.
 
-Typical problems:
+Responsibilities:
 
-- duplicated response wrapper models
-- lost generic payload information
-- unstable generated client types
-- drift between Java contracts and OpenAPI output
+- response contract discovery
+- generic type introspection
+- wrapper schema projection
+- container-aware metadata enrichment
+- OpenAPI contract validation
 
-This starter keeps the Java contract as the source of truth and treats OpenAPI as a projection.
+The generated OpenAPI document remains valid OpenAPI and can be consumed by standard tooling.
 
 ---
 
-## Supported Shapes
+## Supported Response Shapes
 
-Default platform envelope:
+Platform envelope:
 
 ```java
 ServiceResponse<T>
-ServiceResponse<Page<T>>
+
 ServiceResponse<List<T>>
+
+ServiceResponse<Set<T>>
+
+ServiceResponse<Page<T>>
 ```
 
-Custom envelope support:
+BYOE envelopes using user-owned response contracts:
 
 ```java
-YourEnvelope<T>
+ApiResponse<T>
+
+ApiResponse<List<T>>
+
+ApiResponse<Set<T>>
+
+ApiResponse<Page<T>>
 ```
 
-Custom envelopes must:
+`ApiResponse<T>` is only an example of a user-owned envelope. Any configured BYOE envelope that satisfies the structural requirements participates in the same projection pipeline.
 
-- be a concrete class
-- declare exactly one type parameter
-- expose exactly one direct payload field of type `T`
+`Page<T>` refers to the paging contract provided by `openapi-generics-contract`:
 
-Nested generics inside custom envelopes are intentionally not supported.
+```java
+io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
+```
+
+Supported container types:
+
+```java
+List<T>
+
+Set<T>
+
+Page<T>
+```
+
+Nested container graphs remain outside the supported scope:
+
+```java
+ServiceResponse<List<List<T>>>
+
+ServiceResponse<Page<List<T>>>
+
+ApiResponse<List<List<T>>>
+
+ApiResponse<Page<List<T>>>
+```
 
 ---
 
-## How It Works
+## Projection Pipeline
 
 ```text
-Controller return types
-    ↓
-Response type discovery
-    ↓
-Contract introspection
-    ↓
-Wrapper schema projection
-    ↓
-Container-aware enrichment
-    ↓
-Generation-control markers
-    ↓
-OpenAPI contract validation
+Controller Return Types
+        ↓
+Contract Discovery
+        ↓
+Contract Introspection
+        ↓
+Wrapper Projection
+        ↓
+Container Enrichment
+        ↓
+Generation-Control Marking
+        ↓
+OpenAPI Validation
 ```
 
-The pipeline is coordinated by a single `OpenApiPipelineOrchestrator` and runs once per OpenAPI instance.
+The pipeline executes when Springdoc generates the OpenAPI document:
+
+```text
+/v3/api-docs
+
+/v3/api-docs.yaml
+```
+
+It does not affect request handling or runtime application behavior.
 
 ---
 
-## Generated OpenAPI Metadata
+## Generated Metadata
 
-The starter adds vendor extensions used by the generics-aware client codegen layer:
+The starter enriches OpenAPI schemas with vendor extensions used by the client generation layer.
+
+Simple wrapper example:
+
+```yaml
+x-api-wrapper: true
+x-api-wrapper-datatype: CustomerDto
+```
+
+Container wrapper example:
 
 ```yaml
 x-api-wrapper: true
 x-api-wrapper-datatype: ListCustomerDto
 x-data-container: List
 x-data-item: CustomerDto
+```
+
+Generation-control marker:
+
+```yaml
 x-ignore-model: true
 ```
 
-These extensions form the projection protocol between server OpenAPI output and client generation.
-
----
-
-## Schema Enrichment
-
-Container handling is strategy-based.
-
-Built-in strategies:
-
-- `Page<T>` via direct schema resolution
-- `List<T>` via wrapper-embedded array resolution
-
-This keeps container extraction extensible without hard-coding all behavior inside the wrapper enricher.
+These extensions form the projection protocol between server OpenAPI output and client reconstruction.
 
 ---
 
@@ -124,91 +165,101 @@ This keeps container extraction extensible without hard-coding all behavior insi
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprint-platform</groupId>
-  <artifactId>openapi-generics-server-starter</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics-server-starter</artifactId>
+    <version>1.1.0</version>
 </dependency>
 ```
 
-Example:
+Example platform envelope endpoints:
 
 ```java
-@GetMapping
-public ResponseEntity<ServiceResponse<List<CustomerDto>>> listCustomers() {
-  return ResponseEntity.ok(ServiceResponse.of(customers));
-}
-```
+ResponseEntity<ServiceResponse<List<CustomerDto>>>
 
-Springdoc exposes the projected OpenAPI document as usual:
+ResponseEntity<ServiceResponse<Set<CustomerDto>>>
 
-```text
-/v3/api-docs
-/v3/api-docs.yaml
+ResponseEntity<ServiceResponse<Page<CustomerDto>>>
 ```
 
 ---
 
 ## BYOE
 
-Custom envelope configuration:
+Configure an existing user-owned response envelope:
 
 ```yaml
 openapi-generics:
   envelope:
-    type: io.example.ApiResponse
+    type: io.example.contract.ApiResponse
 ```
 
-Example:
+Example BYOE endpoints:
 
 ```java
 ResponseEntity<ApiResponse<CustomerDto>>
+
+ResponseEntity<ApiResponse<List<CustomerDto>>>
+
+ResponseEntity<ApiResponse<Set<CustomerDto>>>
+
+ResponseEntity<ApiResponse<Page<CustomerDto>>>
 ```
 
-BYOE is intentionally limited to simple payload shapes to keep projection deterministic.
+The custom envelope must:
+
+- be a concrete class
+- declare exactly one type parameter
+- expose exactly one direct payload field of type `T`
+
+The payload field must be direct at the envelope definition level.
+
+This is valid:
+
+```java
+class ApiResponse<T> {
+    private T data;
+}
+```
+
+This is not valid:
+
+```java
+class ApiResponse<T> {
+    private Wrapper<T> data;
+}
+```
+
+Container payloads are supported at endpoint usage level through the configured envelope:
+
+```java
+ApiResponse<List<CustomerDto>>
+
+ApiResponse<Set<CustomerDto>>
+
+ApiResponse<Page<CustomerDto>>
+```
 
 ---
 
-## What This Module Does Not Do
+## Out of Scope
 
-This starter does not:
+This module does not:
 
-- define `ServiceResponse`, `Page`, or shared contract models
+- define shared contract types
 - generate Java clients
-- own DTOs
-- change runtime HTTP behavior
-- implement business validation
+- own DTO models
+- modify runtime HTTP behavior
+- perform business validation
 - support arbitrary nested generic graphs
-
----
-
-## Determinism Guarantees
-
-The starter is designed around:
-
-- same Java contract → same OpenAPI output
-- stable wrapper naming
-- explicit vendor metadata
-- fail-fast validation
-- no hidden schema reinterpretation
-
-If the projected OpenAPI document becomes inconsistent, the pipeline fails before invalid clients are generated.
 
 ---
 
 ## Mental Model
 
-Think of this module as:
+```text
+Java Contract
+      ↓
+OpenAPI Projection
+```
 
-> a deterministic projector from Java response contracts to OpenAPI metadata-rich schemas
-
-Not as:
-
-- a documentation helper
-- a DTO generator
-- a general OpenAPI customization toolkit
-
----
-
-## License
-
-MIT — see [LICENSE](../LICENSE)
+The responsibility of this module ends once the OpenAPI document has been produced.

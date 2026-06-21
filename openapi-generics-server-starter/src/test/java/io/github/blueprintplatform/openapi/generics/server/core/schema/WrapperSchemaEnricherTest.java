@@ -5,14 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.ListItemExtractor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.PageItemExtractor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.DirectSchemaResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.WrapperEmbeddedArrayResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaRegistry;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaStrategy;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ListContainerSchemaStrategy;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.PageContainerSchemaStrategy;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.DirectArrayItemExtractor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.ContentArrayItemExtractor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.ComponentContainerSchemaResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.WrapperPayloadArraySchemaResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.*;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -42,7 +39,7 @@ class WrapperSchemaEnricherTest {
                     schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page");
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -65,7 +62,7 @@ class WrapperSchemaEnricherTest {
                     schema("ListCustomerDto", listSchema),
                     schema("ServiceResponseListCustomerDto", wrapperSchema));
 
-    enricher.enrich(openApi, "ServiceResponseListCustomerDto", "ListCustomerDto", "List");
+    enricher.enrich(openApi, "ServiceResponseListCustomerDto", "ListCustomerDto", "List", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponseListCustomerDto");
 
@@ -86,7 +83,7 @@ class WrapperSchemaEnricherTest {
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()),
                     schema("PageCustomerDtoAlias", pageRef));
 
-    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDtoAlias", "Page");
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDtoAlias", "Page", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -107,7 +104,7 @@ class WrapperSchemaEnricherTest {
                     schema("PageCustomerDto", pageComposed),
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page");
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -121,8 +118,8 @@ class WrapperSchemaEnricherTest {
     ContainerSchemaStrategy sliceStrategy =
             new ContainerSchemaStrategy() {
 
-              private final DirectSchemaResolver resolver = new DirectSchemaResolver();
-              private final ListItemExtractor extractor = new ListItemExtractor();
+              private final ComponentContainerSchemaResolver resolver = new ComponentContainerSchemaResolver();
+              private final DirectArrayItemExtractor extractor = new DirectArrayItemExtractor();
 
               @Override
               public String containerName() {
@@ -130,12 +127,12 @@ class WrapperSchemaEnricherTest {
               }
 
               @Override
-              public DirectSchemaResolver resolver() {
+              public ComponentContainerSchemaResolver resolver() {
                 return resolver;
               }
 
               @Override
-              public ListItemExtractor extractor() {
+              public DirectArrayItemExtractor extractor() {
                 return extractor;
               }
             };
@@ -150,7 +147,7 @@ class WrapperSchemaEnricherTest {
                     schema("SliceCustomerDto", sliceSchema),
                     schema("ApiResponseSliceCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ApiResponseSliceCustomerDto", "SliceCustomerDto", "Slice");
+    enricher.enrich(openApi, "ApiResponseSliceCustomerDto", "SliceCustomerDto", "Slice", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ApiResponseSliceCustomerDto");
 
@@ -171,7 +168,7 @@ class WrapperSchemaEnricherTest {
                     schema("FooBarCustomerDto", unsupportedSchema),
                     schema("ServiceResponseFooBarCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponseFooBarCustomerDto", "FooBarCustomerDto", "FooBar");
+    enricher.enrich(openApi, "ServiceResponseFooBarCustomerDto", "FooBarCustomerDto", "FooBar", "data");
 
     Schema<?> wrapper =
             openApi.getComponents().getSchemas().get("ServiceResponseFooBarCustomerDto");
@@ -192,7 +189,7 @@ class WrapperSchemaEnricherTest {
                     schema("PagedCustomerDto", pageSchema),
                     schema("ServiceResponsePagedCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponsePagedCustomerDto", "PagedCustomerDto", "Page");
+    enricher.enrich(openApi, "ServiceResponsePagedCustomerDto", "PagedCustomerDto", "Page", "data");
 
     Schema<?> wrapper =
             openApi.getComponents().getSchemas().get("ServiceResponsePagedCustomerDto");
@@ -209,7 +206,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = openApi(schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")));
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "MissingWrapper", "PageCustomerDto", "Page"));
+            () -> enricher.enrich(openApi, "MissingWrapper", "PageCustomerDto", "Page", "data"));
   }
 
   @Test
@@ -220,7 +217,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "MissingData", "Page"));
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "MissingData", "Page", "data"));
   }
 
   @Test
@@ -236,7 +233,7 @@ class WrapperSchemaEnricherTest {
                     schema("PageCustomerDto", pageSchema),
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page");
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -260,7 +257,7 @@ class WrapperSchemaEnricherTest {
                     schema("PageCustomerDto", pageSchema),
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
-    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page");
+    enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
@@ -273,17 +270,17 @@ class WrapperSchemaEnricherTest {
   void enrich_shouldDoNothing_forNullInputs() {
     WrapperSchemaEnricher enricher = defaultEnricher();
 
-    assertDoesNotThrow(() -> enricher.enrich(null, "Wrapper", "PageCustomerDto", "Page"));
+    assertDoesNotThrow(() -> enricher.enrich(null, "Wrapper", "PageCustomerDto", "Page", "data"));
 
     OpenAPI openApi =
             openApi(
                     schema("PageCustomerDto", pageSchemaWithArrayContentRef("CustomerDto")),
                     schema("ServiceResponsePageCustomerDto", new ObjectSchema()));
 
-    assertDoesNotThrow(() -> enricher.enrich(openApi, null, "PageCustomerDto", "Page"));
-    assertDoesNotThrow(() -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", null, "Page"));
+    assertDoesNotThrow(() -> enricher.enrich(openApi, null, "PageCustomerDto", "Page", "data"));
+    assertDoesNotThrow(() -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", null, "Page", "data"));
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", null));
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", null, "data"));
   }
 
   @Test
@@ -293,7 +290,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = new OpenAPI();
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page"));
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data"));
   }
 
   @Test
@@ -303,7 +300,7 @@ class WrapperSchemaEnricherTest {
     OpenAPI openApi = new OpenAPI().components(new Components());
 
     assertDoesNotThrow(
-            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page"));
+            () -> enricher.enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data"));
   }
 
   @Test
@@ -312,8 +309,8 @@ class WrapperSchemaEnricherTest {
     ContainerSchemaStrategy customListStrategy =
             new ContainerSchemaStrategy() {
 
-              private final DirectSchemaResolver resolver = new DirectSchemaResolver();
-              private final ListItemExtractor extractor = new ListItemExtractor();
+              private final ComponentContainerSchemaResolver resolver = new ComponentContainerSchemaResolver();
+              private final DirectArrayItemExtractor extractor = new DirectArrayItemExtractor();
 
               @Override
               public String containerName() {
@@ -321,12 +318,12 @@ class WrapperSchemaEnricherTest {
               }
 
               @Override
-              public DirectSchemaResolver resolver() {
+              public ComponentContainerSchemaResolver resolver() {
                 return resolver;
               }
 
               @Override
-              public ListItemExtractor extractor() {
+              public DirectArrayItemExtractor extractor() {
                 return extractor;
               }
             };
@@ -342,7 +339,7 @@ class WrapperSchemaEnricherTest {
                     schema("ServiceResponseCustomListCustomerDto", new ObjectSchema()));
 
     enricher.enrich(
-            openApi, "ServiceResponseCustomListCustomerDto", "CustomListCustomerDto", "CustomList");
+            openApi, "ServiceResponseCustomListCustomerDto", "CustomListCustomerDto", "CustomList", "data");
 
     Schema<?> wrapper =
             openApi.getComponents().getSchemas().get("ServiceResponseCustomListCustomerDto");
@@ -351,13 +348,65 @@ class WrapperSchemaEnricherTest {
     assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.DATA_ITEM));
   }
 
+  @Test
+  @DisplayName("enrich -> should use custom payload property for array container")
+  void enrich_shouldUseCustomPayloadProperty_forArrayContainer() {
+    WrapperSchemaEnricher enricher = defaultEnricher();
+
+    ArraySchema listSchema = arraySchemaWithItemRef("CustomerDto");
+
+    ObjectSchema wrapperSchema = new ObjectSchema();
+    wrapperSchema.addProperty("payload", listSchema);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("ListCustomerDto", listSchema),
+                    schema("ApiResponseListCustomerDto", wrapperSchema));
+
+    enricher.enrich(openApi, "ApiResponseListCustomerDto", "ListCustomerDto", "List", "payload");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ApiResponseListCustomerDto");
+
+    assertEquals("List", wrapper.getExtensions().get(VendorExtensions.DATA_CONTAINER));
+    assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.DATA_ITEM));
+  }
+
+  @Test
+  @DisplayName("enrich -> should support Set<T> container")
+  void enrich_shouldSupportSetContainer() {
+    WrapperSchemaEnricher enricher = defaultEnricher();
+
+    ArraySchema setSchema = arraySchemaWithItemRef("CustomerDto");
+
+    ObjectSchema wrapperSchema = new ObjectSchema();
+    wrapperSchema.addProperty("data", setSchema);
+
+    OpenAPI openApi =
+            openApi(
+                    schema("SetCustomerDto", setSchema),
+                    schema("ServiceResponseSetCustomerDto", wrapperSchema));
+
+    enricher.enrich(openApi, "ServiceResponseSetCustomerDto", "SetCustomerDto", "Set", "data");
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponseSetCustomerDto");
+
+    assertEquals("Set", wrapper.getExtensions().get(VendorExtensions.DATA_CONTAINER));
+    assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.DATA_ITEM));
+  }
+
   private WrapperSchemaEnricher defaultEnricher() {
     return new WrapperSchemaEnricher(
             new ContainerSchemaRegistry(
                     List.of(
-                            new PageContainerSchemaStrategy(new DirectSchemaResolver(), new PageItemExtractor()),
+                            new PageContainerSchemaStrategy(
+                                    new ComponentContainerSchemaResolver(),
+                                    new ContentArrayItemExtractor()),
                             new ListContainerSchemaStrategy(
-                                    new WrapperEmbeddedArrayResolver(), new ListItemExtractor()))));
+                                    new WrapperPayloadArraySchemaResolver(),
+                                    new DirectArrayItemExtractor()),
+                            new SetContainerSchemaStrategy(
+                                    new WrapperPayloadArraySchemaResolver(),
+                                    new DirectArrayItemExtractor()))));
   }
 
   private OpenAPI openApi(NamedSchema... namedSchemas) {

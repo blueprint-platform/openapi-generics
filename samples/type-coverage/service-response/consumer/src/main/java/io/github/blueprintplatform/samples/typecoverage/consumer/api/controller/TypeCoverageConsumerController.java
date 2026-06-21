@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -101,5 +102,15 @@ public class TypeCoverageConsumerController {
   @GetMapping("/lists/statuses")
   public ResponseEntity<ServiceResponse<List<CoverageStatus>>> listStatuses() {
     return ResponseEntity.ok(service.listStatuses());
+  }
+
+  @GetMapping("/sets/summaries")
+  public ResponseEntity<ServiceResponse<Set<TypeSummaryDto>>> setSummaries() {
+    return ResponseEntity.ok(service.setSummaries());
+  }
+
+  @GetMapping("/sets/statuses")
+  public ResponseEntity<ServiceResponse<Set<CoverageStatus>>> setStatuses() {
+    return ResponseEntity.ok(service.setStatuses());
   }
 }

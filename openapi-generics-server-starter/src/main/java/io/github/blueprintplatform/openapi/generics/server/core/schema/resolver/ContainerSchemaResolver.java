@@ -5,5 +5,9 @@ import java.util.Map;
 
 public interface ContainerSchemaResolver {
 
-    Schema<?> resolve(Map<String, Schema> schemas, String dataRefName, String wrapperName);
+    Schema<?> resolve(
+            Map<String, Schema> schemas,
+            String dataRefName,
+            String wrapperName,
+            String payloadPropertyName);
 }

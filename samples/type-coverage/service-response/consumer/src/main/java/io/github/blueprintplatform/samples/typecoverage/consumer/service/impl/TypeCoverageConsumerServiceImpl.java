@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -97,5 +98,15 @@ public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerServ
   @Override
   public ServiceResponse<List<CoverageStatus>> listStatuses() {
     return adapter.listStatuses();
+  }
+
+  @Override
+  public ServiceResponse<Set<TypeSummaryDto>> setSummaries() {
+    return adapter.setSummaries();
+  }
+
+  @Override
+  public ServiceResponse<Set<CoverageStatus>> setStatuses() {
+    return adapter.setStatuses();
   }
 }

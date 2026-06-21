@@ -10,6 +10,63 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [1.1.0] - 2026-06-21
+
+### Minor release
+
+OpenAPI Generics 1.1.0 introduces container-aware contract reconstruction and deterministic OpenAPI snapshot validation.
+
+This release expands the platform's supported contract model while preserving backward compatibility with all 1.0.x contracts.
+
+### Added
+
+- Introduced first-class generic container infrastructure across projection and client generation.
+- Added container-aware metadata model for projection, OpenAPI enrichment, and code generation.
+- Added support for:
+    - `ServiceResponse<List<T>>`
+    - `ServiceResponse<Set<T>>`
+    - `ServiceResponse<Page<T>>`
+- Added support for the same container model in BYOE envelopes:
+    - `YourEnvelope<List<T>>`
+    - `YourEnvelope<Set<T>>`
+    - `YourEnvelope<Page<T>>`
+- Added container-aware wrapper reconstruction in generated Java clients.
+- Added configurable container registration support for client-side reconstruction.
+- Added deterministic OpenAPI snapshot validation across sample projects.
+- Added committed OpenAPI specification snapshots as validation artifacts.
+- Added automated specification drift detection during CI validation.
+- Added projection metadata assertions for generated OpenAPI documents.
+
+### Changed
+
+- Generalized container handling into a dedicated platform capability instead of container-specific implementations.
+- Unified projection and reconstruction behavior through shared container metadata.
+- Extended wrapper naming and reconstruction logic to support container-aware response types.
+- Expanded type coverage samples to validate container-based response contracts.
+- Updated documentation, adoption guides, architecture references, and compatibility documentation for the container model.
+
+### Quality & Verification
+
+- Added end-to-end validation for:
+    - `ServiceResponse<T>`
+    - `ServiceResponse<List<T>>`
+    - `ServiceResponse<Set<T>>`
+    - `ServiceResponse<Page<T>>`
+- Added equivalent BYOE validation coverage.
+- Added OpenAPI snapshot regression validation for Spring Boot 3 and Spring Boot 4 sample stacks.
+- Added verification coverage for projection metadata generation, vendor extension consistency, wrapper reconstruction, runtime deserialization, and consumer integration.
+- Verified producer → OpenAPI → generated client → consumer flows across all supported response shapes.
+
+### Compatibility
+
+- Fully backward compatible with all 1.0.x releases.
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Maven-based client generation
+
+---
+
 ## [1.0.3] - 2026-06-13
 
 ### Patch release

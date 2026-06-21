@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TypeCoverageConsumerService {
@@ -43,4 +44,8 @@ public interface TypeCoverageConsumerService {
   ServiceResponse<List<TypeSummaryDto>> listSummaries();
 
   ServiceResponse<List<CoverageStatus>> listStatuses();
+
+  ServiceResponse<Set<TypeSummaryDto>> setSummaries();
+
+  ServiceResponse<Set<CoverageStatus>> setStatuses();
 }

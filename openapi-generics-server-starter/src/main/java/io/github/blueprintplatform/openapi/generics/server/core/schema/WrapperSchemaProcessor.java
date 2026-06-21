@@ -1,6 +1,5 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
-import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -31,13 +30,13 @@ public class WrapperSchemaProcessor {
 
     log.debug("Wrapper schema '{}' enriched", wrapper.getName());
 
-    if (isDefaultEnvelope(descriptor) && descriptor.isContainer()) {
+    if (descriptor.isContainer()) {
       enricher.enrich(
-          openApi, wrapper.getName(), descriptor.dataRefName(), descriptor.containerName());
+              openApi,
+              wrapper.getName(),
+              descriptor.dataRefName(),
+              descriptor.containerName(),
+              descriptor.payloadPropertyName());
     }
-  }
-
-  private boolean isDefaultEnvelope(ResponseTypeDescriptor descriptor) {
-    return ServiceResponse.class.equals(descriptor.envelopeType());
   }
 }

@@ -1,5 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.server.core.validation;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER;
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.API_WRAPPER_DATATYPE;
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions.DATA_CONTAINER;
@@ -7,7 +8,9 @@ import static io.github.blueprintplatform.openapi.generics.server.core.schema.co
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -44,7 +47,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should pass for valid container wrapper")
   void validate_shouldPass_forValidContainerWrapper() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -197,7 +204,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when container extensions are missing")
   void validate_shouldFail_whenContainerExtensionsMissing() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -216,7 +227,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-data-container is invalid")
   void validate_shouldFail_whenContainerInvalid() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -237,7 +252,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-data-item is invalid")
   void validate_shouldFail_whenItemInvalid() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
