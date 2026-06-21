@@ -16,27 +16,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/types/pages", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PagedPayloadController {
 
-    @GetMapping("/summaries")
-    public ResponseEntity<ApiResponse<Page<TypeSummaryDto>>> pagedSummaries() {
-        var content =
-                List.of(
-                        new TypeSummaryDto(
-                                UUID.fromString("33333333-3333-3333-3333-333333333333"),
-                                "BYOE-PAGE-001",
-                                CoverageStatus.ACTIVE),
-                        new TypeSummaryDto(
-                                UUID.fromString("44444444-4444-4444-4444-444444444444"),
-                                "BYOE-PAGE-002",
-                                CoverageStatus.EXPERIMENTAL));
+  @GetMapping("/summaries")
+  public ResponseEntity<ApiResponse<Page<TypeSummaryDto>>> pagedSummaries() {
+    var content =
+        List.of(
+            new TypeSummaryDto(
+                UUID.fromString("33333333-3333-3333-3333-333333333333"),
+                "BYOE-PAGE-001",
+                CoverageStatus.ACTIVE),
+            new TypeSummaryDto(
+                UUID.fromString("44444444-4444-4444-4444-444444444444"),
+                "BYOE-PAGE-002",
+                CoverageStatus.EXPERIMENTAL));
 
-        return ResponseEntity.ok(ApiResponse.ok(Page.of(content, 0, 2, 2)));
-    }
+    return ResponseEntity.ok(ApiResponse.ok(Page.of(content, 0, 2, 2)));
+  }
 
-    @GetMapping("/statuses")
-    public ResponseEntity<ApiResponse<Page<CoverageStatus>>> pagedStatuses() {
-        var content =
-                List.of(CoverageStatus.ACTIVE, CoverageStatus.PASSIVE, CoverageStatus.EXPERIMENTAL);
+  @GetMapping("/statuses")
+  public ResponseEntity<ApiResponse<Page<CoverageStatus>>> pagedStatuses() {
+    var content =
+        List.of(CoverageStatus.ACTIVE, CoverageStatus.PASSIVE, CoverageStatus.EXPERIMENTAL);
 
-        return ResponseEntity.ok(ApiResponse.ok(Page.of(content, 0, 3, 3)));
-    }
+    return ResponseEntity.ok(ApiResponse.ok(Page.of(content, 0, 3, 3)));
+  }
 }

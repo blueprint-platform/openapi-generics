@@ -23,6 +23,7 @@ public class WrapperSchemaProcessor {
     this.enricher = enricher;
   }
 
+  @SuppressWarnings("rawtypes")
   public void process(OpenAPI openApi, ResponseTypeDescriptor descriptor) {
     Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 

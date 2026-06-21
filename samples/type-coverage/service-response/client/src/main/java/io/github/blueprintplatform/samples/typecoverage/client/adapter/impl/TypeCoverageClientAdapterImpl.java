@@ -27,12 +27,12 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
   private final SetPayloadControllerApi setApi;
 
   public TypeCoverageClientAdapterImpl(
-          ScalarPayloadControllerApi scalarApi,
-          ValuePayloadControllerApi valueApi,
-          ObjectPayloadControllerApi objectApi,
-          PagedPayloadControllerApi pagedApi,
-          ListPayloadControllerApi listApi,
-          SetPayloadControllerApi setApi) {
+      ScalarPayloadControllerApi scalarApi,
+      ValuePayloadControllerApi valueApi,
+      ObjectPayloadControllerApi objectApi,
+      PagedPayloadControllerApi pagedApi,
+      ListPayloadControllerApi listApi,
+      SetPayloadControllerApi setApi) {
     this.scalarApi = scalarApi;
     this.valueApi = valueApi;
     this.objectApi = objectApi;

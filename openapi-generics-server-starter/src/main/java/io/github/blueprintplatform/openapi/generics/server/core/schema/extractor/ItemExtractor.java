@@ -17,5 +17,6 @@ public interface ItemExtractor {
      * @param allSchemas      all schemas in the OpenAPI document (for $ref resolution)
      * @return the simple name of the item type, or null if cannot be determined
      */
+    @SuppressWarnings("rawtypes")
     String extractItemName(Schema<?> containerSchema, Map<String, Schema> allSchemas);
 }

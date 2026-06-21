@@ -33,14 +33,15 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should pass for valid simple wrapper")
   void validate_shouldPass_forValidSimpleWrapper() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "CustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    assertDoesNotThrow(() -> guard.validate(openApi, Set.of(descriptor)));
+    assertDoesNotThrow(() -> guard.validate(openApi, descriptors));
   }
 
   @Test
@@ -60,16 +61,18 @@ class OpenApiContractGuardTest {
     wrapper.addExtension(DATA_ITEM, "CustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    assertDoesNotThrow(() -> guard.validate(openApi, Set.of(descriptor)));
+    assertDoesNotThrow(() -> guard.validate(openApi, descriptors));
   }
 
   @Test
   @DisplayName("validate -> should pass when descriptors are empty")
   void validate_shouldPass_whenDescriptorsEmpty() {
     OpenAPI openApi = openApi();
+    Set<ResponseTypeDescriptor> descriptors = Set.of();
 
-    assertDoesNotThrow(() -> guard.validate(openApi, Set.of()));
+    assertDoesNotThrow(() -> guard.validate(openApi, descriptors));
   }
 
   @Test
@@ -84,9 +87,9 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when components.schemas is missing")
   void validate_shouldFail_whenSchemasMissing() {
     OpenAPI openApi = new OpenAPI();
+    Set<ResponseTypeDescriptor> descriptors = Set.of();
 
-    IllegalStateException ex =
-        assertThrows(IllegalStateException.class, () -> guard.validate(openApi, Set.of()));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertEquals("OpenAPI components.schemas is missing", ex.getMessage());
   }
@@ -95,13 +98,12 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when wrapper schema is missing")
   void validate_shouldFail_whenWrapperMissing() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     OpenAPI openApi = openApi();
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("Missing required wrapper schema"));
     assertTrue(ex.getMessage().contains("ServiceResponseCustomerDto"));
@@ -111,14 +113,13 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when wrapper extensions are missing")
   void validate_shouldFail_whenExtensionsMissing() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("missing required extensions"));
   }
@@ -127,17 +128,16 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-api-wrapper is invalid")
   void validate_shouldFail_whenApiWrapperInvalid() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, false);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "CustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + API_WRAPPER));
   }
@@ -146,17 +146,16 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-api-wrapper-datatype is invalid")
   void validate_shouldFail_whenDatatypeInvalid() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "WrongDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + API_WRAPPER_DATATYPE));
   }
@@ -165,26 +164,25 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when payload property is missing in allOf wrapper")
   void validate_shouldFail_whenPayloadMissingInAllOfWrapper() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("payload");
     wrapper.addExtension(API_WRAPPER, true);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "CustomerDto");
-    OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
+
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("must define 'data' property"));
   }
 
   @Test
-  @DisplayName(
-      "validate -> should fail when payload property is missing in direct properties wrapper")
+  @DisplayName("validate -> should fail when payload property is missing in direct properties wrapper")
   void validate_shouldFail_whenPayloadMissingInDirectWrapper() {
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     ObjectSchema wrapper = new ObjectSchema();
     wrapper.addProperty("payload", new Schema<>());
@@ -192,10 +190,9 @@ class OpenApiContractGuardTest {
     wrapper.addExtension(API_WRAPPER_DATATYPE, "CustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("must define 'data' property"));
   }
@@ -215,10 +212,9 @@ class OpenApiContractGuardTest {
     wrapper.addExtension(API_WRAPPER_DATATYPE, "PageCustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_CONTAINER));
   }
@@ -240,10 +236,9 @@ class OpenApiContractGuardTest {
     wrapper.addExtension(DATA_ITEM, "CustomerDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_CONTAINER));
   }
@@ -265,12 +260,16 @@ class OpenApiContractGuardTest {
     wrapper.addExtension(DATA_ITEM, "OrderDto");
 
     OpenAPI openApi = openApi(schema("ServiceResponsePageCustomerDto", wrapper));
+    Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
 
-    IllegalStateException ex =
-        assertThrows(
-            IllegalStateException.class, () -> guard.validate(openApi, Set.of(descriptor)));
+    IllegalStateException ex = validateExpectingFailure(openApi, descriptors);
 
     assertTrue(ex.getMessage().contains("invalid extension: " + DATA_ITEM));
+  }
+
+  private IllegalStateException validateExpectingFailure(
+          OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
+    return assertThrows(IllegalStateException.class, () -> guard.validate(openApi, descriptors));
   }
 
   private OpenAPI openApi(NamedSchema... namedSchemas) {

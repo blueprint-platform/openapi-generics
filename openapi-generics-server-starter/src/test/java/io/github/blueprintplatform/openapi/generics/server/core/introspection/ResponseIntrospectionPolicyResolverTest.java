@@ -38,11 +38,11 @@ class ResponseIntrospectionPolicyResolverTest {
     SupportedContainerType pageContainer =
             new SupportedContainerType(Page.class, "Page", "Page");
 
-    ResponseIntrospectionPolicyResolver resolver =
+    ResponseIntrospectionPolicyResolver customResolver =
             new ResponseIntrospectionPolicyResolver(
                     () -> Set.of(pageContainer));
 
-    ResponseIntrospectionPolicy policy = resolver.resolve(null);
+    ResponseIntrospectionPolicy policy = customResolver.resolve(null);
 
     assertEquals(
             Set.of(pageContainer),
@@ -307,13 +307,13 @@ class ResponseIntrospectionPolicyResolverTest {
     SupportedContainerType setContainer =
             new SupportedContainerType(Set.class, "Set", "Set");
 
-    ResponseIntrospectionPolicyResolver resolver =
+    ResponseIntrospectionPolicyResolver customResolver =
             new ResponseIntrospectionPolicyResolver(() -> Set.of(setContainer));
 
     OpenApiGenericsProperties properties =
             new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
 
-    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+    ResponseIntrospectionPolicy policy = customResolver.resolve(properties);
 
     assertEquals(ValidEnvelope.class, policy.envelopeType());
     assertEquals("payload", policy.payloadPropertyName());

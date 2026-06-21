@@ -38,6 +38,7 @@ public class OpenApiContractGuard {
 
   private static final Logger log = LoggerFactory.getLogger(OpenApiContractGuard.class);
 
+  @SuppressWarnings("rawtypes")
   public void validate(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
     log.debug("OpenAPI contract validation started");
 
@@ -47,6 +48,7 @@ public class OpenApiContractGuard {
     log.debug("OpenAPI contract validation completed successfully");
   }
 
+  @SuppressWarnings("rawtypes")
   private void validateDescriptors(
       Map<String, Schema> schemas, Set<ResponseTypeDescriptor> descriptors) {
     if (descriptors == null || descriptors.isEmpty()) {
@@ -58,6 +60,7 @@ public class OpenApiContractGuard {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private void validateWrapperSchema(
       Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
@@ -116,6 +119,7 @@ public class OpenApiContractGuard {
     requireMatchingExtension(wrapperName, extensions, DATA_ITEM, descriptor.itemRefName());
   }
 
+  @SuppressWarnings("rawtypes")
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
     if (openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
       log.error("OpenAPI validation failed: components.schemas is missing");

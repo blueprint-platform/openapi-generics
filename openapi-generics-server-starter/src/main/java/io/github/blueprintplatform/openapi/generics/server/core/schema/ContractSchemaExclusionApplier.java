@@ -39,6 +39,7 @@ public class ContractSchemaExclusionApplier {
 
   private static final String SCHEMA_REF_PREFIX = "#/components/schemas/";
 
+  @SuppressWarnings("rawtypes")
   public void apply(OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
     if (openApi == null
         || openApi.getComponents() == null
@@ -66,6 +67,7 @@ public class ContractSchemaExclusionApplier {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   private void markNestedEnvelopeSchemas(
       Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
@@ -117,6 +119,7 @@ public class ContractSchemaExclusionApplier {
     return ServiceResponse.class.equals(descriptor.envelopeType());
   }
 
+  @SuppressWarnings("rawtypes")
   private void markIgnore(Map<String, Schema> schemas, String schemaName) {
     Schema<?> schema = schemas.get(schemaName);
     if (schema != null) {

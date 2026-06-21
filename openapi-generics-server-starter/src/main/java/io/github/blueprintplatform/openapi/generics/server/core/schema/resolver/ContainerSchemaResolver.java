@@ -4,7 +4,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 
 public interface ContainerSchemaResolver {
-
+    @SuppressWarnings("rawtypes")
     Schema<?> resolve(
             Map<String, Schema> schemas,
             String dataRefName,

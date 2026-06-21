@@ -34,6 +34,7 @@ public class ModelIgnoreDecider {
   }
 
   /** Evaluates ignore rules for a model. */
+  @SuppressWarnings("rawtypes")
   public boolean shouldIgnore(String name, Schema model) {
     boolean byExtension = isIgnoredByExtension(model);
     boolean byExternal = registry.isExternal(name);
@@ -60,10 +61,11 @@ public class ModelIgnoreDecider {
     return ignored.contains(name);
   }
 
+  @SuppressWarnings("rawtypes")
   private boolean isIgnoredByExtension(Schema model) {
     if (model == null) return false;
 
-    Map<String, Object> ext = model.getExtensions();
+    Map ext = model.getExtensions();
     return ext != null && Boolean.TRUE.equals(ext.get(IGNORE_MODEL));
   }
 }

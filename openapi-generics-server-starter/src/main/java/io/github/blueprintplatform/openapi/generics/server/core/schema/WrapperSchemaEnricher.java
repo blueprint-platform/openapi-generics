@@ -24,6 +24,7 @@ public class WrapperSchemaEnricher {
     this.containerSchemaRegistry = containerSchemaRegistry;
   }
 
+  @SuppressWarnings("rawtypes")
   public void enrich(
       OpenAPI openApi, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
     Map<String, Schema> schemas = getSchemas(openApi);
@@ -42,6 +43,7 @@ public class WrapperSchemaEnricher {
     applyContainerMetadata(metadata);
   }
 
+  @SuppressWarnings("rawtypes")
   private ContainerSchemaMetadata resolveContainerMetadata(
       Map<String, Schema> schemas, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
     ContainerSchemaStrategy strategy = containerSchemaRegistry.findByContainerName(containerName);
@@ -76,6 +78,7 @@ public class WrapperSchemaEnricher {
     metadata.wrapper().addExtension(VendorExtensions.DATA_ITEM, metadata.itemName());
   }
 
+  @SuppressWarnings("rawtypes")
   private Map<String, Schema> getSchemas(OpenAPI openApi) {
     if (openApi == null
         || openApi.getComponents() == null

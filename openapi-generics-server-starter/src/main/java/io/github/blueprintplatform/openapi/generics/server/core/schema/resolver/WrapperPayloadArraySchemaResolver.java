@@ -9,11 +9,13 @@ import java.util.Map;
 
 public class WrapperPayloadArraySchemaResolver implements ContainerSchemaResolver {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Schema<?> resolve(Map<String, Schema> schemas, String dataRefName, String wrapperName, String payloadPropertyName) {
         Schema<?> wrapper = schemas.get(wrapperName);
         if (wrapper == null) return null;
 
+        @SuppressWarnings("rawtypes")
         Map<String, Schema> properties = wrapper.getProperties();
         if (properties == null) return null;
 

@@ -92,7 +92,7 @@ class ServiceResponseTest {
   void equals_withDifferentType_shouldReturnFalse() {
     ServiceResponse<String> response = ServiceResponse.of("x");
 
-    assertNotEquals(response, "not a response");
+    assertNotEquals("not a response", response);
     assertNotEquals(null, response);
   }
 

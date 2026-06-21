@@ -15,27 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/types/sets", produces = MediaType.APPLICATION_JSON_VALUE)
 public class SetPayloadController {
 
-    @GetMapping("/summaries")
-    public ResponseEntity<ApiResponse<Set<TypeSummaryDto>>> setSummaries() {
-        var content =
-                Set.of(
-                        new TypeSummaryDto(
-                                UUID.fromString("99999999-9999-9999-9999-999999999999"),
-                                "BYOE-SET-001",
-                                CoverageStatus.ACTIVE),
-                        new TypeSummaryDto(
-                                UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                                "BYOE-SET-002",
-                                CoverageStatus.EXPERIMENTAL));
+  @GetMapping("/summaries")
+  public ResponseEntity<ApiResponse<Set<TypeSummaryDto>>> setSummaries() {
+    var content =
+        Set.of(
+            new TypeSummaryDto(
+                UUID.fromString("99999999-9999-9999-9999-999999999999"),
+                "BYOE-SET-001",
+                CoverageStatus.ACTIVE),
+            new TypeSummaryDto(
+                UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                "BYOE-SET-002",
+                CoverageStatus.EXPERIMENTAL));
 
-        return ResponseEntity.ok(ApiResponse.ok(content));
-    }
+    return ResponseEntity.ok(ApiResponse.ok(content));
+  }
 
-    @GetMapping("/statuses")
-    public ResponseEntity<ApiResponse<Set<CoverageStatus>>> setStatuses() {
-        var content =
-                Set.of(CoverageStatus.ACTIVE, CoverageStatus.PASSIVE, CoverageStatus.EXPERIMENTAL);
+  @GetMapping("/statuses")
+  public ResponseEntity<ApiResponse<Set<CoverageStatus>>> setStatuses() {
+    var content =
+        Set.of(CoverageStatus.ACTIVE, CoverageStatus.PASSIVE, CoverageStatus.EXPERIMENTAL);
 
-        return ResponseEntity.ok(ApiResponse.ok(content));
-    }
+    return ResponseEntity.ok(ApiResponse.ok(content));
+  }
 }

@@ -16,12 +16,14 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
+import java.util.Objects;
+
 @DisplayName("Unit: CustomerApiClientConfig.problemDetailStatusHandler")
 class CustomerApiClientConfigStatusHandlerTest {
 
   @Test
   @DisplayName(
-      "400 with application/problem+json -> throws ApiProblemException with parsed ProblemDetail")
+          "400 with application/problem+json -> throws ApiProblemException with parsed ProblemDetail")
   void handler_parses_problem_detail_on_4xx() {
     var om = org.springframework.http.converter.json.Jackson2ObjectMapperBuilder.json().build();
     RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost");
@@ -32,35 +34,34 @@ class CustomerApiClientConfigStatusHandlerTest {
     MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
     String body =
-        """
-            {
-              "type":"https://example.org/problem/bad-request",
-              "title":"Bad Request",
-              "status":400,
-              "detail":"Validation failed",
-              "instance":"https://example.org/trace/abc",
-              "errorCode":"VAL_001",
-              "extensions": {
-                "errors": [
-                  { "code":"too_short", "message":"name too short" }
-                ]
-              }
-            }
-            """;
+            """
+                {
+                  "type":"https://example.org/problem/bad-request",
+                  "title":"Bad Request",
+                  "status":400,
+                  "detail":"Validation failed",
+                  "instance":"https://example.org/trace/abc",
+                  "errorCode":"VAL_001",
+                  "extensions": {
+                    "errors": [
+                      { "code":"too_short", "message":"name too short" }
+                    ]
+                  }
+                }
+                """;
 
     server
-        .expect(once(), requestTo("http://localhost/err400"))
-        .andRespond(
-            withStatus(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
-                .body(body));
+            .expect(once(), requestTo("http://localhost/err400"))
+            .andRespond(
+                    withStatus(HttpStatus.BAD_REQUEST)
+                            .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                            .body(body));
 
     RestClient client = builder.build();
+    RestClient.ResponseSpec response = client.get().uri("/err400").retrieve();
 
     ApiProblemException ex =
-        assertThrows(
-            ApiProblemException.class,
-            () -> client.get().uri("/err400").retrieve().body(String.class));
+            assertThrows(ApiProblemException.class, () -> response.body(String.class));
 
     assertEquals(400, ex.getStatus());
 
@@ -78,8 +79,8 @@ class CustomerApiClientConfigStatusHandlerTest {
     assertTrue(ex.hasErrors());
     assertEquals(1, ex.getErrors().size());
     assertNotNull(ex.firstErrorOrNull());
-    assertEquals("too_short", ex.firstErrorOrNull().code());
-    assertEquals("name too short", ex.firstErrorOrNull().message());
+    assertEquals("too_short", Objects.requireNonNull(ex.firstErrorOrNull()).code());
+    assertEquals("name too short", Objects.requireNonNull(ex.firstErrorOrNull()).message());
 
     server.verify();
   }
@@ -96,15 +97,14 @@ class CustomerApiClientConfigStatusHandlerTest {
     MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
 
     server
-        .expect(once(), requestTo("http://localhost/err500"))
-        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+            .expect(once(), requestTo("http://localhost/err500"))
+            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 
     RestClient client = builder.build();
+    RestClient.ResponseSpec response = client.get().uri("/err500").retrieve();
 
     ApiProblemException ex =
-        assertThrows(
-            ApiProblemException.class,
-            () -> client.get().uri("/err500").retrieve().body(String.class));
+            assertThrows(ApiProblemException.class, () -> response.body(String.class));
 
     assertEquals(500, ex.getStatus());
 

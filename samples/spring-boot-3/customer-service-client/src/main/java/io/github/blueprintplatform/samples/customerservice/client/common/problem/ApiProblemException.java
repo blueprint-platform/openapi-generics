@@ -4,6 +4,7 @@ import io.github.blueprintplatform.openapi.generics.contract.error.ErrorItem;
 import io.github.blueprintplatform.openapi.generics.contract.error.ProblemExtensions;
 import java.io.Serial;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -125,8 +126,10 @@ public final class ApiProblemException extends RuntimeException implements Seria
     appendIfNotBlank(sb, " | ", pd.getDetail());
 
     tag(sb, "code", normalize(resolveErrorCode(pd)));
-    tag(sb, "type", pd.getType() != null ? pd.getType().toString() : null);
-    tag(sb, "instance", pd.getInstance() != null ? pd.getInstance().toString() : null);
+    tag(sb, "type", pd.getType().toString());
+
+    URI instance = pd.getInstance();
+    tag(sb, "instance", instance == null ? null : instance.toString());
 
     int errorCount = resolveErrors(pd).size();
     if (errorCount > 0) {

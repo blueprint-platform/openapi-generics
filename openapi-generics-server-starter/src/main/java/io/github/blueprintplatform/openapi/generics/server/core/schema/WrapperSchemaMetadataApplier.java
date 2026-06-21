@@ -15,6 +15,7 @@ public final class WrapperSchemaMetadataApplier {
 
   private WrapperSchemaMetadataApplier() {}
 
+  @SuppressWarnings("rawtypes")
   public static Schema<?> apply(
       Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 

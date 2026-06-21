@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class ComponentContainerSchemaResolver implements ContainerSchemaResolver {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Schema<?> resolve(
             Map<String, Schema> schemas,
@@ -24,6 +25,7 @@ public class ComponentContainerSchemaResolver implements ContainerSchemaResolver
         return resolveContainerSchema(schemas, schemas.get(dataRefName), new LinkedHashSet<>());
     }
 
+    @SuppressWarnings("rawtypes")
     private Schema<?> resolveContainerSchema(
             Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 
@@ -44,6 +46,7 @@ public class ComponentContainerSchemaResolver implements ContainerSchemaResolver
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
     private Schema<?> dereferenceIfNeeded(
             Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 

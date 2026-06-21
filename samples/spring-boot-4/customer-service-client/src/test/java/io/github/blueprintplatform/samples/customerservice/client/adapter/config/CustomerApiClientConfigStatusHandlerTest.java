@@ -103,8 +103,10 @@ class CustomerApiClientConfigStatusHandlerTest {
   }
 
   private ApiProblemException performGetExpectingException(RestClient client, String uri) {
-    return assertThrows(
-        ApiProblemException.class, () -> client.get().uri(uri).retrieve().body(String.class));
+    RestClient.RequestHeadersSpec<?> request = client.get().uri(uri);
+    RestClient.ResponseSpec response = request.retrieve();
+
+    return assertThrows(ApiProblemException.class, () -> response.body(String.class));
   }
 
   private void assertBasicProblem(

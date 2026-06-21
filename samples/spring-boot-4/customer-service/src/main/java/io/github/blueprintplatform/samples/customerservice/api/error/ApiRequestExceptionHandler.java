@@ -14,6 +14,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
+
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+@SuppressWarnings("java:S2638")
 @RestControllerAdvice
 @Order(1)
 public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -85,7 +87,7 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
+  protected  @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       HttpHeaders headers,
       HttpStatusCode status,
@@ -122,11 +124,11 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  protected @Nullable ResponseEntity<Object> handleHttpMessageNotReadable(
-      HttpMessageNotReadableException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
+  protected ResponseEntity<Object> handleHttpMessageNotReadable(
+       HttpMessageNotReadableException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     Throwable cause = ex.getCause();
@@ -159,7 +161,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleNoResourceFoundException(
-      NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+       NoResourceFoundException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
 
@@ -185,10 +190,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleHttpRequestMethodNotSupported(
-      HttpRequestMethodNotSupportedException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
+       HttpRequestMethodNotSupportedException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     String method = ex.getMethod();
@@ -217,10 +222,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleMissingServletRequestParameter(
-      MissingServletRequestParameterException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
+       MissingServletRequestParameterException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     String param = ex.getParameterName();
@@ -243,10 +248,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleServletRequestBindingException(
-      ServletRequestBindingException ex,
-      HttpHeaders headers,
-      HttpStatusCode status,
-      WebRequest request) {
+       ServletRequestBindingException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
     ProblemDetail pd = buildBadRequestParamProblem(req);
@@ -284,7 +289,10 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Override
   protected @Nullable ResponseEntity<Object> handleTypeMismatch(
-      TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+      TypeMismatchException ex,
+       HttpHeaders headers,
+       HttpStatusCode status,
+       WebRequest request) {
 
     HttpServletRequest req = ((ServletWebRequest) request).getRequest();
 

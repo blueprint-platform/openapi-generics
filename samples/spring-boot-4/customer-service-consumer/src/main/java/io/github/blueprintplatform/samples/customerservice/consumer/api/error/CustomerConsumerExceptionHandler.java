@@ -52,7 +52,6 @@ public class CustomerConsumerExceptionHandler {
     return pd;
   }
 
-
   @ExceptionHandler(Exception.class)
   public ProblemDetail handleGeneric(Exception ex, HttpServletRequest req) {
     log.error("Unhandled exception", ex);

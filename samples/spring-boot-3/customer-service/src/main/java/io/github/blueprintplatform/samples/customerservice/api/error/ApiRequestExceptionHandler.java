@@ -25,7 +25,6 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -41,6 +40,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+@SuppressWarnings("java:S2638")
 @RestControllerAdvice
 @Order(1)
 public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -86,7 +86,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex,
       @NonNull HttpHeaders headers,
@@ -125,7 +124,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleHttpMessageNotReadable(
       HttpMessageNotReadableException ex,
       @NonNull HttpHeaders headers,
@@ -162,7 +160,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleNoResourceFoundException(
       NoResourceFoundException ex,
       @NonNull HttpHeaders headers,
@@ -192,7 +189,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
       HttpRequestMethodNotSupportedException ex,
       @NonNull HttpHeaders headers,
@@ -225,7 +221,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleMissingServletRequestParameter(
       MissingServletRequestParameterException ex,
       @NonNull HttpHeaders headers,
@@ -252,7 +247,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleServletRequestBindingException(
       @NonNull ServletRequestBindingException ex,
       @NonNull HttpHeaders headers,
@@ -294,7 +288,6 @@ public class ApiRequestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @Override
-  @Nullable
   protected ResponseEntity<Object> handleTypeMismatch(
       TypeMismatchException ex,
       @NonNull HttpHeaders headers,

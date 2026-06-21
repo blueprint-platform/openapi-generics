@@ -1,6 +1,8 @@
 package io.github.blueprintplatform.openapi.generics.server.autoconfigure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -41,16 +43,20 @@ class OpenApiGenericsMissingDependencyAutoConfigurationTest {
         });
   }
 
-  @Test
-  @DisplayName("should invoke PostConstruct without exception when activated")
-  void shouldInvokePostConstructWithoutException() {
-    contextRunner
-        .withClassLoader(new FilteredClassLoader(OpenApiCustomizer.class))
-        .run(
-            context -> {
-              OpenApiGenericsMissingDependencyAutoConfiguration bean =
-                  context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class);
-              bean.logWarning(); // idempotent, should not throw
-            });
-  }
+    @Test
+    @DisplayName("should invoke PostConstruct without exception when activated")
+    void shouldInvokePostConstructWithoutException() {
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(OpenApiCustomizer.class))
+                .run(
+                        context -> {
+                            assertNotNull(
+                                    context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class));
+
+                            OpenApiGenericsMissingDependencyAutoConfiguration bean =
+                                    context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class);
+
+                            assertDoesNotThrow(bean::logWarning);
+                        });
+    }
 }

@@ -63,7 +63,6 @@ public final class ProblemDetailSupport {
   }
 
   private static ProblemDetail deserializeAndEnrich(ObjectMapper om, ResponseSnapshot snap) {
-
     ProblemDetail pd = om.readValue(snap.body(), ProblemDetail.class);
     JsonNode tree = om.readTree(snap.body());
 
@@ -76,7 +75,7 @@ public final class ProblemDetailSupport {
   private static void enrichErrorCode(ProblemDetail pd, JsonNode tree) {
     JsonNode node = tree.get(KEY_ERROR_CODE);
     if (node != null && !node.isNull()) {
-      pd.setProperty(KEY_ERROR_CODE, node.asText());
+      pd.setProperty(KEY_ERROR_CODE, node.asString());
     }
   }
 

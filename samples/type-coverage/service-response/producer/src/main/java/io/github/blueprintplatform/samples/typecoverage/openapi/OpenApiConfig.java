@@ -10,27 +10,27 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${app.openapi.version:unknown}")
-    private String version;
+  @Value("${app.openapi.version:unknown}")
+  private String version;
 
-    @Value("${app.openapi.base-url:}")
-    private String baseUrl;
+  @Value("${app.openapi.base-url:}")
+  private String baseUrl;
 
-    @Bean
-    public OpenAPI serviceResponseTypeCoverageOpenAPI() {
-        var openApi =
-                new OpenAPI()
-                        .info(
-                                new Info()
-                                        .title(OpenApiConstants.TITLE)
-                                        .version(version)
-                                        .description(OpenApiConstants.DESCRIPTION));
+  @Bean
+  public OpenAPI serviceResponseTypeCoverageOpenAPI() {
+    var openApi =
+        new OpenAPI()
+            .info(
+                new Info()
+                    .title(OpenApiConstants.TITLE)
+                    .version(version)
+                    .description(OpenApiConstants.DESCRIPTION));
 
-        if (baseUrl != null && !baseUrl.isBlank()) {
-            openApi.addServersItem(
-                    new Server().url(baseUrl).description(OpenApiConstants.SERVER_DESCRIPTION));
-        }
-
-        return openApi;
+    if (baseUrl != null && !baseUrl.isBlank()) {
+      openApi.addServersItem(
+          new Server().url(baseUrl).description(OpenApiConstants.SERVER_DESCRIPTION));
     }
+
+    return openApi;
+  }
 }

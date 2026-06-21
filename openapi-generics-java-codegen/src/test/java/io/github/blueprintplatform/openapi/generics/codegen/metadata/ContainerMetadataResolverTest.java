@@ -13,6 +13,8 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openapitools.codegen.CodegenModel;
 
 @Tag("unit")
@@ -242,49 +244,26 @@ class ContainerMetadataResolverTest {
         model.vendorExtensions.get(CodegenVendorExtensions.DATA_CONTAINER_IMPORT));
   }
 
-  @Test
-  @DisplayName("register -> ignores blank FQCN")
-  void register_shouldIgnoreBlankFqcn() {
+  @ParameterizedTest
+  @ValueSource(strings = {"   ", "null", "Slice"})
+  @DisplayName("register -> ignores invalid FQCN")
+  void register_shouldIgnoreInvalidFqcn(String fqcn) {
     ContainerMetadataResolver resolver = new ContainerMetadataResolver();
 
-    resolver.register(Map.of(CodegenProperties.DATA_CONTAINER_PREFIX + "Slice", "   "));
+    resolver.register(
+            Map.of(CodegenProperties.DATA_CONTAINER_PREFIX + "Slice", fqcn));
 
     CodegenModel model = wrapperModel("ServiceResponseSliceCustomerDto", "Slice");
 
     resolver.apply(model);
 
-    assertEquals("Slice", model.vendorExtensions.get(CodegenVendorExtensions.DATA_CONTAINER_TYPE));
-    assertFalse(model.vendorExtensions.containsKey(CodegenVendorExtensions.DATA_CONTAINER_IMPORT));
-  }
+    assertEquals(
+            "Slice",
+            model.vendorExtensions.get(CodegenVendorExtensions.DATA_CONTAINER_TYPE));
 
-  @Test
-  @DisplayName("register -> ignores literal null FQCN")
-  void register_shouldIgnoreLiteralNullFqcn() {
-    ContainerMetadataResolver resolver = new ContainerMetadataResolver();
-
-    resolver.register(Map.of(CodegenProperties.DATA_CONTAINER_PREFIX + "Slice", "null"));
-
-    CodegenModel model = wrapperModel("ServiceResponseSliceCustomerDto", "Slice");
-
-    resolver.apply(model);
-
-    assertEquals("Slice", model.vendorExtensions.get(CodegenVendorExtensions.DATA_CONTAINER_TYPE));
-    assertFalse(model.vendorExtensions.containsKey(CodegenVendorExtensions.DATA_CONTAINER_IMPORT));
-  }
-
-  @Test
-  @DisplayName("register -> ignores non-qualified class name")
-  void register_shouldIgnoreNonQualifiedClassName() {
-    ContainerMetadataResolver resolver = new ContainerMetadataResolver();
-
-    resolver.register(Map.of(CodegenProperties.DATA_CONTAINER_PREFIX + "Slice", "Slice"));
-
-    CodegenModel model = wrapperModel("ServiceResponseSliceCustomerDto", "Slice");
-
-    resolver.apply(model);
-
-    assertEquals("Slice", model.vendorExtensions.get(CodegenVendorExtensions.DATA_CONTAINER_TYPE));
-    assertFalse(model.vendorExtensions.containsKey(CodegenVendorExtensions.DATA_CONTAINER_IMPORT));
+    assertFalse(
+            model.vendorExtensions.containsKey(
+                    CodegenVendorExtensions.DATA_CONTAINER_IMPORT));
   }
 
   @Test

@@ -11,7 +11,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.Set;
 
 /**
  * Resolves and validates the response envelope type used for contract introspection.

@@ -8,6 +8,8 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Tag("unit")
 @DisplayName("Unit Test: ExternalModelRegistry")
@@ -113,34 +115,14 @@ class ExternalModelRegistryTest {
     assertEquals("io.example.CustomerDto", registry.getFqcn("CustomerDto"));
   }
 
-  @Test
-  @DisplayName("register -> should ignore blank FQCN")
-  void register_shouldIgnoreBlankFqcn() {
+
+  @ParameterizedTest
+  @ValueSource(strings = {"   ", "null", "CustomerDto"})
+  @DisplayName("register -> should ignore invalid FQCN")
+  void register_shouldIgnoreInvalidFqcn(String fqcn) {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
-    registry.register(Map.of("openapi-generics.response-contract.CustomerDto", "   "));
-
-    assertFalse(registry.isExternal("CustomerDto"));
-    assertNull(registry.getFqcn("CustomerDto"));
-  }
-
-  @Test
-  @DisplayName("register -> should ignore literal null FQCN")
-  void register_shouldIgnoreLiteralNullFqcn() {
-    ExternalModelRegistry registry = new ExternalModelRegistry();
-
-    registry.register(Map.of("openapi-generics.response-contract.CustomerDto", "null"));
-
-    assertFalse(registry.isExternal("CustomerDto"));
-    assertNull(registry.getFqcn("CustomerDto"));
-  }
-
-  @Test
-  @DisplayName("register -> should ignore non-qualified class name")
-  void register_shouldIgnoreNonQualifiedClassName() {
-    ExternalModelRegistry registry = new ExternalModelRegistry();
-
-    registry.register(Map.of("openapi-generics.response-contract.CustomerDto", "CustomerDto"));
+    registry.register(Map.of("openapi-generics.response-contract.CustomerDto", fqcn));
 
     assertFalse(registry.isExternal("CustomerDto"));
     assertNull(registry.getFqcn("CustomerDto"));
