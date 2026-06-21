@@ -33,7 +33,6 @@
 * [Real-World Example](#real-world-example)
 * [What's New in 1.1](#whats-new-in-11)
 * [Key Features](#key-features)
-* [Supported Generic Response Shapes](#supported-generic-response-shapes)
 * [How it works](#how-it-works)
 * [Compatibility](#compatibility)
 * [Relationship to OpenAPI Generator](#relationship-to-openapi-generator)
@@ -238,46 +237,53 @@ The project demonstrates:
 
 ## What's New in 1.1
 
-Version 1.1 expands OpenAPI Generics support beyond simple payload wrappers by introducing reconstruction support for generic container payloads.
+Version 1.1 expands the range of supported generic response contracts.
 
-The platform now supports contract shapes such as:
+In addition to single-payload responses, OpenAPI Generics now supports collection and paging containers while preserving the same contract-first generation model.
+
+Supported response shapes now include:
 
 ```java
-ServiceResponse<List<CustomerDto>>
+ServiceResponse<T>
 
-ServiceResponse<Set<CustomerDto>>
+ServiceResponse<List<T>>
 
-ServiceResponse<Page<CustomerDto>>
+ServiceResponse<Set<T>>
+
+ServiceResponse<Page<T>>
 ```
 
-and equivalent BYOE contracts using user-owned response envelopes.
+The same support is available when using your own shared response envelope:
 
-For paged responses, `Page<T>` refers to the platform paging contract provided by:
+```java
+ApiResponse<T>
+
+ApiResponse<List<T>>
+
+ApiResponse<Set<T>>
+
+ApiResponse<Page<T>>
+```
+
+`Page<T>` refers to the paging contract provided by:
 
 ```java
 io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
 ```
 
-Highlights:
 
-- `List<T>` container support
-- `Set<T>` container support
-- Platform `Page<T>` container support
-- BYOE container reconstruction support
-- Expanded end-to-end type coverage validation suite
-- Unified container-aware projection and reconstruction pipeline
+This means generated clients can now reconstruct a broader range of real-world API contracts while continuing to reuse existing envelopes and shared domain models.
 
-Currently supported container types:
+Additional improvements in 1.1 include:
 
-```java
-List<T>
+- deterministic OpenAPI specification validation
+- OpenAPI snapshot verification in sample projects
+- expanded end-to-end validation coverage
+- stronger regression detection in CI pipelines
 
-Set<T>
+All 1.0.x contracts remain fully supported.
 
-Page<T>
-```
-
-This release establishes container handling as a first-class platform capability while preserving deterministic contract projection and client reconstruction.
+No migration is required for existing users.
 
 ---
 
@@ -325,7 +331,6 @@ Key characteristics:
 * The envelope type must be available on the client classpath.
 * Springdoc-based projection is automatic.
 * Spec-first pipelines can publish equivalent semantics through OpenAPI vendor extensions.
-* Supported envelope and container combinations are described in the **Supported Generic Response Shapes** section below.
 
 ---
 
@@ -361,23 +366,6 @@ The generated client imports and reuses those contract types directly instead of
 
 ---
 
-### Container-Aware Reconstruction
-
-OpenAPI Generics treats container handling as a first-class platform capability.
-
-Instead of implementing container-specific generation logic, projection and reconstruction operate through a shared container metadata model.
-
-This provides:
-
-* consistent handling across supported containers
-* identical behavior for platform and custom envelopes
-* deterministic reconstruction of generic structures
-* a clear foundation for future container extensibility
-
-Supported container shapes are documented in the **Supported Generic Response Shapes** section below.
-
----
-
 ### Fallback to Standard Generation
 
 Disable the generics-aware template patching with a single Maven property:
@@ -400,78 +388,6 @@ To fully revert to stock OpenAPI Generator behavior:
 | `true` | Skip generics-aware template patching |
 
 Use this mode for output comparison, troubleshooting, or temporary opt-out scenarios.
-
----
-
-## Supported Generic Response Shapes
-
-OpenAPI Generics preserves generic response contracts by combining:
-
-- an envelope type
-- an optional container type
-- a payload type
-
-The generated client reconstructs the original contract shape while preserving generic type information across projection and code generation.
-
-### Supported Envelope Shapes
-
-The platform default envelope is:
-
-```java
-ServiceResponse<T>
-```
-
-Custom envelopes are also supported through BYOE:
-
-```java
-YourEnvelope<T>
-```
-
-Examples:
-
-```java
-ServiceResponse<CustomerDto>
-
-MyApiResponse<CustomerDto>
-```
-
-Custom envelopes participate in the same projection and reconstruction pipeline as the platform envelope.
-
-### Supported Container Shapes
-
-The platform currently supports:
-
-```java
-T
-
-Page<T>
-
-List<T>
-
-Set<T>
-```
-
-`Page<T>` refers to the paging contract provided by `openapi-generics-contract`.
-
-Examples:
-
-```java
-ServiceResponse<Page<CustomerDto>>
-
-ServiceResponse<List<CustomerDto>>
-
-ServiceResponse<Set<CustomerDto>>
-
-ApiResponse<Page<CustomerDto>>
-
-ApiResponse<List<CustomerDto>>
-
-ApiResponse<Set<CustomerDto>>
-```
-
-Container handling is implemented through a dedicated container metadata model rather than container-specific branching.
-
-Future container types may be added through the same infrastructure without changing the contract lifecycle model or generation architecture.
 
 ---
 
