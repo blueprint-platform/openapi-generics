@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
+
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
@@ -16,16 +18,39 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 /**
  * Extracts contract-aware response type metadata from controller return types.
  *
- * <p>Unwraps framework-level wrappers (e.g. {@code ResponseEntity}, async types) and identifies
- * supported envelope structures such as {@code ServiceResponse<T>} or {@code
- * ServiceResponse<Page<T>>}.
+ * <p>Unwraps framework-level wrappers (for example {@code ResponseEntity},
+ * {@code CompletionStage}, {@code Future}, {@code DeferredResult}, and {@code WebAsyncTask})
+ * before analyzing the actual contract response shape.
  *
- * <p>Produces a {@link ResponseTypeDescriptor} only for valid, supported shapes.
+ * <p>Produces a {@link ResponseTypeDescriptor} only for response structures that are explicitly
+ * supported by the active {@link ResponseIntrospectionPolicy}.
  *
- * <p>Enum payloads are supported only when they are published as standalone OpenAPI schema
- * components (for example via {@code @Schema(enumAsRef = true)}). Inline enum schemas are ignored
- * because they do not produce a stable component name that can be referenced by the projection
- * pipeline.
+ * <p>For the default platform envelope, supported shapes are:
+ *
+ * <ul>
+ *   <li>{@code ServiceResponse<T>}
+ *   <li>{@code ServiceResponse<Page<T>>}
+ *   <li>{@code ServiceResponse<List<T>>}
+ * </ul>
+ *
+ * <p>For custom BYOE envelopes, supported shapes are limited to:
+ *
+ * <ul>
+ *   <li>{@code YourEnvelope<T>}
+ * </ul>
+ *
+ * <p>Nested container payloads are intentionally unsupported, including:
+ *
+ * <ul>
+ *   <li>{@code ServiceResponse<List<List<T>>>}
+ *   <li>{@code ServiceResponse<Page<List<T>>>}
+ *   <li>{@code YourEnvelope<Page<T>>}
+ *   <li>{@code YourEnvelope<List<T>>}
+ * </ul>
+ *
+ * <p>Enum payloads are supported only when published as reusable OpenAPI schema components
+ * (for example via {@code @Schema(enumAsRef = true)}). Inline enum schemas are ignored because
+ * they do not produce stable component identities required by the projection pipeline.
  */
 public final class ResponseTypeIntrospector {
 
@@ -34,7 +59,7 @@ public final class ResponseTypeIntrospector {
   private static final String SCHEMA_ANNOTATION = "io.swagger.v3.oas.annotations.media.Schema";
 
   private final Class<?> envelopeType;
-  private final Set<Class<?>> supportedContainers;
+  private final Set<SupportedContainerType> supportedContainers;
   private final String payloadPropertyName;
 
   public ResponseTypeIntrospector(ResponseIntrospectionPolicy policy) {
@@ -56,13 +81,13 @@ public final class ResponseTypeIntrospector {
 
     if (log.isDebugEnabled()) {
       log.debug(
-              "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}",
+              "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}, dataRefName={}",
               safeToString(type),
               envelopeType.getSimpleName(),
               safeToString(dataType),
-              descriptorOpt.map(Object::toString).orElse("<empty>"));
+              descriptorOpt.map(Object::toString).orElse("<empty>"),
+              descriptorOpt.map(ResponseTypeDescriptor::dataRefName).orElse("<empty>"));
     }
-
     return descriptorOpt;
   }
 
@@ -99,33 +124,49 @@ public final class ResponseTypeIntrospector {
 
     return null;
   }
-
   private Optional<ResponseTypeDescriptor> buildDescriptor(ResolvableType dataType) {
     Class<?> raw = dataType.resolve();
     if (raw == null) {
       return Optional.empty();
     }
 
-    for (Class<?> containerType : supportedContainers) {
-      if (containerType.isAssignableFrom(raw)) {
-        ResolvableType itemType = safeGeneric(dataType);
-        Class<?> itemRaw = itemType.resolve();
-        if (!isSupportedPayloadType(itemRaw)) {
-          return Optional.empty();
-        }
-
-        return Optional.of(
-                ResponseTypeDescriptor.container(
-                        envelopeType,
-                        payloadPropertyName,
-                        containerType.getSimpleName(),
-                        itemRaw.getSimpleName()));
-      }
+    Optional<ResponseTypeDescriptor> containerDescriptor = buildContainerDescriptor(dataType, raw);
+    if (containerDescriptor.isPresent()) {
+      return containerDescriptor;
     }
 
     if (!dataType.hasGenerics() && isSupportedPayloadType(raw)) {
       return Optional.of(
               ResponseTypeDescriptor.simple(envelopeType, payloadPropertyName, raw.getSimpleName()));
+    }
+
+    return Optional.empty();
+  }
+
+  private Optional<ResponseTypeDescriptor> buildContainerDescriptor(
+          ResolvableType dataType, Class<?> raw) {
+
+    for (SupportedContainerType containerType : supportedContainers) {
+      if (!containerType.matches(raw)) {
+        continue;
+      }
+
+      ResolvableType itemType = safeGeneric(dataType);
+      if (itemType.hasGenerics()) {
+        return Optional.empty();
+      }
+
+      Class<?> itemRaw = itemType.resolve();
+      if (!isSupportedPayloadType(itemRaw)) {
+        return Optional.empty();
+      }
+
+      return Optional.of(
+              ResponseTypeDescriptor.container(
+                      envelopeType,
+                      payloadPropertyName,
+                      containerType,
+                      itemRaw.getSimpleName()));
     }
 
     return Optional.empty();

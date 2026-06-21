@@ -14,22 +14,39 @@ COPY samples/domain-contracts samples/domain-contracts
 COPY samples/spring-boot-4 samples/spring-boot-4
 
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    mvn -U -q -T 2C -DskipTests --no-transfer-progress \
+    mvn -U -q -T 2C \
+        -DskipTests \
+        --no-transfer-progress \
         -pl openapi-generics-contract,\
 openapi-generics-platform-bom,\
 openapi-generics-server-starter,\
 openapi-generics-java-codegen,\
 openapi-generics-java-codegen-parent \
         -am clean install && \
+    mvn -f samples/pom.xml \
+        -U -q \
+        -N \
+        --no-transfer-progress \
+        install && \
+    mvn -f samples/domain-contracts/pom.xml \
+        -U -q \
+        -DskipTests \
+        --no-transfer-progress \
+        clean install && \
     mvn -f samples/spring-boot-4/pom.xml \
-        -U -q -T 2C -DskipTests --no-transfer-progress \
+        -U -q -T 2C \
+        -DskipTests \
+        --no-transfer-progress \
         -pl customer-service \
         -am clean package && \
-    JAR="$(ls -1 samples/spring-boot-4/customer-service/target/customer-service-*.jar | head -n 1)" && \
+    JAR="$(find samples/spring-boot-4/customer-service/target \
+        -name 'customer-service-*.jar' \
+        ! -name '*.original' \
+        | head -n 1)" && \
     mkdir -p /layers && \
     cd /layers && \
     java -Djarmode=layertools \
-         -jar "/workspace/$JAR" extract
+        -jar "/workspace/$JAR" extract
 
 FROM eclipse-temurin:21.0.10_7-jre-noble
 WORKDIR /app
@@ -53,5 +70,5 @@ USER 10001
 ENV SPRING_PROFILES_ACTIVE=default
 ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseG1GC -Dfile.encoding=UTF-8"
 
-EXPOSE 8094
+EXPOSE 8084
 ENTRYPOINT ["java","org.springframework.boot.loader.launch.JarLauncher"]

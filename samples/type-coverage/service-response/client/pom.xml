@@ -8,13 +8,13 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics-java-codegen-parent</artifactId>
-        <version>1.0.4-SNAPSHOT</version>
+        <version>1.1.0</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.blueprint-platform.samples</groupId>
     <artifactId>service-response-client</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>service-response-client</name>
@@ -88,16 +88,13 @@
                         </goals>
                         <configuration>
                             <generatorName>java-generics-contract</generatorName>
-                            <inputSpec>${project.basedir}/src/main/resources/service-response-coverage.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../spec/service-response-coverage.yaml</inputSpec>
 
                             <library>restclient</library>
 
-                            <apiPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.api
-                            </apiPackage>
-                            <modelPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.dto
-                            </modelPackage>
-                            <invokerPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.invoker
-                            </invokerPackage>
+                            <apiPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.api</apiPackage>
+                            <modelPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.dto</modelPackage>
+                            <invokerPackage>io.github.blueprintplatform.samples.typecoverage.client.generated.invoker</invokerPackage>
 
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>

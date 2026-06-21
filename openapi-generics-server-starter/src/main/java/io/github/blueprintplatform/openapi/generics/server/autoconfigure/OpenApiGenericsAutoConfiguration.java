@@ -1,14 +1,13 @@
 package io.github.blueprintplatform.openapi.generics.server.autoconfigure;
 
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseIntrospectionPolicy;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseIntrospectionPolicyResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.*;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.control.SchemaGenerationControlMarker;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
 import org.springdoc.core.customizers.OpenApiCustomizer;
@@ -21,19 +20,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-/**
- * Spring Boot auto-configuration for the OpenAPI Generics server starter.
- *
- * <p>Registers the beans required to connect Springdoc's {@link OpenApiCustomizer} extension point
- * to the OpenAPI Generics projection pipeline.
- *
- * <p>This configuration is activated only when Springdoc is present and the application runs in a
- * web environment. For servlet-based applications, it provides the Spring MVC response discovery
- * strategy used to inspect controller return types.
- *
- * <p>The actual projection logic is implemented by the pipeline components registered here. This
- * class is responsible only for conditional Spring Boot wiring and default bean composition.
- */
 @AutoConfiguration
 @ConditionalOnClass(OpenApiCustomizer.class)
 @ConditionalOnWebApplication
@@ -50,14 +36,22 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver() {
-    return new ResponseIntrospectionPolicyResolver();
+  public SupportedContainerTypesResolver supportedContainerTypesResolver() {
+    return new DefaultSupportedContainerTypesResolver();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver(
+          SupportedContainerTypesResolver supportedContainerTypesResolver) {
+    return new ResponseIntrospectionPolicyResolver(
+            supportedContainerTypesResolver);
   }
 
   @Bean
   @ConditionalOnMissingBean
   public ResponseIntrospectionPolicy responseIntrospectionPolicy(
-      OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
+          OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
     return resolver.resolve(properties);
   }
 
@@ -69,20 +63,14 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
-  public SchemaGenerationControlMarker schemaGenerationControlMarker() {
-    return new SchemaGenerationControlMarker();
+  public ContractSchemaExclusionApplier schemaGenerationControlMarker() {
+    return new ContractSchemaExclusionApplier();
   }
 
   @Bean
   @ConditionalOnMissingBean
   public WrapperSchemaProcessor wrapperSchemaProcessor(WrapperSchemaEnricher enricher) {
     return new WrapperSchemaProcessor(enricher);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public WrapperSchemaEnricher wrapperSchemaEnricher() {
-    return new WrapperSchemaEnricher();
   }
 
   @Bean
@@ -94,18 +82,18 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-      SchemaGenerationControlMarker schemaGenerationControlMarker,
-      ResponseTypeDiscoveryStrategy discoveryStrategy,
-      ResponseTypeIntrospector introspector,
-      WrapperSchemaProcessor wrapperSchemaProcessor,
-      OpenApiContractGuard contractGuard) {
+          ContractSchemaExclusionApplier contractSchemaExclusionApplier,
+          ResponseTypeDiscoveryStrategy discoveryStrategy,
+          ResponseTypeIntrospector introspector,
+          WrapperSchemaProcessor wrapperSchemaProcessor,
+          OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-        schemaGenerationControlMarker,
-        discoveryStrategy,
-        introspector,
-        wrapperSchemaProcessor,
-        contractGuard);
+            contractSchemaExclusionApplier,
+            discoveryStrategy,
+            introspector,
+            wrapperSchemaProcessor,
+            contractGuard);
   }
 
   @Bean

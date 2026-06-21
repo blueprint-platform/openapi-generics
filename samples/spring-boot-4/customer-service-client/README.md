@@ -16,7 +16,7 @@ This sample shows only one thing:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
 </parent>
 ```
 

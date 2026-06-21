@@ -1,14 +1,18 @@
 package io.github.blueprintplatform.samples.typecoverage.consumer.service.impl;
 
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.samples.typecoverage.client.adapter.TypeCoverageClientAdapter;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.AddressDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.CoverageStatus;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
 import io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 
@@ -74,5 +78,35 @@ public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerServ
   @Override
   public ApiResponse<TypeProfileDto> profile() {
     return adapter.profile();
+  }
+
+  @Override
+  public ApiResponse<List<TypeSummaryDto>> listSummaries() {
+    return adapter.listSummaries();
+  }
+
+  @Override
+  public ApiResponse<List<CoverageStatus>> listStatuses() {
+    return adapter.listStatuses();
+  }
+
+  @Override
+  public ApiResponse<Set<TypeSummaryDto>> setSummaries() {
+    return adapter.setSummaries();
+  }
+
+  @Override
+  public ApiResponse<Set<CoverageStatus>> setStatuses() {
+    return adapter.setStatuses();
+  }
+
+  @Override
+  public ApiResponse<Page<TypeSummaryDto>> pagedSummaries() {
+    return adapter.pagedSummaries();
+  }
+
+  @Override
+  public ApiResponse<Page<CoverageStatus>> pagedStatuses() {
+    return adapter.pagedStatuses();
   }
 }

@@ -9,6 +9,8 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Typ
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface TypeCoverageClientAdapter {
@@ -35,7 +37,15 @@ public interface TypeCoverageClientAdapter {
 
   ServiceResponse<TypeProfileDto> profile();
 
-  ServiceResponse<Page<TypeSummaryDto>> summaries();
+  ServiceResponse<Page<TypeSummaryDto>> pagedSummaries();
 
-  ServiceResponse<Page<CoverageStatus>> statuses();
+  ServiceResponse<Page<CoverageStatus>> pagedStatuses();
+
+  ServiceResponse<List<TypeSummaryDto>> listSummaries();
+
+  ServiceResponse<List<CoverageStatus>> listStatuses();
+
+  ServiceResponse<Set<TypeSummaryDto>> setSummaries();
+
+  ServiceResponse<Set<CoverageStatus>> setStatuses();
 }

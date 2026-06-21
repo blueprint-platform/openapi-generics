@@ -9,14 +9,20 @@ body:
     attributes:
       value: |
         Thank you for taking the time to improve **openapi-generics**!
+
         Please provide enough detail so the issue can be reproduced deterministically.
 
   - type: textarea
     id: description
     attributes:
       label: "Describe the bug"
-      description: "What is the incorrect behavior? Focus on observable output (OpenAPI, generated code, or runtime behavior)."
-      placeholder: "Example: Generated client omits wrapper binding when using nested generic responses (ServiceResponse<Page<T>>)."
+      description: "Describe the incorrect behavior and the observable outcome."
+      placeholder: |
+        Example:
+        Wrapper metadata is not generated correctly for
+        ServiceResponse<List<CustomerDto>> resulting in
+        incorrect reconstruction during code generation.
+
     validations:
       required: true
 
@@ -24,29 +30,38 @@ body:
     id: reproduction
     attributes:
       label: "Steps to reproduce"
-      description: "Provide minimal, deterministic steps to reproduce the issue. Prefer a clean build from repository root."
+      description: "Provide minimal, deterministic reproduction steps."
       placeholder: |
-        1. Run `mvn clean verify` from repository root
-        2. Inspect generated sources under target/generated-sources
-        3. Observe missing/incorrect type or schema
+        1. Run `mvn clean verify`
+        2. Generate the OpenAPI specification
+        3. Generate the client
+        4. Observe the incorrect schema, metadata, or generated artifact
+
+    validations:
+      required: true
 
   - type: textarea
     id: expected
     attributes:
       label: "Expected behavior"
       description: "What should happen instead?"
-      placeholder: "The generator should produce a wrapper type correctly binding generic parameters and preserving contract semantics."
+      placeholder: |
+        Wrapper metadata, projection output, and generated
+        artifacts should remain consistent with the original
+        Java contract.
 
   - type: textarea
     id: scope
     attributes:
       label: "Affected area"
-      description: "Which part of the platform is affected? (write one or more)"
+      description: "Which part of the platform is affected?"
       placeholder: |
-        - contract (ServiceResponse<T>, Page, Meta)
-        - server (contract → OpenAPI projection)
-        - generator (OpenAPI → code)
-        - templates / vendor extensions
+        - contract
+        - projection
+        - vendor extensions
+        - code generation
+        - generated artifacts
+        - runtime behavior
 
   - type: textarea
     id: environment
@@ -54,15 +69,17 @@ body:
       label: "Environment"
       description: "Tooling and runtime details"
       placeholder: |
-        - Java: 21
-        - Maven: 3.9+
-        - OpenAPI Generator: 7.x
-        - Spring Boot: 3.5.x
-        - OS: macOS / Windows / Linux
+        - Java:
+        - Maven:
+        - OpenAPI Generator:
+        - Spring Boot:
+        - OS:
 
   - type: textarea
     id: additional
     attributes:
       label: "Additional context"
-      description: "Logs, snippets, spec fragments, or links to discussions"
-      placeholder: "Include stack traces, generated code excerpts, or OpenAPI fragments if relevant."
+      description: "Logs, OpenAPI fragments, generated code snippets, screenshots, or related issues."
+      placeholder: |
+        Include any supporting material that helps reproduce
+        or understand the issue.

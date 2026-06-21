@@ -1,0 +1,631 @@
+openapi: 3.1.0
+info:
+  title: BYOE Response Type Coverage API
+  description: Type coverage sample for custom ApiResponse<T> envelope projection.
+  version: 1.1.0
+servers:
+- url: http://localhost:8076/type-coverage/byoe-response
+  description: Local BYOE response type coverage producer
+paths:
+  /types/values/uuid:
+    get:
+      tags:
+      - value-payload-controller
+      operationId: uuidValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseUUID"
+  /types/values/enum:
+    get:
+      tags:
+      - value-payload-controller
+      operationId: enumValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseCoverageStatus"
+  /types/values/datetime:
+    get:
+      tags:
+      - value-payload-controller
+      operationId: dateTimeValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseOffsetDateTime"
+  /types/values/date:
+    get:
+      tags:
+      - value-payload-controller
+      operationId: dateValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseLocalDate"
+  /types/sets/summaries:
+    get:
+      tags:
+      - set-payload-controller
+      operationId: setSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseSetTypeSummaryDto"
+  /types/sets/statuses:
+    get:
+      tags:
+      - set-payload-controller
+      operationId: setStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseSetCoverageStatus"
+  /types/scalars/string:
+    get:
+      tags:
+      - scalar-payload-controller
+      operationId: stringValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseString"
+  /types/scalars/long:
+    get:
+      tags:
+      - scalar-payload-controller
+      operationId: longValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseLong"
+  /types/scalars/integer:
+    get:
+      tags:
+      - scalar-payload-controller
+      operationId: integerValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseInteger"
+  /types/scalars/decimal:
+    get:
+      tags:
+      - scalar-payload-controller
+      operationId: decimalValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseBigDecimal"
+  /types/scalars/boolean:
+    get:
+      tags:
+      - scalar-payload-controller
+      operationId: booleanValue
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseBoolean"
+  /types/pages/summaries:
+    get:
+      tags:
+      - paged-payload-controller
+      operationId: pagedSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePageTypeSummaryDto"
+  /types/pages/statuses:
+    get:
+      tags:
+      - paged-payload-controller
+      operationId: pagedStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePageCoverageStatus"
+  /types/objects/profile:
+    get:
+      tags:
+      - object-payload-controller
+      operationId: profile
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTypeProfileDto"
+  /types/objects/address:
+    get:
+      tags:
+      - object-payload-controller
+      operationId: address
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAddressDto"
+  /types/lists/summaries:
+    get:
+      tags:
+      - list-payload-controller
+      operationId: listSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseListTypeSummaryDto"
+  /types/lists/statuses:
+    get:
+      tags:
+      - list-payload-controller
+      operationId: listStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseListCoverageStatus"
+components:
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      x-ignore-model: true
+    ApiResponseUUID:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: UUID
+    ApiResponseCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/CoverageStatus"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: CoverageStatus
+    CoverageStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - PASSIVE
+      - EXPERIMENTAL
+    ApiResponseOffsetDateTime:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: string
+          format: date-time
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: OffsetDateTime
+    ApiResponseLocalDate:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: string
+          format: date
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: LocalDate
+    ApiResponseSetTypeSummaryDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+          uniqueItems: true
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: SetTypeSummaryDto
+      x-data-container: Set
+      x-data-item: TypeSummaryDto
+    TypeSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+    ApiResponseSetCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+          uniqueItems: true
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: SetCoverageStatus
+      x-data-container: Set
+      x-data-item: CoverageStatus
+    ApiResponseString:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: String
+    ApiResponseLong:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: integer
+          format: int64
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Long
+    ApiResponseInteger:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: integer
+          format: int32
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Integer
+    ApiResponseBigDecimal:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: number
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: BigDecimal
+    ApiResponseBoolean:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: Boolean
+    ApiResponsePageTypeSummaryDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PageTypeSummaryDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PageTypeSummaryDto
+      x-data-container: Page
+      x-data-item: TypeSummaryDto
+    PageTypeSummaryDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+      x-ignore-model: true
+    ApiResponsePageCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PageCoverageStatus"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PageCoverageStatus
+      x-data-container: Page
+      x-data-item: CoverageStatus
+    PageCoverageStatus:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+      x-ignore-model: true
+    AddressDto:
+      type: object
+      properties:
+        city:
+          type: string
+        country:
+          type: string
+        postalCode:
+          type: string
+    ApiResponseTypeProfileDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/TypeProfileDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: TypeProfileDto
+    TypeProfileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        enabled:
+          type: boolean
+        priority:
+          type: integer
+          format: int32
+        version:
+          type: integer
+          format: int64
+        score:
+          type: number
+        effectiveDate:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+        address:
+          $ref: "#/components/schemas/AddressDto"
+        tags:
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+    ApiResponseAddressDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/AddressDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: AddressDto
+    ApiResponseListTypeSummaryDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: ListTypeSummaryDto
+      x-data-container: List
+      x-data-item: TypeSummaryDto
+    ApiResponseListCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: ListCoverageStatus
+      x-data-container: List
+      x-data-item: CoverageStatus

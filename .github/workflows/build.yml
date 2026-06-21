@@ -53,3 +53,6 @@ jobs:
 
       - name: Build samples (end-to-end validation)
         run: mvn -B -ntp -f samples/pom.xml clean verify
+
+      - name: Verify generated specs are committed
+        run: git diff --exit-code -- samples

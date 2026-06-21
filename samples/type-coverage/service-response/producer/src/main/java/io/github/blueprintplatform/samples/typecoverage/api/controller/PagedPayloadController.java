@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PagedPayloadController {
 
   @GetMapping("/summaries")
-  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> summaries() {
+  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> pagedSummaries() {
     var content =
         List.of(
             new TypeSummaryDto(
@@ -38,7 +38,7 @@ public class PagedPayloadController {
   }
 
   @GetMapping("/statuses")
-  public ResponseEntity<ServiceResponse<Page<CoverageStatus>>> statuses() {
+  public ResponseEntity<ServiceResponse<Page<CoverageStatus>>> pagedStatuses() {
     var content =
         List.of(CoverageStatus.ACTIVE, CoverageStatus.PASSIVE, CoverageStatus.EXPERIMENTAL);
 

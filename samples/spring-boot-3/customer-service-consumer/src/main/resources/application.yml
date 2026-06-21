@@ -29,7 +29,7 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
-    io.github.blueprintplatform: DEBUG
+    io.github.blueprintplatform: INFO
 
 customer:
   api:

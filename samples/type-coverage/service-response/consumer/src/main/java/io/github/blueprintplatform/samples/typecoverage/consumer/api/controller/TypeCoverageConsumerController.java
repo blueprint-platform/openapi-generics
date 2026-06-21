@@ -10,6 +10,8 @@ import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCov
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -83,12 +85,32 @@ public class TypeCoverageConsumerController {
   }
 
   @GetMapping("/pages/summaries")
-  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> summaries() {
-    return ResponseEntity.ok(service.summaries());
+  public ResponseEntity<ServiceResponse<Page<TypeSummaryDto>>> pagedSummaries() {
+    return ResponseEntity.ok(service.pagedSummaries());
   }
 
   @GetMapping("/pages/statuses")
-  public ResponseEntity<ServiceResponse<Page<CoverageStatus>>> statuses() {
-    return ResponseEntity.ok(service.statuses());
+  public ResponseEntity<ServiceResponse<Page<CoverageStatus>>> pagedStatuses() {
+    return ResponseEntity.ok(service.pagedStatuses());
+  }
+
+  @GetMapping("/lists/summaries")
+  public ResponseEntity<ServiceResponse<List<TypeSummaryDto>>> listSummaries() {
+    return ResponseEntity.ok(service.listSummaries());
+  }
+
+  @GetMapping("/lists/statuses")
+  public ResponseEntity<ServiceResponse<List<CoverageStatus>>> listStatuses() {
+    return ResponseEntity.ok(service.listStatuses());
+  }
+
+  @GetMapping("/sets/summaries")
+  public ResponseEntity<ServiceResponse<Set<TypeSummaryDto>>> setSummaries() {
+    return ResponseEntity.ok(service.setSummaries());
+  }
+
+  @GetMapping("/sets/statuses")
+  public ResponseEntity<ServiceResponse<Set<CoverageStatus>>> setStatuses() {
+    return ResponseEntity.ok(service.setStatuses());
   }
 }

@@ -1,6 +1,5 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
-import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -11,11 +10,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Processes wrapper schemas during OpenAPI projection.
  *
- * <p>Builds the composed wrapper schema for the given response descriptor (applies to both default
- * and custom envelopes).
- *
- * <p>If the envelope is the default ServiceResponse, additional schema enrichment is applied.
- * Custom envelopes (BYOE) are not further enriched.
+ * <p>Applies wrapper metadata for the given response descriptor and enriches default-envelope
+ * container responses with container metadata.
  */
 public class WrapperSchemaProcessor {
 
@@ -30,16 +26,17 @@ public class WrapperSchemaProcessor {
   public void process(OpenAPI openApi, ResponseTypeDescriptor descriptor) {
     Map<String, Schema> schemas = openApi.getComponents().getSchemas();
 
-    Schema<?> wrapper = ServiceResponseSchemaFactory.enrichComposedWrapper(schemas, descriptor);
+    Schema<?> wrapper = WrapperSchemaMetadataApplier.apply(schemas, descriptor);
 
     log.debug("Wrapper schema '{}' enriched", wrapper.getName());
 
-    if (isDefaultEnvelope(descriptor)) {
-      enricher.enrich(openApi, wrapper.getName(), descriptor.dataRefName());
+    if (descriptor.isContainer()) {
+      enricher.enrich(
+              openApi,
+              wrapper.getName(),
+              descriptor.dataRefName(),
+              descriptor.containerName(),
+              descriptor.payloadPropertyName());
     }
-  }
-
-  private boolean isDefaultEnvelope(ResponseTypeDescriptor descriptor) {
-    return ServiceResponse.class.equals(descriptor.envelopeType());
   }
 }

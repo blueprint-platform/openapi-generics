@@ -104,7 +104,7 @@ If the upstream template structure changes in a way that prevents wrapper integr
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.0.3</version>
+  <version>1.1.0</version>
   <relativePath/>
 </parent>
 ```

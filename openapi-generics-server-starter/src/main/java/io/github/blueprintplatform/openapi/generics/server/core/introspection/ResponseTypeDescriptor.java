@@ -1,22 +1,15 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+
 import java.util.Objects;
 
 /**
- /**
- * Describes a supported contract-aware response shape discovered during introspection.
+ * Describes a supported response shape discovered during introspection.
  *
- * <p>Acts as the semantic bridge between response type analysis and OpenAPI schema generation.
- *
- * <p>A descriptor may represent either:
- *
- * <ul>
- *   <li>a simple response shape (for example, {@code ServiceResponse<CustomerDto>})
- *   <li>a container response shape (for example, {@code ServiceResponse<Page<CustomerDto>>})
- * </ul>
- *
- * <p>The extracted metadata is later used to generate wrapper schemas, apply vendor extensions,
- * and validate the projected OpenAPI contract.
+ * <p>For container responses, {@code dataRefName} follows the OpenAPI schema name produced by
+ * springdoc, while {@code containerName} represents the semantic container identifier used by
+ * OpenAPI Generics vendor extensions.
  */
 public final class ResponseTypeDescriptor {
 
@@ -27,11 +20,11 @@ public final class ResponseTypeDescriptor {
   private final String itemRefName;
 
   private ResponseTypeDescriptor(
-      Class<?> envelopeType,
-      String payloadPropertyName,
-      String dataRefName,
-      String containerName,
-      String itemRefName) {
+          Class<?> envelopeType,
+          String payloadPropertyName,
+          String dataRefName,
+          String containerName,
+          String itemRefName) {
     this.envelopeType = envelopeType;
     this.payloadPropertyName = payloadPropertyName;
     this.dataRefName = dataRefName;
@@ -40,15 +33,24 @@ public final class ResponseTypeDescriptor {
   }
 
   public static ResponseTypeDescriptor simple(
-      Class<?> envelopeType, String payloadPropertyName, String dataRefName) {
+          Class<?> envelopeType, String payloadPropertyName, String dataRefName) {
     return new ResponseTypeDescriptor(envelopeType, payloadPropertyName, dataRefName, null, null);
   }
 
   public static ResponseTypeDescriptor container(
-      Class<?> envelopeType, String payloadPropertyName, String containerName, String itemRefName) {
-    String dataRefName = containerName + itemRefName;
+          Class<?> envelopeType,
+          String payloadPropertyName,
+          SupportedContainerType containerType,
+          String itemRefName) {
+
+    String dataRefName = containerType.schemaName() + itemRefName;
+
     return new ResponseTypeDescriptor(
-        envelopeType, payloadPropertyName, dataRefName, containerName, itemRefName);
+            envelopeType,
+            payloadPropertyName,
+            dataRefName,
+            containerType.containerName(),
+            itemRefName);
   }
 
   public Class<?> envelopeType() {
@@ -80,10 +82,10 @@ public final class ResponseTypeDescriptor {
     if (this == o) return true;
     if (!(o instanceof ResponseTypeDescriptor that)) return false;
     return Objects.equals(envelopeType, that.envelopeType)
-        && Objects.equals(payloadPropertyName, that.payloadPropertyName)
-        && Objects.equals(dataRefName, that.dataRefName)
-        && Objects.equals(containerName, that.containerName)
-        && Objects.equals(itemRefName, that.itemRefName);
+            && Objects.equals(payloadPropertyName, that.payloadPropertyName)
+            && Objects.equals(dataRefName, that.dataRefName)
+            && Objects.equals(containerName, that.containerName)
+            && Objects.equals(itemRefName, that.itemRefName);
   }
 
   @Override
@@ -94,20 +96,20 @@ public final class ResponseTypeDescriptor {
   @Override
   public String toString() {
     return "ResponseTypeDescriptor{"
-        + "envelopeType="
-        + (envelopeType != null ? envelopeType.getSimpleName() : "null")
-        + ", payloadPropertyName='"
-        + payloadPropertyName
-        + '\''
-        + ", dataRefName='"
-        + dataRefName
-        + '\''
-        + ", containerName='"
-        + containerName
-        + '\''
-        + ", itemRefName='"
-        + itemRefName
-        + '\''
-        + '}';
+            + "envelopeType="
+            + (envelopeType != null ? envelopeType.getSimpleName() : "null")
+            + ", payloadPropertyName='"
+            + payloadPropertyName
+            + '\''
+            + ", dataRefName='"
+            + dataRefName
+            + '\''
+            + ", containerName='"
+            + containerName
+            + '\''
+            + ", itemRefName='"
+            + itemRefName
+            + '\''
+            + '}';
   }
 }

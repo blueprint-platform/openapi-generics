@@ -1,10 +1,14 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
+import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.ContainerNames.PAGE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -19,9 +23,8 @@ import org.junit.jupiter.api.Test;
 class WrapperSchemaProcessorTest {
 
   @Test
-  @DisplayName(
-      "process -> should enrich wrapper and delegate container enrichment for default envelope")
-  void process_shouldDelegateEnricher_whenDefaultEnvelope() {
+  @DisplayName("process -> should enrich simple wrapper and skip container enrichment")
+  void process_shouldEnrichSimpleWrapper_andSkipContainerEnrichment() {
     WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
     WrapperSchemaProcessor processor = new WrapperSchemaProcessor(enricher);
 
@@ -34,16 +37,15 @@ class WrapperSchemaProcessorTest {
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponseCustomerDto");
 
     assertNotNull(wrapper);
-    assertEquals(Boolean.TRUE, wrapper.getExtensions().get("x-api-wrapper"));
-    assertEquals("CustomerDto", wrapper.getExtensions().get("x-api-wrapper-datatype"));
+    assertEquals(Boolean.TRUE, wrapper.getExtensions().get(VendorExtensions.API_WRAPPER));
+    assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
 
-    verify(enricher).enrich(openApi, "ServiceResponseCustomerDto", "CustomerDto");
-    verifyNoMoreInteractions(enricher);
+    verifyNoInteractions(enricher);
   }
 
   @Test
   @DisplayName("process -> should enrich wrapper but skip container enrichment for custom envelope")
-  void process_shouldSkipEnricher_whenCustomEnvelope() {
+  void process_shouldSkipContainerEnrichment_whenCustomEnvelope() {
     WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
     WrapperSchemaProcessor processor = new WrapperSchemaProcessor(enricher);
 
@@ -56,8 +58,8 @@ class WrapperSchemaProcessorTest {
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ApiResponseCustomerDto");
 
     assertNotNull(wrapper);
-    assertEquals(Boolean.TRUE, wrapper.getExtensions().get("x-api-wrapper"));
-    assertEquals("CustomerDto", wrapper.getExtensions().get("x-api-wrapper-datatype"));
+    assertEquals(Boolean.TRUE, wrapper.getExtensions().get(VendorExtensions.API_WRAPPER));
+    assertEquals("CustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
 
     verifyNoInteractions(enricher);
   }
@@ -65,23 +67,28 @@ class WrapperSchemaProcessorTest {
   @Test
   @DisplayName(
       "process -> should delegate container enrichment for default envelope container response")
-  void process_shouldDelegateEnricher_forDefaultEnvelopeContainerResponse() {
+  void process_shouldDelegateContainerEnrichment_forDefaultEnvelopeContainerResponse() {
     WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
     WrapperSchemaProcessor processor = new WrapperSchemaProcessor(enricher);
 
     OpenAPI openApi = openApiWithWrapper("ServiceResponsePageCustomerDto");
     ResponseTypeDescriptor descriptor =
-        ResponseTypeDescriptor.container(ServiceResponse.class, "data", "Page", "CustomerDto");
+            ResponseTypeDescriptor.container(
+                    ServiceResponse.class,
+                    "data",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
 
     processor.process(openApi, descriptor);
 
     Schema<?> wrapper = openApi.getComponents().getSchemas().get("ServiceResponsePageCustomerDto");
 
     assertNotNull(wrapper);
-    assertEquals(Boolean.TRUE, wrapper.getExtensions().get("x-api-wrapper"));
-    assertEquals("PageCustomerDto", wrapper.getExtensions().get("x-api-wrapper-datatype"));
+    assertEquals(Boolean.TRUE, wrapper.getExtensions().get(VendorExtensions.API_WRAPPER));
+    assertEquals(
+        "PageCustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
 
-    verify(enricher).enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto");
+    verify(enricher).enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
     verifyNoMoreInteractions(enricher);
   }
 
@@ -100,6 +107,33 @@ class WrapperSchemaProcessorTest {
 
     assertTrue(ex.getMessage().contains("Missing wrapper schema"));
     verifyNoInteractions(enricher);
+  }
+
+  @Test
+  @DisplayName("process -> should delegate container enrichment for custom envelope container response")
+  void process_shouldDelegateContainerEnrichment_forCustomEnvelopeContainerResponse() {
+    WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
+    WrapperSchemaProcessor processor = new WrapperSchemaProcessor(enricher);
+
+    OpenAPI openApi = openApiWithWrapper("ApiResponsePageCustomerDto");
+    ResponseTypeDescriptor descriptor =
+            ResponseTypeDescriptor.container(
+                    ApiResponse.class,
+                    "payload",
+                    new SupportedContainerType(Page.class, PAGE, PAGE),
+                    "CustomerDto");
+
+    processor.process(openApi, descriptor);
+
+    Schema<?> wrapper = openApi.getComponents().getSchemas().get("ApiResponsePageCustomerDto");
+
+    assertNotNull(wrapper);
+    assertEquals(Boolean.TRUE, wrapper.getExtensions().get(VendorExtensions.API_WRAPPER));
+    assertEquals("PageCustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
+
+    verify(enricher)
+            .enrich(openApi, "ApiResponsePageCustomerDto", "PageCustomerDto", "Page", "payload");
+    verifyNoMoreInteractions(enricher);
   }
 
   private OpenAPI openApiWithWrapper(String wrapperName) {

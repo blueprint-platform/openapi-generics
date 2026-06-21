@@ -1,10 +1,10 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
-import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.contract.PropertyNames;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.PropertyNames;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
@@ -30,19 +30,27 @@ import java.util.Set;
  */
 public class ResponseIntrospectionPolicyResolver {
 
-  public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {
-    String configuredType = extractConfiguredEnvelopeType(properties);
+  private final SupportedContainerTypesResolver supportedContainerTypesResolver;
 
-    if (configuredType == null) {
-      return new ResponseIntrospectionPolicy(
-          ServiceResponse.class, PropertyNames.DATA, Set.of(Page.class));
+    public ResponseIntrospectionPolicyResolver(SupportedContainerTypesResolver supportedContainerTypesResolver) {
+        this.supportedContainerTypesResolver = supportedContainerTypesResolver;
     }
 
-    Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
-    String payloadPropertyName = validateExternalEnvelopeType(envelopeType);
+    public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {
+      String configuredType = extractConfiguredEnvelopeType(properties);
 
-    return new ResponseIntrospectionPolicy(envelopeType, payloadPropertyName, Set.of());
-  }
+      if (configuredType == null) {
+        return new ResponseIntrospectionPolicy(
+                ServiceResponse.class,
+                PropertyNames.DATA,
+                supportedContainerTypesResolver.resolve());
+      }
+
+      Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
+      String payloadPropertyName = validateExternalEnvelopeType(envelopeType);
+
+      return new ResponseIntrospectionPolicy(envelopeType, payloadPropertyName, supportedContainerTypesResolver.resolve());
+    }
 
   private String extractConfiguredEnvelopeType(OpenApiGenericsProperties properties) {
     if (properties == null) {

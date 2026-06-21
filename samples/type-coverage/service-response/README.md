@@ -1,18 +1,27 @@
 # service-response-type-coverage
 
-> End-to-end reference sample for validating projection and client reconstruction of the canonical `ServiceResponse<T>` contract.
+> End-to-end verification sample for OpenAPI projection, client generation, and runtime reconstruction of `ServiceResponse<T>` contracts.
 
-This sample exists to verify how different payload types are projected into OpenAPI and reconstructed by the OpenAPI Generics platform.
+This sample is intentionally focused on type coverage.
 
-It is intentionally not a business application.
-
-Its purpose is to provide a deterministic environment for validating OpenAPI projection, generated client behavior, wrapper reconstruction, vendor extensions, and regression scenarios.
+It verifies that response types published by a producer service can be projected into OpenAPI, reconstructed by the generated client, and consumed without losing generic type information.
 
 ---
 
-## Architecture
+## Table of Contents
 
-The sample demonstrates the complete OpenAPI Generics flow:
+- [What This Sample Validates](#what-this-sample-validates)
+- [Modules](#modules)
+- [Covered Response Shapes](#covered-response-shapes)
+- [Running the Sample](#running-the-sample)
+- [Verification Endpoints](#verification-endpoints)
+- [Mental Model](#mental-model)
+
+---
+
+## What This Sample Validates
+
+The sample exercises the complete OpenAPI Generics flow:
 
 ```text
 Producer
@@ -24,9 +33,9 @@ Generated Client
 Consumer
 ```
 
-The consumer does not manually map response payloads.
+The generated client is used directly by the consumer application.
 
-All responses are deserialized directly into the generated generic-aware client types produced by the platform.
+No manual DTO mapping or wrapper reconstruction exists inside the consumer.
 
 ---
 
@@ -35,30 +44,23 @@ All responses are deserialized directly into the generated generic-aware client 
 ```text
 service-response-type-coverage
 ├── producer
-│   └── Exposes ServiceResponse<T> endpoints
 │
 ├── client
-│   └── Generated Java client produced from the projected OpenAPI contract
 │
 └── consumer
-    └── Uses the generated client to call the producer
 ```
+
+| Module | Responsibility |
+|----------|----------------|
+| producer | Publishes ServiceResponse-based endpoints |
+| client | Generated Java client |
+| consumer | Uses the generated client and exposes verification endpoints |
 
 ---
 
-## What this sample covers
+## Covered Response Shapes
 
-The producer exposes endpoints using the canonical response shapes:
-
-```java
-ServiceResponse<T>
-
-ServiceResponse<Page<T>>
-```
-
-and exercises multiple payload categories.
-
-### Scalar payloads
+### Scalar Payloads
 
 ```java
 ServiceResponse<String>
@@ -68,7 +70,7 @@ ServiceResponse<Long>
 ServiceResponse<BigDecimal>
 ```
 
-### Value payloads
+### Value Payloads
 
 ```java
 ServiceResponse<UUID>
@@ -77,107 +79,51 @@ ServiceResponse<OffsetDateTime>
 ServiceResponse<CoverageStatus>
 ```
 
-### Object payloads
+### Object Payloads
 
 ```java
 ServiceResponse<AddressDto>
 ServiceResponse<TypeProfileDto>
 ```
 
-Including:
+### List Payloads
 
-- nested DTOs
-- collections
-- maps
-- enums
-- temporal types
+```java
+ServiceResponse<List<TypeSummaryDto>>
+ServiceResponse<List<CoverageStatus>>
+```
 
-### Paged payloads
+### Set Payloads
+
+```java
+ServiceResponse<Set<TypeSummaryDto>>
+ServiceResponse<Set<CoverageStatus>>
+```
+
+
+### Page Payloads
 
 ```java
 ServiceResponse<Page<TypeSummaryDto>>
-
 ServiceResponse<Page<CoverageStatus>>
 ```
 
-Including:
-
-- DTO item types
-- enum item types
-- nested generic reconstruction
-
 ---
 
-## Sample Payload Categories
+## Running the Sample
 
-### Scalars
-
-```text
-GET /types/scalars/string
-GET /types/scalars/boolean
-GET /types/scalars/integer
-GET /types/scalars/long
-GET /types/scalars/decimal
-```
-
-### Values
-
-```text
-GET /types/values/uuid
-GET /types/values/date
-GET /types/values/datetime
-GET /types/values/enum
-```
-
-### Objects
-
-```text
-GET /types/objects/address
-GET /types/objects/profile
-```
-
-### Pages
-
-```text
-GET /types/pages/summaries
-GET /types/pages/statuses
-```
-
----
-
-## Quick Start
-
-### Run producer
+### Start Producer
 
 ```bash
 cd producer
 mvn spring-boot:run
 ```
 
-Default URL:
+Producer URLs:
 
 ```text
 http://localhost:8074/type-coverage/service-response
 ```
-
-### Run consumer
-
-```bash
-cd consumer
-mvn spring-boot:run
-```
-
-Default URL:
-
-```text
-http://localhost:8075/type-coverage/service-response-consumer
-```
-
----
-
-## Verify Producer
-
-### OpenAPI
 
 Swagger UI:
 
@@ -185,174 +131,167 @@ Swagger UI:
 http://localhost:8074/type-coverage/service-response/swagger-ui/index.html
 ```
 
-YAML:
+OpenAPI:
 
 ```text
 http://localhost:8074/type-coverage/service-response/v3/api-docs.yaml
 ```
 
+### Start Consumer
+
+```bash
+cd consumer
+mvn spring-boot:run
+```
+
+Consumer URL:
+
+```text
+http://localhost:8075/type-coverage/service-response-consumer
+```
+
 ---
 
-## Verify Consumer
+## Quick Smoke Test
 
-The consumer calls the producer through the generated client and returns the deserialized response.
+After starting both producer and consumer, a small subset of endpoints can be called directly to verify that the generated client reconstructs the expected generic response types correctly.
 
-### Scalar payload
+The goal of these requests is not to validate business behavior.
 
-```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/scalars/string
-```
+They provide a fast end-to-end sanity check for:
 
-Expected shape:
+- OpenAPI projection
+- generated client generation
+- generic wrapper reconstruction
+- runtime deserialization
+- consumer integration
 
-```json
-{
-  "data": "type-coverage",
-  "meta": {}
-}
-```
-
-### Enum payload
+### Producer Verification
 
 ```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/values/enum
+curl http://localhost:8074/type-coverage/service-response/types/scalars/string
+
+curl http://localhost:8074/type-coverage/service-response/types/lists/summaries
+
+curl http://localhost:8074/type-coverage/service-response/types/sets/statuses
+
+curl http://localhost:8074/type-coverage/service-response/types/pages/summaries
 ```
 
-Expected shape:
-
-```json
-{
-  "data": "EXPERIMENTAL",
-  "meta": {}
-}
-```
-
-### Complex DTO payload
-
-```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/objects/profile
-```
-
-Validates:
-
-- nested DTOs
-- collections
-- maps
-- enums
-- LocalDate
-- OffsetDateTime
-
-### Paged DTO payload
-
-```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/pages/summaries
-```
-
-Validates:
+Expected generic shapes:
 
 ```java
+ServiceResponse<String>
+
+ServiceResponse<List<TypeSummaryDto>>
+
+ServiceResponse<Set<CoverageStatus>>
+
 ServiceResponse<Page<TypeSummaryDto>>
 ```
 
-### Paged enum payload
+### Consumer Verification
 
 ```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/pages/statuses
+curl http://localhost:8075/type-coverage/service-response-consumer/types/scalars/string
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/lists/summaries
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/sets/statuses
+
+curl http://localhost:8075/type-coverage/service-response-consumer/types/pages/summaries
 ```
 
-Validates:
+The consumer uses only generated client artifacts.
 
-```java
-ServiceResponse<Page<CoverageStatus>>
+No manual DTO mapping or wrapper reconstruction exists in the consumer application.
+
+Successful responses verify that generic type information survives the complete pipeline:
+
+```text
+Producer
+    ↓
+OpenAPI Projection
+    ↓
+Generated Client
+    ↓
+Consumer Runtime
 ```
-
-This is one of the most important scenarios because it exercises:
-
-```java
-ServiceResponse<T>
-
-Page<T>
-
-Enum
-```
-
-simultaneously.
 
 ---
 
-## What is being validated
-
-The sample verifies that OpenAPI Generics can correctly project and reconstruct:
+## Verification Endpoints
 
 ### Scalars
 
-```java
-String
-Boolean
-Integer
-Long
-BigDecimal
+```text
+/types/scalars/string
+/types/scalars/boolean
+/types/scalars/integer
+/types/scalars/long
+/types/scalars/decimal
 ```
 
-### Value Types
+### Values
 
-```java
-UUID
-LocalDate
-OffsetDateTime
-Enum
+```text
+/types/values/uuid
+/types/values/date
+/types/values/datetime
+/types/values/enum
 ```
 
 ### Objects
 
-```java
-DTO
-Nested DTO
-Collection
-Map
+```text
+/types/objects/address
+/types/objects/profile
 ```
 
-### Nested Generics
+### Lists
 
-```java
-ServiceResponse<Page<DTO>>
-
-ServiceResponse<Page<Enum>>
+```text
+/types/lists/summaries
+/types/lists/statuses
 ```
 
----
+### Sets
 
-## Why this sample exists
+```text
+/types/sets/summaries
+/types/sets/statuses
+```
 
-When investigating projection behavior or generated client output, it is useful to isolate payload handling from business concerns.
+### Pages
 
-This sample provides a reproducible environment that can be used to:
+```text
+/types/pages/summaries
+/types/pages/statuses
+```
 
-- inspect generated OpenAPI schemas
-- validate vendor extensions
-- verify wrapper generation
-- verify enum handling
-- validate generic reconstruction
-- reproduce code generation issues
-- validate platform regressions
-- test generated client interoperability
+These endpoints validate that the generated client correctly reconstructs:
+
+```java
+ServiceResponse<T>
+ServiceResponse<List<T>>
+ServiceResponse<Set<T>>
+ServiceResponse<Page<T>>
+```
+
+for primitive, value, enum, DTO, list, set, and paged payload types.
 
 ---
 
 ## Mental Model
 
 ```text
-Contract Type
-      ↓
 ServiceResponse<T>
-      ↓
+        ↓
 OpenAPI Projection
-      ↓
-Vendor Extensions
-      ↓
+        ↓
 Generated Client
-      ↓
+        ↓
 Consumer Deserialization
 ```
 
-The sample focuses exclusively on validating this flow.
+The purpose of this sample is to verify that this flow remains stable across platform changes.

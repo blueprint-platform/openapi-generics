@@ -78,30 +78,46 @@ docker compose up --build -d
 
 ## Verify
 
-### Single resource
+### Spring Boot 3
 
-```
+Single resource
+
+```bash
 curl http://localhost:8085/customer-service-consumer/customers/1
 ```
 
-(or use port `8095` for Spring Boot 4)
+Pagination
 
----
-
-### Pagination
-
-```
+```bash
 curl "http://localhost:8085/customer-service-consumer/customers?page=0&size=5"
 ```
 
-(or use port `8095` for Spring Boot 4)
+Producer OpenAPI
+
+```bash
+curl http://localhost:8084/customer-service/v3/api-docs.yaml
+```
 
 ---
 
-### Producer OpenAPI
+### Spring Boot 4
 
+Single resource
+
+```bash
+curl http://localhost:8095/customer-service-consumer/customers/1
 ```
-curl http://localhost:8084/customer-service/v3/api-docs.yaml
+
+Pagination
+
+```bash
+curl "http://localhost:8095/customer-service-consumer/customers?page=0&size=5"
+```
+
+Producer OpenAPI
+
+```bash
+curl http://localhost:8094/customer-service/v3/api-docs.yaml
 ```
 
 ---
