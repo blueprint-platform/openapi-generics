@@ -12,9 +12,10 @@ import java.util.Map;
  * Page schema usually contains a "content" property which is an array.
  */
 public class ContentArrayItemExtractor implements ItemExtractor {
+
     @SuppressWarnings("rawtypes")
     @Override
-    public String extractItemName(Schema<?> containerSchema, Map<String, Schema> allSchemas) {
+    public String extractItemName(Schema<?> containerSchema) {
         if (containerSchema == null) return null;
 
         Map<String, Schema> properties = containerSchema.getProperties();

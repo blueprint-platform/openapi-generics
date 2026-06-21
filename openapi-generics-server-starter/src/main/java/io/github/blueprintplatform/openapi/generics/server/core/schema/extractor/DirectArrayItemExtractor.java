@@ -15,8 +15,9 @@ import java.util.Map;
 public class DirectArrayItemExtractor implements ItemExtractor {
 
 
+    @SuppressWarnings("rawtypes")
     @Override
-    public String extractItemName(Schema<?> containerSchema, Map<String, Schema> allSchemas) {
+    public String extractItemName(Schema<?> containerSchema) {
         if (containerSchema == null) return null;
 
         Schema<?> items = null;

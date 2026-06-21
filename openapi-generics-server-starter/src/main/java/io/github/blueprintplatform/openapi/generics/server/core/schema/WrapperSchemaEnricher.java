@@ -58,7 +58,7 @@ public class WrapperSchemaEnricher {
       return null;
     }
 
-    String itemName = strategy.extractor().extractItemName(containerSchema, schemas);
+    String itemName = strategy.extractor().extractItemName(containerSchema);
 
     if (itemName == null) {
       return null;
