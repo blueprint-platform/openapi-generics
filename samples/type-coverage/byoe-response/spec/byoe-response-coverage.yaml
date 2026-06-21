@@ -1,7 +1,8 @@
 openapi: 3.1.0
 info:
   title: BYOE Response Type Coverage API
-  description: Type coverage sample for custom ApiResponse<T> envelope projection.
+  description: "Type coverage sample validating contract projection and client reconstruction\
+    \ for ApiResponse<T>, ApiResponse<List<T>>, ApiResponse<Set<T>>, and ApiResponse<Page<T>>."
   version: 1.1.1-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
