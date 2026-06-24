@@ -3,7 +3,7 @@ info:
   title: BYOE Response Type Coverage API
   description: "Type coverage sample validating contract projection and client reconstruction\
     \ for ApiResponse<T>, ApiResponse<List<T>>, ApiResponse<Set<T>>, and ApiResponse<Page<T>>."
-  version: 1.1.1-SNAPSHOT
+  version: 1.2.0-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
   description: Local BYOE response type coverage producer
