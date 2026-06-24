@@ -255,6 +255,7 @@
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${spotless-maven-plugin.version}</version>
                     <configuration combine.self="override">
+                        <skip>${openapi.generics.skip}</skip>
                         <java>
                             <includes>
                                 <include>${openapi.generated.java.include.pattern}</include>
