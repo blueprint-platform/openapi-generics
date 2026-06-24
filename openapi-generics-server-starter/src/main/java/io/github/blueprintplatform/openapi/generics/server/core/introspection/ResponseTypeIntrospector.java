@@ -1,13 +1,12 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Future;
-
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ResolvableType;
@@ -18,9 +17,9 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 /**
  * Extracts contract-aware response type metadata from controller return types.
  *
- * <p>Unwraps framework-level wrappers (for example {@code ResponseEntity},
- * {@code CompletionStage}, {@code Future}, {@code DeferredResult}, and {@code WebAsyncTask})
- * before analyzing the actual contract response shape.
+ * <p>Unwraps framework-level wrappers (for example {@code ResponseEntity}, {@code CompletionStage},
+ * {@code Future}, {@code DeferredResult}, and {@code WebAsyncTask}) before analyzing the actual
+ * contract response shape.
  *
  * <p>Produces a {@link ResponseTypeDescriptor} only for response structures that are explicitly
  * supported by the active {@link ResponseIntrospectionPolicy}.
@@ -48,9 +47,9 @@ import org.springframework.web.context.request.async.WebAsyncTask;
  *   <li>{@code YourEnvelope<List<T>>}
  * </ul>
  *
- * <p>Enum payloads are supported only when published as reusable OpenAPI schema components
- * (for example via {@code @Schema(enumAsRef = true)}). Inline enum schemas are ignored because
- * they do not produce stable component identities required by the projection pipeline.
+ * <p>Enum payloads are supported only when published as reusable OpenAPI schema components (for
+ * example via {@code @Schema(enumAsRef = true)}). Inline enum schemas are ignored because they do
+ * not produce stable component identities required by the projection pipeline.
  */
 public final class ResponseTypeIntrospector {
 
@@ -81,12 +80,12 @@ public final class ResponseTypeIntrospector {
 
     if (log.isDebugEnabled()) {
       log.debug(
-              "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}, dataRefName={}",
-              safeToString(type),
-              envelopeType.getSimpleName(),
-              safeToString(dataType),
-              descriptorOpt.map(Object::toString).orElse("<empty>"),
-              descriptorOpt.map(ResponseTypeDescriptor::dataRefName).orElse("<empty>"));
+          "Introspected type [{}]: envelopeType={}, dataType={}, descriptor={}, dataRefName={}",
+          safeToString(type),
+          envelopeType.getSimpleName(),
+          safeToString(dataType),
+          descriptorOpt.map(Object::toString).orElse("<empty>"),
+          descriptorOpt.map(ResponseTypeDescriptor::dataRefName).orElse("<empty>"));
     }
     return descriptorOpt;
   }
@@ -124,6 +123,7 @@ public final class ResponseTypeIntrospector {
 
     return null;
   }
+
   private Optional<ResponseTypeDescriptor> buildDescriptor(ResolvableType dataType) {
     Class<?> raw = dataType.resolve();
     if (raw == null) {
@@ -137,14 +137,14 @@ public final class ResponseTypeIntrospector {
 
     if (!dataType.hasGenerics() && isSupportedPayloadType(raw)) {
       return Optional.of(
-              ResponseTypeDescriptor.simple(envelopeType, payloadPropertyName, raw.getSimpleName()));
+          ResponseTypeDescriptor.simple(envelopeType, payloadPropertyName, raw.getSimpleName()));
     }
 
     return Optional.empty();
   }
 
   private Optional<ResponseTypeDescriptor> buildContainerDescriptor(
-          ResolvableType dataType, Class<?> raw) {
+      ResolvableType dataType, Class<?> raw) {
 
     for (SupportedContainerType containerType : supportedContainers) {
       if (!containerType.matches(raw)) {
@@ -162,11 +162,8 @@ public final class ResponseTypeIntrospector {
       }
 
       return Optional.of(
-              ResponseTypeDescriptor.container(
-                      envelopeType,
-                      payloadPropertyName,
-                      containerType,
-                      itemRaw.getSimpleName()));
+          ResponseTypeDescriptor.container(
+              envelopeType, payloadPropertyName, containerType, itemRaw.getSimpleName()));
     }
 
     return Optional.empty();

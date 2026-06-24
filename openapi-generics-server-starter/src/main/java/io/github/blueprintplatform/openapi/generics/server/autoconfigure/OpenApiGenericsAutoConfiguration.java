@@ -43,15 +43,14 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver(
-          SupportedContainerTypesResolver supportedContainerTypesResolver) {
-    return new ResponseIntrospectionPolicyResolver(
-            supportedContainerTypesResolver);
+      SupportedContainerTypesResolver supportedContainerTypesResolver) {
+    return new ResponseIntrospectionPolicyResolver(supportedContainerTypesResolver);
   }
 
   @Bean
   @ConditionalOnMissingBean
   public ResponseIntrospectionPolicy responseIntrospectionPolicy(
-          OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
+      OpenApiGenericsProperties properties, ResponseIntrospectionPolicyResolver resolver) {
     return resolver.resolve(properties);
   }
 
@@ -82,18 +81,18 @@ public class OpenApiGenericsAutoConfiguration {
   @Bean
   @ConditionalOnMissingBean
   public OpenApiPipelineOrchestrator openApiPipelineOrchestrator(
-          ContractSchemaExclusionApplier contractSchemaExclusionApplier,
-          ResponseTypeDiscoveryStrategy discoveryStrategy,
-          ResponseTypeIntrospector introspector,
-          WrapperSchemaProcessor wrapperSchemaProcessor,
-          OpenApiContractGuard contractGuard) {
+      ContractSchemaExclusionApplier contractSchemaExclusionApplier,
+      ResponseTypeDiscoveryStrategy discoveryStrategy,
+      ResponseTypeIntrospector introspector,
+      WrapperSchemaProcessor wrapperSchemaProcessor,
+      OpenApiContractGuard contractGuard) {
 
     return new OpenApiPipelineOrchestrator(
-            contractSchemaExclusionApplier,
-            discoveryStrategy,
-            introspector,
-            wrapperSchemaProcessor,
-            contractGuard);
+        contractSchemaExclusionApplier,
+        discoveryStrategy,
+        introspector,
+        wrapperSchemaProcessor,
+        contractGuard);
   }
 
   @Bean

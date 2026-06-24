@@ -32,12 +32,7 @@ public class WrapperSchemaProcessor {
     log.debug("Wrapper schema '{}' enriched", wrapper.getName());
 
     if (descriptor.isContainer()) {
-      enricher.enrich(
-              openApi,
-              wrapper.getName(),
-              descriptor.dataRefName(),
-              descriptor.containerName(),
-              descriptor.payloadPropertyName());
+      enricher.enrich(openApi, wrapper.getName(), descriptor);
     }
   }
 }

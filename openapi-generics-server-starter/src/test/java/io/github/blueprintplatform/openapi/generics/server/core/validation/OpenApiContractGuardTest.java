@@ -33,7 +33,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should pass for valid simple wrapper")
   void validate_shouldPass_forValidSimpleWrapper() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "CustomerDto");
@@ -48,11 +48,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should pass for valid container wrapper")
   void validate_shouldPass_forValidContainerWrapper() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -98,7 +98,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when wrapper schema is missing")
   void validate_shouldFail_whenWrapperMissing() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     OpenAPI openApi = openApi();
     Set<ResponseTypeDescriptor> descriptors = Set.of(descriptor);
@@ -113,7 +113,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when wrapper extensions are missing")
   void validate_shouldFail_whenExtensionsMissing() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     OpenAPI openApi = openApi(schema("ServiceResponseCustomerDto", wrapper));
@@ -128,7 +128,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-api-wrapper is invalid")
   void validate_shouldFail_whenApiWrapperInvalid() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, false);
@@ -146,7 +146,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-api-wrapper-datatype is invalid")
   void validate_shouldFail_whenDatatypeInvalid() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -164,7 +164,7 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when payload property is missing in allOf wrapper")
   void validate_shouldFail_whenPayloadMissingInAllOfWrapper() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("payload");
     wrapper.addExtension(API_WRAPPER, true);
@@ -179,10 +179,11 @@ class OpenApiContractGuardTest {
   }
 
   @Test
-  @DisplayName("validate -> should fail when payload property is missing in direct properties wrapper")
+  @DisplayName(
+      "validate -> should fail when payload property is missing in direct properties wrapper")
   void validate_shouldFail_whenPayloadMissingInDirectWrapper() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
+        ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     ObjectSchema wrapper = new ObjectSchema();
     wrapper.addProperty("payload", new Schema<>());
@@ -201,11 +202,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when container extensions are missing")
   void validate_shouldFail_whenContainerExtensionsMissing() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -223,11 +224,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-data-container is invalid")
   void validate_shouldFail_whenContainerInvalid() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -247,11 +248,11 @@ class OpenApiContractGuardTest {
   @DisplayName("validate -> should fail when x-data-item is invalid")
   void validate_shouldFail_whenItemInvalid() {
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
@@ -268,7 +269,7 @@ class OpenApiContractGuardTest {
   }
 
   private IllegalStateException validateExpectingFailure(
-          OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
+      OpenAPI openApi, Set<ResponseTypeDescriptor> descriptors) {
     return assertThrows(IllegalStateException.class, () -> guard.validate(openApi, descriptors));
   }
 

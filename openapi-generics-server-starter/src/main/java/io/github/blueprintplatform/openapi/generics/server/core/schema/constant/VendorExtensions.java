@@ -9,6 +9,7 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  * <ul>
  *   <li>{@code ServiceResponse<T>} (wrapper semantics)
  *   <li>{@code Page<T>} (container semantics)
+ *   <li>{@code List<T>} and {@code Set<T>} (collection container semantics)
  * </ul>
  *
  * <h2>Structural model</h2>
@@ -33,12 +34,14 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  *   <li><b>Flat over hierarchical</b> → aligned with OpenAPI model
  *   <li><b>Deterministic</b> → same input produces same extensions
  *   <li><b>Single source of truth</b> → no duplication across classes
+ *   <li><b>Preserve introspection results</b> → do not discard resolved Java container identity
  * </ul>
  *
  * <h2>Stability</h2>
  *
  * <ul>
  *   <li>Changing any key is a <b>breaking change</b>
+ *   <li>Adding a new key is a backward-compatible metadata enhancement
  *   <li>Must be versioned carefully
  * </ul>
  *
@@ -49,6 +52,7 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  *   x-api-wrapper: true
  *   x-api-wrapper-datatype: PageCustomerDto
  *   x-data-container: Page
+ *   x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
  *   x-data-item: CustomerDto
  * </pre>
  *
@@ -69,43 +73,16 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.constant
  */
 public final class VendorExtensions {
 
-  // -------------------------------------------------------------------------
-  // Wrapper semantics
-  // -------------------------------------------------------------------------
-
-  /** Marks a schema as a contract-aware wrapper. */
   public static final String API_WRAPPER = "x-api-wrapper";
 
-  /** Carries the underlying data type of the wrapper. */
   public static final String API_WRAPPER_DATATYPE = "x-api-wrapper-datatype";
 
-  // -------------------------------------------------------------------------
-  // Container semantics
-  // -------------------------------------------------------------------------
-
-  /** Indicates the container type of the response payload. */
   public static final String DATA_CONTAINER = "x-data-container";
 
-  /** Indicates the item type contained within the container. */
+  public static final String DATA_CONTAINER_TYPE = "x-data-container-type";
+
   public static final String DATA_ITEM = "x-data-item";
 
-  // -------------------------------------------------------------------------
-  // Generation control
-  // -------------------------------------------------------------------------
-
-  /**
-   * Marks a schema to be excluded from code generation.
-   *
-   * <p>Use this for:
-   *
-   * <ul>
-   *   <li>Shared contract types (e.g. {@code ServiceResponse}, {@code Meta})
-   *   <li>Externally provided models
-   *   <li>Infrastructure-level schemas not meant to be generated per client
-   * </ul>
-   *
-   * <p>The schema remains part of the OpenAPI document but will be ignored by templates.
-   */
   public static final String IGNORE_MODEL = "x-ignore-model";
 
   private VendorExtensions() {}

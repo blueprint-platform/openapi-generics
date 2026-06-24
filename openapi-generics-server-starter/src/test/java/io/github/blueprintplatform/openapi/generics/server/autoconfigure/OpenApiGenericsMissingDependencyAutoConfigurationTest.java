@@ -43,20 +43,20 @@ class OpenApiGenericsMissingDependencyAutoConfigurationTest {
         });
   }
 
-    @Test
-    @DisplayName("should invoke PostConstruct without exception when activated")
-    void shouldInvokePostConstructWithoutException() {
-        contextRunner
-                .withClassLoader(new FilteredClassLoader(OpenApiCustomizer.class))
-                .run(
-                        context -> {
-                            assertNotNull(
-                                    context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class));
+  @Test
+  @DisplayName("should invoke PostConstruct without exception when activated")
+  void shouldInvokePostConstructWithoutException() {
+    contextRunner
+        .withClassLoader(new FilteredClassLoader(OpenApiCustomizer.class))
+        .run(
+            context -> {
+              assertNotNull(
+                  context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class));
 
-                            OpenApiGenericsMissingDependencyAutoConfiguration bean =
-                                    context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class);
+              OpenApiGenericsMissingDependencyAutoConfiguration bean =
+                  context.getBean(OpenApiGenericsMissingDependencyAutoConfiguration.class);
 
-                            assertDoesNotThrow(bean::logWarning);
-                        });
-    }
+              assertDoesNotThrow(bean::logWarning);
+            });
+  }
 }

@@ -1,5 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaRegistry;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaStrategy;
@@ -25,16 +26,17 @@ public class WrapperSchemaEnricher {
   }
 
   @SuppressWarnings("rawtypes")
-  public void enrich(
-      OpenAPI openApi, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
+  public void enrich(OpenAPI openApi, String wrapperName, ResponseTypeDescriptor descriptor) {
     Map<String, Schema> schemas = getSchemas(openApi);
 
-    if (schemas.isEmpty() || wrapperName == null || dataRefName == null || containerName == null) {
+    if (schemas.isEmpty()
+        || wrapperName == null
+        || descriptor == null
+        || !descriptor.isContainer()) {
       return;
     }
 
-    ContainerSchemaMetadata metadata =
-        resolveContainerMetadata(schemas, wrapperName, dataRefName, containerName, payloadPropertyName);
+    ContainerSchemaMetadata metadata = resolveContainerMetadata(schemas, wrapperName, descriptor);
 
     if (metadata == null) {
       return;
@@ -45,14 +47,19 @@ public class WrapperSchemaEnricher {
 
   @SuppressWarnings("rawtypes")
   private ContainerSchemaMetadata resolveContainerMetadata(
-      Map<String, Schema> schemas, String wrapperName, String dataRefName, String containerName, String payloadPropertyName) {
-    ContainerSchemaStrategy strategy = containerSchemaRegistry.findByContainerName(containerName);
+      Map<String, Schema> schemas, String wrapperName, ResponseTypeDescriptor descriptor) {
+    ContainerSchemaStrategy strategy =
+        containerSchemaRegistry.findByContainerType(descriptor.containerType());
 
     if (strategy == null) {
       return null;
     }
 
-    Schema<?> containerSchema = strategy.resolver().resolve(schemas, dataRefName, wrapperName, payloadPropertyName);
+    Schema<?> containerSchema =
+        strategy
+            .resolver()
+            .resolve(
+                schemas, descriptor.dataRefName(), wrapperName, descriptor.payloadPropertyName());
 
     if (containerSchema == null) {
       return null;
@@ -70,11 +77,15 @@ public class WrapperSchemaEnricher {
       return null;
     }
 
-    return new ContainerSchemaMetadata(wrapper, strategy.containerName(), itemName);
+    return new ContainerSchemaMetadata(
+        wrapper, strategy.containerName(), descriptor.containerTypeName(), itemName);
   }
 
   private void applyContainerMetadata(ContainerSchemaMetadata metadata) {
     metadata.wrapper().addExtension(VendorExtensions.DATA_CONTAINER, metadata.containerName());
+    metadata
+        .wrapper()
+        .addExtension(VendorExtensions.DATA_CONTAINER_TYPE, metadata.containerTypeName());
     metadata.wrapper().addExtension(VendorExtensions.DATA_ITEM, metadata.itemName());
   }
 
@@ -90,5 +101,5 @@ public class WrapperSchemaEnricher {
   }
 
   private record ContainerSchemaMetadata(
-      Schema<?> wrapper, String containerName, String itemName) {}
+      Schema<?> wrapper, String containerName, String containerTypeName, String itemName) {}
 }

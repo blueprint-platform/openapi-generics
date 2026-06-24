@@ -31,25 +31,25 @@ public class ResponseIntrospectionPolicyResolver {
 
   private final SupportedContainerTypesResolver supportedContainerTypesResolver;
 
-    public ResponseIntrospectionPolicyResolver(SupportedContainerTypesResolver supportedContainerTypesResolver) {
-        this.supportedContainerTypesResolver = supportedContainerTypesResolver;
+  public ResponseIntrospectionPolicyResolver(
+      SupportedContainerTypesResolver supportedContainerTypesResolver) {
+    this.supportedContainerTypesResolver = supportedContainerTypesResolver;
+  }
+
+  public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {
+    String configuredType = extractConfiguredEnvelopeType(properties);
+
+    if (configuredType == null) {
+      return new ResponseIntrospectionPolicy(
+          ServiceResponse.class, PropertyNames.DATA, supportedContainerTypesResolver.resolve());
     }
 
-    public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {
-      String configuredType = extractConfiguredEnvelopeType(properties);
+    Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
+    String payloadPropertyName = validateExternalEnvelopeType(envelopeType);
 
-      if (configuredType == null) {
-        return new ResponseIntrospectionPolicy(
-                ServiceResponse.class,
-                PropertyNames.DATA,
-                supportedContainerTypesResolver.resolve());
-      }
-
-      Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
-      String payloadPropertyName = validateExternalEnvelopeType(envelopeType);
-
-      return new ResponseIntrospectionPolicy(envelopeType, payloadPropertyName, supportedContainerTypesResolver.resolve());
-    }
+    return new ResponseIntrospectionPolicy(
+        envelopeType, payloadPropertyName, supportedContainerTypesResolver.resolve());
+  }
 
   private String extractConfiguredEnvelopeType(OpenApiGenericsProperties properties) {
     if (properties == null) {

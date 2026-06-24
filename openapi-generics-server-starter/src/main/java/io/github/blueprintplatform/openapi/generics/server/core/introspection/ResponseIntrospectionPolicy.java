@@ -4,8 +4,8 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.co
 import java.util.Set;
 
 /**
- * Immutable configuration describing how response types should be interpreted by the
- * introspection pipeline.
+ * Immutable configuration describing how response types should be interpreted by the introspection
+ * pipeline.
  *
  * <p>This policy defines:
  *
@@ -23,15 +23,14 @@ import java.util.Set;
  * ServiceResponse<List<T>>
  * }</pre>
  *
- * <p>Additional containers may be contributed through the
- * {@link SupportedContainerType} model without changing the core
- * introspection algorithm.
+ * <p>Additional containers may be contributed through the {@link SupportedContainerType} model
+ * without changing the core introspection algorithm.
  *
  * @param envelopeType envelope type to detect (for example {@code ServiceResponse})
  * @param payloadPropertyName property representing the payload within the envelope
  * @param supportedContainers supported generic container definitions
  */
 public record ResponseIntrospectionPolicy(
-        Class<?> envelopeType,
-        String payloadPropertyName,
-        Set<SupportedContainerType> supportedContainers) {}
+    Class<?> envelopeType,
+    String payloadPropertyName,
+    Set<SupportedContainerType> supportedContainers) {}

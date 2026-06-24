@@ -64,11 +64,11 @@ class ContractSchemaExclusionApplierTest {
             schema("PageCustomerDto", new ObjectSchema()));
 
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     marker.apply(openApi, Set.of(descriptor));
 

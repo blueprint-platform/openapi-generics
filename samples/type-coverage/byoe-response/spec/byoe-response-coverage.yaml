@@ -315,6 +315,7 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: SetTypeSummaryDto
       x-data-container: Set
+      x-data-container-type: java.util.Set
       x-data-item: TypeSummaryDto
     TypeSummaryDto:
       type: object
@@ -346,6 +347,7 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: SetCoverageStatus
       x-data-container: Set
+      x-data-container-type: java.util.Set
       x-data-item: CoverageStatus
     ApiResponseString:
       type: object
@@ -446,6 +448,7 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: PageTypeSummaryDto
       x-data-container: Page
+      x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
       x-data-item: TypeSummaryDto
     PageTypeSummaryDto:
       type: object
@@ -488,6 +491,7 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: PageCoverageStatus
       x-data-container: Page
+      x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
       x-data-item: CoverageStatus
     PageCoverageStatus:
       type: object
@@ -609,6 +613,7 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: ListTypeSummaryDto
       x-data-container: List
+      x-data-container-type: java.util.List
       x-data-item: TypeSummaryDto
     ApiResponseListCoverageStatus:
       type: object
@@ -629,4 +634,5 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: ListCoverageStatus
       x-data-container: List
+      x-data-container-type: java.util.List
       x-data-item: CoverageStatus

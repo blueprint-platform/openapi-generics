@@ -73,11 +73,11 @@ class WrapperSchemaProcessorTest {
 
     OpenAPI openApi = openApiWithWrapper("ServiceResponsePageCustomerDto");
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     processor.process(openApi, descriptor);
 
@@ -88,7 +88,7 @@ class WrapperSchemaProcessorTest {
     assertEquals(
         "PageCustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
 
-    verify(enricher).enrich(openApi, "ServiceResponsePageCustomerDto", "PageCustomerDto", "Page", "data");
+    verify(enricher).enrich(openApi, "ServiceResponsePageCustomerDto", descriptor);
     verifyNoMoreInteractions(enricher);
   }
 
@@ -110,18 +110,19 @@ class WrapperSchemaProcessorTest {
   }
 
   @Test
-  @DisplayName("process -> should delegate container enrichment for custom envelope container response")
+  @DisplayName(
+      "process -> should delegate container enrichment for custom envelope container response")
   void process_shouldDelegateContainerEnrichment_forCustomEnvelopeContainerResponse() {
     WrapperSchemaEnricher enricher = mock(WrapperSchemaEnricher.class);
     WrapperSchemaProcessor processor = new WrapperSchemaProcessor(enricher);
 
     OpenAPI openApi = openApiWithWrapper("ApiResponsePageCustomerDto");
     ResponseTypeDescriptor descriptor =
-            ResponseTypeDescriptor.container(
-                    ApiResponse.class,
-                    "payload",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "CustomerDto");
+        ResponseTypeDescriptor.container(
+            ApiResponse.class,
+            "payload",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "CustomerDto");
 
     processor.process(openApi, descriptor);
 
@@ -129,10 +130,10 @@ class WrapperSchemaProcessorTest {
 
     assertNotNull(wrapper);
     assertEquals(Boolean.TRUE, wrapper.getExtensions().get(VendorExtensions.API_WRAPPER));
-    assertEquals("PageCustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
+    assertEquals(
+        "PageCustomerDto", wrapper.getExtensions().get(VendorExtensions.API_WRAPPER_DATATYPE));
 
-    verify(enricher)
-            .enrich(openApi, "ApiResponsePageCustomerDto", "PageCustomerDto", "Page", "payload");
+    verify(enricher).enrich(openApi, "ApiResponsePageCustomerDto", descriptor);
     verifyNoMoreInteractions(enricher);
   }
 

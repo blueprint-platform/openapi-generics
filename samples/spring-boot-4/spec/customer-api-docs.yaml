@@ -249,4 +249,5 @@ components:
       x-api-wrapper: true
       x-api-wrapper-datatype: PageCustomerDto
       x-data-container: Page
+      x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
       x-data-item: CustomerDto

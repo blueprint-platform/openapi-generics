@@ -6,12 +6,10 @@ import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceRes
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-
-import java.util.List;
-import java.util.Set;
-
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -21,32 +19,27 @@ import org.junit.jupiter.api.Test;
 class ResponseIntrospectionPolicyResolverTest {
 
   private final ResponseIntrospectionPolicyResolver resolver =
-          new ResponseIntrospectionPolicyResolver(
-                  new DefaultSupportedContainerTypesResolver());
+      new ResponseIntrospectionPolicyResolver(new DefaultSupportedContainerTypesResolver());
 
   private static Set<SupportedContainerType> defaultContainers() {
     return Set.of(
-            new SupportedContainerType(Page.class, "Page", "Page"),
-            new SupportedContainerType(List.class, "List", "List"),
-            new SupportedContainerType(Set.class, "Set", "Set"));
+        new SupportedContainerType(Page.class, "Page", "Page"),
+        new SupportedContainerType(List.class, "List", "List"),
+        new SupportedContainerType(Set.class, "Set", "Set"));
   }
 
   @Test
   @DisplayName("resolve -> should use supported container resolver for default policy")
   void resolve_shouldUseSupportedContainerResolverForDefaultPolicy() {
 
-    SupportedContainerType pageContainer =
-            new SupportedContainerType(Page.class, "Page", "Page");
+    SupportedContainerType pageContainer = new SupportedContainerType(Page.class, "Page", "Page");
 
     ResponseIntrospectionPolicyResolver customResolver =
-            new ResponseIntrospectionPolicyResolver(
-                    () -> Set.of(pageContainer));
+        new ResponseIntrospectionPolicyResolver(() -> Set.of(pageContainer));
 
     ResponseIntrospectionPolicy policy = customResolver.resolve(null);
 
-    assertEquals(
-            Set.of(pageContainer),
-            policy.supportedContainers());
+    assertEquals(Set.of(pageContainer), policy.supportedContainers());
   }
 
   @Test
@@ -304,14 +297,13 @@ class ResponseIntrospectionPolicyResolverTest {
   @Test
   @DisplayName("resolve -> should use supported container resolver for custom envelope policy")
   void resolve_shouldUseSupportedContainerResolverForCustomEnvelopePolicy() {
-    SupportedContainerType setContainer =
-            new SupportedContainerType(Set.class, "Set", "Set");
+    SupportedContainerType setContainer = new SupportedContainerType(Set.class, "Set", "Set");
 
     ResponseIntrospectionPolicyResolver customResolver =
-            new ResponseIntrospectionPolicyResolver(() -> Set.of(setContainer));
+        new ResponseIntrospectionPolicyResolver(() -> Set.of(setContainer));
 
     OpenApiGenericsProperties properties =
-            new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
+        new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
 
     ResponseIntrospectionPolicy policy = customResolver.resolve(properties);
 

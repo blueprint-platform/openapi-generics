@@ -4,11 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -22,10 +21,10 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 class ResponseTypeIntrospectorTest {
 
   private static final ResponseIntrospectionPolicy DEFAULT_POLICY =
-          new ResponseIntrospectionPolicy(
-                  ServiceResponse.class,
-                  "data",
-                  Set.of(new SupportedContainerType(Page.class, "Page",  "Page")));
+      new ResponseIntrospectionPolicy(
+          ServiceResponse.class,
+          "data",
+          Set.of(new SupportedContainerType(Page.class, "Page", "Page")));
 
   private final ResponseTypeIntrospector introspector =
       new ResponseTypeIntrospector(DEFAULT_POLICY);

@@ -4,5 +4,5 @@ import java.util.Set;
 
 public interface SupportedContainerTypesResolver {
 
-    Set<SupportedContainerType> resolve();
+  Set<SupportedContainerType> resolve();
 }

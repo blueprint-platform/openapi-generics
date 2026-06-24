@@ -21,11 +21,11 @@ class ExternalModelRegistryTest {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
     Map<String, Object> props =
-            Map.of(
-                    "openapi-generics.response-contract.CustomerDto",
-                    "io.example.CustomerDto",
-                    "openapi-generics.response-contract.OrderDto",
-                    "io.example.OrderDto");
+        Map.of(
+            "openapi-generics.response-contract.CustomerDto",
+            "io.example.CustomerDto",
+            "openapi-generics.response-contract.OrderDto",
+            "io.example.OrderDto");
 
     registry.register(props);
 
@@ -41,11 +41,11 @@ class ExternalModelRegistryTest {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
     Map<String, Object> props =
-            Map.of(
-                    "some.other.key",
-                    "value",
-                    "openapiGenerics.wrongPrefix.CustomerDto",
-                    "io.example.CustomerDto");
+        Map.of(
+            "some.other.key",
+            "value",
+            "openapiGenerics.wrongPrefix.CustomerDto",
+            "io.example.CustomerDto");
 
     registry.register(props);
 
@@ -109,12 +109,11 @@ class ExternalModelRegistryTest {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
     registry.register(
-            Map.of("openapi-generics.response-contract.CustomerDto", "  io.example.CustomerDto  "));
+        Map.of("openapi-generics.response-contract.CustomerDto", "  io.example.CustomerDto  "));
 
     assertTrue(registry.isExternal("CustomerDto"));
     assertEquals("io.example.CustomerDto", registry.getFqcn("CustomerDto"));
   }
-
 
   @ParameterizedTest
   @ValueSource(strings = {"   ", "null", "CustomerDto"})
@@ -161,10 +160,10 @@ class ExternalModelRegistryTest {
     ExternalModelRegistry registry = new ExternalModelRegistry();
 
     registry.register(
-            Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV1"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV1"));
 
     registry.register(
-            Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV2"));
+        Map.of("openapi-generics.response-contract.CustomerDto", "io.example.CustomerDtoV2"));
 
     assertEquals("io.example.CustomerDtoV2", registry.getFqcn("CustomerDto"));
   }

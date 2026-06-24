@@ -3,7 +3,6 @@ package io.github.blueprintplatform.openapi.generics.codegen;
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalImportResolver;
 import io.github.blueprintplatform.openapi.generics.codegen.external.ExternalModelRegistry;
 import io.github.blueprintplatform.openapi.generics.codegen.filtering.ModelIgnoreDecider;
-import io.github.blueprintplatform.openapi.generics.codegen.metadata.ContainerImportResolver;
 import io.github.blueprintplatform.openapi.generics.codegen.metadata.EnvelopeMetadataResolver;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
@@ -23,7 +22,6 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
   private final EnvelopeMetadataResolver envelopeResolver = new EnvelopeMetadataResolver();
-  private final ContainerImportResolver containerResolver = new ContainerImportResolver();
 
   @Override
   public void processOpts() {
@@ -31,10 +29,10 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
 
     registry.register(additionalProperties);
     envelopeResolver.register(additionalProperties);
-    containerResolver.register(additionalProperties);
 
     log.debug(
-            "Generic-aware codegen initialized with external model registry, envelope metadata, and container metadata");
+        "Generic-aware codegen initialized with external model registry, envelope metadata, and"
+            + " container metadata");
   }
 
   @Override
@@ -59,12 +57,12 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     int before = result.getModels().size();
 
     result
-            .getModels()
-            .removeIf(
-                    modelMap -> {
-                      CodegenModel model = modelMap.getModel();
-                      return model != null && ignoreDecider.isIgnored(model.name);
-                    });
+        .getModels()
+        .removeIf(
+            modelMap -> {
+              CodegenModel model = modelMap.getModel();
+              return model != null && ignoreDecider.isIgnored(model.name);
+            });
 
     int after = result.getModels().size();
 
@@ -73,17 +71,16 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
     }
 
     result
-            .getModels()
-            .forEach(
-                    modelMap -> {
-                      CodegenModel model = modelMap.getModel();
+        .getModels()
+        .forEach(
+            modelMap -> {
+              CodegenModel model = modelMap.getModel();
 
-                      if (model != null) {
-                        importResolver.apply(model);
-                        envelopeResolver.apply(model);
-                        containerResolver.apply(model);
-                      }
-                    });
+              if (model != null) {
+                importResolver.apply(model);
+                envelopeResolver.apply(model);
+              }
+            });
 
     return result;
   }

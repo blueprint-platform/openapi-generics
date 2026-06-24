@@ -19,64 +19,66 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnWebApplication
 public class OpenApiGenericsSchemaAutoConfiguration {
 
-    @Bean
-    @ConditionalOnMissingBean(ContentArrayItemExtractor.class)
-    public ContentArrayItemExtractor contentArrayItemExtractor() {
-        return new ContentArrayItemExtractor();
-    }
+  @Bean
+  @ConditionalOnMissingBean(ContentArrayItemExtractor.class)
+  public ContentArrayItemExtractor contentArrayItemExtractor() {
+    return new ContentArrayItemExtractor();
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(DirectArrayItemExtractor.class)
-    public DirectArrayItemExtractor directArrayItemExtractor() {
-        return new DirectArrayItemExtractor();
-    }
+  @Bean
+  @ConditionalOnMissingBean(DirectArrayItemExtractor.class)
+  public DirectArrayItemExtractor directArrayItemExtractor() {
+    return new DirectArrayItemExtractor();
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(ComponentContainerSchemaResolver.class)
-    public ComponentContainerSchemaResolver componentContainerSchemaResolver() {
-        return new ComponentContainerSchemaResolver();
-    }
+  @Bean
+  @ConditionalOnMissingBean(ComponentContainerSchemaResolver.class)
+  public ComponentContainerSchemaResolver componentContainerSchemaResolver() {
+    return new ComponentContainerSchemaResolver();
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(WrapperPayloadArraySchemaResolver.class)
-    public WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver() {
-        return new WrapperPayloadArraySchemaResolver();
-    }
+  @Bean
+  @ConditionalOnMissingBean(WrapperPayloadArraySchemaResolver.class)
+  public WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver() {
+    return new WrapperPayloadArraySchemaResolver();
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(PageContainerSchemaStrategy.class)
-    public PageContainerSchemaStrategy pageContainerSchemaStrategy(
-            ComponentContainerSchemaResolver componentContainerSchemaResolver, ContentArrayItemExtractor contentArrayItemExtractor) {
-        return new PageContainerSchemaStrategy(componentContainerSchemaResolver, contentArrayItemExtractor);
-    }
+  @Bean
+  @ConditionalOnMissingBean(PageContainerSchemaStrategy.class)
+  public PageContainerSchemaStrategy pageContainerSchemaStrategy(
+      ComponentContainerSchemaResolver componentContainerSchemaResolver,
+      ContentArrayItemExtractor contentArrayItemExtractor) {
+    return new PageContainerSchemaStrategy(
+        componentContainerSchemaResolver, contentArrayItemExtractor);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(ListContainerSchemaStrategy.class)
-    public ListContainerSchemaStrategy listContainerSchemaStrategy(
-            WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
-            DirectArrayItemExtractor directArrayItemExtractor) {
-        return new ListContainerSchemaStrategy(wrapperPayloadArraySchemaResolver, directArrayItemExtractor);
-    }
+  @Bean
+  @ConditionalOnMissingBean(ListContainerSchemaStrategy.class)
+  public ListContainerSchemaStrategy listContainerSchemaStrategy(
+      WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
+      DirectArrayItemExtractor directArrayItemExtractor) {
+    return new ListContainerSchemaStrategy(
+        wrapperPayloadArraySchemaResolver, directArrayItemExtractor);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean(SetContainerSchemaStrategy.class)
-    public SetContainerSchemaStrategy setContainerSchemaStrategy(
-            WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
-            DirectArrayItemExtractor directArrayItemExtractor) {
-        return new SetContainerSchemaStrategy(
-                wrapperPayloadArraySchemaResolver,
-                directArrayItemExtractor);
-    }
+  @Bean
+  @ConditionalOnMissingBean(SetContainerSchemaStrategy.class)
+  public SetContainerSchemaStrategy setContainerSchemaStrategy(
+      WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
+      DirectArrayItemExtractor directArrayItemExtractor) {
+    return new SetContainerSchemaStrategy(
+        wrapperPayloadArraySchemaResolver, directArrayItemExtractor);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ContainerSchemaRegistry containerSchemaRegistry(List<ContainerSchemaStrategy> strategies) {
-        return new ContainerSchemaRegistry(strategies);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ContainerSchemaRegistry containerSchemaRegistry(List<ContainerSchemaStrategy> strategies) {
+    return new ContainerSchemaRegistry(strategies);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public WrapperSchemaEnricher wrapperSchemaEnricher(ContainerSchemaRegistry registry) {
-        return new WrapperSchemaEnricher(registry);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public WrapperSchemaEnricher wrapperSchemaEnricher(ContainerSchemaRegistry registry) {
+    return new WrapperSchemaEnricher(registry);
+  }
 }

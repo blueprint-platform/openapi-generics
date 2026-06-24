@@ -2,9 +2,9 @@
 import {{.}};
 {{/vendorExtensions.x-extra-imports}}
 import {{vendorExtensions.x-envelope-import}};
-{{#vendorExtensions.x-data-container-import}}
-import {{vendorExtensions.x-data-container-import}};
-{{/vendorExtensions.x-data-container-import}}
+{{#vendorExtensions.x-data-container-type}}
+import {{vendorExtensions.x-data-container-type}};
+{{/vendorExtensions.x-data-container-type}}
 
 public class {{classname}} extends {{vendorExtensions.x-envelope-type}}<{{#vendorExtensions.x-data-container}}{{vendorExtensions.x-data-container}}<{{vendorExtensions.x-data-item}}>{{/vendorExtensions.x-data-container}}{{^vendorExtensions.x-data-container}}{{vendorExtensions.x-api-wrapper-datatype}}{{/vendorExtensions.x-data-container}}> {
 }

@@ -47,11 +47,11 @@ class OpenApiPipelineOrchestratorTest {
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
     ResponseTypeDescriptor descriptor2 =
-            ResponseTypeDescriptor.container(
-                    ServiceResponse.class,
-                    "data",
-                    new SupportedContainerType(Page.class, PAGE, PAGE),
-                    "OrderDto");
+        ResponseTypeDescriptor.container(
+            ServiceResponse.class,
+            "data",
+            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "OrderDto");
 
     when(discoveryStrategy.discover()).thenReturn(Set.of(type1, type2));
     when(introspector.extract(type1)).thenReturn(Optional.of(descriptor1));

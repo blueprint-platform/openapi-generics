@@ -3,76 +3,75 @@ package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.*;
 
 import io.swagger.v3.oas.models.media.*;
-
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class ComponentContainerSchemaResolver implements ContainerSchemaResolver {
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Schema<?> resolve(
-            Map<String, Schema> schemas,
-            String dataRefName,
-            String wrapperName,
-            String payloadPropertyName) {
+  @SuppressWarnings("rawtypes")
+  @Override
+  public Schema<?> resolve(
+      Map<String, Schema> schemas,
+      String dataRefName,
+      String wrapperName,
+      String payloadPropertyName) {
 
-        if (!schemas.containsKey(dataRefName)) {
-            return null;
-        }
-
-        return resolveContainerSchema(schemas, schemas.get(dataRefName), new LinkedHashSet<>());
+    if (!schemas.containsKey(dataRefName)) {
+      return null;
     }
 
-    @SuppressWarnings("rawtypes")
-    private Schema<?> resolveContainerSchema(
-            Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+    return resolveContainerSchema(schemas, schemas.get(dataRefName), new LinkedHashSet<>());
+  }
 
-        if (schema == null) return null;
+  @SuppressWarnings("rawtypes")
+  private Schema<?> resolveContainerSchema(
+      Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 
-        Schema<?> current = dereferenceIfNeeded(schemas, schema, visited);
-        if (current == null) return null;
+    if (schema == null) return null;
 
-        if (isContainerLike(current)) return current;
+    Schema<?> current = dereferenceIfNeeded(schemas, schema, visited);
+    if (current == null) return null;
 
-        if (current instanceof ComposedSchema composed && composed.getAllOf() != null) {
-            for (Schema<?> candidate : composed.getAllOf()) {
-                Schema<?> resolved = resolveContainerSchema(schemas, candidate, visited);
-                if (resolved != null) return resolved;
-            }
-        }
+    if (isContainerLike(current)) return current;
 
-        return null;
+    if (current instanceof ComposedSchema composed && composed.getAllOf() != null) {
+      for (Schema<?> candidate : composed.getAllOf()) {
+        Schema<?> resolved = resolveContainerSchema(schemas, candidate, visited);
+        if (resolved != null) return resolved;
+      }
     }
 
-    @SuppressWarnings("rawtypes")
-    private Schema<?> dereferenceIfNeeded(
-            Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
+    return null;
+  }
 
-        String ref = schema.get$ref();
-        if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) return schema;
+  @SuppressWarnings("rawtypes")
+  private Schema<?> dereferenceIfNeeded(
+      Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 
-        String name = ref.substring(COMPONENT_SCHEMA_REF_PREFIX.length());
-        if (!visited.add(name)) return null;
+    String ref = schema.get$ref();
+    if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) return schema;
 
-        return schemas.get(name);
-    }
+    String name = ref.substring(COMPONENT_SCHEMA_REF_PREFIX.length());
+    if (!visited.add(name)) return null;
 
-    private boolean isContainerLike(Schema<?> schema) {
-        return schema instanceof ObjectSchema
-                || TYPE_OBJECT.equals(schema.getType())
-                || (schema.getProperties() != null && !schema.getProperties().isEmpty())
-                || isArrayLike(schema);
-    }
+    return schemas.get(name);
+  }
 
-    private boolean isArrayLike(Schema<?> schema) {
-        if (schema == null) return false;
+  private boolean isContainerLike(Schema<?> schema) {
+    return schema instanceof ObjectSchema
+        || TYPE_OBJECT.equals(schema.getType())
+        || (schema.getProperties() != null && !schema.getProperties().isEmpty())
+        || isArrayLike(schema);
+  }
 
-        return schema instanceof ArraySchema
-                || TYPE_ARRAY.equals(schema.getType())
-                || (schema instanceof JsonSchema json
-                && json.getTypes() != null
-                && json.getTypes().contains(TYPE_ARRAY));
-    }
+  private boolean isArrayLike(Schema<?> schema) {
+    if (schema == null) return false;
+
+    return schema instanceof ArraySchema
+        || TYPE_ARRAY.equals(schema.getType())
+        || (schema instanceof JsonSchema json
+            && json.getTypes() != null
+            && json.getTypes().contains(TYPE_ARRAY));
+  }
 }

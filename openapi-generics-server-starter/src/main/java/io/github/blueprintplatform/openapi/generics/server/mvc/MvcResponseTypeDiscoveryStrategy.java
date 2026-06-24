@@ -24,40 +24,40 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
  */
 public class MvcResponseTypeDiscoveryStrategy implements ResponseTypeDiscoveryStrategy {
 
-    private final ListableBeanFactory beanFactory;
+  private final ListableBeanFactory beanFactory;
 
-    public MvcResponseTypeDiscoveryStrategy(ListableBeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
+  public MvcResponseTypeDiscoveryStrategy(ListableBeanFactory beanFactory) {
+    this.beanFactory = beanFactory;
+  }
+
+  @Override
+  public Set<ResolvableType> discover() {
+    Set<ResolvableType> result = new LinkedHashSet<>();
+
+    Map<String, RequestMappingHandlerMapping> mappings =
+        beanFactory.getBeansOfType(RequestMappingHandlerMapping.class);
+
+    if (mappings.isEmpty()) {
+      return result;
     }
 
-    @Override
-    public Set<ResolvableType> discover() {
-        Set<ResolvableType> result = new LinkedHashSet<>();
+    mappings
+        .values()
+        .forEach(
+            mapping ->
+                mapping
+                    .getHandlerMethods()
+                    .values()
+                    .forEach(
+                        handlerMethod -> {
+                          MethodParameter returnType = handlerMethod.getReturnType();
+                          ResolvableType type = ResolvableType.forMethodParameter(returnType);
 
-        Map<String, RequestMappingHandlerMapping> mappings =
-                beanFactory.getBeansOfType(RequestMappingHandlerMapping.class);
+                          if (type.resolve() != null) {
+                            result.add(type);
+                          }
+                        }));
 
-        if (mappings.isEmpty()) {
-            return result;
-        }
-
-        mappings
-                .values()
-                .forEach(
-                        mapping ->
-                                mapping
-                                        .getHandlerMethods()
-                                        .values()
-                                        .forEach(
-                                                handlerMethod -> {
-                                                    MethodParameter returnType = handlerMethod.getReturnType();
-                                                    ResolvableType type = ResolvableType.forMethodParameter(returnType);
-
-                                                    if (type.resolve() != null) {
-                                                        result.add(type);
-                                                    }
-                                                }));
-
-        return result;
-    }
+    return result;
+  }
 }

@@ -8,16 +8,15 @@ import java.util.Map;
 /**
  * Applies canonical wrapper metadata to generated OpenAPI wrapper schemas.
  *
- * <p>Enriches projected response wrapper schemas with the vendor extensions required by the
- * OpenAPI Generics code generation contract.
+ * <p>Enriches projected response wrapper schemas with the vendor extensions required by the OpenAPI
+ * Generics code generation contract.
  */
 public final class WrapperSchemaMetadataApplier {
 
   private WrapperSchemaMetadataApplier() {}
 
   @SuppressWarnings("rawtypes")
-  public static Schema<?> apply(
-      Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
+  public static Schema<?> apply(Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
     String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();
     Schema<?> wrapper = schemas.get(wrapperName);
