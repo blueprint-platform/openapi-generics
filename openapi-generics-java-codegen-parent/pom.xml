@@ -32,6 +32,7 @@
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
         <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
+        <spotless-maven-plugin.version>3.7.0</spotless-maven-plugin.version>
 
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
         <openapi.generator.output>${project.build.directory}/generated-sources/openapi</openapi.generator.output>
@@ -248,6 +249,32 @@
                     </executions>
                 </plugin>
 
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless-maven-plugin.version}</version>
+                    <configuration combine.self="override">
+                        <java>
+                            <includes>
+                                <include>target/generated-sources/openapi/src/gen/java/**/*.java</include>
+                            </includes>
+                            <removeUnusedImports>
+                                <engine>cleanthat-javaparser-unnecessaryimport</engine>
+                            </removeUnusedImports>
+                            <googleJavaFormat/>
+                        </java>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotless-apply-generated</id>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>apply</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 
@@ -270,6 +297,11 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
