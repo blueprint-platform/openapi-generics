@@ -39,6 +39,7 @@
         <openapi.generator.sourceFolder>src/gen/java</openapi.generator.sourceFolder>
 
         <openapi.generated.sources>${openapi.generator.output}/${openapi.generator.sourceFolder}</openapi.generated.sources>
+        <openapi.generated.java.include.pattern>target/generated-sources/openapi/src/gen/java/**/*.java</openapi.generated.java.include.pattern>
         <openapi.templates.codegen>${project.build.directory}/codegen-templates</openapi.templates.codegen>
         <openapi.generics.skip>false</openapi.generics.skip>
     </properties>
@@ -256,7 +257,7 @@
                     <configuration combine.self="override">
                         <java>
                             <includes>
-                                <include>target/generated-sources/openapi/src/gen/java/**/*.java</include>
+                                <include>${openapi.generated.java.include.pattern}</include>
                             </includes>
                             <removeUnusedImports>
                                 <engine>cleanthat-javaparser-unnecessaryimport</engine>
