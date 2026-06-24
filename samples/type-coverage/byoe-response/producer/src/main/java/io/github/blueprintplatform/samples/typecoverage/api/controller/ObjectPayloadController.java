@@ -6,6 +6,7 @@ import io.github.blueprintplatform.samples.typecoverage.api.dto.TypeProfileDto;
 import io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class ObjectPayloadController {
             1,
             3L,
             new BigDecimal("98.75"),
-            LocalDate.of(2026, 6, 10),
+            LocalDate.of(2026, Month.JUNE, 10),
             OffsetDateTime.parse("2026-06-10T21:00:00+03:00"),
             CoverageStatus.ACTIVE,
             new AddressDto("Istanbul", "TR", "34700"),

@@ -3,6 +3,7 @@ package io.github.blueprintplatform.samples.typecoverage.api.controller;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.samples.typecoverage.api.dto.CoverageStatus;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.http.MediaType;
@@ -23,7 +24,7 @@ public class ValuePayloadController {
 
   @GetMapping("/date")
   public ResponseEntity<ServiceResponse<LocalDate>> dateValue() {
-    return ResponseEntity.ok(ServiceResponse.of(LocalDate.of(2026, 6, 10)));
+    return ResponseEntity.ok(ServiceResponse.of(LocalDate.of(2026, Month.JUNE, 10)));
   }
 
   @GetMapping("/datetime")

@@ -398,14 +398,6 @@ class WrapperSchemaEnricherTest {
     return containerDescriptor(Page.class, "Page", itemRefName);
   }
 
-  private ResponseTypeDescriptor pageAliasDescriptor(String itemRefName) {
-    SupportedContainerType containerType =
-        new SupportedContainerType(Page.class, "PageAlias", "Page");
-
-    return ResponseTypeDescriptor.container(
-        ServiceResponse.class, "data", containerType, itemRefName);
-  }
-
   private ResponseTypeDescriptor listDescriptor(String itemRefName) {
     return listDescriptor(itemRefName, "data");
   }
