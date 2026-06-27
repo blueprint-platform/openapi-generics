@@ -311,7 +311,7 @@ No migration is required for existing users.
 
 ### BYOE — Bring Your Own Envelope
 
-Already have an `ApiResponse<T>` (or another response envelope) shared across your services?
+Already have an `ApiResponse<T>` or another response envelope shared across your services?
 
 Use it as the contract source of truth without migrating to a platform-specific wrapper.
 
@@ -321,6 +321,14 @@ On the **server/producer** side:
 openapi-generics:
   envelope:
     type: io.example.contract.ApiResponse
+
+  # Optional: register application-defined generic containers
+  containers:
+    - type: io.example.contract.Paging
+      item-property: content
+
+    - type: io.example.contract.Window
+      item-property: items
 ```
 
 On the **client/codegen** side:
@@ -335,11 +343,12 @@ On the **client/codegen** side:
 
 Key characteristics:
 
-* Your envelope remains the contract owner.
-* Generated wrappers extend your envelope instead of redefining it.
-* The envelope type must be available on the client classpath.
-* Springdoc-based projection is automatic.
-* Spec-first pipelines can publish equivalent semantics through OpenAPI vendor extensions.
+- Your envelope remains the contract owner.
+- Generated wrappers extend your envelope instead of redefining it.
+- The envelope type must be available on the client classpath.
+- Springdoc-based projection is automatic.
+- Application-defined containers are optional and participate in the same projection and reconstruction model as built-in containers when configured.
+- Spec-first pipelines can publish equivalent semantics through OpenAPI vendor extensions.
 
 ---
 
