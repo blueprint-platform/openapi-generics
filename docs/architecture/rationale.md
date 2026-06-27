@@ -1,4 +1,4 @@
-# Rationale: Why OpenAPI Generics Exists
+#  Architectural Rationale: Why OpenAPI Generics Exists
 
 **Intended Audience:** Enterprise architects, platform engineers, OpenAPI specification contributors, language tooling maintainers, and teams responsible for API contract governance.
 
@@ -215,6 +215,9 @@ Architects evaluating this approach should assess it against the structure of th
 - [Client-Side Adoption](../adoption/client-side-adoption.md)
 
 ### Specifications
+
+- **OpenAPI Specification 3.1.0**  
+  https://spec.openapis.org/oas/v3.1.0.html
 
 - **OpenAPI Specification 3.2.0**  
   https://spec.openapis.org/oas/v3.2.0.html
