@@ -1,22 +1,24 @@
 # openapi-generics-java-codegen
 
-> Contract-aware Java generator extension for OpenAPI Generics
+> Contract-aware Java generator extension for OpenAPI Generics.
 
 `openapi-generics-java-codegen` provides the custom OpenAPI Generator implementation used by OpenAPI Generics.
 
-It defines the generator named:
+It registers the generator named:
 
 ```text
 java-generics-contract
 ```
 
-This module is build-time only.
-
-In normal usage, consumers do not depend on it directly. It is wired through:
+This module is build-time only. In normal usage, consumers do not depend on it directly. It is wired through:
 
 ```text
 openapi-generics-java-codegen-parent
 ```
+
+Its responsibility is:
+
+> **OpenAPI metadata → contract-aligned Java client types**
 
 ---
 
@@ -38,20 +40,19 @@ openapi-generics-java-codegen-parent
 
 This module extends OpenAPI Generator’s Java client generation with OpenAPI Generics semantics.
 
-Responsibilities:
+It:
 
-- detect OpenAPI Generics wrapper models
-- apply envelope metadata
-- apply container metadata
-- reuse external contract models
-- filter ignored infrastructure models
-- generate contract-aligned wrapper classes
+- detects wrapper schemas marked with `x-api-wrapper`
+- applies envelope metadata for default and BYOE envelopes
+- reconstructs generic container payloads from OpenAPI metadata
+- imports container Java types through `x-data-container-type`
+- reuses externally owned DTOs through BYOC mappings
+- filters infrastructure schemas marked with `x-ignore-model`
+- generates thin contract-aligned wrapper classes
 
 It consumes metadata already present in the OpenAPI document.
 
-It does not discover server-side Java contracts.
-
-It does not orchestrate Maven template extraction or patching.
+It does not discover server-side Java contracts or create OpenAPI schemas.
 
 ---
 
@@ -60,20 +61,20 @@ It does not orchestrate Maven template extraction or patching.
 ```text
 OpenAPI Models
       ↓
-Model Ownership Resolution
-      ↓
-Ignored Model Filtering
+Ignored / External Model Resolution
       ↓
 Envelope Metadata Enrichment
       ↓
-Container Metadata Enrichment
+Container Metadata Consumption
       ↓
 External Import Resolution
       ↓
 Wrapper Reconstruction
+      ↓
+Generated Java Client
 ```
 
-The generator operates on OpenAPI model metadata and produces Java client types.
+The generator operates on OpenAPI model metadata and produces Java types that preserve the original contract shape.
 
 ---
 
@@ -81,7 +82,7 @@ The generator operates on OpenAPI model metadata and produces Java client types.
 
 OpenAPI wrapper schemas are reconstructed as thin Java subclasses.
 
-Example:
+Simple wrapper:
 
 ```java
 public class ServiceResponseCustomerDto
@@ -89,7 +90,7 @@ public class ServiceResponseCustomerDto
 }
 ```
 
-Container example:
+Built-in container wrapper:
 
 ```java
 public class ServiceResponsePageCustomerDto
@@ -97,7 +98,7 @@ public class ServiceResponsePageCustomerDto
 }
 ```
 
-BYOE example:
+BYOE wrapper:
 
 ```java
 public class ApiResponseListCustomerDto
@@ -105,9 +106,15 @@ public class ApiResponseListCustomerDto
 }
 ```
 
-Generated wrappers intentionally contain no behavior.
+Application-defined container wrapper:
 
-Their role is to bind generic parameters to contract-owned envelope types.
+```java
+public class ApiResponsePagingCustomerDto
+    extends ApiResponse<Paging<CustomerDto>> {
+}
+```
+
+Generated wrappers intentionally contain no behavior. Their role is to bind generic parameters to contract-owned envelope and container types.
 
 ---
 
@@ -161,36 +168,35 @@ This keeps DTO ownership outside generated code.
 
 ## Container Metadata
 
-The generator reconstructs supported container payloads using OpenAPI vendor extensions:
+Container reconstruction is driven by OpenAPI vendor extensions.
+
+Built-in container example:
 
 ```yaml
-x-data-container: List
+x-api-wrapper: true
+x-api-wrapper-datatype: PageCustomerDto
+x-data-container: Page
+x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
 x-data-item: CustomerDto
 ```
 
-Built-in container mappings:
+Application-defined container example:
 
-```java
-List<T>
-
-Set<T>
-
-Page<T>
+```yaml
+x-api-wrapper: true
+x-api-wrapper-datatype: PagingCustomerDto
+x-data-container: Paging
+x-data-container-type: io.example.contract.Paging
+x-data-item: CustomerDto
 ```
 
-`Page<T>` refers to:
+The generator uses:
 
-```java
-io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
-```
+- `x-data-container` as the generic container name used in the generated wrapper
+- `x-data-container-type` as the fully qualified Java import
+- `x-data-item` as the generic item type
 
-Container imports and type names are applied during metadata enrichment.
-
-Additional container mappings can be registered through:
-
-```text
-openapi-generics.data-container.<ContainerName>
-```
+This allows built-in and application-defined generic containers to be reconstructed through the same template path.
 
 ---
 
