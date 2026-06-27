@@ -4,7 +4,7 @@ info:
   description: "Type coverage sample validating contract projection and client reconstruction\
     \ for ServiceResponse<T>, ServiceResponse<List<T>>, ServiceResponse<Set<T>>, and\
     \ ServiceResponse<Page<T>>."
-  version: 1.2.0
+  version: 1.2.1-SNAPSHOT
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local producer for generic response contract projection and container
