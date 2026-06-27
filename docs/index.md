@@ -142,15 +142,15 @@ openapi-generics:
 
 ## Key Features
 
-| Feature | Description |
-|----------|-------------|
-| **Contract-first** | Java remains the source of truth. |
-| **BYOE** | Reuse your own response envelope. |
-| **BYOC** | Reuse externally owned DTOs. |
-| **Application-defined containers** | Register custom generic containers. |
+| Feature                            | Description                                                          |
+|------------------------------------|----------------------------------------------------------------------|
+| **Contract-first**                 | Java remains the source of truth.                                    |
+| **BYOE**                           | Reuse your own response envelope.                                    |
+| **BYOC**                           | Reuse externally owned DTOs.                                         |
+| **Application-defined containers** | Register custom generic containers.                                  |
 | **Container-aware reconstruction** | Built-in and configured containers share one deterministic pipeline. |
-| **Deterministic generation** | Stable projection, validation, and generated clients. |
-| **Generated-source hygiene** | Cleaner Java imports and generated artifacts. |
+| **Deterministic generation**       | Stable projection, validation, and generated clients.                |
+| **Generated-source hygiene**       | Cleaner Java imports and generated artifacts.                        |
 
 ---
 

@@ -294,15 +294,15 @@ No migration is required for existing users.
 
 ## Key Features
 
-| Feature | What it does | Default |
-|----------|--------------|---------|
-| **BYOE** — Bring Your Own Envelope | Reuse your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required. | `ServiceResponse<T>` |
-| **BYOC** — Bring Your Own Contract | Reuse your existing domain DTOs instead of generating duplicate models. | Generate from spec |
-| **Application-defined containers** | Register your own generic container contracts (for example `Paging<T>` or `Window<T>`) and have them participate in the same projection, metadata, and reconstruction pipeline as built-in containers. | Built-in containers only |
-| **Container-aware reconstruction** | Deterministically reconstruct built-in and configured generic container types from OpenAPI metadata instead of using container-specific generation logic. | Enabled |
-| **Fallback to standard generation** | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`. | Generics-aware generation enabled |
-| **Deterministic generation** | Apply deterministic template patching, generated-source hygiene, and build-time validation to produce stable, reproducible Java clients. | Enabled |
-| **End-to-end samples** | Complete producer, client, and consumer pipelines for Spring Boot 3, Spring Boot 4, `ServiceResponse`, and BYOE scenarios. | See [samples](samples/) |
+| Feature                             | What it does                                                                                                                                                                                           | Default                           |
+|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
+| **BYOE** — Bring Your Own Envelope  | Reuse your existing response envelope (for example `ApiResponse<T>`) instead of `ServiceResponse<T>`. No migration required.                                                                           | `ServiceResponse<T>`              |
+| **BYOC** — Bring Your Own Contract  | Reuse your existing domain DTOs instead of generating duplicate models.                                                                                                                                | Generate from spec                |
+| **Application-defined containers**  | Register your own generic container contracts (for example `Paging<T>` or `Window<T>`) and have them participate in the same projection, metadata, and reconstruction pipeline as built-in containers. | Built-in containers only          |
+| **Container-aware reconstruction**  | Deterministically reconstruct built-in and configured generic container types from OpenAPI metadata instead of using container-specific generation logic.                                              | Enabled                           |
+| **Fallback to standard generation** | Disable the generics-aware template patching with a single Maven property. To fully revert to stock OpenAPI Generator behavior, switch the client module to `generatorName=java`.                      | Generics-aware generation enabled |
+| **Deterministic generation**        | Apply deterministic template patching, generated-source hygiene, and build-time validation to produce stable, reproducible Java clients.                                                               | Enabled                           |
+| **End-to-end samples**              | Complete producer, client, and consumer pipelines for Spring Boot 3, Spring Boot 4, `ServiceResponse`, and BYOE scenarios.                                                                             | See [samples](samples/)           |
 
 ---
 
@@ -397,10 +397,10 @@ To fully revert to stock OpenAPI Generator behavior:
 <generatorName>java</generatorName>
 ```
 
-| `openapi.generics.skip` | Behavior |
-|----------|----------|
-| `false` (default) | Apply generics-aware template patching |
-| `true` | Skip generics-aware template patching |
+| `openapi.generics.skip` | Behavior                               |
+|-------------------------|----------------------------------------|
+| `false` (default)       | Apply generics-aware template patching |
+| `true`                  | Skip generics-aware template patching  |
 
 Use this mode for output comparison, troubleshooting, or temporary opt-out scenarios.
 
@@ -544,13 +544,13 @@ The provided parent configuration includes a tested default, but consumers may o
 
 ## Modules
 
-| Module | Responsibility |
-|----------|----------------|
-| [`openapi-generics-contract`](openapi-generics-contract/README.md) | Shared response contracts and platform-owned generic types. |
-| [`openapi-generics-server-starter`](openapi-generics-server-starter/README.md) | Spring Boot integration that projects generic contract metadata into OpenAPI. |
-| [`openapi-generics-java-codegen`](openapi-generics-java-codegen/README.md) | OpenAPI Generator specialization that reconstructs contract-aligned Java clients. |
+| Module                                                                                   | Responsibility                                                                       |
+|------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [`openapi-generics-contract`](openapi-generics-contract/README.md)                       | Shared response contracts and platform-owned generic types.                          |
+| [`openapi-generics-server-starter`](openapi-generics-server-starter/README.md)           | Spring Boot integration that projects generic contract metadata into OpenAPI.        |
+| [`openapi-generics-java-codegen`](openapi-generics-java-codegen/README.md)               | OpenAPI Generator specialization that reconstructs contract-aligned Java clients.    |
 | [`openapi-generics-java-codegen-parent`](openapi-generics-java-codegen-parent/README.md) | Maven parent for client generation, template patching, and generated-source hygiene. |
-| [`openapi-generics-platform-bom`](openapi-generics-platform-bom/README.md) | Dependency alignment for OpenAPI Generics modules. |
+| [`openapi-generics-platform-bom`](openapi-generics-platform-bom/README.md)               | Dependency alignment for OpenAPI Generics modules.                                   |
 
 ---
 

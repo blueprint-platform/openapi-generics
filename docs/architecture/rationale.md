@@ -86,11 +86,11 @@ These limitations are documented in public issue trackers and reflect the curren
 
 Clear separation of concerns is necessary for accurate analysis:
 
-| Category            | Description                                                                 | Current Relevance to Generic Contract Preservation                  | Primary Remediation Path                  |
-|---------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------|-------------------------------------------|
-| **Specification**   | What the OpenAPI and JSON Schema standards define or deliberately omit.     | Dynamic references exist; no native generic type parameter syntax.  | Future specification work.                |
-| **Implementation**  | Behavior of a specific parser, dereferencer, or generator.                  | Partial or conservative handling of dynamic references in major implementations. | Contributions to individual projects.     |
-| **Ecosystem**       | Emergent behavior from composition of multiple tools and frameworks.        | End-to-end loss of generic relationships across Springdoc → parser → generator paths. | Compatibility layers or coordinated evolution. |
+| Category           | Description                                                             | Current Relevance to Generic Contract Preservation                                    | Primary Remediation Path                       |
+|--------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------------|------------------------------------------------|
+| **Specification**  | What the OpenAPI and JSON Schema standards define or deliberately omit. | Dynamic references exist; no native generic type parameter syntax.                    | Future specification work.                     |
+| **Implementation** | Behavior of a specific parser, dereferencer, or generator.              | Partial or conservative handling of dynamic references in major implementations.      | Contributions to individual projects.          |
+| **Ecosystem**      | Emergent behavior from composition of multiple tools and frameworks.    | End-to-end loss of generic relationships across Springdoc → parser → generator paths. | Compatibility layers or coordinated evolution. |
 
 This project operates primarily at the ecosystem level. It accepts the current practical state of specification support and core implementation behavior as the baseline for production use and introduces a deterministic layer that works with existing OpenAPI documents.
 

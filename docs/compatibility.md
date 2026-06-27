@@ -84,17 +84,17 @@ Configured containers participate in the same projection, metadata enrichment, a
 
 ### Runtime — Server-Side Projection
 
-| Java | Spring Boot | springdoc-openapi | Scope | Status |
-|---|---|---|---|---|
-| 17+ | 3.4.x | 2.8.x | WebMvc | Supported |
-| 17+ | 3.5.x | 2.8.x | WebMvc | Supported |
-| 17+ | 4.x | 3.x | WebMvc | Supported |
+| Java | Spring Boot | springdoc-openapi | Scope  | Status    |
+|------|-------------|-------------------|--------|-----------|
+| 17+  | 3.4.x       | 2.8.x             | WebMvc | Supported |
+| 17+  | 3.5.x       | 2.8.x             | WebMvc | Supported |
+| 17+  | 4.x         | 3.x               | WebMvc | Supported |
 
 ### Build-Time — Client Generation
 
-| Java | OpenAPI Generator | Build Tool | Status |
-|---|---|---|---|
-| 17+ | 7.x | Maven | Supported |
+| Java | OpenAPI Generator | Build Tool | Status    |
+|------|-------------------|------------|-----------|
+| 17+  | 7.x               | Maven      | Supported |
 
 The client generation parent provides a tested default OpenAPI Generator version, but consumers may override `openapi-generator.version` within the supported 7.x line.
 

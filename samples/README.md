@@ -42,11 +42,11 @@ The generated client reconstructs the original contract shape instead of redefin
 
 Each runnable integration stack contains three layers:
 
-| Layer | Responsibility |
-|----------|----------------|
-| **Producer** | Defines the Java API contract and publishes the OpenAPI document. |
-| **Generated client** | Is generated from the OpenAPI document using OpenAPI Generics. |
-| **Consumer** | Uses the generated client and exposes downstream verification endpoints. |
+| Layer                | Responsibility                                                           |
+|----------------------|--------------------------------------------------------------------------|
+| **Producer**         | Defines the Java API contract and publishes the OpenAPI document.        |
+| **Generated client** | Is generated from the OpenAPI document using OpenAPI Generics.           |
+| **Consumer**         | Uses the generated client and exposes downstream verification endpoints. |
 
 The same contract moves through all layers.
 
@@ -74,12 +74,12 @@ samples
     └── byoe-response
 ```
 
-| Directory | Purpose |
-|----------|---------|
-| `domain-contracts` | Shared domain and contract types used by the sample stacks. |
-| `spring-boot-3` | Runnable Spring Boot 3 producer → generated client → consumer stack. |
-| `spring-boot-4` | Runnable Spring Boot 4 producer → generated client → consumer stack. |
-| `type-coverage` | Focused validation suites for supported generic response shapes and regression coverage. |
+| Directory          | Purpose                                                                                  |
+|--------------------|------------------------------------------------------------------------------------------|
+| `domain-contracts` | Shared domain and contract types used by the sample stacks.                              |
+| `spring-boot-3`    | Runnable Spring Boot 3 producer → generated client → consumer stack.                     |
+| `spring-boot-4`    | Runnable Spring Boot 4 producer → generated client → consumer stack.                     |
+| `type-coverage`    | Focused validation suites for supported generic response shapes and regression coverage. |
 
 ---
 
@@ -87,9 +87,9 @@ samples
 
 The repository contains two kinds of samples.
 
-| Sample Type | Purpose |
-|------------|---------|
-| **Integration stacks** | Runnable producer → generated client → consumer applications for Spring Boot 3 and Spring Boot 4. |
+| Sample Type               | Purpose                                                                                                                                                  |
+|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Integration stacks**    | Runnable producer → generated client → consumer applications for Spring Boot 3 and Spring Boot 4.                                                        |
 | **Type coverage samples** | Focused regression suites that validate supported generic response shapes, BYOE contracts, collections, pages, and application-owned generic containers. |
 
 The integration stacks are intended for first-time users who want to run the platform end-to-end.
@@ -130,9 +130,9 @@ Spring Boot 3 Consumer
 
 ### Services
 
-| Service | Port | URL |
-|---------|------|-----|
-| Producer | 8084 | `http://localhost:8084/customer-service` |
+| Service  | Port | URL                                               |
+|----------|------|---------------------------------------------------|
+| Producer | 8084 | `http://localhost:8084/customer-service`          |
 | Consumer | 8085 | `http://localhost:8085/customer-service-consumer` |
 
 ### Start
@@ -204,9 +204,9 @@ Spring Boot 4 Consumer
 
 ### Services
 
-| Service | Port | URL |
-|---------|------|-----|
-| Producer | 8094 | `http://localhost:8094/customer-service` |
+| Service  | Port | URL                                               |
+|----------|------|---------------------------------------------------|
+| Producer | 8094 | `http://localhost:8094/customer-service`          |
 | Consumer | 8095 | `http://localhost:8095/customer-service-consumer` |
 
 ### Start
@@ -281,10 +281,10 @@ They verify contract-preservation behavior across supported response shapes, inc
 
 Available type-coverage samples:
 
-| Sample | Purpose |
-|----------|----------|
-| `type-coverage/service-response` | Validates the canonical platform-provided `ServiceResponse<T>` contract. |
-| `type-coverage/byoe-response` | Validates Bring Your Own Envelope support using a user-owned `ApiResponse<T>` contract. |
+| Sample                           | Purpose                                                                                 |
+|----------------------------------|-----------------------------------------------------------------------------------------|
+| `type-coverage/service-response` | Validates the canonical platform-provided `ServiceResponse<T>` contract.                |
+| `type-coverage/byoe-response`    | Validates Bring Your Own Envelope support using a user-owned `ApiResponse<T>` contract. |
 
 These samples are used as executable regression suites for projection metadata, vendor extensions, wrapper reconstruction, generated client typing, runtime deserialization, and consumer compatibility.
 

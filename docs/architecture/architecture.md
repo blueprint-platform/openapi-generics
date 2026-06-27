@@ -161,13 +161,13 @@ Supported capabilities:
 
 ## Module Map
 
-| Module                                                                                         | Responsibility |
-|------------------------------------------------------------------------------------------------|----------------|
-| [`openapi-generics-contract`](../../openapi-generics-contract/README.md)                                                    | Shared contracts and platform types |
-| [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md)           | Spring Boot projection pipeline |
-| [`openapi-generics-java-codegen`](../../openapi-generics-java-codegen/README.md)               | Contract-aware OpenAPI Generator extension |
+| Module                                                                                         | Responsibility                                 |
+|------------------------------------------------------------------------------------------------|------------------------------------------------|
+| [`openapi-generics-contract`](../../openapi-generics-contract/README.md)                       | Shared contracts and platform types            |
+| [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md)           | Spring Boot projection pipeline                |
+| [`openapi-generics-java-codegen`](../../openapi-generics-java-codegen/README.md)               | Contract-aware OpenAPI Generator extension     |
 | [`openapi-generics-java-codegen-parent`](../../openapi-generics-java-codegen-parent/README.md) | Generator orchestration and template lifecycle |
-| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md)               | Dependency alignment |
+| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md)               | Dependency alignment                           |
 
 ---
 

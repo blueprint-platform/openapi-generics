@@ -74,12 +74,12 @@ byoe-response-type-coverage
 └── consumer
 ```
 
-| Module | Responsibility |
-|----------|----------------|
+| Module   | Responsibility                                                   |
+|----------|------------------------------------------------------------------|
 | contract | User-owned `ApiResponse` and generic payload container contracts |
-| producer | Publishes `ApiResponse`-based endpoints |
-| client | Generated Java client |
-| consumer | Uses the generated client and exposes verification endpoints |
+| producer | Publishes `ApiResponse`-based endpoints                          |
+| client   | Generated Java client                                            |
+| consumer | Uses the generated client and exposes verification endpoints     |
 
 ---
 
