@@ -124,12 +124,12 @@ rather than importing this BOM directly.
 
 ## Architectural Role
 
-| Layer | Module |
-|---------|---------|
-| Contract Authority | `openapi-generics-contract` |
-| OpenAPI Projection | `openapi-generics-server-starter` |
+| Layer                           | Module                                 |
+|---------------------------------|----------------------------------------|
+| Contract Authority              | `openapi-generics-contract`            |
+| OpenAPI Projection              | `openapi-generics-server-starter`      |
 | Client Generation Orchestration | `openapi-generics-java-codegen-parent` |
-| Dependency Alignment | `openapi-generics-platform-bom` |
+| Dependency Alignment            | `openapi-generics-platform-bom`        |
 
 The BOM exists only to provide dependency alignment.
 

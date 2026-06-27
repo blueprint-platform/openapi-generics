@@ -64,7 +64,7 @@ that both producers and consumers depend on directly.
 Within the platform, this module is the **authority layer**:
 
 | Layer         | Role                                |
-| ------------- | ----------------------------------- |
+|---------------|-------------------------------------|
 | **Authority** | openapi-generics-contract (this)    |
 | Projection    | server starter (OpenAPI generation) |
 | Enforcement   | code generation (build-time)        |
@@ -296,8 +296,8 @@ Usage:
 ## Compatibility Matrix
 
 | Component | Supported Versions |
-|----------|-------------------|
-| Java     | 17+               |
+|-----------|--------------------|
+| Java      | 17+                |
 
 ---
 
