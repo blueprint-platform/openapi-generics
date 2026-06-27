@@ -556,11 +556,26 @@ The provided parent configuration includes a tested default, but consumers may o
 
 ## References
 
+### Project Documentation
+
+- **Rationale**  
+  [Why OpenAPI Generics Exists](./docs/architecture/rationale.md) — Explains the architectural motivation, engineering trade-offs, and ecosystem constraints behind the project.
+
 - **Adoption Guide (GitHub Pages)**  
   [Spring Boot OpenAPI Generics — Adoption Guide](https://blueprint-platform.github.io/openapi-generics/)
 
+### Articles
+
 - **Medium Article**  
   [We Made OpenAPI Generator Think in Generics](https://medium.com/@baris.sayli/type-safe-generic-api-responses-with-spring-boot-3-4-openapi-generator-and-custom-templates-ccd93405fb04)
+
+### Standards & Specifications
+
+- **OpenAPI Specification 3.2.0**  
+  https://spec.openapis.org/oas/v3.2.0.html
+
+- **JSON Schema Draft 2020-12**  
+  https://json-schema.org/draft/2020-12
 
 - **RFC 9457**  
   [Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
