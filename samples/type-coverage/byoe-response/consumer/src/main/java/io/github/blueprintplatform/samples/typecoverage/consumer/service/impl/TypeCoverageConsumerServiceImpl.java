@@ -8,6 +8,8 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Typ
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
 import io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse;
+import io.github.blueprintplatform.samples.typecoverage.contract.Paging;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -108,5 +110,25 @@ public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerServ
   @Override
   public ApiResponse<Page<CoverageStatus>> pagedStatuses() {
     return adapter.pagedStatuses();
+  }
+
+  @Override
+  public ApiResponse<Paging<TypeSummaryDto>> pagingSummaries() {
+    return adapter.pagingSummaries();
+  }
+
+  @Override
+  public ApiResponse<Paging<CoverageStatus>> pagingStatuses() {
+    return adapter.pagingStatuses();
+  }
+
+  @Override
+  public ApiResponse<Window<TypeSummaryDto>> windowSummaries() {
+    return adapter.windowSummaries();
+  }
+
+  @Override
+  public ApiResponse<Window<CoverageStatus>> windowStatuses() {
+    return adapter.windowStatuses();
   }
 }

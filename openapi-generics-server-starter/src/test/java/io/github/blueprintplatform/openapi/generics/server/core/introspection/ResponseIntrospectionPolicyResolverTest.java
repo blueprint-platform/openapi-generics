@@ -4,10 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
+import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.ContainerProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.ConfiguredContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.DefaultSupportedContainerTypesResolver;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
@@ -19,27 +24,82 @@ import org.junit.jupiter.api.Test;
 class ResponseIntrospectionPolicyResolverTest {
 
   private final ResponseIntrospectionPolicyResolver resolver =
-      new ResponseIntrospectionPolicyResolver(new DefaultSupportedContainerTypesResolver());
+      new ResponseIntrospectionPolicyResolver(
+          new DefaultSupportedContainerTypesResolver(), new ConfiguredContainerTypesResolver());
 
-  private static Set<SupportedContainerType> defaultContainers() {
+  private static Set<SupportedContainerDescriptor> defaultContainers() {
     return Set.of(
-        new SupportedContainerType(Page.class, "Page", "Page"),
-        new SupportedContainerType(List.class, "List", "List"),
-        new SupportedContainerType(Set.class, "Set", "Set"));
+        new SupportedContainerDescriptor(
+            Page.class,
+            "Page",
+            "Page",
+            ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+            "content",
+            ContainerSource.BUILT_IN,
+            ContainerMatchMode.EXACT),
+        new SupportedContainerDescriptor(
+            List.class,
+            "List",
+            "List",
+            ContainerShape.DIRECT_ARRAY,
+            null,
+            ContainerSource.BUILT_IN,
+            ContainerMatchMode.ASSIGNABLE),
+        new SupportedContainerDescriptor(
+            Set.class,
+            "Set",
+            "Set",
+            ContainerShape.DIRECT_ARRAY,
+            null,
+            ContainerSource.BUILT_IN,
+            ContainerMatchMode.ASSIGNABLE));
   }
 
   @Test
   @DisplayName("resolve -> should use supported container resolver for default policy")
   void resolve_shouldUseSupportedContainerResolverForDefaultPolicy() {
-
-    SupportedContainerType pageContainer = new SupportedContainerType(Page.class, "Page", "Page");
+    SupportedContainerDescriptor pageContainer =
+        new SupportedContainerDescriptor(
+            Page.class,
+            "Page",
+            "Page",
+            ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+            "content",
+            ContainerSource.BUILT_IN,
+            ContainerMatchMode.EXACT);
 
     ResponseIntrospectionPolicyResolver customResolver =
-        new ResponseIntrospectionPolicyResolver(() -> Set.of(pageContainer));
+        new ResponseIntrospectionPolicyResolver(
+            () -> Set.of(pageContainer), new ConfiguredContainerTypesResolver());
 
     ResponseIntrospectionPolicy policy = customResolver.resolve(null);
 
     assertEquals(Set.of(pageContainer), policy.supportedContainers());
+  }
+
+  @Test
+  @DisplayName("resolve -> should include configured containers in default policy")
+  void resolve_shouldIncludeConfiguredContainersInDefaultPolicy() {
+    OpenApiGenericsProperties properties =
+        new OpenApiGenericsProperties(
+            null, List.of(new ContainerProperties(Paging.class.getName(), "content")));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+
+    SupportedContainerDescriptor expected =
+        new SupportedContainerDescriptor(
+            Paging.class,
+            "Paging",
+            "Paging",
+            ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+            "content",
+            ContainerSource.CONFIGURED,
+            ContainerMatchMode.EXACT);
+
+    assertEquals(ServiceResponse.class, policy.envelopeType());
+    assertEquals("data", policy.payloadPropertyName());
+    assertTrue(policy.supportedContainers().containsAll(defaultContainers()));
+    assertTrue(policy.supportedContainers().contains(expected));
   }
 
   @Test
@@ -55,7 +115,7 @@ class ResponseIntrospectionPolicyResolverTest {
   @Test
   @DisplayName("resolve -> should return default policy when envelope is missing")
   void resolve_shouldReturnDefaultPolicy_whenEnvelopeMissing() {
-    OpenApiGenericsProperties properties = new OpenApiGenericsProperties(null);
+    OpenApiGenericsProperties properties = new OpenApiGenericsProperties(null, null);
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -68,7 +128,7 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should return default policy when envelope type is blank")
   void resolve_shouldReturnDefaultPolicy_whenEnvelopeTypeBlank() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties("   "));
+        new OpenApiGenericsProperties(new EnvelopeProperties("   "), null);
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -81,7 +141,7 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should resolve custom envelope with direct payload field")
   void resolve_shouldResolveCustomEnvelope_whenValid() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
+        new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()), null);
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -91,10 +151,36 @@ class ResponseIntrospectionPolicyResolverTest {
   }
 
   @Test
+  @DisplayName("resolve -> should include configured containers in custom envelope policy")
+  void resolve_shouldIncludeConfiguredContainersInCustomEnvelopePolicy() {
+    OpenApiGenericsProperties properties =
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(ValidEnvelope.class.getName()),
+            List.of(new ContainerProperties(Paging.class.getName(), "content")));
+
+    ResponseIntrospectionPolicy policy = resolver.resolve(properties);
+
+    SupportedContainerDescriptor expected =
+        new SupportedContainerDescriptor(
+            Paging.class,
+            "Paging",
+            "Paging",
+            ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+            "content",
+            ContainerSource.CONFIGURED,
+            ContainerMatchMode.EXACT);
+
+    assertEquals(ValidEnvelope.class, policy.envelopeType());
+    assertEquals("payload", policy.payloadPropertyName());
+    assertTrue(policy.supportedContainers().containsAll(defaultContainers()));
+    assertTrue(policy.supportedContainers().contains(expected));
+  }
+
+  @Test
   @DisplayName("resolve -> should reject non fqcn envelope type")
   void resolve_shouldRejectNonFqcnEnvelopeType() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties("ApiResponse"));
+        new OpenApiGenericsProperties(new EnvelopeProperties("ApiResponse"), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -106,7 +192,7 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject missing envelope class")
   void resolve_shouldRejectMissingEnvelopeClass() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties("com.example.DoesNotExist"));
+        new OpenApiGenericsProperties(new EnvelopeProperties("com.example.DoesNotExist"), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -119,7 +205,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectInterfaceEnvelope() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeInterface.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeInterface.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -131,7 +217,8 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject abstract envelope")
   void resolve_shouldRejectAbstractEnvelope() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties(AbstractEnvelope.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(AbstractEnvelope.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -144,7 +231,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectRecordEnvelope() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeRecord.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeRecord.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -157,7 +244,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectEnvelopeWithMultipleTypeParameters() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeMultipleTypes.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeMultipleTypes.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -170,7 +257,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectEnvelopeWithoutDirectPayloadField() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeNoPayload.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeNoPayload.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -183,7 +270,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectEnvelopeWithMultipleDirectPayloadFields() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeMultiplePayloads.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeMultiplePayloads.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -196,7 +283,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectEnvelopeWithNestedPayloadField() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeNestedPayload.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeNestedPayload.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -208,7 +295,8 @@ class ResponseIntrospectionPolicyResolverTest {
   @DisplayName("resolve -> should reject enum envelope")
   void resolve_shouldRejectEnumEnvelope() {
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()));
+        new OpenApiGenericsProperties(
+            new EnvelopeProperties(InvalidEnvelopeEnum.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -221,7 +309,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectAnnotationEnvelope() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeAnnotation.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -234,7 +322,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldRejectEnvelopeWithZeroTypeParameters() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeNoGenerics.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -247,7 +335,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldIgnoreStaticFields() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(EnvelopeWithStaticField.class.getName()));
+            new EnvelopeProperties(EnvelopeWithStaticField.class.getName()), null);
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -260,7 +348,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldDetectNestedPayloadInGenericArray() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeGenericArrayPayload.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -273,7 +361,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldDetectDeeplyNestedPayload() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()));
+            new EnvelopeProperties(InvalidEnvelopeDeeplyNestedPayload.class.getName()), null);
 
     IllegalStateException ex =
         assertThrows(IllegalStateException.class, () -> resolver.resolve(properties));
@@ -286,7 +374,7 @@ class ResponseIntrospectionPolicyResolverTest {
   void resolve_shouldAcceptEnvelopeWithUnrelatedGenerics() {
     OpenApiGenericsProperties properties =
         new OpenApiGenericsProperties(
-            new EnvelopeProperties(EnvelopeWithUnrelatedGenericField.class.getName()));
+            new EnvelopeProperties(EnvelopeWithUnrelatedGenericField.class.getName()), null);
 
     ResponseIntrospectionPolicy policy = resolver.resolve(properties);
 
@@ -297,13 +385,22 @@ class ResponseIntrospectionPolicyResolverTest {
   @Test
   @DisplayName("resolve -> should use supported container resolver for custom envelope policy")
   void resolve_shouldUseSupportedContainerResolverForCustomEnvelopePolicy() {
-    SupportedContainerType setContainer = new SupportedContainerType(Set.class, "Set", "Set");
+    SupportedContainerDescriptor setContainer =
+        new SupportedContainerDescriptor(
+            Set.class,
+            "Set",
+            "Set",
+            ContainerShape.DIRECT_ARRAY,
+            null,
+            ContainerSource.BUILT_IN,
+            ContainerMatchMode.ASSIGNABLE);
 
     ResponseIntrospectionPolicyResolver customResolver =
-        new ResponseIntrospectionPolicyResolver(() -> Set.of(setContainer));
+        new ResponseIntrospectionPolicyResolver(
+            () -> Set.of(setContainer), new ConfiguredContainerTypesResolver());
 
     OpenApiGenericsProperties properties =
-        new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()));
+        new OpenApiGenericsProperties(new EnvelopeProperties(ValidEnvelope.class.getName()), null);
 
     ResponseIntrospectionPolicy policy = customResolver.resolve(properties);
 
@@ -361,6 +458,7 @@ class ResponseIntrospectionPolicyResolverTest {
   }
 
   static final class EnvelopeWithStaticField<T> {
+    static String ignored;
     T payload;
   }
 
@@ -374,6 +472,10 @@ class ResponseIntrospectionPolicyResolverTest {
 
   static final class EnvelopeWithUnrelatedGenericField<T> {
     T payload;
-    java.util.List<String> tags; // String is not T, should not be classified as payload
+    java.util.List<String> tags;
+  }
+
+  static final class Paging<T> {
+    List<T> content;
   }
 }

@@ -28,6 +28,11 @@ app:
 openapi-generics:
   envelope:
     type: io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse
+  containers:
+    - type: io.github.blueprintplatform.samples.typecoverage.contract.Paging
+      item-property: content
+    - type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      item-property: items
 
 springdoc:
   default-consumes-media-type: application/json

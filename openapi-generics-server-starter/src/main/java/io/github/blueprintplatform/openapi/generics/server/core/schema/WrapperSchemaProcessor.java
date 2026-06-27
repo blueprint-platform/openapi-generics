@@ -1,6 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.server.core.schema;
 
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.WrapperSchemaEnricher;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;

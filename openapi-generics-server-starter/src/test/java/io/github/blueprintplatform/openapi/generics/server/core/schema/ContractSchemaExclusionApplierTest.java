@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -67,7 +70,14 @@ class ContractSchemaExclusionApplierTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     marker.apply(openApi, Set.of(descriptor));

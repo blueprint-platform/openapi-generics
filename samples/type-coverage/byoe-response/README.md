@@ -1,10 +1,10 @@
 # byoe-response-type-coverage
 
-> End-to-end verification sample for OpenAPI projection, client generation, and runtime reconstruction using a custom response envelope.
+> End-to-end verification sample for OpenAPI projection, client generation, and runtime reconstruction of user-owned `ApiResponse<T>` contracts.
 
 This sample demonstrates the **Bring Your Own Envelope (BYOE)** capabilities of OpenAPI Generics.
 
-Instead of using the platform-provided envelope implementation, the producer exposes endpoints using a completely user-owned generic response contract.
+Instead of using the platform-provided response envelope, the producer exposes endpoints using a completely application-owned generic contract:
 
 ```java
 ApiResponse<T>
@@ -12,95 +12,59 @@ ApiResponse<T>
 
 The sample verifies that OpenAPI Generics can:
 
-- project custom generic envelopes into OpenAPI
-- reconstruct generic type information during code generation
-- generate strongly typed clients
-- deserialize responses back into the original contract shape
-- support scalar, value, object, collection, and paged payloads
+- project user-owned generic response envelopes into OpenAPI
+- reconstruct generic type information during client generation
+- generate strongly typed Java clients
+- deserialize responses back into the original application contract
+- support scalar, value, object, collection, built-in page, and application-owned generic container payloads
 
 without requiring changes to the original response contract.
 
 ---
 
-# Table of Contents
+## Table of Contents
 
-- [Purpose](#purpose)
-- [Architecture](#architecture)
+- [What This Sample Validates](#what-this-sample-validates)
 - [Modules](#modules)
-- [Custom Envelope](#custom-envelope)
-- [Supported Response Shapes](#supported-response-shapes)
-- [Verification Matrix](#verification-matrix)
+- [User-Owned Envelope](#user-owned-envelope)
+- [Covered Response Shapes](#covered-response-shapes)
 - [Running the Sample](#running-the-sample)
 - [Verification Endpoints](#verification-endpoints)
-- [BYOE Projection Flow](#byoe-projection-flow)
-- [What This Sample Protects](#what-this-sample-protects)
+- [Mental Model](#mental-model)
 
 ---
 
-# Purpose
+## What This Sample Validates
 
-The goal of this sample is to validate the complete BYOE lifecycle:
+The sample exercises the complete OpenAPI Generics flow:
 
 ```text
 User-Owned Contract
-         ↓
+        ↓
 Spring Endpoint
-         ↓
+        ↓
 OpenAPI Projection
-         ↓
+        ↓
 Generated Client
-         ↓
+        ↓
 Consumer Runtime
 ```
 
 The consumer uses only generated client artifacts.
 
-No DTO adapters.
+No manual DTO mapping.
 
 No manual envelope reconstruction.
 
+No manual generic container reconstruction.
+
 No custom deserialization code.
 
-The generated client must reconstruct the original generic contract automatically.
+The generated client automatically reconstructs the original application contract together with any nested generic payload types.
 
 ---
 
-# Architecture
-
-```text
-Producer
-    │
-    ▼
-OpenAPI Projection
-    │
-    ▼
-Generated Client
-    │
-    ▼
-Consumer
-```
-
-The producer publishes endpoints using:
-
-```java
-ApiResponse<T>
-```
-
-The OpenAPI document contains projected wrapper schemas.
-
-The OpenAPI Generics code generator reconstructs the original generic contract.
-
-The generated client returns:
-
-```java
-ApiResponse<T>
-```
-
-instead of generated wrapper DTOs.
-
----
-
-# Modules
+## Modules
 
 ```text
 byoe-response-type-coverage
@@ -111,18 +75,17 @@ byoe-response-type-coverage
 ```
 
 | Module | Responsibility |
-|----------|----------|
-| contract | User-owned ApiResponse contract |
-| producer | Publishes ApiResponse-based endpoints |
+|----------|----------------|
+| contract | User-owned `ApiResponse` and generic payload container contracts |
+| producer | Publishes `ApiResponse`-based endpoints |
 | client | Generated Java client |
-| consumer | Consumes generated client |
-| consumer-api | Verification endpoints for runtime testing |
+| consumer | Uses the generated client and exposes verification endpoints |
 
 ---
 
-# Custom Envelope
+## User-Owned Envelope
 
-The sample uses a completely user-owned envelope.
+The sample uses a completely application-owned response envelope.
 
 ```java
 public class ApiResponse<T> {
@@ -149,120 +112,81 @@ public record ApiError(
 
 These classes are not provided by OpenAPI Generics.
 
-OpenAPI Generics only projects and reconstructs them.
-
-The ownership of the contract remains entirely with the application.
+OpenAPI Generics projects and reconstructs them while preserving the original application contract.
 
 ---
 
-# Supported Response Shapes
+## Covered Response Shapes
 
-## Scalar Payloads
+### Scalar Payloads
 
 ```java
 ApiResponse<String>
-
 ApiResponse<Boolean>
-
 ApiResponse<Integer>
-
 ApiResponse<Long>
-
 ApiResponse<BigDecimal>
 ```
 
----
-
-## Value Payloads
+### Value Payloads
 
 ```java
 ApiResponse<UUID>
-
 ApiResponse<LocalDate>
-
 ApiResponse<OffsetDateTime>
-
 ApiResponse<CoverageStatus>
 ```
 
----
-
-## Object Payloads
+### Object Payloads
 
 ```java
 ApiResponse<AddressDto>
-
 ApiResponse<TypeProfileDto>
 ```
 
-Including:
-
-- nested DTOs
-- enums
-- collections
-- maps
-- temporal types
-
----
-
-## Collection Payloads
+### List Payloads
 
 ```java
 ApiResponse<List<TypeSummaryDto>>
-
 ApiResponse<List<CoverageStatus>>
+```
 
+### Set Payloads
+
+```java
 ApiResponse<Set<TypeSummaryDto>>
-
 ApiResponse<Set<CoverageStatus>>
 ```
 
----
-
-## Paged Payloads
+### Built-in Page Payloads
 
 ```java
 ApiResponse<Page<TypeSummaryDto>>
-
 ApiResponse<Page<CoverageStatus>>
 ```
 
-Using:
+using the built-in platform `Page<T>` contract.
+
+### Application-owned Generic Container Payloads
 
 ```java
-io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
+ApiResponse<Paging<TypeSummaryDto>>
+ApiResponse<Paging<CoverageStatus>>
+
+ApiResponse<Window<TypeSummaryDto>>
+ApiResponse<Window<CoverageStatus>>
 ```
 
----
-
-# Verification Matrix
-
-| Category | Verified |
-|----------|----------|
-| Scalar types | ✓ |
-| UUID | ✓ |
-| LocalDate | ✓ |
-| OffsetDateTime | ✓ |
-| Enum payloads | ✓ |
-| DTO payloads | ✓ |
-| Nested DTO graphs | ✓ |
-| List payloads | ✓ |
-| Set payloads | ✓ |
-| Page payloads | ✓ |
-| Generated client reconstruction | ✓ |
-| Runtime deserialization | ✓ |
-| Consumer integration | ✓ |
-| User-owned envelope | ✓ |
+These payloads verify that nested application-owned generic containers are projected into OpenAPI and reconstructed by the generated client without requiring custom serialization, mapping, or adapter code.
 
 ---
 
-# Running the Sample
+## Running the Sample
 
-## Start Producer
+### Start Producer
 
 ```bash
 cd producer
-
 mvn spring-boot:run
 ```
 
@@ -284,13 +208,10 @@ OpenAPI document:
 http://localhost:8076/type-coverage/byoe-response/v3/api-docs.yaml
 ```
 
----
-
-## Start Consumer
+### Start Consumer
 
 ```bash
 cd consumer
-
 mvn spring-boot:run
 ```
 
@@ -304,16 +225,14 @@ http://localhost:8077/type-coverage/byoe-response-consumer
 
 ## Quick Smoke Test
 
-After starting both producer and consumer, a small subset of endpoints can be called directly to verify that the generated client reconstructs the expected generic response types correctly.
+After starting both producer and consumer, a representative subset of endpoints can be called directly to verify that the generated client reconstructs the expected generic response types correctly.
 
-The goal of these requests is not to validate business behavior.
-
-They provide a fast end-to-end sanity check for:
+These requests provide a fast end-to-end verification of:
 
 - OpenAPI projection
-- custom envelope projection
 - generated client generation
-- generic wrapper reconstruction
+- user-owned envelope reconstruction
+- nested generic payload reconstruction
 - runtime deserialization
 - consumer integration
 
@@ -327,9 +246,13 @@ curl http://localhost:8076/type-coverage/byoe-response/types/lists/summaries
 curl http://localhost:8076/type-coverage/byoe-response/types/sets/statuses
 
 curl http://localhost:8076/type-coverage/byoe-response/types/pages/summaries
+
+curl http://localhost:8076/type-coverage/byoe-response/types/paging/summaries
+
+curl http://localhost:8076/type-coverage/byoe-response/types/windows/summaries
 ```
 
-Expected generic shapes:
+Expected generic response shapes:
 
 ```java
 ApiResponse<String>
@@ -339,6 +262,10 @@ ApiResponse<List<TypeSummaryDto>>
 ApiResponse<Set<CoverageStatus>>
 
 ApiResponse<Page<TypeSummaryDto>>
+
+ApiResponse<Paging<TypeSummaryDto>>
+
+ApiResponse<Window<TypeSummaryDto>>
 ```
 
 ### Consumer Verification
@@ -351,154 +278,104 @@ curl http://localhost:8077/type-coverage/byoe-response-consumer/types/lists/summ
 curl http://localhost:8077/type-coverage/byoe-response-consumer/types/sets/statuses
 
 curl http://localhost:8077/type-coverage/byoe-response-consumer/types/pages/summaries
+
+curl http://localhost:8077/type-coverage/byoe-response-consumer/types/paging/summaries
+
+curl http://localhost:8077/type-coverage/byoe-response-consumer/types/windows/summaries
 ```
 
 The consumer uses only generated client artifacts.
 
-No manual DTO mapping, custom deserialization, or envelope reconstruction exists in the consumer application.
-
-Successful responses verify that generic type information survives the complete pipeline:
-
-```text
-User-Owned Contract
-         ↓
-OpenAPI Projection
-         ↓
-Generated Client
-         ↓
-Consumer Runtime
-```
-
-and is reconstructed back into the original contract shape:
-
-```java
-ApiResponse<T>
-```
+No manual DTO mapping, custom deserialization, envelope reconstruction, or generic container reconstruction exists in the consumer application.
 
 ---
 
-# Verification Endpoints
+## Verification Endpoints
 
-## Scalars
+### Scalars
 
 ```text
 /types/scalars/string
-
 /types/scalars/boolean
-
 /types/scalars/integer
-
 /types/scalars/long
-
 /types/scalars/decimal
 ```
 
----
-
-## Values
+### Values
 
 ```text
 /types/values/uuid
-
 /types/values/date
-
 /types/values/datetime
-
 /types/values/enum
 ```
 
----
-
-## Objects
+### Objects
 
 ```text
 /types/objects/address
-
 /types/objects/profile
 ```
 
----
-
-## Lists
+### Lists
 
 ```text
 /types/lists/summaries
-
 /types/lists/statuses
 ```
 
----
-
-## Sets
+### Sets
 
 ```text
 /types/sets/summaries
-
 /types/sets/statuses
 ```
 
----
-
-## Pages
+### Built-in Pages
 
 ```text
 /types/pages/summaries
-
 /types/pages/statuses
 ```
 
----
-
-# BYOE Projection Flow
-
-The producer starts with:
-
-```java
-ApiResponse<Page<TypeSummaryDto>>
-```
-
-Projection phase:
+### Application-owned Generic Containers
 
 ```text
-ApiResponse<Page<TypeSummaryDto>>
-            ↓
-ApiResponsePageTypeSummaryDto
+/types/paging/summaries
+/types/paging/statuses
+
+/types/windows/summaries
+/types/windows/statuses
 ```
 
-Generated client phase:
-
-```text
-ApiResponsePageTypeSummaryDto
-            ↓
-ApiResponse<Page<TypeSummaryDto>>
-```
-
-Consumer phase:
+These endpoints verify that the generated client correctly reconstructs:
 
 ```java
-ApiResponse<Page<TypeSummaryDto>>
+ApiResponse<T>
+ApiResponse<List<T>>
+ApiResponse<Set<T>>
+ApiResponse<Page<T>>
+ApiResponse<Paging<T>>
+ApiResponse<Window<T>>
 ```
 
-The wrapper DTO exists only as a projection artifact.
-
-The consumer works exclusively with the original generic contract.
+across primitive, value, enum, DTO, collection, built-in page, and application-owned generic container payloads.
 
 ---
 
-# What This Sample Protects
+## Mental Model
 
-This sample serves as a regression suite for BYOE support.
+```text
+ApiResponse<Paging<TypeSummaryDto>>
+                ↓
+OpenAPI Projection
+                ↓
+Generated Client
+                ↓
+Consumer Deserialization
+                ↓
+ApiResponse<Paging<TypeSummaryDto>>
+```
 
-It validates that future changes do not break:
-
-- custom envelope projection
-- generic payload reconstruction
-- collection reconstruction
-- page reconstruction
-- generated client typing
-- runtime deserialization
-- consumer integration
-
-The sample is intentionally designed as an end-to-end verification pipeline rather than a unit-level feature demonstration.
-
-Its purpose is to guarantee that user-owned response contracts continue to work without modification across future OpenAPI Generics releases.
+The same reconstruction flow applies to every supported response shape, including application-owned generic payload containers nested inside the user-owned response envelope.

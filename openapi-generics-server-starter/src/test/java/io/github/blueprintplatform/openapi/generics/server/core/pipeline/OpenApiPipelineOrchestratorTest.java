@@ -9,7 +9,10 @@ import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDiscoveryStrategy;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
@@ -50,7 +53,14 @@ class OpenApiPipelineOrchestratorTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "OrderDto");
 
     when(discoveryStrategy.discover()).thenReturn(Set.of(type1, type2));

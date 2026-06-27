@@ -8,12 +8,14 @@ import io.github.blueprintplatform.openapi.generics.server.core.introspection.Re
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeIntrospector;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.ContainerSchemaRegistry;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.ContainerSchemaMetadataResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.WrapperSchemaEnricher;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.extraction.ArrayItemReferenceExtractor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolution.ComponentContainerSchemaResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolution.WrapperPayloadArraySchemaResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -45,7 +47,10 @@ class OpenApiGenericsAutoConfigurationTest {
           assertThat(context).hasSingleBean(ResponseIntrospectionPolicy.class);
           assertThat(context).hasSingleBean(ResponseTypeIntrospector.class);
           assertThat(context).hasSingleBean(ContractSchemaExclusionApplier.class);
-          assertThat(context).hasSingleBean(ContainerSchemaRegistry.class);
+          assertThat(context).hasSingleBean(ArrayItemReferenceExtractor.class);
+          assertThat(context).hasSingleBean(ComponentContainerSchemaResolver.class);
+          assertThat(context).hasSingleBean(WrapperPayloadArraySchemaResolver.class);
+          assertThat(context).hasSingleBean(ContainerSchemaMetadataResolver.class);
           assertThat(context).hasSingleBean(WrapperSchemaEnricher.class);
           assertThat(context).hasSingleBean(WrapperSchemaProcessor.class);
           assertThat(context).hasSingleBean(OpenApiContractGuard.class);
@@ -73,7 +78,10 @@ class OpenApiGenericsAutoConfigurationTest {
         .withClassLoader(new FilteredClassLoader(OpenApiCustomizer.class))
         .run(
             context -> {
-              assertThat(context).doesNotHaveBean(ContainerSchemaRegistry.class);
+              assertThat(context).doesNotHaveBean(ArrayItemReferenceExtractor.class);
+              assertThat(context).doesNotHaveBean(ComponentContainerSchemaResolver.class);
+              assertThat(context).doesNotHaveBean(WrapperPayloadArraySchemaResolver.class);
+              assertThat(context).doesNotHaveBean(ContainerSchemaMetadataResolver.class);
               assertThat(context).doesNotHaveBean(WrapperSchemaEnricher.class);
               assertThat(context).doesNotHaveBean(OpenApiPipelineOrchestrator.class);
               assertThat(context).doesNotHaveBean("openApiGenericsCustomizer");
@@ -143,7 +151,11 @@ class OpenApiGenericsAutoConfigurationTest {
   static class CustomEnricherConfig {
 
     static final WrapperSchemaEnricher CUSTOM_ENRICHER =
-        new WrapperSchemaEnricher(new ContainerSchemaRegistry(List.of()));
+        new WrapperSchemaEnricher(
+            new ContainerSchemaMetadataResolver(
+                new WrapperPayloadArraySchemaResolver(),
+                new ComponentContainerSchemaResolver(),
+                new ArrayItemReferenceExtractor()));
 
     @Bean
     WrapperSchemaEnricher wrapperSchemaEnricher() {

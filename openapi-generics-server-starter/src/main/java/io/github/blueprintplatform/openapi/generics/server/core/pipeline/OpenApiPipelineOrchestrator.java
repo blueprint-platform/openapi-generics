@@ -15,30 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Orchestrates the full OpenAPI projection pipeline for contract-aware responses.
+ * Orchestrates the OpenAPI projection pipeline for generic response contracts.
  *
- * <p>This is the single entry point that coordinates all processing steps:
+ * <p>Coordinates response type discovery, generic type introspection, wrapper schema processing,
+ * contract schema exclusion, and final OpenAPI validation.
  *
- * <ol>
- *   <li>Discover response types from the application layer
- *   <li>Extract contract-aware descriptors via introspection
- *   <li>Generate wrapper schemas (default or BYOE)
- *   <li>Mark non-authoritative schemas to be ignored
- *   <li>Validate final OpenAPI contract integrity
- * </ol>
- *
- * <p>The pipeline is executed exactly once per OpenAPI instance.
- *
- * <p><b>Design principles:</b>
- *
- * <ul>
- *   <li>Deterministic execution order
- *   <li>Contract-first enforcement (no drift allowed)
- *   <li>OpenAPI is treated as a projection, not a source of truth
- * </ul>
- *
- * <p>Acts as the integration point between discovery, schema generation, control marking, and
- * contract validation phases.
+ * <p>The pipeline is executed once per OpenAPI instance.
  */
 public class OpenApiPipelineOrchestrator {
 

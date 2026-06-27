@@ -1,12 +1,16 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver;
+package io.github.blueprintplatform.openapi.generics.server.core.schema.resolution;
 
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.*;
 
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.JsonSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+/** Resolves component-based container schemas referenced by projected wrapper payloads. */
 public class ComponentContainerSchemaResolver implements ContainerSchemaResolver {
 
   @SuppressWarnings("rawtypes")
@@ -28,17 +32,25 @@ public class ComponentContainerSchemaResolver implements ContainerSchemaResolver
   private Schema<?> resolveContainerSchema(
       Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 
-    if (schema == null) return null;
+    if (schema == null) {
+      return null;
+    }
 
     Schema<?> current = dereferenceIfNeeded(schemas, schema, visited);
-    if (current == null) return null;
+    if (current == null) {
+      return null;
+    }
 
-    if (isContainerLike(current)) return current;
+    if (isContainerLike(current)) {
+      return current;
+    }
 
     if (current instanceof ComposedSchema composed && composed.getAllOf() != null) {
       for (Schema<?> candidate : composed.getAllOf()) {
         Schema<?> resolved = resolveContainerSchema(schemas, candidate, visited);
-        if (resolved != null) return resolved;
+        if (resolved != null) {
+          return resolved;
+        }
       }
     }
 
@@ -50,23 +62,30 @@ public class ComponentContainerSchemaResolver implements ContainerSchemaResolver
       Map<String, Schema> schemas, Schema<?> schema, Set<String> visited) {
 
     String ref = schema.get$ref();
-    if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) return schema;
+    if (ref == null || !ref.startsWith(COMPONENT_SCHEMA_REF_PREFIX)) {
+      return schema;
+    }
 
     String name = ref.substring(COMPONENT_SCHEMA_REF_PREFIX.length());
-    if (!visited.add(name)) return null;
+    if (!visited.add(name)) {
+      return null;
+    }
 
     return schemas.get(name);
   }
 
   private boolean isContainerLike(Schema<?> schema) {
-    return schema instanceof ObjectSchema
-        || TYPE_OBJECT.equals(schema.getType())
-        || (schema.getProperties() != null && !schema.getProperties().isEmpty())
-        || isArrayLike(schema);
+    return hasProperties(schema) || isArrayLike(schema);
+  }
+
+  private boolean hasProperties(Schema<?> schema) {
+    return schema.getProperties() != null && !schema.getProperties().isEmpty();
   }
 
   private boolean isArrayLike(Schema<?> schema) {
-    if (schema == null) return false;
+    if (schema == null) {
+      return false;
+    }
 
     return schema instanceof ArraySchema
         || TYPE_ARRAY.equals(schema.getType())

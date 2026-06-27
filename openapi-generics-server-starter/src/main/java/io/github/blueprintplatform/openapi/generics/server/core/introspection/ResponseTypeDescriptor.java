@@ -1,13 +1,13 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import java.util.Objects;
 
 /**
  * Describes a supported response shape discovered during introspection.
  *
  * <p>For container responses, {@code dataRefName} follows the OpenAPI schema name produced by
- * springdoc, {@code containerType} preserves the Java container identity discovered during
+ * springdoc, {@code container} preserves the Java container identity discovered during
  * introspection, and {@code itemRefName} represents the contained item schema name.
  */
 public final class ResponseTypeDescriptor {
@@ -15,19 +15,19 @@ public final class ResponseTypeDescriptor {
   private final Class<?> envelopeType;
   private final String payloadPropertyName;
   private final String dataRefName;
-  private final SupportedContainerType containerType;
+  private final SupportedContainerDescriptor container;
   private final String itemRefName;
 
   private ResponseTypeDescriptor(
       Class<?> envelopeType,
       String payloadPropertyName,
       String dataRefName,
-      SupportedContainerType containerType,
+      SupportedContainerDescriptor container,
       String itemRefName) {
     this.envelopeType = envelopeType;
     this.payloadPropertyName = payloadPropertyName;
     this.dataRefName = dataRefName;
-    this.containerType = containerType;
+    this.container = container;
     this.itemRefName = itemRefName;
   }
 
@@ -39,13 +39,13 @@ public final class ResponseTypeDescriptor {
   public static ResponseTypeDescriptor container(
       Class<?> envelopeType,
       String payloadPropertyName,
-      SupportedContainerType containerType,
+      SupportedContainerDescriptor container,
       String itemRefName) {
     return new ResponseTypeDescriptor(
         envelopeType,
         payloadPropertyName,
-        containerType.schemaName() + itemRefName,
-        containerType,
+        container.schemaName() + itemRefName,
+        container,
         itemRefName);
   }
 
@@ -61,16 +61,16 @@ public final class ResponseTypeDescriptor {
     return dataRefName;
   }
 
-  public SupportedContainerType containerType() {
-    return containerType;
+  public SupportedContainerDescriptor container() {
+    return container;
   }
 
   public String containerName() {
-    return containerType != null ? containerType.containerName() : null;
+    return container != null ? container.containerName() : null;
   }
 
   public String containerTypeName() {
-    return containerType != null ? containerType.containerTypeName() : null;
+    return container != null ? container.containerTypeName() : null;
   }
 
   public String itemRefName() {
@@ -78,7 +78,7 @@ public final class ResponseTypeDescriptor {
   }
 
   public boolean isContainer() {
-    return containerType != null && itemRefName != null;
+    return container != null && itemRefName != null;
   }
 
   @Override
@@ -88,13 +88,13 @@ public final class ResponseTypeDescriptor {
     return Objects.equals(envelopeType, that.envelopeType)
         && Objects.equals(payloadPropertyName, that.payloadPropertyName)
         && Objects.equals(dataRefName, that.dataRefName)
-        && Objects.equals(containerType, that.containerType)
+        && Objects.equals(container, that.container)
         && Objects.equals(itemRefName, that.itemRefName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(envelopeType, payloadPropertyName, dataRefName, containerType, itemRefName);
+    return Objects.hash(envelopeType, payloadPropertyName, dataRefName, container, itemRefName);
   }
 
   @Override

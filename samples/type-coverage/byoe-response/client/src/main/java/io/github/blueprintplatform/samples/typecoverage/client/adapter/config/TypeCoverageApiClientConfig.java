@@ -1,11 +1,6 @@
 package io.github.blueprintplatform.samples.typecoverage.client.adapter.config;
 
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ListPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ObjectPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.PagedPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ScalarPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.SetPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ValuePayloadControllerApi;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.api.*;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.invoker.ApiClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -54,5 +49,15 @@ public class TypeCoverageApiClientConfig {
   @Bean
   PagedPayloadControllerApi pagedPayloadControllerApi(ApiClient typeCoverageApiClient) {
     return new PagedPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  PagingPayloadControllerApi pagingPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new PagingPayloadControllerApi(typeCoverageApiClient);
+  }
+
+  @Bean
+  WindowPayloadControllerApi windowPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new WindowPayloadControllerApi(typeCoverageApiClient);
   }
 }

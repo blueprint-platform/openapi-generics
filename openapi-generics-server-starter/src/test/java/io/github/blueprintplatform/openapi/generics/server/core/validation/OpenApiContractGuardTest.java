@@ -10,7 +10,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -51,7 +54,14 @@ class OpenApiContractGuardTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
@@ -205,7 +215,14 @@ class OpenApiContractGuardTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
@@ -227,7 +244,14 @@ class OpenApiContractGuardTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
@@ -251,9 +275,15 @@ class OpenApiContractGuardTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
-
     Schema<?> wrapper = wrapperWithAllOfPayload("data");
     wrapper.addExtension(API_WRAPPER, true);
     wrapper.addExtension(API_WRAPPER_DATATYPE, "PageCustomerDto");

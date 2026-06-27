@@ -1,12 +1,11 @@
 package io.github.blueprintplatform.openapi.generics.server.autoconfigure;
 
-import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.ContentArrayItemExtractor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.extractor.DirectArrayItemExtractor;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.ComponentContainerSchemaResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.resolver.WrapperPayloadArraySchemaResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.strategy.*;
-import java.util.List;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.ContainerSchemaMetadataResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.WrapperSchemaEnricher;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.extraction.ArrayItemReferenceExtractor;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolution.ComponentContainerSchemaResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.resolution.WrapperPayloadArraySchemaResolver;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -14,21 +13,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
+/**
+ * Schema auto-configuration for OpenAPI Generics server support.
+ *
+ * <p>Registers schema resolution and enrichment components used to process projected generic
+ * wrapper schemas.
+ */
 @AutoConfiguration(before = OpenApiGenericsAutoConfiguration.class)
 @ConditionalOnClass(OpenApiCustomizer.class)
 @ConditionalOnWebApplication
 public class OpenApiGenericsSchemaAutoConfiguration {
 
   @Bean
-  @ConditionalOnMissingBean(ContentArrayItemExtractor.class)
-  public ContentArrayItemExtractor contentArrayItemExtractor() {
-    return new ContentArrayItemExtractor();
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(DirectArrayItemExtractor.class)
-  public DirectArrayItemExtractor directArrayItemExtractor() {
-    return new DirectArrayItemExtractor();
+  @ConditionalOnMissingBean(ArrayItemReferenceExtractor.class)
+  public ArrayItemReferenceExtractor arrayItemReferenceExtractor() {
+    return new ArrayItemReferenceExtractor();
   }
 
   @Bean
@@ -44,41 +43,27 @@ public class OpenApiGenericsSchemaAutoConfiguration {
   }
 
   @Bean
-  @ConditionalOnMissingBean(PageContainerSchemaStrategy.class)
-  public PageContainerSchemaStrategy pageContainerSchemaStrategy(
+  @ConditionalOnMissingBean
+  public ContainerSchemaMetadataResolver containerSchemaMetadataResolver(
+      WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
       ComponentContainerSchemaResolver componentContainerSchemaResolver,
-      ContentArrayItemExtractor contentArrayItemExtractor) {
-    return new PageContainerSchemaStrategy(
-        componentContainerSchemaResolver, contentArrayItemExtractor);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(ListContainerSchemaStrategy.class)
-  public ListContainerSchemaStrategy listContainerSchemaStrategy(
-      WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
-      DirectArrayItemExtractor directArrayItemExtractor) {
-    return new ListContainerSchemaStrategy(
-        wrapperPayloadArraySchemaResolver, directArrayItemExtractor);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(SetContainerSchemaStrategy.class)
-  public SetContainerSchemaStrategy setContainerSchemaStrategy(
-      WrapperPayloadArraySchemaResolver wrapperPayloadArraySchemaResolver,
-      DirectArrayItemExtractor directArrayItemExtractor) {
-    return new SetContainerSchemaStrategy(
-        wrapperPayloadArraySchemaResolver, directArrayItemExtractor);
+      ArrayItemReferenceExtractor arrayItemReferenceExtractor) {
+    return new ContainerSchemaMetadataResolver(
+        wrapperPayloadArraySchemaResolver,
+        componentContainerSchemaResolver,
+        arrayItemReferenceExtractor);
   }
 
   @Bean
   @ConditionalOnMissingBean
-  public ContainerSchemaRegistry containerSchemaRegistry(List<ContainerSchemaStrategy> strategies) {
-    return new ContainerSchemaRegistry(strategies);
+  public WrapperSchemaEnricher wrapperSchemaEnricher(
+      ContainerSchemaMetadataResolver containerSchemaMetadataResolver) {
+    return new WrapperSchemaEnricher(containerSchemaMetadataResolver);
   }
 
   @Bean
   @ConditionalOnMissingBean
-  public WrapperSchemaEnricher wrapperSchemaEnricher(ContainerSchemaRegistry registry) {
-    return new WrapperSchemaEnricher(registry);
+  public WrapperSchemaProcessor wrapperSchemaProcessor(WrapperSchemaEnricher enricher) {
+    return new WrapperSchemaProcessor(enricher);
   }
 }
