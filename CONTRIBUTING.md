@@ -1,85 +1,76 @@
 # Contributing Guide
 
-Thanks for your interest in improving **openapi-generics**!
-This repository provides a **contract-first, generics-aware OpenAPI platform**, centered around a deterministic API lifecycle:
+Thanks for your interest in improving **OpenAPI Generics**.
 
-> **Contract → OpenAPI projection → Code generation**
+OpenAPI Generics is a contract-preserving OpenAPI platform for Java and Spring Boot, built around a deterministic lifecycle:
+
+> **Java Contract → OpenAPI Projection → Deterministic Client Reconstruction**
 
 Built with:
 
-* Java 17+
-* Spring Boot 3.4.x, 3.5.x 4.x
-* OpenAPI Generator 7.x
+- Java 17+
+- Spring Boot 3.4.x, 3.5.x, 4.x
+- OpenAPI Generator 7.x
 
-> Be kind. Be constructive. See our [Code of Conduct](./CODE_OF_CONDUCT.md).
+> Be kind, be constructive, and follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ---
 
-## Table of contents
+## Table of Contents
 
-* [Questions & support](#questions--support)
-* [How to contribute](#how-to-contribute)
-* [Development setup](#development-setup)
-* [Project layout](#project-layout)
-* [Coding style & commits](#coding-style--commits)
-* [Testing & coverage](#testing--coverage)
-* [Architecture principles (important)](#architecture-principles-important)
-* [Pull Request checklist](#pull-request-checklist)
-* [Labels we use](#labels-we-use)
-* [Security](#security)
-* [License](#license)
+- [Questions & Support](#questions--support)
+- [How to Contribute](#how-to-contribute)
+- [Development Setup](#development-setup)
+- [Project Layout](#project-layout)
+- [Coding Style & Commits](#coding-style--commits)
+- [Testing](#testing)
+- [Architecture Principles](#architecture-principles)
+- [Pull Request Checklist](#pull-request-checklist)
+- [Security](#security)
+- [License](#license)
 
 ---
 
 ## Questions & Support
 
-Have a question, design idea, or usage concern?
+Before opening an issue, please search existing Issues and Discussions.
 
-* Use **GitHub Discussions → Ideas** for:
+Use **GitHub Discussions** for:
 
-  * API contract design
-  * generics handling (`ServiceResponse<T>`, `Page<T>`)
-  * projection behavior
+- design questions
+- generic contracts and containers
+- projection and code generation behavior
+- usage and integration questions
 
-* Use **GitHub Discussions → Q&A** for:
-
-  * setup and configuration
-  * integration questions
-  * generator usage
-
-- Found a bug?
-
-  * Open an **Issue** with a minimal reproduction
-
-Please search existing issues and discussions first.
+Use **GitHub Issues** for reproducible bugs.
 
 ---
 
-## How to contribute
+## How to Contribute
 
-1. **Fork** and create a branch:
+1. Fork the repository.
+2. Create a focused branch.
 
 ```bash
-git checkout -b feature/scope-short-title
+git checkout -b feature/short-description
 ```
 
-2. Keep changes **small and focused**
-3. Update tests and docs if behavior changes
-4. Run full build
-5. Open PR with clear explanation
+3. Keep changes small and self-contained.
+4. Update documentation and tests when behavior changes.
+5. Run the full build before opening a pull request.
 
-> Small PRs = faster review
+Small, focused pull requests are easier to review.
 
 ---
 
-## Development setup
+## Development Setup
 
 ### Prerequisites
 
-* Java 17+ (21 recommended)
-* Maven 3.9+
+- Java 17+ (Java 21 recommended)
+- Maven 3.9+
 
-### Build (core platform)
+### Build
 
 ```bash
 mvn -q -ntp clean verify
@@ -87,119 +78,101 @@ mvn -q -ntp clean verify
 
 ---
 
-## Project layout
+## Project Layout
 
-```
-/openapi-generics-contract
-/openapi-generics-platform-bom
-/openapi-generics-server-starter
-/openapi-generics-java-codegen
-/openapi-generics-java-codegen-parent
+```text
+openapi-generics-contract
+openapi-generics-platform-bom
+openapi-generics-server-starter
+openapi-generics-java-codegen
+openapi-generics-java-codegen-parent
 ```
 
 ---
 
-## Coding style & commits
+## Coding Style & Commits
 
-### Rules
+### Principles
 
-* Keep code minimal and deterministic
-* Do NOT patch generated output
-* Fix issues at:
-
-  * contract
-  * projection
-  * generator
+- Keep implementations deterministic.
+- Avoid unnecessary complexity.
+- Never modify generated code.
+- Fix issues at the source:
+  - contract
+  - projection
+  - generator
 
 ### Commit prefixes
 
-* feature:
-* bugfix:
-* docs:
-* refactor:
-* test:
-* ci:
+- `feature:`
+- `bugfix:`
+- `docs:`
+- `refactor:`
+- `test:`
+- `ci:`
 
 ---
 
-## Testing & coverage
+## Testing
+
+Run the complete verification suite before submitting changes:
 
 ```bash
 mvn clean verify
 ```
 
-Notes:
-
-* Core modules focus on correctness, not runtime apps
-* Integration validation happens via sample consumers (external)
+Core platform modules focus on deterministic contract projection and client generation. End-to-end validation is performed through the sample projects.
 
 ---
 
-## Architecture principles (important)
+## Architecture Principles
 
-> These are not guidelines — they are invariants.
+These are project invariants.
 
-This project follows strict boundaries:
+### Contract First
 
-### 1. Contract is the source of truth
+Contract-owned response envelopes (for example `ServiceResponse<T>` or your own BYOE envelope) define the API contract.
 
-* `ServiceResponse<T>` defines semantics
-* OpenAPI must be a projection (not authority)
+OpenAPI is a projection of that contract.
 
-### 2. Determinism
+### Determinism
 
-Same input → same output
+The same contract and configuration must always produce the same generated output.
 
-No hidden behavior
+### Single Source of Truth
 
-### 3. No duplication
+Contracts are defined once and reused across server, OpenAPI, and generated clients.
 
-* Contract defined once
-* No re-definition in OpenAPI or generated code
+### Generated Code Is Disposable
 
-### 4. Generated code is disposable
+Never fix problems in generated sources.
 
-Never fix issues in generated files
+Always fix them in:
 
-Fix:
-
-* contract
-* projection
-* templates
+- the contract
+- the projection layer
+- the generator
 
 ---
 
-## Pull Request checklist
+## Pull Request Checklist
 
-* [ ] Scope is minimal
-* [ ] Build passes
-* [ ] Tests updated if needed
-* [ ] Docs updated if needed
-* [ ] No generated code edits
-
----
-
-## Labels we use
-
-* enhancement
-* bug
-* documentation
-* good first issue
-* help wanted
+- [ ] Scope is focused
+- [ ] Build passes
+- [ ] Tests updated when required
+- [ ] Documentation updated when required
+- [ ] No generated code has been modified
 
 ---
 
 ## Security
 
-Do NOT open public issues for vulnerabilities
+Please do **not** report security vulnerabilities through public GitHub issues.
 
-* Use GitHub Security Advisory
-* Or email: [baris.sayli@gmail.com](mailto:baris.sayli@gmail.com)
-
-See SECURITY.md
+Use GitHub Security Advisories or the contact information described in [SECURITY.md](./SECURITY.md).
 
 ---
 
 ## License
 
-MIT License
+By contributing, you agree that your contributions will be licensed under the project's MIT License.

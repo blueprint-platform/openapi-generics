@@ -6,15 +6,15 @@ nav_exclude: true
 
 # Architecture
 
-> Internal architecture of openapi-generics.
+> Internal architecture of OpenAPI Generics.
 
-OpenAPI Generics preserves contract-owned generic response structures across the complete Java → OpenAPI → Client lifecycle.
+OpenAPI Generics preserves contract semantics across the complete Java → OpenAPI → Client lifecycle.
 
-The project is built around a single principle:
+Its architecture is based on a simple principle:
 
-> Java contract is the source of truth.  
-> OpenAPI is a projection.  
-> Generated clients are deterministic reconstructions of that contract.
+> Java contracts are the source of truth.  
+> OpenAPI is a deterministic projection.  
+> Generated clients reconstruct the original contract.
 
 ---
 
@@ -22,18 +22,17 @@ The project is built around a single principle:
 
 - [Architecture Overview](#architecture-overview)
 - [Projection Protocol](#projection-protocol)
-- [Server Side](#server-side)
+- [Projection](#projection)
 - [Client Generation](#client-generation)
-- [Deterministic Generation](#deterministic-generation)
+- [Deterministic Pipeline](#deterministic-pipeline)
 - [Supported Scope](#supported-scope)
 - [Module Map](#module-map)
-- [Mental Model](#mental-model)
 
 ---
 
 ## Architecture Overview
 
-The platform consists of two independent parts connected only through the OpenAPI document.
+OpenAPI Generics consists of two independent phases connected only by the generated OpenAPI document.
 
 ```text
 Spring Boot Service
@@ -53,59 +52,51 @@ Generated Java Client
 
 The server publishes contract metadata.
 
-The client generator consumes that metadata and reconstructs contract-aligned wrappers.
-
-No runtime coupling exists between server and client generation.
+The client generator consumes that metadata to reconstruct contract-aligned Java types.
 
 ---
 
 ## Projection Protocol
 
-Generic semantics are carried through OpenAPI vendor extensions.
+Contract semantics are projected through OpenAPI vendor extensions.
 
-Examples:
+Example:
 
 ```yaml
 x-api-wrapper: true
+x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
+x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
 x-data-item: CustomerDto
 x-ignore-model: true
 ```
 
-These extensions allow the generator to distinguish:
-
-- contract-owned wrappers
-- container types
-- payload types
-- infrastructure models that should not be regenerated
+These extensions describe wrapper semantics, container identity, payload type, and generation behavior while remaining valid OpenAPI.
 
 ---
 
-## Server Side
+## Projection
 
-`openapi-generics-server-starter` projects Java contracts into OpenAPI.
+`openapi-generics-server-starter` analyzes Java response contracts and projects them into OpenAPI.
 
 Responsibilities:
 
-- Response contract discovery
-- Generic type introspection
-- Wrapper schema projection
-- Container metadata enrichment
-- Contract validation
+- response contract discovery
+- generic type introspection
+- wrapper schema projection
+- metadata enrichment
+- contract validation
 
-Examples:
+Supported contracts include:
 
 ```java
-ServiceResponse<CustomerDto>
-
-ServiceResponse<Page<CustomerDto>>
-
-ServiceResponse<List<CustomerDto>>
-
-ServiceResponse<Set<CustomerDto>>
+ServiceResponse<T>
+ServiceResponse<List<T>>
+ServiceResponse<Set<T>>
+ServiceResponse<Page<T>>
 ```
 
-and equivalent BYOE envelopes.
+Applications may also register their own generic container contracts (for example `Paging<T>` or `Window<T>`), which participate in the same projection pipeline.
 
 ---
 
@@ -115,72 +106,68 @@ and equivalent BYOE envelopes.
 
 Responsibilities:
 
-- Wrapper reconstruction
-- External contract reuse (BYOC)
-- Infrastructure model filtering
-- Container-aware generation
+- wrapper reconstruction
+- container-aware reconstruction
+- BYOE support
+- BYOC support
+- infrastructure model filtering
+- generated-source hygiene
 
-Generated wrappers remain intentionally thin:
+Generated wrappers intentionally remain thin:
 
 ```java
 public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {
-}
+    extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
 ---
 
-## Deterministic Generation
-
-The platform is designed around deterministic output.
+## Deterministic Pipeline
 
 ```text
 Java Contract
       ↓
-OpenAPI
+OpenAPI Projection
       ↓
-Generated Client
+Deterministic Client Reconstruction
 ```
 
-Same contract produces the same OpenAPI document and the same generated client output.
+The same contract and configuration always produce the same OpenAPI document and the same generated client.
 
-The platform validates both projection and generation stages and prefers fail-fast behavior over potentially incorrect code generation.
+Projection and generation are validated with fail-fast verification to prevent contract drift.
 
 ---
 
 ## Supported Scope
 
-Platform envelope:
+Built-in platform contracts:
 
 ```java
 ServiceResponse<T>
+ServiceResponse<List<T>>
+ServiceResponse<Set<T>>
+ServiceResponse<Page<T>>
 ```
 
-Supported container types:
+Supported capabilities:
 
-```java
-Page<T>
-List<T>
-Set<T>
-```
-
-Custom envelopes are supported through BYOE and participate in the same projection and reconstruction pipeline.
+- BYOE (Bring Your Own Envelope)
+- BYOC (Bring Your Own Contract)
+- application-defined generic containers
+- deterministic OpenAPI metadata
+- contract-aware Java client generation
 
 ---
 
-
 ## Module Map
 
-For contributors navigating the codebase:
-
 | Module | Responsibility |
-|----------|----------|
-| [`openapi-generics-contract`](../../README.md) | Shared platform contracts including `ServiceResponse<T>`, `Page<T>`, `Meta`, and `Sort`. |
-| [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md) | Spring Boot integration and OpenAPI projection pipeline. |
-| [`openapi-generics-java-codegen`](../../openapi-generics-java-codegen/README.md) | Contract-aware OpenAPI Generator extension (`GenericAwareJavaCodegen`). |
-| [`openapi-generics-java-codegen-parent`](../../openapi-generics-java-codegen-parent/README.md) | Build integration, template orchestration, and generator configuration. |
-| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md) | Dependency alignment for platform modules and integrations. |
-
+|----------|----------------|
+| [`openapi-generics-contract`](../../README.md) | Shared contracts and platform types |
+| [`openapi-generics-server-starter`](../../openapi-generics-server-starter/README.md) | Spring Boot projection pipeline |
+| [`openapi-generics-java-codegen`](../../openapi-generics-java-codegen/README.md) | Contract-aware OpenAPI Generator extension |
+| [`openapi-generics-java-codegen-parent`](../../openapi-generics-java-codegen-parent/README.md) | Generator orchestration and template lifecycle |
+| [`openapi-generics-platform-bom`](../../openapi-generics-platform-bom/README.md) | Dependency alignment |
 
 ---
 
@@ -191,9 +178,9 @@ Java Contract
       ↓
 OpenAPI Projection
       ↓
-Contract-Aware Reconstruction
+Contract Reconstruction
 ```
 
-The platform does not redefine contracts.
+OpenAPI Generics does not redefine contracts.
 
-It preserves them across the OpenAPI lifecycle.
+It preserves them.

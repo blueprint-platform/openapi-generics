@@ -1,197 +1,110 @@
 # Security Policy
 
-We take security seriously and appreciate responsible disclosures.
-If you believe you've found a vulnerability, **please follow the process below**.
+We take security seriously and appreciate responsible vulnerability disclosures.
+
+If you believe you have found a security issue in OpenAPI Generics, please report it privately using one of the channels below.
 
 ---
 
 ## Table of Contents
 
-* [Supported Versions](#supported-versions)
-* [Reporting a Vulnerability](#reporting-a-vulnerability)
-* [Our Process & Timelines](#our-process--timelines)
-* [Severity Guidance](#severity-guidance)
-* [Coordinated Disclosure](#coordinated-disclosure)
-* [Scope](#scope)
-* [Non-qualifying Reports](#non-qualifying-reports)
-* [Questions](#questions)
+- [Supported Versions](#supported-versions)
+- [Reporting a Vulnerability](#reporting-a-vulnerability)
+- [Disclosure Process](#disclosure-process)
+- [Scope](#scope)
+- [Out of Scope](#out-of-scope)
+- [Questions](#questions)
 
 ---
 
 ## Supported Versions
 
-We provide security fixes for the latest stable release line and the `main` branch.
+Security fixes are provided for the latest stable release line and the `main` branch.
 
-| Version   | Status                       |
-|-----------|------------------------------|
-| `main`    | Active development           |
-| `1.1.x`   | Supported (security fixes)   |
-| `1.0.x`   | End of support               |
-| `< 1.0.0` | Not supported                |
+| Version | Status |
+|---------|--------|
+| `main` | Active development |
+| `1.2.x` | Supported |
+| `1.1.x` | End of support |
+| `1.0.x` | End of support |
+| `< 1.0.0` | Not supported |
 
 > **Note**
-> We strongly recommend running the latest stable release before reporting security issues.
-> Security fixes are provided only for the current supported release line.
+> Please upgrade to the latest stable release before reporting a security issue. Security fixes are provided only for the current supported release line.
 
 ---
 
 ## Reporting a Vulnerability
 
-**Do not open a public issue.**
+**Please do not open a public GitHub issue for security reports.**
 
-Use one of the following **private disclosure channels**:
+Use one of the following private channels:
 
-### 1. GitHub Security Advisory (preferred)
+### GitHub Security Advisory (preferred)
 
-Use GitHub's private vulnerability reporting:
-[Report a vulnerability](https://github.com/blueprint-platform/openapi-generics/security/advisories/new)
+https://github.com/blueprint-platform/openapi-generics/security/advisories/new
 
-### 2. Email
+### Email
 
-Send details to **baris.sayli@gmail.com** with the subject prefix `SECURITY: <short summary>`.
+**baris.sayli@gmail.com**
 
-Please include:
+Please include, where possible:
 
-* A clear description of the issue and its potential impact
-* A minimal proof-of-concept (PoC) or reproduction steps
-* Affected version(s) (tag or commit hash)
-* Environment details if relevant
-* Suggested remediation ideas (optional but welcome)
+- a description of the issue
+- reproduction steps or a minimal proof of concept
+- affected version(s)
+- any relevant environment details
 
 ---
 
-## Our Process & Timelines
+## Disclosure Process
 
-We aim to handle reports responsibly, transparently, and without unnecessary delay.
+Reported vulnerabilities are reviewed as quickly as possible.
 
-* **Acknowledgement:** within 72 hours
-* **Initial triage:** within 7 days
-* **Fix timeline:** depends on severity (see [Severity Guidance](#severity-guidance))
-* **Release:** fixes are published once validated
+If confirmed, we will:
 
-For sensitive issues, **coordinated disclosure** may be used.
-Reporters are kept informed at key milestones.
-
----
-
-## Severity Guidance
-
-We follow a pragmatic, CVSS-inspired classification. Severity directly influences prioritization and release timing.
-
-### Critical
-
-* Remote code execution
-* Unsafe deserialization leading to RCE
-* Authentication/authorization bypass in generated code
-
-**Target fix:** within 30 days
-
-### High
-
-* Arbitrary file write/read
-* Contract bypass enabling unsafe execution paths
-* Significant information disclosure
-
-**Target fix:** within 30 days
-
-### Medium
-
-* Schema manipulation leading to incorrect client/server behavior
-* DoS within bounded system scope
-* Minor information disclosure
-
-**Target fix:** within 90 days
-
-### Low
-
-* Hardening gaps
-* Misconfigurations
-* Edge-case misuse without realistic exploit chain
-
-**Target fix:** planned for next release cycle
-
----
-
-## Coordinated Disclosure
-
-* We prefer **coordinated disclosure**
-* Please do not share details publicly before a fix is released
-* Reporters may be credited in release notes upon request
+- assess the impact
+- prepare an appropriate fix
+- publish the fix in a supported release
+- coordinate public disclosure when appropriate
 
 ---
 
 ## Scope
 
-### In scope
+OpenAPI Generics is a platform rather than an application.
 
-This repository is a **platform**, not an application. Security concerns are evaluated across the full platform chain.
+Security reports are relevant when they affect:
 
-**User-facing entry points:**
+- OpenAPI contract projection
+- generated client correctness
+- contract preservation
+- custom code generation
+- template behavior
+- vendor extension processing
 
-* `openapi-generics-server-starter` (server side) — Spring Boot integration, contract → OpenAPI projection
-* `openapi-generics-java-codegen-parent` (client side) — generator configuration, templates, and build wiring
-
-**Transitively pulled (part of the runtime and generation chain):**
-
-* `openapi-generics-contract` — core shared model, `ServiceResponse<T>` semantics, pagination (`Page`, `Meta`), error model (RFC 9457)
-* `openapi-generics-java-codegen` — generator implementation, template behavior, type mapping and suppression logic
-
-Consumers typically depend on only one entry point directly. The rest is pulled transitively, so security must be evaluated across the full chain.
-
-**Security-relevant areas:**
-
-* Misalignment between contract, OpenAPI projection, and generated code
-* Contract violations or ambiguity (`ServiceResponse<T>` semantics)
-* Incorrect schema projection (server → OpenAPI)
-* Incorrect code generation (OpenAPI → client)
-* Template-level behavior and transformation rules
-* Loss of determinism between contract, spec, and generated code
-
-### Out of scope
-
-* Example or sample applications outside the core platform
-* Vulnerabilities caused solely by **third-party dependencies** (report upstream first)
-* Deployment-specific misconfigurations
-* Runtime environment issues unrelated to the platform itself
+Generated code issues are investigated when they originate from OpenAPI Generics itself (templates, code generation, or contract semantics).
 
 ---
 
-## Non-qualifying Reports
+## Out of Scope
 
-To keep focus on impactful issues, we generally exclude:
+The following are generally outside the scope of this policy:
 
-* Best-practice recommendations without a realistic exploit scenario
-* Generic rate-limiting or DoS claims without a concrete attack vector
-* Missing headers or hardening suggestions in non-production contexts
-* Social engineering or physical attack scenarios
-
-### Generated code issues
-
-Vulnerabilities found in **generated code alone** (without a corresponding template or generator flaw) are generally considered:
-
-* **Upstream issues** — report to [OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator)
-* **Consumer issues** — how the generated code is used in the consumer's application
-
-We will investigate if the generated code issue traces back to:
-
-* Our template patches
-* Our custom codegen implementation
-* Contract-level semantic misalignment
-
-> **Important**
-> Generated code is treated as **disposable output**.
-> Security fixes must target **contracts, templates, or generators**, not generated artifacts.
+- vulnerabilities caused solely by third-party dependencies
+- deployment or infrastructure misconfiguration
+- example and sample applications
+- consumer-specific application code
+- generated code issues that originate from upstream OpenAPI Generator rather than OpenAPI Generics
 
 ---
 
 ## Questions
 
-If you're unsure whether something qualifies as a security issue, contact **baris.sayli@gmail.com**.
+If you are unsure whether an issue qualifies as a security vulnerability, feel free to contact:
 
-We're happy to help triage before a formal report.
+**baris.sayli@gmail.com**
 
 ---
 
-Thank you for helping keep the platform and its users safe.
-
-**Security, like API contracts, must be enforced at system boundaries — not patched after the fact.**
+Thank you for helping improve the security and reliability of OpenAPI Generics.

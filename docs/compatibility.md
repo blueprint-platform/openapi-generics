@@ -5,7 +5,7 @@ nav_exclude: true
 
 # Compatibility & Support Policy
 
-This page defines the officially supported runtime and build-time scope for **OpenAPI Generics 1.1.0**.
+This page defines the officially supported runtime and build-time scope for **OpenAPI Generics 1.2.0**.
 
 It describes what the platform tests, publishes, and treats as supported behavior.
 
@@ -32,7 +32,7 @@ OpenAPI Generics currently supports:
 - OpenAPI Generator 7.x
 - Maven-based client generation
 
-The supported contract model includes:
+The supported built-in contract model includes:
 
 ```java
 ServiceResponse<T>
@@ -62,6 +62,22 @@ YourEnvelope<Page<T>>
 io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
 ```
 
+Applications may also register their own generic container contracts.
+
+Example:
+
+```yaml
+openapi-generics:
+  containers:
+    - type: io.example.contract.Paging
+      item-property: content
+
+    - type: io.example.contract.Window
+      item-property: items
+```
+
+Configured containers participate in the same projection, metadata enrichment, and deterministic reconstruction pipeline as the built-in container types.
+
 ---
 
 ## Compatibility Matrix
@@ -86,18 +102,22 @@ The client generation parent provides a tested default OpenAPI Generator version
 
 ## Verified Capabilities
 
-The supported matrix is validated through repository samples and type-coverage modules.
+The supported matrix is validated through repository samples and dedicated type-coverage modules.
 
 Verified capabilities include:
 
 - default `ServiceResponse<T>` projection
 - `Page<T>`, `List<T>`, and `Set<T>` container projection
+- application-defined generic container registration
+- configurable container projection and reconstruction
+- preservation of Java container identity through `x-data-container-type`
 - BYOE envelope projection
 - BYOE container reconstruction
 - BYOC external DTO reuse
 - generated wrapper reconstruction
 - ignored infrastructure model filtering
-- end-to-end producer → OpenAPI → client → consumer validation
+- generated-source hygiene and deterministic Java client output
+- end-to-end producer → OpenAPI → generated client → consumer validation
 
 Reference samples:
 
@@ -124,9 +144,12 @@ Inside that boundary, OpenAPI Generics owns:
 
 - generics-aware OpenAPI projection
 - vendor extension metadata
+- application-defined generic container registration
 - contract-aware Java client generation
 - wrapper reconstruction
+- container-aware reconstruction
 - BYOE and BYOC resolution
+- generated-source hygiene
 - fail-fast detection of template patch drift
 
 Outside that boundary, behavior belongs to the surrounding ecosystem, such as:
@@ -147,9 +170,10 @@ The following are not currently supported:
 - non-Java server frameworks
 - non-Java client reconstruction
 - arbitrary nested generic graphs
-- arbitrary custom container inference
+- automatic inference of unregistered custom generic containers
 
-Standard OpenAPI tooling can still consume the generated OpenAPI document.  
+Standard OpenAPI tooling can still consume the generated OpenAPI document.
+
 Tools that do not understand OpenAPI Generics metadata simply ignore the vendor extensions.
 
 ---

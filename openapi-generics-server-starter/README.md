@@ -167,7 +167,7 @@ These extensions form the projection protocol between server OpenAPI output and 
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-server-starter</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 

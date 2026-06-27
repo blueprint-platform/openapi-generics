@@ -1,12 +1,13 @@
 # 🧩 Pull Request Template
 
 Thank you for contributing to **openapi-generics**! 🙌
-This repository is **contract‑first**, **projection‑driven**, and **generator‑sensitive** — small changes can affect:
+This repository is contract-first, projection-driven, and reconstruction-aware.
+Small changes can affect:
 
-* Contract semantics
-* OpenAPI projection output
-* Generated client behavior
-* Long-term determinism guarantees
+- Contract semantics
+- OpenAPI projection
+- Generated client reconstruction
+- Long-term deterministic behavior
 
 This template is intentionally strict. It ensures reviewers evaluate **contract impact first**, implementation second.
 
@@ -25,15 +26,15 @@ This template is intentionally strict. It ensures reviewers evaluate **contract 
 
 ## 📦 Changes
 
-List only **essential changes**:
+List only the **essential changes**:
 
-* Contract updates (`ServiceResponse<T>`, paging, error model)
-* OpenAPI projection / schema generation changes
-* Vendor extensions (`x-*`) behavior
-* Generator or template changes
-* Build / CI / docs updates
+- Contract updates (`ServiceResponse<T>`, paging, error model, BYOE)
+- OpenAPI projection or vendor extension (`x-*`) changes
+- Generic container registration (`openapi-generics.containers`)
+- Generator or template changes
+- Build, CI, documentation, or sample updates
 
-Avoid implementation noise — reviewers will inspect the diff.
+Avoid implementation details—reviewers will inspect the diff.
 
 ---
 

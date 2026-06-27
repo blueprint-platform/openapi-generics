@@ -10,10 +10,10 @@ has_toc: false
 
 > Publish a generics-aware OpenAPI document from your Spring Boot service without changing runtime behavior.
 
-This guide explains what changes in a producer service when `openapi-generics-server-starter` is added.
+This guide explains how to enable OpenAPI Generics on the producer side.
 
 For client generation, see [Client-Side Adoption](./client-side-adoption.md).  
-For internals, see [Architecture](../architecture/architecture.md).
+For implementation details, see [Architecture](../architecture/architecture.md).
 
 ---
 
@@ -22,10 +22,9 @@ For internals, see [Architecture](../architecture/architecture.md).
 - [Quick Start](#quick-start)
 - [What the Starter Does](#what-the-starter-does)
 - [Supported Controller Shapes](#supported-controller-shapes)
-- [BYOE](#byoe)
-- [What Is Left Untouched](#what-is-left-untouched)
-- [Error Responses](#error-responses)
+- [BYOE — Bring Your Own Envelope](#byoe)
 - [Verification](#verification)
+- [Further Reading](#further-reading)
 
 ---
 
@@ -37,7 +36,7 @@ Add the starter:
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-server-starter</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -45,80 +44,64 @@ Write controller methods normally:
 
 ```java
 @GetMapping("/{id}")
-public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(@PathVariable Long id) {
+public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(...) {
     return ResponseEntity.ok(ServiceResponse.of(service.findById(id)));
 }
 ```
 
-Container payloads are supported:
+Container payloads are supported as well:
 
 ```java
-@GetMapping
-public ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers() {
-    return ResponseEntity.ok(ServiceResponse.of(service.findAll()));
-}
+ServiceResponse<List<CustomerDto>>
+ServiceResponse<Set<CustomerDto>>
+ServiceResponse<Page<CustomerDto>>
 ```
 
-```java
-@GetMapping("/list")
-public ResponseEntity<ServiceResponse<List<CustomerDto>>> listCustomers() {
-    return ResponseEntity.ok(ServiceResponse.of(service.list()));
-}
-```
-
-```java
-@GetMapping("/set")
-public ResponseEntity<ServiceResponse<Set<CustomerDto>>> customerSet() {
-    return ResponseEntity.ok(ServiceResponse.of(service.set()));
-}
-```
-
-`Page<T>` refers to:
-
-```java
-io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
-```
+Application-defined generic containers are also supported when registered through the optional `openapi-generics.containers` configuration.
 
 ---
 
 ## What the Starter Does
 
-The starter runs when Springdoc generates the OpenAPI document:
+The starter runs only when Springdoc generates an OpenAPI document, for example:
 
 ```text
 /v3/api-docs
 /v3/api-docs.yaml
 ```
 
-It does not intercept HTTP requests.
+It:
 
-It does not change serialization.
+- discovers supported generic response contracts
+- projects wrapper and container metadata into OpenAPI
+- publishes OpenAPI Generics vendor extensions
+- validates the generated contract metadata
 
-It does not change controller runtime behavior.
+It does **not**:
 
-It only projects supported Java response shapes into OpenAPI with metadata that the client generator can later reconstruct.
+- intercept HTTP requests
+- change runtime serialization
+- modify controller behavior
 
-Pipeline summary:
+Projection pipeline:
 
 ```text
-Controller return type
-        ↓
-Response introspection
-        ↓
-Wrapper schema metadata
-        ↓
-Container metadata
-        ↓
-Generation-control markers
-        ↓
-OpenAPI validation
+Java Contract
+      ↓
+Response Introspection
+      ↓
+OpenAPI Projection
+      ↓
+Vendor Extensions
+      ↓
+Validated OpenAPI Document
 ```
 
 ---
 
 ## Supported Controller Shapes
 
-Default platform envelope:
+Built-in contracts:
 
 ```java
 ServiceResponse<T>
@@ -130,197 +113,80 @@ ServiceResponse<Set<T>>
 ServiceResponse<Page<T>>
 ```
 
-Supported examples:
+BYOE envelopes support the same response shapes.
+
+Application-defined generic containers (for example `Paging<T>` or `Window<T>`) participate in the same projection pipeline when registered through configuration.
+
+Asynchronous wrappers are unwrapped automatically, including:
 
 ```java
-ResponseEntity<ServiceResponse<CustomerDto>>
-
-ResponseEntity<ServiceResponse<List<CustomerDto>>>
-
-ResponseEntity<ServiceResponse<Set<CustomerDto>>>
-
-ResponseEntity<ServiceResponse<Page<CustomerDto>>>
-```
-
-Async wrappers are unwrapped automatically:
-
-```java
-CompletionStage<ServiceResponse<CustomerDto>>
-
-Future<ServiceResponse<CustomerDto>>
-
-DeferredResult<ServiceResponse<CustomerDto>>
-
-WebAsyncTask<ServiceResponse<CustomerDto>>
-```
-
-Enums are supported when published as reusable schema components:
-
-```java
-@Schema(enumAsRef = true)
-public enum CoverageStatus {
-    ACTIVE,
-    PASSIVE,
-    EXPERIMENTAL
-}
+CompletionStage<T>
+Future<T>
+DeferredResult<T>
+WebAsyncTask<T>
 ```
 
 ---
 
-## BYOE
+## BYOE — Bring Your Own Envelope
 
-Use a custom envelope by configuring it on the producer:
+Use your own response envelope instead of `ServiceResponse<T>`.
+
+Configure the envelope and, optionally, register application-defined generic containers:
 
 ```yaml
 openapi-generics:
   envelope:
     type: io.example.contract.ApiResponse
+
+  # Optional
+  containers:
+    - type: io.example.contract.Paging
+      item-property: content
+
+    - type: io.example.contract.Window
+      item-property: items
 ```
 
-Then use it in controller return types:
+The configured envelope becomes the published contract while preserving the same projection model.
 
-```java
-@GetMapping("/{id}")
-public ResponseEntity<ApiResponse<CustomerDto>> getCustomer(@PathVariable Long id) {
-    return ResponseEntity.ok(ApiResponse.ok(service.findById(id)));
-}
-```
+Configured generic containers are optional. When registered, they participate in the same projection pipeline as the built-in `List<T>`, `Set<T>`, and platform-provided `Page<T>` container types.
 
-BYOE supports the same container model:
-
-```java
-ApiResponse<T>
-
-ApiResponse<List<T>>
-
-ApiResponse<Set<T>>
-
-ApiResponse<Page<T>>
-```
-
-The envelope class must:
-
-- be a concrete class
-- declare exactly one type parameter
-- expose exactly one direct payload field of type `T`
-
-Valid example:
-
-```java
-public final class ApiResponse<T> {
-
-    private int status;
-
-    private String message;
-
-    private T data;
-}
-```
-
-Invalid envelope shapes fail at startup with a clear `IllegalStateException`.
-
----
-
-## What Is Left Untouched
-
-The starter only acts on supported envelope-shaped responses.
-
-These remain normal Springdoc output:
-
-```java
-CustomerDto
-
-List<CustomerDto>
-
-Map<String, Object>
-
-ResponseEntity<Void>
-```
-
-Reactive WebFlux types such as `Mono<T>` and `Flux<T>` are outside the current scope.
-
----
-
-## Error Responses
-
-The starter projects success response envelopes.
-
-It does not define your error model.
-
-Choose one service-wide pattern:
-
-```text
-Success → ServiceResponse<T>
-Error   → ProblemDetail
-```
-
-or:
-
-```text
-Success → YourEnvelope<T>
-Error   → YourEnvelope<Void>
-```
-
-Keep the pattern consistent across the service.
-
-The client generator preserves the response contract; it does not decide error semantics.
+This allows generated clients to reconstruct both built-in and application-defined generic container contracts through the same deterministic model.
 
 ---
 
 ## Verification
 
-### 1. Check runtime response
+After starting the application, verify that the generated OpenAPI document contains OpenAPI Generics metadata.
 
-```bash
-curl -s http://localhost:8084/customer-service/customers/1
-```
-
-The JSON should match your actual envelope serialization.
-
-If runtime JSON is wrong, fix the envelope/Jackson contract. The starter does not change runtime serialization.
-
-### 2. Check OpenAPI metadata
-
-```bash
-curl -s http://localhost:8084/customer-service/v3/api-docs.yaml | grep -A4 "x-api-wrapper"
-```
-
-Expected metadata:
-
-```yaml
-x-api-wrapper: true
-x-api-wrapper-datatype: CustomerDto
-```
-
-For container payloads:
+Built-in container example:
 
 ```yaml
 x-api-wrapper: true
 x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
+x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
 x-data-item: CustomerDto
 ```
 
-### 3. Check ignored infrastructure models
+Application-defined container example:
 
-The OpenAPI document should mark contract-owned infrastructure schemas with:
+```yaml
+x-api-wrapper: true
+x-api-wrapper-datatype: PagingCustomerDto
+x-data-container: Paging
+x-data-container-type: io.example.contract.Paging
+x-data-item: CustomerDto
+```
+
+Infrastructure schemas that are contract-owned or externally provided should also be marked with:
 
 ```yaml
 x-ignore-model: true
 ```
 
-Typical ignored models:
-
-```text
-ServiceResponse
-Meta
-Sort
-Page
-```
-
-or your BYOE envelope.
-
-If these markers are present, the server-side projection is ready for client generation.
+These metadata allow the client generator to reconstruct the original Java contract deterministically.
 
 ---
 

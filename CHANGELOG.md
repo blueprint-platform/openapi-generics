@@ -10,6 +10,54 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [1.2.0] - 2026-06-27
+
+### Minor release
+
+OpenAPI Generics 1.2.0 extends the contract-first platform with application-defined generic containers, richer projection metadata, and deterministic generated-source hygiene.
+
+This release generalizes the container infrastructure introduced in 1.1, allowing applications to contribute their own generic container contracts while preserving the same projection, metadata enrichment, and client reconstruction pipeline.
+
+All 1.1.x contracts remain fully backward compatible.
+
+### Added
+
+- Added support for application-defined generic container contracts through configuration.
+- Added startup validation for configured generic containers, including generic type and collection property verification.
+- Added support for configurable container item properties, enabling custom contracts such as `Paging<T>` and `Window<T>`.
+- Added `x-data-container-type` vendor extension to preserve the fully qualified Java container type during OpenAPI projection.
+- Added container identity preservation throughout response introspection, projection, metadata enrichment, and client reconstruction.
+- Added deterministic generated-source hygiene phase to the Java code generation pipeline.
+- Added automated cleanup of duplicate and unused imports in generated Java sources.
+- Added comprehensive validation for configured container discovery, projection metadata generation, and reconstruction behavior.
+
+### Changed
+
+- Generalized the container model to support both built-in and application-defined generic containers through a unified descriptor model.
+- Unified built-in and configured containers under the same projection, metadata, and reconstruction pipeline.
+- Improved projection metadata by preserving resolved Java container identity alongside semantic container information.
+- Improved generated Java source quality through deterministic post-generation cleanup.
+- Updated documentation, architecture diagrams, samples, and adoption guides to cover configurable generic containers and enriched projection metadata.
+
+### Quality & Verification
+
+- Added regression coverage for application-defined generic container registration and validation.
+- Added verification for `x-data-container-type` generation across supported container types.
+- Added unit and integration tests covering configurable container projection, metadata enrichment, and reconstruction.
+- Added regression coverage for generated-source hygiene and deterministic code generation.
+- Verified producer → OpenAPI → generated client → consumer flows for both built-in and configured generic container contracts.
+- Verified full backward compatibility with all 1.1.x response contracts.
+
+### Compatibility
+
+- Fully backward compatible with all 1.1.x releases.
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Maven-based client generation
+
+---
+
 ## [1.1.0] - 2026-06-21
 
 ### Minor release

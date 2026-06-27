@@ -8,25 +8,25 @@ has_toc: false
 
 # Client-Side Adoption
 
-> Generate a Java client that reconstructs the published contract instead of redefining it.
+> Generate Java clients that reconstruct your published contract instead of redefining it.
 
-This guide explains how to consume an OpenAPI Generics-enabled OpenAPI document and generate a contract-aligned Java client.
+This guide explains how to generate contract-aligned Java clients from an OpenAPI Generics document.
 
 For server-side projection, see [Server-Side Adoption](./server-side-adoption.md).  
-For internals, see [Architecture](../architecture/architecture.md).
+For architecture details, see [Architecture](../architecture/architecture.md).
 
 ---
 
 ## Contents
 
 - [Quick Start](#quick-start)
-- [What the Client Does](#what-the-client-does)
-- [BYOE](#byoe)
-- [BYOC](#byoc)
-- [Supported Output Shapes](#supported-output-shapes)
+- [BYOE — Bring Your Own Envelope](#byoe)
+- [BYOC — Bring Your Own Contract](#byoc)
+- [Supported Contracts](#supported-contracts)
 - [Fallback Mode](#fallback-mode)
 - [Verification](#verification)
 - [Usage Boundary](#usage-boundary)
+- [Further Reading](#further-reading)
 
 ---
 
@@ -38,9 +38,10 @@ For internals, see [Architecture](../architecture/architecture.md).
 <parent>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </parent>
 ```
+
 
 ### 2. Configure OpenAPI Generator
 
@@ -107,13 +108,14 @@ public class ServiceResponsePageCustomerDto
 
 `Page<T>` is imported from `openapi-generics-contract`; the wrapper class itself is generated under your configured `modelPackage`.
 
-### 3. Build
+
+### 3. Generate
 
 ```bash
 mvn clean install
 ```
 
-Generated sources are added automatically from:
+Generated sources are added automatically under:
 
 ```text
 target/generated-sources/openapi/src/gen/java
@@ -121,29 +123,9 @@ target/generated-sources/openapi/src/gen/java
 
 ---
 
-## What the Client Does
-
-The client generation pipeline consumes an OpenAPI document and reconstructs contract-aligned Java wrapper types.
-
-It uses OpenAPI Generics vendor extensions such as:
-
-```yaml
-x-api-wrapper: true
-x-api-wrapper-datatype: PageCustomerDto
-x-data-container: Page
-x-data-item: CustomerDto
-x-ignore-model: true
-```
-
-The OpenAPI document is the input.
-
-The Java contract remains the semantic target.
-
----
-
 ## BYOE
 
-Use your own response envelope instead of the platform default `ServiceResponse<T>`.
+Reuse your existing response envelope instead of `ServiceResponse<T>`.
 
 ```xml
 <additionalProperties>
@@ -153,35 +135,13 @@ Use your own response envelope instead of the platform default `ServiceResponse<
 </additionalProperties>
 ```
 
-Generated wrappers then extend your envelope:
-
-```java
-public class ApiResponseCustomerDto
-    extends ApiResponse<CustomerDto> {
-}
-```
-
-Container payloads are also reconstructed when the OpenAPI document carries container metadata:
-
-```java
-public class ApiResponseListCustomerDto
-    extends ApiResponse<List<CustomerDto>> {
-}
-```
-
-```java
-public class ApiResponsePageCustomerDto
-    extends ApiResponse<Page<CustomerDto>> {
-}
-```
-
-The configured envelope must be available on the client classpath.
+Generated wrappers extend your envelope while preserving the published contract semantics.
 
 ---
 
 ## BYOC
 
-Reuse DTOs you already own instead of regenerating them.
+Reuse existing DTOs instead of generating duplicates.
 
 ```xml
 <additionalProperties>
@@ -191,161 +151,73 @@ Reuse DTOs you already own instead of regenerating them.
 </additionalProperties>
 ```
 
-Effect:
-
-- `CustomerDto` is not generated
-- generated wrappers import `com.example.contract.CustomerDto`
-- the client reuses your contract-owned DTO
-
-Add one mapping per externally owned OpenAPI model.
+Mapped models are imported directly from your shared contract module.
 
 ---
 
-## Supported Output Shapes
+## Supported Contracts
 
-Default platform envelope:
+Built-in contracts:
 
 ```java
 ServiceResponse<T>
-
 ServiceResponse<List<T>>
-
 ServiceResponse<Set<T>>
-
 ServiceResponse<Page<T>>
 ```
 
-BYOE envelope:
+BYOE envelopes support the same response shapes.
 
-```java
-ApiResponse<T>
-
-ApiResponse<List<T>>
-
-ApiResponse<Set<T>>
-
-ApiResponse<Page<T>>
-```
-
-`Page<T>` refers to:
-
-```java
-io.github.blueprintplatform.openapi.generics.contract.paging.Page<T>
-```
-
-Generated wrappers are intentionally thin:
-
-```java
-public class ServiceResponseSetCustomerDto
-    extends ServiceResponse<Set<CustomerDto>> {
-}
-```
-
-They exist for transport binding and generic type preservation.
-
-They are not domain models.
+Application-defined generic containers (for example `Paging<T>` or `Window<T>`) participate in the same projection and reconstruction pipeline when published through OpenAPI Generics metadata.
 
 ---
 
 ## Fallback Mode
 
-To bypass OpenAPI Generics template patching and use stock OpenAPI Generator behavior:
+Disable OpenAPI Generics template patching:
 
 ```xml
 <openapi.generics.skip>true</openapi.generics.skip>
 ```
 
-Use this for:
-
-- output comparison
-- debugging
-- incremental migration
-
-Default:
+To return completely to standard OpenAPI Generator behavior, use:
 
 ```xml
-<openapi.generics.skip>false</openapi.generics.skip>
+<generatorName>java</generatorName>
 ```
 
 ---
 
 ## Verification
 
-After generation, check:
+After generation, verify that:
 
-### Wrappers should be thin
-
-Expected:
-
-```java
-public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {
-}
-```
-
-Not expected:
-
-```java
-public class ServiceResponsePageCustomerDto {
-    private PageCustomerDto data;
-    private Meta meta;
-}
-```
-
-### Contract-owned models should not be regenerated
-
-Generated DTO package should not contain:
-
-```text
-ServiceResponse
-Meta
-Sort
-Page
-```
-
-Nor any DTO mapped through BYOC.
-
-### BYOE and BYOC types must compile
-
-If the build fails with `cannot find symbol`, the referenced contract module is missing from the client classpath.
+- wrappers extend existing contracts rather than redefining them
+- contract-owned infrastructure models are not regenerated
+- BYOE and BYOC types resolve successfully
+- configured generic containers are reconstructed identically to built-in containers
 
 ---
 
 ## Usage Boundary
 
-Generated APIs should stay behind an adapter boundary.
+Generated wrappers are transport bindings, not application contracts.
 
-Application code should depend on contract types:
+Application code should depend on shared contract types such as:
 
 ```java
 ServiceResponse<CustomerDto>
 ```
 
-or, with BYOE:
+or
 
 ```java
 ApiResponse<CustomerDto>
 ```
 
-not on generated wrapper classes such as:
+rather than generated wrapper classes.
 
-```java
-ServiceResponseCustomerDto
-ApiResponseCustomerDto
-```
-
-Recommended shape:
-
-```java
-public interface CustomerClient {
-
-    ServiceResponse<CustomerDto> getCustomer(Long id);
-}
-```
-
-Implementation delegates to the generated API.
-
-This keeps generated code as a transport concern and prevents OpenAPI output from leaking into application logic.
+Keep generated clients behind an adapter boundary so application code remains independent of generated artifacts.
 
 ---
 
