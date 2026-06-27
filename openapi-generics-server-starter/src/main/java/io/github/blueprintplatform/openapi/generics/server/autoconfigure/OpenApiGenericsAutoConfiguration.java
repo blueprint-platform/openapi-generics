@@ -2,11 +2,11 @@ package io.github.blueprintplatform.openapi.generics.server.autoconfigure;
 
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.*;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.DefaultSupportedContainerTypesResolver;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.ConfiguredContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.DefaultSupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.SupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.pipeline.OpenApiPipelineOrchestrator;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.ContractSchemaExclusionApplier;
-import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaEnricher;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.WrapperSchemaProcessor;
 import io.github.blueprintplatform.openapi.generics.server.core.validation.OpenApiContractGuard;
 import io.github.blueprintplatform.openapi.generics.server.mvc.MvcResponseTypeDiscoveryStrategy;
@@ -20,7 +20,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-@AutoConfiguration
+/**
+ * Main auto-configuration for OpenAPI Generics server support.
+ *
+ * <p>Registers response type discovery, generic response introspection, contract guarding, and the
+ * OpenAPI customization pipeline.
+ */
+@AutoConfiguration(after = OpenApiGenericsSchemaAutoConfiguration.class)
 @ConditionalOnClass(OpenApiCustomizer.class)
 @ConditionalOnWebApplication
 @EnableConfigurationProperties(OpenApiGenericsProperties.class)
@@ -42,9 +48,17 @@ public class OpenApiGenericsAutoConfiguration {
 
   @Bean
   @ConditionalOnMissingBean
+  public ConfiguredContainerTypesResolver configuredContainerTypesResolver() {
+    return new ConfiguredContainerTypesResolver();
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
   public ResponseIntrospectionPolicyResolver responseIntrospectionPolicyResolver(
-      SupportedContainerTypesResolver supportedContainerTypesResolver) {
-    return new ResponseIntrospectionPolicyResolver(supportedContainerTypesResolver);
+      SupportedContainerTypesResolver supportedContainerTypesResolver,
+      ConfiguredContainerTypesResolver configuredContainerTypesResolver) {
+    return new ResponseIntrospectionPolicyResolver(
+        supportedContainerTypesResolver, configuredContainerTypesResolver);
   }
 
   @Bean
@@ -64,12 +78,6 @@ public class OpenApiGenericsAutoConfiguration {
   @ConditionalOnMissingBean
   public ContractSchemaExclusionApplier schemaGenerationControlMarker() {
     return new ContractSchemaExclusionApplier();
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public WrapperSchemaProcessor wrapperSchemaProcessor(WrapperSchemaEnricher enricher) {
-    return new WrapperSchemaProcessor(enricher);
   }
 
   @Bean

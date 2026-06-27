@@ -1,13 +1,51 @@
 openapi: 3.1.0
 info:
   title: BYOE Response Type Coverage API
-  description: "Type coverage sample validating contract projection and client reconstruction\
-    \ for ApiResponse<T>, ApiResponse<List<T>>, ApiResponse<Set<T>>, and ApiResponse<Page<T>>."
+  description: |
+    Type coverage sample validating OpenAPI projection, generated client reconstruction,
+    and runtime deserialization for custom response envelopes.
+
+    Verified response shapes include:
+
+    - ApiResponse<T>
+    - ApiResponse<List<T>>
+    - ApiResponse<Set<T>>
+    - ApiResponse<Page<T>>
+    - ApiResponse<Paging<T>>
+    - ApiResponse<Window<T>>
+
+    Demonstrates Bring Your Own Envelope (BYOE) and Bring Your Own Container (BYOC)
+    support by reconstructing both built-in and application-defined generic response
+    contracts across OpenAPI projection, generated clients, and runtime deserialization.
   version: 1.2.0-SNAPSHOT
 servers:
 - url: http://localhost:8076/type-coverage/byoe-response
-  description: Local BYOE response type coverage producer
+  description: Local BYOE/BYOC response type coverage producer
 paths:
+  /types/windows/summaries:
+    get:
+      tags:
+      - window-payload-controller
+      operationId: windowSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWindowTypeSummaryDto"
+  /types/windows/statuses:
+    get:
+      tags:
+      - window-payload-controller
+      operationId: windowStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWindowCoverageStatus"
   /types/values/uuid:
     get:
       tags:
@@ -140,6 +178,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseBoolean"
+  /types/paging/summaries:
+    get:
+      tags:
+      - paging-payload-controller
+      operationId: pagingSummaries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagingTypeSummaryDto"
+  /types/paging/statuses:
+    get:
+      tags:
+      - paging-payload-controller
+      operationId: pagingStatuses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponsePagingCoverageStatus"
   /types/pages/summaries:
     get:
       tags:
@@ -222,6 +284,84 @@ components:
         message:
           type: string
       x-ignore-model: true
+    ApiResponseWindowTypeSummaryDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/WindowTypeSummaryDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: WindowTypeSummaryDto
+      x-data-container: Window
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      x-data-item: TypeSummaryDto
+    CoverageStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - PASSIVE
+      - EXPERIMENTAL
+    TypeSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        status:
+          $ref: "#/components/schemas/CoverageStatus"
+    WindowTypeSummaryDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        nextCursor:
+          type: string
+        hasNext:
+          type: boolean
+      x-ignore-model: true
+    ApiResponseWindowCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/WindowCoverageStatus"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: WindowCoverageStatus
+      x-data-container: Window
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Window
+      x-data-item: CoverageStatus
+    WindowCoverageStatus:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        nextCursor:
+          type: string
+        hasNext:
+          type: boolean
+      x-ignore-model: true
     ApiResponseUUID:
       type: object
       properties:
@@ -255,12 +395,6 @@ components:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
       x-api-wrapper-datatype: CoverageStatus
-    CoverageStatus:
-      type: string
-      enum:
-      - ACTIVE
-      - PASSIVE
-      - EXPERIMENTAL
     ApiResponseOffsetDateTime:
       type: object
       properties:
@@ -317,16 +451,6 @@ components:
       x-data-container: Set
       x-data-container-type: java.util.Set
       x-data-item: TypeSummaryDto
-    TypeSummaryDto:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        code:
-          type: string
-        status:
-          $ref: "#/components/schemas/CoverageStatus"
     ApiResponseSetCoverageStatus:
       type: object
       properties:
@@ -431,6 +555,88 @@ components:
             $ref: "#/components/schemas/ApiError"
       x-api-wrapper: true
       x-api-wrapper-datatype: Boolean
+    ApiResponsePagingTypeSummaryDto:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagingTypeSummaryDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PagingTypeSummaryDto
+      x-data-container: Paging
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Paging
+      x-data-item: TypeSummaryDto
+    PagingTypeSummaryDto:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeSummaryDto"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+      x-ignore-model: true
+    ApiResponsePagingCoverageStatus:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/PagingCoverageStatus"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiError"
+      x-api-wrapper: true
+      x-api-wrapper-datatype: PagingCoverageStatus
+      x-data-container: Paging
+      x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Paging
+      x-data-item: CoverageStatus
+    PagingCoverageStatus:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageStatus"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        hasNext:
+          type: boolean
+      x-ignore-model: true
     ApiResponsePageTypeSummaryDto:
       type: object
       properties:

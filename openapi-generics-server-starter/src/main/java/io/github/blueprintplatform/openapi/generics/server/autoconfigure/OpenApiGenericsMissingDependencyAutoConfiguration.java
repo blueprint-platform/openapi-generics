@@ -48,20 +48,16 @@ public class OpenApiGenericsMissingDependencyAutoConfiguration {
 
       This starter activates only when Springdoc is present.
 
-      To enable OpenAPI customization, add one of the following:
-
-        - org.springdoc:springdoc-openapi-starter-webmvc-ui
-        - org.springdoc:springdoc-openapi-starter-webflux-ui
+      To enable OpenAPI customization, add dependency on Springdoc OpenAPI in your build configuration:
+        - For Maven:
+          <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
 
       -------------------------------------------------------------------------
       """;
 
-  /**
-   * Logs a warning message indicating that Springdoc is missing.
-   *
-   * <p>This method is invoked after bean initialization and provides a clear diagnostic message to
-   * the user.
-   */
   @PostConstruct
   public void logWarning() {
     log.warn(MESSAGE);

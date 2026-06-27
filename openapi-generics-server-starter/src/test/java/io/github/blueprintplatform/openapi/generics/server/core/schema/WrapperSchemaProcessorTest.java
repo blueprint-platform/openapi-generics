@@ -7,8 +7,12 @@ import static org.mockito.Mockito.*;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.server.core.introspection.ResponseTypeDescriptor;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.VendorExtensions;
+import io.github.blueprintplatform.openapi.generics.server.core.schema.enrichment.WrapperSchemaEnricher;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -76,7 +80,14 @@ class WrapperSchemaProcessorTest {
         ResponseTypeDescriptor.container(
             ServiceResponse.class,
             "data",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     processor.process(openApi, descriptor);
@@ -120,8 +131,15 @@ class WrapperSchemaProcessorTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.container(
             ApiResponse.class,
-            "payload",
-            new SupportedContainerType(Page.class, PAGE, PAGE),
+            "data",
+            new SupportedContainerDescriptor(
+                Page.class,
+                PAGE,
+                PAGE,
+                ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+                "content",
+                ContainerSource.BUILT_IN,
+                ContainerMatchMode.EXACT),
             "CustomerDto");
 
     processor.process(openApi, descriptor);

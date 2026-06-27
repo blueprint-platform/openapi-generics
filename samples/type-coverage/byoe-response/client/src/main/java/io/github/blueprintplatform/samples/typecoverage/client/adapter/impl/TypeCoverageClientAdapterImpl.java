@@ -2,17 +2,14 @@ package io.github.blueprintplatform.samples.typecoverage.client.adapter.impl;
 
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.samples.typecoverage.client.adapter.TypeCoverageClientAdapter;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ListPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ObjectPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.PagedPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ScalarPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.SetPayloadControllerApi;
-import io.github.blueprintplatform.samples.typecoverage.client.generated.api.ValuePayloadControllerApi;
+import io.github.blueprintplatform.samples.typecoverage.client.generated.api.*;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.AddressDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.CoverageStatus;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeProfileDto;
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse;
+import io.github.blueprintplatform.samples.typecoverage.contract.Paging;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -30,20 +27,26 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
   private final ListPayloadControllerApi listApi;
   private final SetPayloadControllerApi setApi;
   private final PagedPayloadControllerApi pagedApi;
+  private final PagingPayloadControllerApi pagingApi;
+  private final WindowPayloadControllerApi windowApi;
 
   public TypeCoverageClientAdapterImpl(
-      ScalarPayloadControllerApi scalarApi,
-      ValuePayloadControllerApi valueApi,
-      ObjectPayloadControllerApi objectApi,
-      ListPayloadControllerApi listApi,
-      SetPayloadControllerApi setApi,
-      PagedPayloadControllerApi pagedApi) {
+          ScalarPayloadControllerApi scalarApi,
+          ValuePayloadControllerApi valueApi,
+          ObjectPayloadControllerApi objectApi,
+          ListPayloadControllerApi listApi,
+          SetPayloadControllerApi setApi,
+          PagedPayloadControllerApi pagedApi,
+          PagingPayloadControllerApi pagingApi,
+          WindowPayloadControllerApi windowApi) {
     this.scalarApi = scalarApi;
     this.valueApi = valueApi;
     this.objectApi = objectApi;
     this.listApi = listApi;
     this.setApi = setApi;
     this.pagedApi = pagedApi;
+    this.pagingApi = pagingApi;
+    this.windowApi = windowApi;
   }
 
   @Override
@@ -129,5 +132,25 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
   @Override
   public ApiResponse<Page<CoverageStatus>> pagedStatuses() {
     return pagedApi.pagedStatuses();
+  }
+
+  @Override
+  public ApiResponse<Paging<TypeSummaryDto>> pagingSummaries() {
+    return pagingApi.pagingSummaries();
+  }
+
+  @Override
+  public ApiResponse<Paging<CoverageStatus>> pagingStatuses() {
+    return pagingApi.pagingStatuses();
+  }
+
+  @Override
+  public ApiResponse<Window<TypeSummaryDto>> windowSummaries() {
+    return windowApi.windowSummaries();
+  }
+
+  @Override
+  public ApiResponse<Window<CoverageStatus>> windowStatuses() {
+    return windowApi.windowStatuses();
   }
 }

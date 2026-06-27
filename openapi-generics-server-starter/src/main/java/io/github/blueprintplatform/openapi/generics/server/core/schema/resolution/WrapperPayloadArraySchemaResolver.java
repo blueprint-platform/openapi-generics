@@ -1,4 +1,4 @@
-package io.github.blueprintplatform.openapi.generics.server.core.schema.resolver;
+package io.github.blueprintplatform.openapi.generics.server.core.schema.resolution;
 
 import static io.github.blueprintplatform.openapi.generics.server.core.schema.constant.SchemaConstants.TYPE_ARRAY;
 
@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.JsonSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import java.util.Map;
 
+/** Resolves array payload schemas defined directly on projected wrapper properties. */
 public class WrapperPayloadArraySchemaResolver implements ContainerSchemaResolver {
 
   @SuppressWarnings("rawtypes")

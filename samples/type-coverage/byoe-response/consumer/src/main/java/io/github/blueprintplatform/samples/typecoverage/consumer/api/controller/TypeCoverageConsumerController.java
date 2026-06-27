@@ -7,6 +7,8 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Typ
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
 import io.github.blueprintplatform.samples.typecoverage.contract.ApiResponse;
+import io.github.blueprintplatform.samples.typecoverage.contract.Paging;
+import io.github.blueprintplatform.samples.typecoverage.contract.Window;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -112,5 +114,25 @@ public class TypeCoverageConsumerController {
   @GetMapping("/pages/statuses")
   public ResponseEntity<ApiResponse<Page<CoverageStatus>>> pagedStatuses() {
     return ResponseEntity.ok(service.pagedStatuses());
+  }
+
+  @GetMapping("/paging/summaries")
+  public ResponseEntity<ApiResponse<Paging<TypeSummaryDto>>> pagingSummaries() {
+    return ResponseEntity.ok(service.pagingSummaries());
+  }
+
+  @GetMapping("/paging/statuses")
+  public ResponseEntity<ApiResponse<Paging<CoverageStatus>>> pagingStatuses() {
+    return ResponseEntity.ok(service.pagingStatuses());
+  }
+
+  @GetMapping("/windows/summaries")
+  public ResponseEntity<ApiResponse<Window<TypeSummaryDto>>> windowSummaries() {
+    return ResponseEntity.ok(service.windowSummaries());
+  }
+
+  @GetMapping("/windows/statuses")
+  public ResponseEntity<ApiResponse<Window<CoverageStatus>>> windowStatuses() {
+    return ResponseEntity.ok(service.windowStatuses());
   }
 }

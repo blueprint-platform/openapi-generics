@@ -1,6 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -15,41 +15,10 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
- * Extracts contract-aware response type metadata from controller return types.
+ * Introspects generic response types and produces descriptors used during OpenAPI projection.
  *
- * <p>Unwraps framework-level wrappers (for example {@code ResponseEntity}, {@code CompletionStage},
- * {@code Future}, {@code DeferredResult}, and {@code WebAsyncTask}) before analyzing the actual
- * contract response shape.
- *
- * <p>Produces a {@link ResponseTypeDescriptor} only for response structures that are explicitly
- * supported by the active {@link ResponseIntrospectionPolicy}.
- *
- * <p>For the default platform envelope, supported shapes are:
- *
- * <ul>
- *   <li>{@code ServiceResponse<T>}
- *   <li>{@code ServiceResponse<Page<T>>}
- *   <li>{@code ServiceResponse<List<T>>}
- * </ul>
- *
- * <p>For custom BYOE envelopes, supported shapes are limited to:
- *
- * <ul>
- *   <li>{@code YourEnvelope<T>}
- * </ul>
- *
- * <p>Nested container payloads are intentionally unsupported, including:
- *
- * <ul>
- *   <li>{@code ServiceResponse<List<List<T>>>}
- *   <li>{@code ServiceResponse<Page<List<T>>>}
- *   <li>{@code YourEnvelope<Page<T>>}
- *   <li>{@code YourEnvelope<List<T>>}
- * </ul>
- *
- * <p>Enum payloads are supported only when published as reusable OpenAPI schema components (for
- * example via {@code @Schema(enumAsRef = true)}). Inline enum schemas are ignored because they do
- * not produce stable component identities required by the projection pipeline.
+ * <p>Recognizes the configured response envelope, supported generic container contracts, and
+ * payload types after unwrapping common asynchronous response wrappers.
  */
 public final class ResponseTypeIntrospector {
 
@@ -58,7 +27,7 @@ public final class ResponseTypeIntrospector {
   private static final String SCHEMA_ANNOTATION = "io.swagger.v3.oas.annotations.media.Schema";
 
   private final Class<?> envelopeType;
-  private final Set<SupportedContainerType> supportedContainers;
+  private final Set<SupportedContainerDescriptor> supportedContainers;
   private final String payloadPropertyName;
 
   public ResponseTypeIntrospector(ResponseIntrospectionPolicy policy) {
@@ -87,12 +56,14 @@ public final class ResponseTypeIntrospector {
           descriptorOpt.map(Object::toString).orElse("<empty>"),
           descriptorOpt.map(ResponseTypeDescriptor::dataRefName).orElse("<empty>"));
     }
+
     return descriptorOpt;
   }
 
   private ResolvableType unwrap(ResolvableType type) {
     for (int i = 0; i < MAX_UNWRAP_DEPTH; i++) {
       Class<?> raw = type.resolve();
+
       if (raw == null || envelopeType.isAssignableFrom(raw)) {
         return type;
       }
@@ -145,13 +116,13 @@ public final class ResponseTypeIntrospector {
 
   private Optional<ResponseTypeDescriptor> buildContainerDescriptor(
       ResolvableType dataType, Class<?> raw) {
-
-    for (SupportedContainerType containerType : supportedContainers) {
-      if (!containerType.matches(raw)) {
+    for (SupportedContainerDescriptor container : supportedContainers) {
+      if (!container.matches(raw)) {
         continue;
       }
 
       ResolvableType itemType = safeGeneric(dataType);
+
       if (itemType.hasGenerics()) {
         return Optional.empty();
       }
@@ -163,7 +134,7 @@ public final class ResponseTypeIntrospector {
 
       return Optional.of(
           ResponseTypeDescriptor.container(
-              envelopeType, payloadPropertyName, containerType, itemRaw.getSimpleName()));
+              envelopeType, payloadPropertyName, container, itemRaw.getSimpleName()));
     }
 
     return Optional.empty();
@@ -203,6 +174,7 @@ public final class ResponseTypeIntrospector {
     if (!type.hasGenerics()) {
       return ResolvableType.NONE;
     }
+
     return type.getGeneric(0);
   }
 

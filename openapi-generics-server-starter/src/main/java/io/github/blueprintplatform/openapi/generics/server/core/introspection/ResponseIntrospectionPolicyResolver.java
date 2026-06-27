@@ -3,7 +3,9 @@ package io.github.blueprintplatform.openapi.generics.server.core.introspection;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.EnvelopeProperties;
 import io.github.blueprintplatform.openapi.generics.server.autoconfigure.properties.OpenApiGenericsProperties;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.ConfiguredContainerTypesResolver;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.resolver.SupportedContainerTypesResolver;
 import io.github.blueprintplatform.openapi.generics.server.core.schema.constant.PropertyNames;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
@@ -11,56 +13,61 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
- * Resolves and validates the response envelope type used for contract introspection.
+ * Resolves the response introspection policy from built-in defaults and application configuration.
  *
- * <p>Supports both the default {@code ServiceResponse<T>} and custom envelopes (BYOE), ensuring
- * they comply with strict structural constraints:
- *
- * <ul>
- *   <li>Must be a concrete class
- *   <li>Must declare exactly one type parameter
- *   <li>Must contain exactly one direct payload field of type T
- *   <li>Nested generic payloads are not supported
- * </ul>
- *
- * <p>Produces a {@link ResponseIntrospectionPolicy} used by the introspection pipeline.
+ * <p>Determines the response envelope contract, payload property, and supported generic container
+ * types used during response type introspection.
  */
 public class ResponseIntrospectionPolicyResolver {
 
   private final SupportedContainerTypesResolver supportedContainerTypesResolver;
+  private final ConfiguredContainerTypesResolver configuredContainerTypesResolver;
 
   public ResponseIntrospectionPolicyResolver(
-      SupportedContainerTypesResolver supportedContainerTypesResolver) {
+      SupportedContainerTypesResolver supportedContainerTypesResolver,
+      ConfiguredContainerTypesResolver configuredContainerTypesResolver) {
     this.supportedContainerTypesResolver = supportedContainerTypesResolver;
+    this.configuredContainerTypesResolver = configuredContainerTypesResolver;
   }
 
   public ResponseIntrospectionPolicy resolve(OpenApiGenericsProperties properties) {
     String configuredType = extractConfiguredEnvelopeType(properties);
+    Set<SupportedContainerDescriptor> supportedContainers = resolveSupportedContainers(properties);
 
     if (configuredType == null) {
       return new ResponseIntrospectionPolicy(
-          ServiceResponse.class, PropertyNames.DATA, supportedContainerTypesResolver.resolve());
+          ServiceResponse.class, PropertyNames.DATA, supportedContainers);
     }
 
     Class<?> envelopeType = resolveExternalEnvelopeType(configuredType);
     String payloadPropertyName = validateExternalEnvelopeType(envelopeType);
 
-    return new ResponseIntrospectionPolicy(
-        envelopeType, payloadPropertyName, supportedContainerTypesResolver.resolve());
+    return new ResponseIntrospectionPolicy(envelopeType, payloadPropertyName, supportedContainers);
+  }
+
+  private Set<SupportedContainerDescriptor> resolveSupportedContainers(
+      OpenApiGenericsProperties properties) {
+
+    Set<SupportedContainerDescriptor> containers =
+        new LinkedHashSet<>(supportedContainerTypesResolver.resolve());
+
+    if (properties != null) {
+      containers.addAll(configuredContainerTypesResolver.resolve(properties.containers()));
+    }
+
+    return Set.copyOf(containers);
   }
 
   private String extractConfiguredEnvelopeType(OpenApiGenericsProperties properties) {
-    if (properties == null) {
+    if (properties == null || properties.envelope() == null) {
       return null;
     }
 
     EnvelopeProperties envelope = properties.envelope();
-    if (envelope == null) {
-      return null;
-    }
-
     String type = envelope.type();
     return (type == null || type.isBlank()) ? null : type;
   }
@@ -76,14 +83,14 @@ public class ResponseIntrospectionPolicyResolver {
               + configuredType
               + "'. Expected fully-qualified class name (e.g. com.example.ApiResponse)");
     }
+
     try {
       return Class.forName(configuredType);
     } catch (ClassNotFoundException e) {
       throw new IllegalStateException(
           "Configured envelope class not found: '"
               + configuredType
-              + "'. "
-              + "Ensure the class exists and is on the application classpath.",
+              + "'. Ensure the class exists and is on the application classpath.",
           e);
     }
   }
@@ -124,7 +131,6 @@ public class ResponseIntrospectionPolicyResolver {
 
   private String validateSingleDirectPayloadSlot(
       Class<?> envelopeType, TypeVariable<?> payloadTypeParameter) {
-
     String payloadPropertyName = null;
 
     for (Field field : envelopeType.getDeclaredFields()) {
@@ -137,13 +143,16 @@ public class ResponseIntrospectionPolicyResolver {
               "contains unsupported nested generic payload slot in field '"
                   + field.getName()
                   + "'");
-        } else if (kind == PayloadSlotKind.DIRECT) {
+        }
+
+        if (kind == PayloadSlotKind.DIRECT) {
           if (payloadPropertyName != null) {
             throw invalidEnvelope(
                 envelopeType,
                 "must declare exactly one direct payload field of type "
                     + payloadTypeParameter.getName());
           }
+
           payloadPropertyName = field.getName();
         }
       }

@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
-import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.SupportedContainerType;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerMatchMode;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerShape;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.ContainerSource;
+import io.github.blueprintplatform.openapi.generics.server.core.introspection.container.descriptor.SupportedContainerDescriptor;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -20,11 +23,32 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 @DisplayName("Unit Test: ResponseTypeIntrospector")
 class ResponseTypeIntrospectorTest {
 
+  private static final SupportedContainerDescriptor PAGE_CONTAINER =
+      new SupportedContainerDescriptor(
+          Page.class,
+          "Page",
+          "Page",
+          ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+          "content",
+          ContainerSource.BUILT_IN,
+          ContainerMatchMode.EXACT);
+
+  private static final SupportedContainerDescriptor PAGING_CONTAINER =
+      new SupportedContainerDescriptor(
+          Paging.class,
+          "Paging",
+          "Paging",
+          ContainerShape.OBJECT_WITH_ITEM_ARRAY,
+          "content",
+          ContainerSource.CONFIGURED,
+          ContainerMatchMode.EXACT);
+
   private static final ResponseIntrospectionPolicy DEFAULT_POLICY =
+      new ResponseIntrospectionPolicy(ServiceResponse.class, "data", Set.of(PAGE_CONTAINER));
+
+  private static final ResponseIntrospectionPolicy CUSTOM_CONTAINER_POLICY =
       new ResponseIntrospectionPolicy(
-          ServiceResponse.class,
-          "data",
-          Set.of(new SupportedContainerType(Page.class, "Page", "Page")));
+          ServiceResponse.class, "data", Set.of(PAGE_CONTAINER, PAGING_CONTAINER));
 
   private final ResponseTypeIntrospector introspector =
       new ResponseTypeIntrospector(DEFAULT_POLICY);
@@ -60,6 +84,30 @@ class ResponseTypeIntrospectorTest {
     assertEquals("data", descriptor.payloadPropertyName());
     assertEquals("PageCustomerDto", descriptor.dataRefName());
     assertEquals("Page", descriptor.containerName());
+    assertEquals(Page.class.getName(), descriptor.containerTypeName());
+    assertEquals("CustomerDto", descriptor.itemRefName());
+    assertTrue(descriptor.isContainer());
+  }
+
+  @Test
+  @DisplayName("extract -> should return container descriptor for configured container")
+  void extract_shouldReturnContainerDescriptor_forConfiguredContainer() {
+    ResponseTypeIntrospector customIntrospector =
+        new ResponseTypeIntrospector(CUSTOM_CONTAINER_POLICY);
+
+    ResolvableType pagingType =
+        ResolvableType.forClassWithGenerics(
+            Paging.class, ResolvableType.forClass(CustomerDto.class));
+
+    ResolvableType type = ResolvableType.forClassWithGenerics(ServiceResponse.class, pagingType);
+
+    ResponseTypeDescriptor descriptor = customIntrospector.extract(type).orElseThrow();
+
+    assertEquals(ServiceResponse.class, descriptor.envelopeType());
+    assertEquals("data", descriptor.payloadPropertyName());
+    assertEquals("PagingCustomerDto", descriptor.dataRefName());
+    assertEquals("Paging", descriptor.containerName());
+    assertEquals(Paging.class.getName(), descriptor.containerTypeName());
     assertEquals("CustomerDto", descriptor.itemRefName());
     assertTrue(descriptor.isContainer());
   }
@@ -161,6 +209,18 @@ class ResponseTypeIntrospectorTest {
   }
 
   @Test
+  @DisplayName("extract -> should return empty for unregistered generic container")
+  void extract_shouldReturnEmpty_forUnregisteredGenericContainer() {
+    ResolvableType pagingType =
+        ResolvableType.forClassWithGenerics(
+            Paging.class, ResolvableType.forClass(CustomerDto.class));
+
+    ResolvableType type = ResolvableType.forClassWithGenerics(ServiceResponse.class, pagingType);
+
+    assertTrue(introspector.extract(type).isEmpty());
+  }
+
+  @Test
   @DisplayName("extract -> should return empty when container item type is unresolved")
   void extract_shouldReturnEmpty_whenContainerItemTypeUnresolved() {
     ResolvableType rawPageType = ResolvableType.forClass(Page.class);
@@ -172,4 +232,8 @@ class ResponseTypeIntrospectorTest {
   private static final class CustomerDto {}
 
   private static final class Wrapper<T> {}
+
+  private static final class Paging<T> {
+    java.util.List<T> content;
+  }
 }
