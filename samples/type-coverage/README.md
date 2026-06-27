@@ -6,24 +6,24 @@ Unlike the Spring Boot integration samples, the projects in this directory are n
 
 Their purpose is to provide deterministic validation environments for verifying the core OpenAPI Generics pipeline and preventing regressions across future releases.
 
-The type-coverage samples validate both the platform-provided `ServiceResponse<T>` envelope and user-owned Bring Your Own Envelope (BYOE) contracts, including scalar payloads, value payloads, DTO payloads, collections, built-in pages, and application-owned generic containers.
+The type-coverage samples validate two distinct contract models:
+
+- the platform-provided `ServiceResponse<T>` envelope
+- a user-owned Bring Your Own Envelope (BYOE) contract using `ApiResponse<T>`
+
+Each sample has its own validation scope. The two samples are related, but they do not validate the exact same response-shape matrix.
 
 ---
 
 ## Table of Contents
 
 - [Purpose](#purpose)
-- [What Is Validated](#what-is-validated)
+- [Validation Model](#validation-model)
 - [Design Principles](#design-principles)
 - [Available Samples](#available-samples)
-- [Covered Contract Shapes](#covered-contract-shapes)
-- [Scalar Payloads](#scalar-payloads)
-- [Value Payloads](#value-payloads)
-- [Object Payloads](#object-payloads)
-- [Collection Payloads](#collection-payloads)
-- [Built-in Page Payloads](#built-in-page-payloads)
-- [Application-Owned Generic Container Payloads](#application-owned-generic-container-payloads)
+- [ServiceResponse Coverage](#serviceresponse-coverage)
 - [BYOE Coverage](#byoe-coverage)
+- [What Is Validated](#what-is-validated)
 - [Regression Strategy](#regression-strategy)
 - [Mental Model](#mental-model)
 
@@ -53,29 +53,56 @@ A successful type-coverage sample proves that the consumer receives the same gen
 
 ---
 
-## What Is Validated
+## Validation Model
 
-The samples collectively verify:
+The `type-coverage` directory contains focused validation suites for supported OpenAPI Generics contract shapes.
 
-- OpenAPI projection correctness
-- generic response envelope reconstruction
-- generated client type safety
-- runtime deserialization behavior
-- vendor extension processing
-- external model handling
-- ignored model handling
-- envelope reconstruction
-- scalar and value payload reconstruction
-- DTO payload reconstruction
-- enum payload reconstruction
-- collection reconstruction
-- built-in `Page<T>` reconstruction
-- application-owned generic container reconstruction
-- container identity preservation through `x-data-container-type`
-- consumer compatibility
-- backward compatibility
-- deterministic generated-source hygiene
-- regression protection
+There are two separate coverage tracks.
+
+### Platform Envelope Track
+
+The `service-response` sample validates the canonical platform-provided envelope:
+
+```java
+ServiceResponse<T>
+```
+
+It verifies the built-in response shapes supported by the OpenAPI Generics platform:
+
+```java
+ServiceResponse<T>
+ServiceResponse<List<T>>
+ServiceResponse<Set<T>>
+ServiceResponse<Page<T>>
+```
+
+This sample does not validate application-owned generic containers such as `Paging<T>` or `Window<T>`.
+
+### BYOE Track
+
+The `byoe-response` sample validates a completely user-owned response envelope:
+
+```java
+ApiResponse<T>
+```
+
+It verifies BYOE support across built-in shapes:
+
+```java
+ApiResponse<T>
+ApiResponse<List<T>>
+ApiResponse<Set<T>>
+ApiResponse<Page<T>>
+```
+
+It also validates OpenAPI Generics 1.2 application-defined generic container support through user-owned container payloads:
+
+```java
+ApiResponse<Paging<T>>
+ApiResponse<Window<T>>
+```
+
+This is the sample that exercises application-owned generic containers such as `Paging<T>` and `Window<T>`.
 
 ---
 
@@ -113,32 +140,24 @@ The generated client must reconstruct the original contract shape automatically.
 
 | Sample | Purpose |
 |----------|----------|
-| `service-response` | Validates the canonical platform-provided `ServiceResponse<T>` contract across scalar, value, object, enum, collection, page, and application-owned generic container payloads. |
-| `byoe-response` | Validates Bring Your Own Envelope (BYOE) support using a completely user-owned `ApiResponse<T>` contract across the same response shape matrix. |
+| `service-response` | Validates the canonical platform-provided `ServiceResponse<T>` contract across scalar, value, object, enum, collection, set, and built-in page payloads. |
+| `byoe-response` | Validates Bring Your Own Envelope (BYOE) support using a user-owned `ApiResponse<T>` contract, including built-in shapes and application-owned generic container payloads. |
 
 ---
 
-## Covered Contract Shapes
+## ServiceResponse Coverage
 
-The type-coverage samples validate the same reconstruction model across both built-in and user-owned envelopes.
-
-### Platform Envelope
+The `service-response` sample validates the platform-provided envelope:
 
 ```java
 ServiceResponse<T>
 ```
 
-### User-Owned Envelope
+This is the canonical OpenAPI Generics response contract.
 
-```java
-ApiResponse<T>
-```
+The sample verifies that the generated client reconstructs the expected `ServiceResponse` shapes without redefining the envelope model.
 
-Both envelopes are validated against the following payload categories.
-
----
-
-## Scalar Payloads
+### Scalar Payloads
 
 ```java
 ServiceResponse<String>
@@ -146,122 +165,55 @@ ServiceResponse<Boolean>
 ServiceResponse<Integer>
 ServiceResponse<Long>
 ServiceResponse<BigDecimal>
-
-ApiResponse<String>
-ApiResponse<Boolean>
-ApiResponse<Integer>
-ApiResponse<Long>
-ApiResponse<BigDecimal>
 ```
 
-These scenarios validate that simple scalar values are projected and reconstructed without losing the generic response envelope.
-
----
-
-## Value Payloads
+### Value Payloads
 
 ```java
 ServiceResponse<UUID>
 ServiceResponse<LocalDate>
 ServiceResponse<OffsetDateTime>
 ServiceResponse<CoverageStatus>
-
-ApiResponse<UUID>
-ApiResponse<LocalDate>
-ApiResponse<OffsetDateTime>
-ApiResponse<CoverageStatus>
 ```
 
-These scenarios validate value-object style payloads, date/time payloads, and enum payloads.
-
-Enum coverage also protects the reusable OpenAPI component requirement for generic enum payload reconstruction.
-
----
-
-## Object Payloads
+### Object Payloads
 
 ```java
 ServiceResponse<AddressDto>
 ServiceResponse<TypeProfileDto>
-
-ApiResponse<AddressDto>
-ApiResponse<TypeProfileDto>
 ```
 
-These scenarios validate DTO payload reconstruction and external model handling.
-
-The generated client must reuse or reconstruct the expected DTO types without introducing unnecessary mapping layers.
-
----
-
-## Collection Payloads
+### List Payloads
 
 ```java
 ServiceResponse<List<TypeSummaryDto>>
 ServiceResponse<List<CoverageStatus>>
-
-ServiceResponse<Set<TypeSummaryDto>>
-ServiceResponse<Set<CoverageStatus>>
-
-ApiResponse<List<TypeSummaryDto>>
-ApiResponse<List<CoverageStatus>>
-
-ApiResponse<Set<TypeSummaryDto>>
-ApiResponse<Set<CoverageStatus>>
 ```
 
-These scenarios validate collection-aware projection and reconstruction.
+### Set Payloads
 
-The generated client must preserve both the response envelope and the collection payload type.
+```java
+ServiceResponse<Set<TypeSummaryDto>>
+ServiceResponse<Set<CoverageStatus>>
+```
 
----
-
-## Built-in Page Payloads
+### Built-in Page Payloads
 
 ```java
 ServiceResponse<Page<TypeSummaryDto>>
 ServiceResponse<Page<CoverageStatus>>
-
-ApiResponse<Page<TypeSummaryDto>>
-ApiResponse<Page<CoverageStatus>>
 ```
 
-These scenarios validate reconstruction of the built-in OpenAPI Generics `Page<T>` contract.
+The purpose of this sample is to verify the baseline projection and reconstruction behavior of the canonical OpenAPI Generics contract.
 
-The generated client must preserve the page container instead of flattening or redefining the paged response structure.
+It validates:
 
----
+- `ServiceResponse<T>`
+- `ServiceResponse<List<T>>`
+- `ServiceResponse<Set<T>>`
+- `ServiceResponse<Page<T>>`
 
-## Application-Owned Generic Container Payloads
-
-OpenAPI Generics 1.2 adds support for application-defined generic containers.
-
-The type-coverage samples validate nested application-owned containers such as:
-
-```java
-Paging<T>
-Window<T>
-```
-
-Covered response shapes include:
-
-```java
-ServiceResponse<Paging<TypeSummaryDto>>
-ServiceResponse<Paging<CoverageStatus>>
-
-ServiceResponse<Window<TypeSummaryDto>>
-ServiceResponse<Window<CoverageStatus>>
-
-ApiResponse<Paging<TypeSummaryDto>>
-ApiResponse<Paging<CoverageStatus>>
-
-ApiResponse<Window<TypeSummaryDto>>
-ApiResponse<Window<CoverageStatus>>
-```
-
-These scenarios verify that application-owned generic containers are projected into OpenAPI and reconstructed by the generated client without custom serialization, mapping, adapter code, or client-side type repair.
-
-They also verify that Java container identity is preserved through projection metadata, including `x-data-container-type`.
+It does not validate `ServiceResponse<Paging<T>>` or `ServiceResponse<Window<T>>`.
 
 ---
 
@@ -291,20 +243,122 @@ public class ApiResponse<T> {
 }
 ```
 
-OpenAPI Generics must project and reconstruct this contract without requiring changes to the original response model.
-
-The sample verifies BYOE reconstruction across:
+Error model:
 
 ```java
-ApiResponse<T>
-ApiResponse<List<T>>
-ApiResponse<Set<T>>
-ApiResponse<Page<T>>
-ApiResponse<Paging<T>>
-ApiResponse<Window<T>>
+public record ApiError(
+    String code,
+    String message
+) {}
 ```
 
-The purpose is to prove that OpenAPI Generics can preserve generic contract semantics even when the response envelope and nested generic containers are entirely application-owned.
+These classes are not provided by OpenAPI Generics.
+
+OpenAPI Generics projects and reconstructs them while preserving the original application contract.
+
+### Scalar Payloads
+
+```java
+ApiResponse<String>
+ApiResponse<Boolean>
+ApiResponse<Integer>
+ApiResponse<Long>
+ApiResponse<BigDecimal>
+```
+
+### Value Payloads
+
+```java
+ApiResponse<UUID>
+ApiResponse<LocalDate>
+ApiResponse<OffsetDateTime>
+ApiResponse<CoverageStatus>
+```
+
+### Object Payloads
+
+```java
+ApiResponse<AddressDto>
+ApiResponse<TypeProfileDto>
+```
+
+### List Payloads
+
+```java
+ApiResponse<List<TypeSummaryDto>>
+ApiResponse<List<CoverageStatus>>
+```
+
+### Set Payloads
+
+```java
+ApiResponse<Set<TypeSummaryDto>>
+ApiResponse<Set<CoverageStatus>>
+```
+
+### Built-in Page Payloads
+
+```java
+ApiResponse<Page<TypeSummaryDto>>
+ApiResponse<Page<CoverageStatus>>
+```
+
+### Application-Owned Generic Container Payloads
+
+OpenAPI Generics 1.2 adds support for application-defined generic containers.
+
+The `byoe-response` sample validates this capability using application-owned containers such as:
+
+```java
+Paging<T>
+Window<T>
+```
+
+Covered response shapes include:
+
+```java
+ApiResponse<Paging<TypeSummaryDto>>
+ApiResponse<Paging<CoverageStatus>>
+
+ApiResponse<Window<TypeSummaryDto>>
+ApiResponse<Window<CoverageStatus>>
+```
+
+These payloads verify that nested application-owned generic containers are projected into OpenAPI and reconstructed by the generated client without requiring custom serialization, manual mapping, adapter code, or client-side type repair.
+
+They also verify that Java container identity is preserved through projection metadata, including `x-data-container-type`.
+
+The purpose of this sample is to prove that OpenAPI Generics can preserve generic contract semantics even when the response envelope and nested generic containers are entirely application-owned.
+
+---
+
+## What Is Validated
+
+The samples collectively verify:
+
+- OpenAPI projection correctness
+- generic response envelope reconstruction
+- generated client type safety
+- runtime deserialization behavior
+- vendor extension processing
+- ignored model handling
+- external model handling
+- scalar and value payload reconstruction
+- DTO payload reconstruction
+- enum payload reconstruction
+- collection reconstruction
+- built-in `Page<T>` reconstruction
+- BYOE envelope reconstruction
+- application-owned generic container reconstruction in the BYOE sample
+- container identity preservation through `x-data-container-type`
+- consumer compatibility
+- backward compatibility
+- deterministic generated-source hygiene
+- regression protection
+
+The important distinction is that application-owned generic containers are validated by the `byoe-response` sample.
+
+The `service-response` sample remains focused on the canonical `ServiceResponse<T>` contract and its built-in supported shapes.
 
 ---
 
@@ -329,7 +383,8 @@ Their responsibility is to detect failures in:
 - enum payload reconstruction
 - collection reconstruction
 - page reconstruction
-- application-owned generic container reconstruction
+- BYOE envelope reconstruction
+- application-owned generic container reconstruction in BYOE flows
 - generated client typing
 - generated-source hygiene
 - runtime deserialization
@@ -355,7 +410,21 @@ Runtime Reconstruction
 Consumer Contract
 ```
 
-For example:
+For the platform-provided envelope:
+
+```text
+ServiceResponse<Page<TypeSummaryDto>>
+                ↓
+OpenAPI Projection
+                ↓
+Generated Client
+                ↓
+Consumer Deserialization
+                ↓
+ServiceResponse<Page<TypeSummaryDto>>
+```
+
+For a BYOE envelope with an application-owned generic container:
 
 ```text
 ApiResponse<Paging<TypeSummaryDto>>
@@ -369,7 +438,11 @@ Consumer Deserialization
 ApiResponse<Paging<TypeSummaryDto>>
 ```
 
-The same reconstruction flow applies to every supported response shape, including platform-owned envelopes, user-owned envelopes, built-in containers, collections, pages, and application-owned generic payload containers.
+The same reconstruction principle applies across the supported response shapes, but each sample has a specific validation boundary.
+
+`service-response` validates the canonical platform envelope.
+
+`byoe-response` validates a user-owned envelope and the application-owned generic container scenarios introduced in OpenAPI Generics 1.2.
 
 A successful type-coverage sample proves that the consumer receives the same generic contract shape that originally existed in the producer.
 
