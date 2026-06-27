@@ -1,3 +1,9 @@
+---
+layout: default
+title: Architectural Rationale
+nav_exclude: true
+---
+
 #  Architectural Rationale: Why OpenAPI Generics Exists
 
 **Intended Audience:** Enterprise architects, platform engineers, OpenAPI specification contributors, language tooling maintainers, and teams responsible for API contract governance.

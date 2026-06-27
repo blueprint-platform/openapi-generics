@@ -26,7 +26,7 @@ The result is simple:
 
 > Generated clients reconstruct your contract instead of redefining it.
 
-[Get Started](#get-started) · [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)
+[Get Started](#get-started) · [Samples](#samples) · [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)
 
 ---
 
@@ -39,6 +39,7 @@ The result is simple:
 - [How It Works](#how-it-works)
 - [Get Started](#get-started)
 - [Documentation](#documentation)
+- [Samples](#samples)
 - [Compatibility](#compatibility)
 - [Community](#community)
 
@@ -215,24 +216,32 @@ mvn clean install
 
 ## Documentation
 
-- [Server-Side Adoption](adoption/server-side-adoption.md)
-- [Client-Side Adoption](adoption/client-side-adoption.md)
-- [Architecture](architecture/architecture.md)
-- [Compatibility & Support Policy](compatibility.md)
-- [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)
+- [Architectural Rationale](architecture/rationale.md)  
+  Why OpenAPI Generics exists, what problem it solves, and the architectural trade-offs behind the project.
+
+- [Server-Side Adoption](adoption/server-side-adoption.md)  
+  Publish generics-aware OpenAPI documents from Spring Boot services without changing runtime behavior.
+
+- [Client-Side Adoption](adoption/client-side-adoption.md)  
+  Generate Java clients that reconstruct generic contracts instead of redefining them.
+
+- [Architecture](architecture/architecture.md)  
+  Internal projection and reconstruction model of OpenAPI Generics.
+
+- [Compatibility & Support Policy](compatibility.md)  
+  Supported Java, Spring Boot, springdoc-openapi, OpenAPI Generator, and build-time boundaries.
+
+- [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)  
+  Source code, releases, issues, and discussions.
 
 ---
 
 ## Samples
 
-Repository samples cover:
+Repository samples demonstrate the complete producer → OpenAPI → generated client → consumer lifecycle.
 
-- Spring Boot 3
-- Spring Boot 4
-- ServiceResponse
-- BYOE
-- Type coverage
-- End-to-end producer → client → consumer validation
+- [Sample Projects](https://github.com/blueprint-platform/openapi-generics/tree/main/samples)  
+  Includes Spring Boot 3 and Spring Boot 4 end-to-end samples, built-in `ServiceResponse<T>` coverage, BYOE coverage, and type-coverage validation.
 
 ---
 

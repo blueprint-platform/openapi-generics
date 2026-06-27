@@ -220,8 +220,7 @@ For BYOE, BYOC, and fallback-to-standard-generation options, see the [Key featur
 
 ## Real-World Example
 
-See the Licensing Project for a complete end-to-end BYOE example
-using a shared `ApiResponse<T>` contract.
+See the [Licensing Project](https://github.com/bsayli/licensing) for a complete end-to-end BYOE example using a shared `ApiResponse<T>` contract.
 
 The project demonstrates:
 
@@ -230,8 +229,6 @@ The project demonstrates:
 - Generated Java client using `openapi-generics-java-codegen-parent`
 - Shared `ApiResponse<T>` reuse across service, client, SDK, and CLI
 - Docker-based end-to-end verification
-
-🔗 https://github.com/bsayli/licensing
 
 ---
 
@@ -411,9 +408,9 @@ Use this mode for output comparison, troubleshooting, or temporary opt-out scena
 
 ## How it works
 
-OpenAPI Generics is not primarily a generics solution.
+OpenAPI Generics preserves Java generic contract semantics across the OpenAPI lifecycle.
 
-It is a contract preservation system that uses Java generics to keep API contracts consistent across the entire OpenAPI lifecycle.
+It keeps generic response envelopes, container payloads, and shared DTO contracts aligned from Spring Boot producers to generated Java clients.
 
 The project is built on one principle:
 
@@ -471,7 +468,7 @@ Together, these extensions describe wrapper semantics, payload type, container i
 The architecture consists of two complementary phases:
 
 - **Projection** — derives deterministic OpenAPI metadata from Java contracts.
-- **Enforcement** — reconstructs those contracts during client generation using the projected metadata.
+- **Reconstruction** — restores contract-aligned Java client types during generation using the projected metadata.
 
 Both phases share the same contract authority while keeping generated code isolated from application code.
 
@@ -514,10 +511,11 @@ The generated OpenAPI document remains valid OpenAPI and can be consumed by stan
 
 What OpenAPI Generics adds:
 
-- Generic-aware client generation through a custom `JavaClientCodegen`
+- Generics-aware Java client generation through an OpenAPI Generator specialization
 - Contract metadata via vendor extensions such as `x-api-wrapper`, `x-data-container`, `x-data-container-type`, and `x-data-item`
 - Server-side OpenAPI enrichment through Springdoc integration
 - Container-aware reconstruction for both built-in and application-defined generic container contracts
+- Deterministic generated-source hygiene for cleaner Java client output
 
 The project keeps OpenAPI Generator as the source of template structure and applies a minimal generics-aware extension layer rather than maintaining a forked template set.
 
@@ -546,11 +544,13 @@ The provided parent configuration includes a tested default, but consumers may o
 
 ## Modules
 
-* [openapi-generics-contract](openapi-generics-contract/README.md)
-* [openapi-generics-server-starter](openapi-generics-server-starter/README.md)
-* [openapi-generics-java-codegen](openapi-generics-java-codegen/README.md)
-* [openapi-generics-java-codegen-parent](openapi-generics-java-codegen-parent/README.md)
-* [openapi-generics-platform-bom](openapi-generics-platform-bom/README.md)
+| Module | Responsibility |
+|----------|----------------|
+| [`openapi-generics-contract`](openapi-generics-contract/README.md) | Shared response contracts and platform-owned generic types. |
+| [`openapi-generics-server-starter`](openapi-generics-server-starter/README.md) | Spring Boot integration that projects generic contract metadata into OpenAPI. |
+| [`openapi-generics-java-codegen`](openapi-generics-java-codegen/README.md) | OpenAPI Generator specialization that reconstructs contract-aligned Java clients. |
+| [`openapi-generics-java-codegen-parent`](openapi-generics-java-codegen-parent/README.md) | Maven parent for client generation, template patching, and generated-source hygiene. |
+| [`openapi-generics-platform-bom`](openapi-generics-platform-bom/README.md) | Dependency alignment for OpenAPI Generics modules. |
 
 ---
 
@@ -561,8 +561,8 @@ The provided parent configuration includes a tested default, but consumers may o
 - **[Rationale: Why OpenAPI Generics Exists](./docs/architecture/rationale.md)**  
   Explains the architectural motivation, design decisions, engineering trade-offs, and ecosystem constraints behind the project.
 
-- **[Adoption Guide](https://blueprint-platform.github.io/openapi-generics/)**  
-  Official guide for server-side and client-side integration.
+- **[Documentation Site](https://blueprint-platform.github.io/openapi-generics/)**  
+  Official GitHub Pages documentation for adoption guides, architecture, compatibility, and project usage.
 
 ### Articles
 
