@@ -106,18 +106,11 @@ The generated wrapper becomes a thin type binding while the original contract re
 
 ## What's New in 1.2
 
-OpenAPI Generics 1.2 extends the platform beyond built-in containers.
+OpenAPI Generics 1.2 extends the container-aware reconstruction model introduced in 1.1.
 
-Highlights include:
+The platform now supports application-defined generic containers while keeping the same contract-first projection and deterministic client reconstruction pipeline.
 
-- Application-defined generic container support
-- Java container identity preservation (`x-data-container-type`)
-- Generated-source hygiene for cleaner Java clients
-- Improved metadata validation
-- Expanded regression coverage
-- Full backward compatibility with 1.1.x
-
-Built-in contracts remain fully supported:
+Built-in response shapes continue to work unchanged:
 
 ```java
 ServiceResponse<T>
@@ -126,10 +119,22 @@ ServiceResponse<Set<T>>
 ServiceResponse<Page<T>>
 ```
 
-Applications can now register their own generic containers:
+The same reconstruction model is also available when using your own shared response envelope:
+
+```java
+ApiResponse<T>
+ApiResponse<List<T>>
+ApiResponse<Set<T>>
+ApiResponse<Page<T>>
+```
+
+Applications can now register custom generic container contracts, for example:
 
 ```yaml
 openapi-generics:
+  envelope:
+    type: io.example.contract.ApiResponse
+
   containers:
     - type: io.example.contract.Paging
       item-property: content
@@ -137,6 +142,19 @@ openapi-generics:
     - type: io.example.contract.Window
       item-property: items
 ```
+
+Configured containers participate in the same projection, metadata generation, and client reconstruction pipeline as the built-in container types.
+
+Highlights:
+
+- Application-defined generic container support
+- Java container identity preservation through `x-data-container-type`
+- Cleaner generated Java sources
+- Improved projection metadata validation
+- Expanded regression coverage
+- Full backward compatibility with 1.1.x
+
+No migration is required for existing users.
 
 ---
 
