@@ -6,7 +6,7 @@
 **authoritative response model** used across the OpenAPI Generics platform.
 
 It is the only place where response semantics are defined.
-Everything else in the system either **projects**, **interprets**, or **consumes** this model.
+Everything else in the system either **projects**, **reconstructs**, or **consumes** this model.
 
 The goal is simple:
 
@@ -61,24 +61,25 @@ that both producers and consumers depend on directly.
 
 ## Architectural Positioning (Critical)
 
-Within the platform, this module is the **authority layer**:
+Within the platform, this module is the **contract authority** for the built-in response model:
 
-| Layer         | Role                                |
-|---------------|-------------------------------------|
-| **Authority** | openapi-generics-contract (this)    |
-| Projection    | server starter (OpenAPI generation) |
-| Enforcement   | code generation (build-time)        |
-| Consumption   | generated clients                   |
+| Layer                  | Role                                                                                                                              |
+|------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| **Contract Authority** | Defines the canonical built-in Java contract types: `ServiceResponse<T>`, `Meta`, `Page<T>`, sorting, and error-extension models. |
+| Projection             | Server-side integration projects these contract types into OpenAPI metadata.                                                      |
+| Reconstruction         | Code generation reconstructs client-side wrapper types that reuse the original contract model.                                    |
+| Consumption            | Generated clients and downstream services consume the shared contract types.                                                      |
 
 ### Core Rule
 
-> OpenAPI is a projection. This module is the authority.
+> OpenAPI is a projection. The Java contract remains the authority.
 
 ### Implications
 
-* OpenAPI MUST NOT redefine these models
-* generators MUST NOT re-generate them
-* clients MUST reuse them directly
+* OpenAPI SHOULD NOT become the owner of these models.
+* Generators SHOULD NOT redefine the built-in response envelope.
+* Generated clients SHOULD reuse the shared contract types directly.
+* Contract identity should remain stable across server, OpenAPI, generated client, and consumer boundaries.
 
 If this boundary is violated, contract drift is reintroduced.
 
@@ -245,7 +246,7 @@ This module is intentionally **independent but central**.
 
 * generator maps schemas back to these classes
 * prevents model duplication
-* enforces contract alignment
+* reconstructs contract-aligned client types
 
 ---
 
@@ -303,7 +304,7 @@ Usage:
 
 ## Versioning Strategy
 
-Current state: **1.1.x GA**
+Current state: **1.2.0**
 
 The contract module is treated as the stable authority layer of the platform.
 
@@ -312,7 +313,7 @@ should evolve conservatively and remain backward-compatible whenever possible.
 
 ### Important Rule
 
-> Server and client MUST use the same contract version.
+> Server and generated client SHOULD use the same contract version.
 
 For strict contract alignment, use the same `openapi-generics-contract` version
 across producer and generated client modules.
