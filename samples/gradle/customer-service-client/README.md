@@ -49,6 +49,12 @@ samples/gradle/customer-service-client
 ├── build.gradle.kts
 ├── gradle.properties
 ├── settings.gradle.kts
+├── gradlew
+├── gradlew.bat
+├── gradle/
+│   └── wrapper/
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
 ├── README.md
 └── src/main/java/
     └── io/github/blueprintplatform/samples/gradle/customer/
@@ -108,20 +114,20 @@ repository. Published consumers resolve released artifacts from their configured
 
 ## Run the Sample
 
-From the repository root:
+From the sample directory:
 
 ```bash
-./openapi-generics-gradle-plugin/gradlew   -p samples/gradle/customer-service-client   clean build
+./gradlew clean build
 ```
 
-Run it a second time to observe configuration-cache reuse:
+Run it again to observe configuration-cache reuse:
 
 ```bash
-./openapi-generics-gradle-plugin/gradlew   -p samples/gradle/customer-service-client   build
+./gradlew build
 ```
 
-The sample deliberately reuses the repository's Gradle wrapper instead of maintaining a duplicate
-wrapper distribution.
+The sample maintains its own Gradle wrapper so it can be run independently with the Gradle version
+verified for this example.
 
 ## Expected Output
 
