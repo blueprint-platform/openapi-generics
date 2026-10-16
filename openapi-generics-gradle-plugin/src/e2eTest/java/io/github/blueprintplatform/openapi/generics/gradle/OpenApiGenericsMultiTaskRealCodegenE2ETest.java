@@ -42,6 +42,110 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
                     .toAbsolutePath()
                     .normalize();
 
+    private static void assertSuccessfulOrUpToDate(
+            BuildResult result,
+            String taskPath) {
+
+        BuildTask task = result.task(taskPath);
+
+        assertNotNull(
+                task,
+                () ->
+                        "Expected task '%s' was not in the task graph.%n%n%s"
+                                .formatted(
+                                        taskPath,
+                                        result.getOutput()));
+
+        assertTrue(
+                task.getOutcome() == SUCCESS
+                        || task.getOutcome() == UP_TO_DATE,
+                () ->
+                        "Expected task '%s' to succeed or be up-to-date "
+                                + "but was '%s'.%n%n%s"
+                                .formatted(
+                                        taskPath,
+                                        task.getOutcome(),
+                                        result.getOutput()));
+    }
+
+    private static void assertRegularFile(
+            Path expected,
+            BuildResult result) {
+
+        assertTrue(
+                Files.isRegularFile(expected),
+                () ->
+                        "Expected file was not found:%n%s%n%nBuild output:%n%s"
+                                .formatted(
+                                        expected,
+                                        result.getOutput()));
+    }
+
+    private static void deleteRecursively(Path directory)
+            throws IOException {
+
+        if (Files.notExists(directory)) {
+            return;
+        }
+
+        try (Stream<Path> paths = Files.walk(directory)) {
+            try {
+                paths.sorted(Comparator.reverseOrder())
+                        .forEach(
+                                OpenApiGenericsMultiTaskRealCodegenE2ETest
+                                        ::deletePath);
+            } catch (UncheckedIOException exception) {
+                throw exception.getCause();
+            }
+        }
+    }
+
+    private static void deletePath(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException exception) {
+            throw new UncheckedIOException(
+                    "Could not delete multi-task E2E debug path: "
+                            + path,
+                    exception);
+        }
+    }
+
+    private static String sourceMismatchMessage(
+            Path sourcePath,
+            String source,
+            BuildResult result) {
+
+        return """
+                Generated source did not contain the expected generic inheritance.
+
+                Source:
+                %s
+
+                Generated content:
+                %s
+
+                Build output:
+                %s
+                """
+                .formatted(
+                        sourcePath,
+                        source,
+                        result.getOutput());
+    }
+
+    private static String requireSystemProperty(String name) {
+        String value = System.getProperty(name);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Required E2E system property '%s' is missing."
+                            .formatted(name));
+        }
+
+        return value;
+    }
+
     @BeforeEach
     void prepareConsumerProject() throws IOException {
         deleteRecursively(projectDirectory);
@@ -234,109 +338,5 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
                     destination,
                     StandardCopyOption.REPLACE_EXISTING);
         }
-    }
-
-    private static void assertSuccessfulOrUpToDate(
-            BuildResult result,
-            String taskPath) {
-
-        BuildTask task = result.task(taskPath);
-
-        assertNotNull(
-                task,
-                () ->
-                        "Expected task '%s' was not in the task graph.%n%n%s"
-                                .formatted(
-                                        taskPath,
-                                        result.getOutput()));
-
-        assertTrue(
-                task.getOutcome() == SUCCESS
-                        || task.getOutcome() == UP_TO_DATE,
-                () ->
-                        "Expected task '%s' to succeed or be up-to-date "
-                                + "but was '%s'.%n%n%s"
-                                .formatted(
-                                        taskPath,
-                                        task.getOutcome(),
-                                        result.getOutput()));
-    }
-
-    private static void assertRegularFile(
-            Path expected,
-            BuildResult result) {
-
-        assertTrue(
-                Files.isRegularFile(expected),
-                () ->
-                        "Expected file was not found:%n%s%n%nBuild output:%n%s"
-                                .formatted(
-                                        expected,
-                                        result.getOutput()));
-    }
-
-    private static void deleteRecursively(Path directory)
-            throws IOException {
-
-        if (Files.notExists(directory)) {
-            return;
-        }
-
-        try (Stream<Path> paths = Files.walk(directory)) {
-            try {
-                paths.sorted(Comparator.reverseOrder())
-                        .forEach(
-                                OpenApiGenericsMultiTaskRealCodegenE2ETest
-                                        ::deletePath);
-            } catch (UncheckedIOException exception) {
-                throw exception.getCause();
-            }
-        }
-    }
-
-    private static void deletePath(Path path) {
-        try {
-            Files.delete(path);
-        } catch (IOException exception) {
-            throw new UncheckedIOException(
-                    "Could not delete multi-task E2E debug path: "
-                            + path,
-                    exception);
-        }
-    }
-
-    private static String sourceMismatchMessage(
-            Path sourcePath,
-            String source,
-            BuildResult result) {
-
-        return """
-                Generated source did not contain the expected generic inheritance.
-
-                Source:
-                %s
-
-                Generated content:
-                %s
-
-                Build output:
-                %s
-                """
-                .formatted(
-                        sourcePath,
-                        source,
-                        result.getOutput());
-    }
-
-    private static String requireSystemProperty(String name) {
-        String value = System.getProperty(name);
-
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException(
-                    "Required E2E system property '%s' is missing."
-                            .formatted(name));
-        }
-
-        return value;
     }
 }

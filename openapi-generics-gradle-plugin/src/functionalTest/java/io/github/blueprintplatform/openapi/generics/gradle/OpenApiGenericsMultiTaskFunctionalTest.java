@@ -22,103 +22,6 @@ class OpenApiGenericsMultiTaskFunctionalTest {
 
     private FunctionalTestEnvironment environment;
 
-    @BeforeEach
-    void prepare() throws IOException {
-        environment = FunctionalTestEnvironment.create(projectDirectory);
-        environment.writeMultipleGenericsTasksConsumer();
-    }
-
-    @Test
-    void wiresSharedTemplatePreparationToEverySelectedTask() {
-        BuildResult result =
-                environment.run(ConsumerBuildFiles.PRINT_TEMPLATE_DEPENDENCIES);
-
-        assertTrue(
-                result.getOutput()
-                        .contains(
-                                "TEMPLATE_DEPENDENCY_"
-                                        + ConsumerBuildFiles.CUSTOMER_GENERATE_TASK
-                                        + "=true"),
-                result::getOutput);
-
-        assertTrue(
-                result.getOutput()
-                        .contains(
-                                "TEMPLATE_DEPENDENCY_"
-                                        + ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK
-                                        + "=true"),
-                result::getOutput);
-    }
-
-    @Test
-    void assignsTheEffectiveTemplateDirectoryToEverySelectedTask() {
-        BuildResult result =
-                environment.run(ConsumerBuildFiles.PRINT_TEMPLATE_DIRS);
-
-        assertSelectedTaskUsesEffectiveTemplates(
-                result,
-                ConsumerBuildFiles.CUSTOMER_GENERATE_TASK);
-
-        assertSelectedTaskUsesEffectiveTemplates(
-                result,
-                ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK);
-    }
-
-
-    @Test
-    void addsGeneratorRuntimeClasspathToEverySelectedTask() {
-        BuildResult result =
-                environment.run(ConsumerBuildFiles.PRINT_GENERATOR_CLASSPATHS);
-
-        assertSelectedTaskHasCodegenRuntime(
-                result,
-                ConsumerBuildFiles.CUSTOMER_GENERATE_TASK);
-
-        assertSelectedTaskHasCodegenRuntime(
-                result,
-                ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK);
-    }
-
-    @Test
-    void registersEverySelectedGeneratedSourceRoot() {
-        BuildResult result =
-                environment.run(ConsumerBuildFiles.PRINT_MAIN_JAVA_SRC_DIRS);
-
-        assertGeneratedSourceRegistered(
-                result,
-                "generated/customer");
-
-        assertGeneratedSourceRegistered(
-                result,
-                "generated/service-response");
-    }
-
-    @Test
-    void makesCompileJavaDependOnEverySelectedGenerateTask() {
-        BuildResult result =
-                environment.run("compileJava", "--dry-run");
-
-        assertTrue(
-                result.getOutput()
-                        .contains(
-                                ":" + ConsumerBuildFiles.CUSTOMER_GENERATE_TASK),
-                result::getOutput);
-
-        assertTrue(
-                result.getOutput()
-                        .contains(
-                                ":"
-                                        + ConsumerBuildFiles
-                                                .SERVICE_RESPONSE_GENERATE_TASK),
-                result::getOutput);
-
-        assertTrue(
-                result.getOutput()
-                        .contains(":prepareOpenApiGenericsTemplates"),
-                result::getOutput);
-    }
-
-
     private static void assertSelectedTaskHasCodegenRuntime(
             BuildResult result,
             String taskName) {
@@ -185,5 +88,100 @@ class OpenApiGenericsMultiTaskFunctionalTest {
                                 .formatted(
                                         outputDirectory,
                                         result.getOutput()));
+    }
+
+    @BeforeEach
+    void prepare() throws IOException {
+        environment = FunctionalTestEnvironment.create(projectDirectory);
+        environment.writeMultipleGenericsTasksConsumer();
+    }
+
+    @Test
+    void wiresSharedTemplatePreparationToEverySelectedTask() {
+        BuildResult result =
+                environment.run(ConsumerBuildFiles.PRINT_TEMPLATE_DEPENDENCIES);
+
+        assertTrue(
+                result.getOutput()
+                        .contains(
+                                "TEMPLATE_DEPENDENCY_"
+                                        + ConsumerBuildFiles.CUSTOMER_GENERATE_TASK
+                                        + "=true"),
+                result::getOutput);
+
+        assertTrue(
+                result.getOutput()
+                        .contains(
+                                "TEMPLATE_DEPENDENCY_"
+                                        + ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK
+                                        + "=true"),
+                result::getOutput);
+    }
+
+    @Test
+    void assignsTheEffectiveTemplateDirectoryToEverySelectedTask() {
+        BuildResult result =
+                environment.run(ConsumerBuildFiles.PRINT_TEMPLATE_DIRS);
+
+        assertSelectedTaskUsesEffectiveTemplates(
+                result,
+                ConsumerBuildFiles.CUSTOMER_GENERATE_TASK);
+
+        assertSelectedTaskUsesEffectiveTemplates(
+                result,
+                ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK);
+    }
+
+    @Test
+    void addsGeneratorRuntimeClasspathToEverySelectedTask() {
+        BuildResult result =
+                environment.run(ConsumerBuildFiles.PRINT_GENERATOR_CLASSPATHS);
+
+        assertSelectedTaskHasCodegenRuntime(
+                result,
+                ConsumerBuildFiles.CUSTOMER_GENERATE_TASK);
+
+        assertSelectedTaskHasCodegenRuntime(
+                result,
+                ConsumerBuildFiles.SERVICE_RESPONSE_GENERATE_TASK);
+    }
+
+    @Test
+    void registersEverySelectedGeneratedSourceRoot() {
+        BuildResult result =
+                environment.run(ConsumerBuildFiles.PRINT_MAIN_JAVA_SRC_DIRS);
+
+        assertGeneratedSourceRegistered(
+                result,
+                "generated/customer");
+
+        assertGeneratedSourceRegistered(
+                result,
+                "generated/service-response");
+    }
+
+    @Test
+    void makesCompileJavaDependOnEverySelectedGenerateTask() {
+        BuildResult result =
+                environment.run("compileJava", "--dry-run");
+
+        assertTrue(
+                result.getOutput()
+                        .contains(
+                                ":" + ConsumerBuildFiles.CUSTOMER_GENERATE_TASK),
+                result::getOutput);
+
+        assertTrue(
+                result.getOutput()
+                        .contains(
+                                ":"
+                                        + ConsumerBuildFiles
+                                                .SERVICE_RESPONSE_GENERATE_TASK),
+                result::getOutput);
+
+        assertTrue(
+                result.getOutput()
+                        .contains(":prepareOpenApiGenericsTemplates"),
+                result::getOutput);
     }
 }

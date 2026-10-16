@@ -50,17 +50,6 @@ public final class OpenApiGenericsGeneratedSourceRegistrar {
                                         project));
     }
 
-    /**
-     * Per-task hook invoked from GenerateTask configuration.
-     *
-     * <p>Source-set mutation is intentionally not performed here.
-     */
-    public void register(
-            Project project,
-            GenerateTask task,
-            OpenApiGenericsTaskSelection selection) {
-    }
-
     private void installJavaIntegration(
             Project project) {
 

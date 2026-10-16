@@ -30,15 +30,18 @@ public final class OpenApiGenericsGradlePlugin implements Plugin<Project> {
                         new OpenApiGenericsCodegenClasspath(
                                 OpenApiGenericsGradlePlugin.class));
 
+        OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar =
+                new OpenApiGenericsGeneratedSourceRegistrar(
+                        new OpenApiGenericsSourceLayout());
+
         OpenApiGenericsGenerateTaskConfigurer taskConfigurer =
-                new OpenApiGenericsGenerateTaskConfigurer(
-                        new OpenApiGenericsGeneratedSourceRegistrar(
-                                new OpenApiGenericsSourceLayout()));
+                new OpenApiGenericsGenerateTaskConfigurer();
 
         OpenApiGeneratorIntegration integration =
                 new OpenApiGeneratorIntegration(
                         new OpenApiGeneratorCompatibility(),
                         templateLifecycle,
+                        generatedSourceRegistrar,
                         taskConfigurer);
 
         project.getPluginManager()

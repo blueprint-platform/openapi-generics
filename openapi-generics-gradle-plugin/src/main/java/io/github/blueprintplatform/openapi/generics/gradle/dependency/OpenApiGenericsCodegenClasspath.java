@@ -1,5 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.gradle.dependency;
 
+import io.github.blueprintplatform.openapi.generics.gradle.exception.OpenApiGenericsCodegenVersionConflictException;
 import io.github.blueprintplatform.openapi.generics.gradle.exception.PluginVersionResolutionException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -30,18 +31,28 @@ public final class OpenApiGenericsCodegenClasspath {
 
         String pluginVersion = resolvePluginVersion();
 
+        /*
+         * Validate both dependencies already present on the configuration and
+         * dependencies added later by the consumer build script.
+         *
+         * The plugin is applied before the consumer's dependencies block is
+         * normally evaluated, so a one-time lookup here would miss later
+         * conflicting declarations.
+         */
+        generatorExtraClasspath
+                .getDependencies()
+                .all(
+                        dependency ->
+                                validateCodegenDependency(
+                                        dependency,
+                                        pluginVersion,
+                                        generatorExtraClasspath.getName()));
+
         Dependency existingDependency =
                 generatorExtraClasspath
                         .getDependencies()
                         .stream()
-                        .filter(
-                                dependency ->
-                                        OPENAPI_GENERICS_GROUP.equals(
-                                                dependency.getGroup())
-                                                && OPENAPI_GENERICS_CODEGEN_MODULE.equals(
-                                                dependency.getName())
-                                                && pluginVersion.equals(
-                                                dependency.getVersion()))
+                        .filter(this::isOpenApiGenericsCodegenDependency)
                         .findFirst()
                         .orElse(null);
 
@@ -57,6 +68,34 @@ public final class OpenApiGenericsCodegenClasspath {
                                         OPENAPI_GENERICS_GROUP,
                                         OPENAPI_GENERICS_CODEGEN_MODULE,
                                         pluginVersion));
+    }
+
+    private boolean isOpenApiGenericsCodegenDependency(
+            Dependency dependency) {
+
+        return OPENAPI_GENERICS_GROUP.equals(
+                dependency.getGroup())
+                && OPENAPI_GENERICS_CODEGEN_MODULE.equals(
+                dependency.getName());
+    }
+
+    private void validateCodegenDependency(
+            Dependency dependency,
+            String pluginVersion,
+            String configurationName) {
+
+        if (!isOpenApiGenericsCodegenDependency(dependency)) {
+            return;
+        }
+
+        if (pluginVersion.equals(dependency.getVersion())) {
+            return;
+        }
+
+        throw new OpenApiGenericsCodegenVersionConflictException(
+                pluginVersion,
+                dependency.getVersion(),
+                configurationName);
     }
 
     private String resolvePluginVersion() {

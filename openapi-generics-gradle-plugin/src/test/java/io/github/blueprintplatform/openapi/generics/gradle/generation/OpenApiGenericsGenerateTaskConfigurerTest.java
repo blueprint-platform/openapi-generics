@@ -55,9 +55,7 @@ class OpenApiGenericsGenerateTaskConfigurerTest {
             FileCollection runtimeClasspath) {
 
         OpenApiGenericsGenerateTaskConfigurer configurer =
-                new OpenApiGenericsGenerateTaskConfigurer(
-                        new OpenApiGenericsGeneratedSourceRegistrar(
-                                new OpenApiGenericsSourceLayout()));
+                new OpenApiGenericsGenerateTaskConfigurer();
 
         configurer.configure(
                 project,

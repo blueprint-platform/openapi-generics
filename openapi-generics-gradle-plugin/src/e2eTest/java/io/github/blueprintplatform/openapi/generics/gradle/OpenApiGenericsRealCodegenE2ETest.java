@@ -59,6 +59,172 @@ class OpenApiGenericsRealCodegenE2ETest {
                     .toAbsolutePath()
                     .normalize();
 
+    private static void assertSuccessfulTask(
+            BuildResult result,
+            String taskPath) {
+
+        BuildTask task =
+                result.task(
+                        taskPath);
+
+        assertNotNull(
+                task,
+                () -> "Expected task '%s' was not in the task graph.%n%n%s"
+                        .formatted(
+                                taskPath,
+                                result.getOutput()));
+
+        assertEquals(
+                SUCCESS,
+                task.getOutcome(),
+                () -> "Expected task '%s' to succeed but was '%s'.%n%n%s"
+                        .formatted(
+                                taskPath,
+                                task.getOutcome(),
+                                result.getOutput()));
+    }
+
+    private static void assertRegularFile(
+            String description,
+            Path expected,
+            BuildResult result) {
+
+        assertTrue(
+                Files.isRegularFile(
+                        expected),
+                () -> missingFileMessage(
+                        description,
+                        expected,
+                        result));
+    }
+
+    private static void deleteRecursively(
+            Path directory)
+            throws IOException {
+
+        if (Files.notExists(directory)) {
+            return;
+        }
+
+        try (Stream<Path> paths =
+                Files.walk(directory)) {
+
+            try {
+                paths.sorted(
+                                Comparator.reverseOrder())
+                        .forEach(
+                                OpenApiGenericsRealCodegenE2ETest
+                                        ::deletePath);
+            } catch (UncheckedIOException exception) {
+                throw exception.getCause();
+            }
+        }
+    }
+
+    private static void deletePath(
+            Path path) {
+
+        try {
+            Files.delete(path);
+        } catch (IOException exception) {
+            throw new UncheckedIOException(
+                    "Could not delete E2E debug path: "
+                            + path,
+                    exception);
+        }
+    }
+
+    private static String missingFileMessage(
+            String description,
+            Path expected,
+            BuildResult result) {
+
+        return """
+                Expected %s was not found.
+
+                Expected:
+                %s
+
+                Persistent E2E project:
+                %s
+
+                Build output:
+                %s
+                """
+                .formatted(
+                        description,
+                        expected,
+                        expected
+                                .toAbsolutePath()
+                                .normalize(),
+                        result.getOutput());
+    }
+
+    private static String unexpectedFileMessage(
+            String description,
+            Path unexpected,
+            BuildResult result) {
+
+        return """
+                Unexpected %s was generated.
+
+                Unexpected:
+                %s
+
+                Build output:
+                %s
+                """
+                .formatted(
+                        description,
+                        unexpected,
+                        result.getOutput());
+    }
+
+    private static String sourceMismatchMessage(
+            String expectation,
+            Path sourcePath,
+            String source,
+            BuildResult result) {
+
+        return """
+                Generated source did not satisfy expectation:
+                %s
+
+                Source:
+                %s
+
+                Generated content:
+                %s
+
+                Build output:
+                %s
+                """
+                .formatted(
+                        expectation,
+                        sourcePath,
+                        source,
+                        result.getOutput());
+    }
+
+    private static String requireSystemProperty(
+            String name) {
+
+        String value =
+                System.getProperty(
+                        name);
+
+        if (value == null
+                || value.isBlank()) {
+
+            throw new IllegalStateException(
+                    "Required E2E system property '%s' is missing."
+                            .formatted(
+                                    name));
+        }
+
+        return value;
+    }
+
     @BeforeEach
     void prepareConsumerProject() throws IOException {
         deleteRecursively(projectDirectory);
@@ -321,171 +487,5 @@ class OpenApiGenericsRealCodegenE2ETest {
                 "compiled " + description,
                 compiledClass,
                 result);
-    }
-
-    private static void assertSuccessfulTask(
-            BuildResult result,
-            String taskPath) {
-
-        BuildTask task =
-                result.task(
-                        taskPath);
-
-        assertNotNull(
-                task,
-                () -> "Expected task '%s' was not in the task graph.%n%n%s"
-                        .formatted(
-                                taskPath,
-                                result.getOutput()));
-
-        assertEquals(
-                SUCCESS,
-                task.getOutcome(),
-                () -> "Expected task '%s' to succeed but was '%s'.%n%n%s"
-                        .formatted(
-                                taskPath,
-                                task.getOutcome(),
-                                result.getOutput()));
-    }
-
-    private static void assertRegularFile(
-            String description,
-            Path expected,
-            BuildResult result) {
-
-        assertTrue(
-                Files.isRegularFile(
-                        expected),
-                () -> missingFileMessage(
-                        description,
-                        expected,
-                        result));
-    }
-
-    private static void deleteRecursively(
-            Path directory)
-            throws IOException {
-
-        if (Files.notExists(directory)) {
-            return;
-        }
-
-        try (Stream<Path> paths =
-                Files.walk(directory)) {
-
-            try {
-                paths.sorted(
-                                Comparator.reverseOrder())
-                        .forEach(
-                                OpenApiGenericsRealCodegenE2ETest
-                                        ::deletePath);
-            } catch (UncheckedIOException exception) {
-                throw exception.getCause();
-            }
-        }
-    }
-
-    private static void deletePath(
-            Path path) {
-
-        try {
-            Files.delete(path);
-        } catch (IOException exception) {
-            throw new UncheckedIOException(
-                    "Could not delete E2E debug path: "
-                            + path,
-                    exception);
-        }
-    }
-
-    private static String missingFileMessage(
-            String description,
-            Path expected,
-            BuildResult result) {
-
-        return """
-                Expected %s was not found.
-
-                Expected:
-                %s
-
-                Persistent E2E project:
-                %s
-
-                Build output:
-                %s
-                """
-                .formatted(
-                        description,
-                        expected,
-                        expected
-                                .toAbsolutePath()
-                                .normalize(),
-                        result.getOutput());
-    }
-
-    private static String unexpectedFileMessage(
-            String description,
-            Path unexpected,
-            BuildResult result) {
-
-        return """
-                Unexpected %s was generated.
-
-                Unexpected:
-                %s
-
-                Build output:
-                %s
-                """
-                .formatted(
-                        description,
-                        unexpected,
-                        result.getOutput());
-    }
-
-    private static String sourceMismatchMessage(
-            String expectation,
-            Path sourcePath,
-            String source,
-            BuildResult result) {
-
-        return """
-                Generated source did not satisfy expectation:
-                %s
-
-                Source:
-                %s
-
-                Generated content:
-                %s
-
-                Build output:
-                %s
-                """
-                .formatted(
-                        expectation,
-                        sourcePath,
-                        source,
-                        result.getOutput());
-    }
-
-    private static String requireSystemProperty(
-            String name) {
-
-        String value =
-                System.getProperty(
-                        name);
-
-        if (value == null
-                || value.isBlank()) {
-
-            throw new IllegalStateException(
-                    "Required E2E system property '%s' is missing."
-                            .formatted(
-                                    name));
-        }
-
-        return value;
     }
 }

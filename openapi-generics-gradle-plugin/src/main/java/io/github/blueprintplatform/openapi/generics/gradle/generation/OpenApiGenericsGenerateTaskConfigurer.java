@@ -9,29 +9,12 @@ import org.gradle.api.provider.Provider;
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask;
 
 /**
- * Adds OpenAPI Generics-owned template, runtime classpath, and source lifecycle wiring to official
- * generation tasks.
+ * Adds OpenAPI Generics-owned template and runtime classpath wiring to official generation tasks.
  *
  * <p>The configurer never assigns or overrides {@code generatorName}. Generator selection remains
  * an explicit consumer decision.
  */
 public final class OpenApiGenericsGenerateTaskConfigurer {
-
-    private final OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar;
-
-    public OpenApiGenericsGenerateTaskConfigurer(
-            OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar) {
-
-        this.generatedSourceRegistrar = generatedSourceRegistrar;
-    }
-
-    /**
-     * Installs project-level Java compilation wiring before GenerateTask configuration callbacks
-     * begin.
-     */
-    public void install(Project project) {
-        generatedSourceRegistrar.install(project);
-    }
 
     public void configure(
             Project project,
@@ -48,10 +31,10 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                 selected ->
                                         selected
                                                 ? templateRuntime
-                                                        .effectiveTemplateDirectory()
-                                                        .map(directory -> directory.dir("Java"))
+                                                .effectiveTemplateDirectory()
+                                                .map(directory -> directory.dir("Java"))
                                                 : project.getProviders()
-                                                        .provider(() -> null));
+                                                .provider(() -> null));
 
         Provider<FileCollection> selectedGeneratorRuntimeClasspath =
                 selection.isSelected()
@@ -89,28 +72,11 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                         ? templateRuntime.preparationTask()
                                         : null);
 
-        generatedSourceRegistrar.register(
-                project,
-                task,
-                selection);
-
         task.doFirst(
-                ignored -> {
-                    reportSelection(
-                            task,
-                            selection);
-
-                    if (selection.isSelected().get()) {
-                        task.getLogger()
-                                .lifecycle(
-                                        "OpenAPI Generics effective templateDir for '{}': {}",
-                                        task.getPath(),
-                                        task.getTemplateDir()
-                                                .get()
-                                                .getAsFile()
-                                                .getAbsolutePath());
-                    }
-                });
+                ignored ->
+                        reportSelection(
+                                task,
+                                selection));
     }
 
     private void reportSelection(
@@ -124,6 +90,15 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                     + "with generatorName '{}'.",
                             selection.getTaskPath(),
                             selection.getDisplayGeneratorName());
+
+            task.getLogger()
+                    .info(
+                            "OpenAPI Generics effective templateDir for '{}': {}",
+                            task.getPath(),
+                            task.getTemplateDir()
+                                    .get()
+                                    .getAsFile()
+                                    .getAbsolutePath());
 
             return;
         }

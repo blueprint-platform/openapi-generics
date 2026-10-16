@@ -1,5 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.gradle.integration;
 
+import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGeneratedSourceRegistrar;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGenerateTaskConfigurer;
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateLifecycle;
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateRuntime;
@@ -14,15 +15,18 @@ public final class OpenApiGeneratorIntegration {
 
     private final OpenApiGeneratorCompatibility compatibility;
     private final OpenApiGenericsTemplateLifecycle templateLifecycle;
+    private final OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar;
     private final OpenApiGenericsGenerateTaskConfigurer taskConfigurer;
 
     public OpenApiGeneratorIntegration(
             OpenApiGeneratorCompatibility compatibility,
             OpenApiGenericsTemplateLifecycle templateLifecycle,
+            OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar,
             OpenApiGenericsGenerateTaskConfigurer taskConfigurer) {
 
         this.compatibility = compatibility;
         this.templateLifecycle = templateLifecycle;
+        this.generatedSourceRegistrar = generatedSourceRegistrar;
         this.taskConfigurer = taskConfigurer;
     }
 
@@ -40,7 +44,7 @@ public final class OpenApiGeneratorIntegration {
          * GenerateTask.configureEach callbacks. Gradle 9.x mutation guards reject configuring
          * another task provider from inside a task-container configuration callback.
          */
-        taskConfigurer.install(project);
+        generatedSourceRegistrar.install(project);
 
         project.getTasks()
                 .withType(GenerateTask.class)

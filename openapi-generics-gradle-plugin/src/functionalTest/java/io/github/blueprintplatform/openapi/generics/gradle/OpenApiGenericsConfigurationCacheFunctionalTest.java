@@ -20,6 +20,14 @@ class OpenApiGenericsConfigurationCacheFunctionalTest {
 
     private FunctionalTestEnvironment environment;
 
+    private static void assertSuccessfulPrepare(BuildResult result) {
+        BuildTask task = result.task(":prepareOpenApiGenericsTemplates");
+        assertNotNull(task, result::getOutput);
+        assertTrue(
+                task.getOutcome() == SUCCESS || task.getOutcome() == UP_TO_DATE,
+                result::getOutput);
+    }
+
     @BeforeEach
     void prepare() throws IOException {
         environment = FunctionalTestEnvironment.create(projectDirectory);
@@ -44,11 +52,37 @@ class OpenApiGenericsConfigurationCacheFunctionalTest {
                 second::getOutput);
     }
 
-    private static void assertSuccessfulPrepare(BuildResult result) {
-        BuildTask task = result.task(":prepareOpenApiGenericsTemplates");
-        assertNotNull(task, result::getOutput);
+    @Test
+    void reusesConfigurationCacheForCompileJavaTaskGraph() {
+        BuildResult first =
+                environment.runWithConfigurationCache(
+                        "compileJava",
+                        "--dry-run");
+
         assertTrue(
-                task.getOutcome() == SUCCESS || task.getOutcome() == UP_TO_DATE,
-                result::getOutput);
+                first.getOutput().contains("Configuration cache entry stored")
+                        || first.getOutput().contains("Calculating task graph as no cached"),
+                first::getOutput);
+
+        assertTrue(
+                first.getOutput().contains(":openApiGenerate"),
+                first::getOutput);
+
+        assertTrue(
+                first.getOutput().contains(":prepareOpenApiGenericsTemplates"),
+                first::getOutput);
+
+        BuildResult second =
+                environment.runWithConfigurationCache(
+                        "compileJava",
+                        "--dry-run");
+
+        assertTrue(
+                second.getOutput().contains("Reusing configuration cache"),
+                second::getOutput);
+
+        assertTrue(
+                second.getOutput().contains(":openApiGenerate"),
+                second::getOutput);
     }
 }

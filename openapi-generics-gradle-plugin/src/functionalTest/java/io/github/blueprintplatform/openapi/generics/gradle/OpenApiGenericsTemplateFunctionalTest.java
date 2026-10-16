@@ -31,6 +31,19 @@ class OpenApiGenericsTemplateFunctionalTest {
     void preparesPatchedAndOverlaidTemplates() throws IOException {
         BuildResult result = environment.run("prepareOpenApiGenericsTemplates");
 
+        assertPreparedTemplates(result);
+    }
+
+    @Test
+    void preparesTemplatesWithoutProjectRepositoryForOpenApiGenerator() throws IOException {
+        environment.writeOfficialJavaConsumerWithCodegenOnlyRepository();
+
+        BuildResult result = environment.run("prepareOpenApiGenericsTemplates");
+
+        assertPreparedTemplates(result);
+    }
+
+    private void assertPreparedTemplates(BuildResult result) throws IOException {
         BuildTask task = result.task(":prepareOpenApiGenericsTemplates");
         assertEquals(SUCCESS, task != null ? task.getOutcome() : null, result::getOutput);
 

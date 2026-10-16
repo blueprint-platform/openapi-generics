@@ -47,6 +47,17 @@ public final class ConsumerBuildFiles {
                 + inspectionTasks(true);
     }
 
+    public static String officialJavaConsumerWithCodegenOnlyRepository(
+            String openApiGeneratorVersion,
+            String pluginVersion,
+            String fixtureRepositoryUri) {
+
+        return plugins(openApiGeneratorVersion, pluginVersion, true)
+                + codegenOnlyRepositories(fixtureRepositoryUri)
+                + officialGenerateConfiguration()
+                + inspectionTasks(true);
+    }
+
     public static String mixedGeneratorConsumer(
             String openApiGeneratorVersion,
             String pluginVersion,
@@ -110,6 +121,22 @@ public final class ConsumerBuildFiles {
                         includeJava ? "java" : "",
                         openApiGeneratorVersion,
                         pluginVersion);
+    }
+
+    private static String codegenOnlyRepositories(String fixtureRepositoryUri) {
+        return """
+                repositories {
+                    maven {
+                        url = uri("%s")
+
+                        content {
+                            includeGroup("io.github.blueprint-platform")
+                        }
+                    }
+                }
+
+                """
+                .formatted(fixtureRepositoryUri);
     }
 
     private static String repositories(String fixtureRepositoryUri) {
@@ -308,5 +335,26 @@ public final class ConsumerBuildFiles {
                         PRINT_TEMPLATE_DIRS,
                         PRINT_TEMPLATE_DEPENDENCIES,
                         PRINT_GENERATOR_CLASSPATHS);
+    }
+
+    public static String officialJavaConsumerWithCodegenDependency(
+            String openApiGeneratorVersion,
+            String pluginVersion,
+            String fixtureRepositoryUri,
+            String codegenVersion) {
+
+        return plugins(openApiGeneratorVersion, pluginVersion, true)
+                + repositories(fixtureRepositoryUri)
+                + """
+                    dependencies {
+                        openApiGeneratorExtra(
+                            "io.github.blueprint-platform:openapi-generics-java-codegen:%s"
+                        )
+                    }
+
+                    """
+                .formatted(codegenVersion)
+                + officialGenerateConfiguration()
+                + inspectionTasks(true);
     }
 }

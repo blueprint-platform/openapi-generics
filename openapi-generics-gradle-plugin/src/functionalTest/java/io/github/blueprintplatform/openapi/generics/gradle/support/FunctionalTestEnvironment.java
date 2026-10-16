@@ -60,6 +60,18 @@ public final class FunctionalTestEnvironment {
         return environment;
     }
 
+    private static String requireSystemProperty(String name) {
+        String value = System.getProperty(name);
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "Required functional-test system property '%s' is missing."
+                            .formatted(name));
+        }
+
+        return value;
+    }
+
     public Path projectDirectory() {
         return projectDirectory;
     }
@@ -87,6 +99,14 @@ public final class FunctionalTestEnvironment {
     public void writeOfficialJavaConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumer(
+                        OPENAPI_GENERATOR_VERSION,
+                        pluginVersion,
+                        fixtureRepositoryUri()));
+    }
+
+    public void writeOfficialJavaConsumerWithCodegenOnlyRepository() throws IOException {
+        writeBuildFile(
+                ConsumerBuildFiles.officialJavaConsumerWithCodegenOnlyRepository(
                         OPENAPI_GENERATOR_VERSION,
                         pluginVersion,
                         fixtureRepositoryUri()));
@@ -188,17 +208,5 @@ public final class FunctionalTestEnvironment {
                     "OPENAPI_GENERICS_TEST_WRAPPER".getBytes(StandardCharsets.UTF_8));
             jarOutputStream.closeEntry();
         }
-    }
-
-    private static String requireSystemProperty(String name) {
-        String value = System.getProperty(name);
-
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException(
-                    "Required functional-test system property '%s' is missing."
-                            .formatted(name));
-        }
-
-        return value;
     }
 }

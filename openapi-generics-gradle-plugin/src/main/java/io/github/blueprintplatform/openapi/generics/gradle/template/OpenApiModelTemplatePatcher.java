@@ -49,32 +49,6 @@ public final class OpenApiModelTemplatePatcher {
                     + "{{/vendorExtensions.x-api-wrapper}}"
                     + "{{/model}}{{/models}}";
 
-    public String patch(String upstreamTemplate) {
-        Objects.requireNonNull(
-                upstreamTemplate,
-                "upstreamTemplate must not be null");
-
-        requireUnpatched(upstreamTemplate);
-
-        String patched =
-                replaceExactlyOnce(
-                        upstreamTemplate,
-                        OPENING_ANCHOR,
-                        OPENING_REPLACEMENT,
-                        "opening model dispatch");
-
-        patched =
-                replaceExactlyOnce(
-                        patched,
-                        CLOSING_ANCHOR,
-                        CLOSING_REPLACEMENT,
-                        "closing model dispatch");
-
-        verifyPatch(patched);
-
-        return patched;
-    }
-
     private static void requireUnpatched(
             String upstreamTemplate) {
 
@@ -161,5 +135,31 @@ public final class OpenApiModelTemplatePatcher {
 
         return Pattern.compile(
                 expression.toString());
+    }
+
+    public String patch(String upstreamTemplate) {
+        Objects.requireNonNull(
+                upstreamTemplate,
+                "upstreamTemplate must not be null");
+
+        requireUnpatched(upstreamTemplate);
+
+        String patched =
+                replaceExactlyOnce(
+                        upstreamTemplate,
+                        OPENING_ANCHOR,
+                        OPENING_REPLACEMENT,
+                        "opening model dispatch");
+
+        patched =
+                replaceExactlyOnce(
+                        patched,
+                        CLOSING_ANCHOR,
+                        CLOSING_REPLACEMENT,
+                        "closing model dispatch");
+
+        verifyPatch(patched);
+
+        return patched;
     }
 }

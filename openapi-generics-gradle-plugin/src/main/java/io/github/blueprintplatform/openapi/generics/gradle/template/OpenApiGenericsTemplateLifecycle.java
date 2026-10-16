@@ -6,6 +6,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
 
@@ -29,7 +30,7 @@ public final class OpenApiGenericsTemplateLifecycle {
             Project project,
             Configuration generatorExtraClasspath) {
 
-        Configuration upstreamTemplates =
+        FileCollection upstreamTemplates =
                 templateClasspath.create(project);
 
         Dependency codegenDependency =
