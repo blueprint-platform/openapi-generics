@@ -143,6 +143,28 @@ public final class FunctionalTestEnvironment {
         return run(complete);
     }
 
+    public BuildResult runWithGradleVersion(
+            String gradleVersion,
+            String... arguments) {
+
+        return runner(arguments)
+                .withGradleVersion(gradleVersion)
+                .build();
+    }
+
+    public BuildResult runWithGradleVersionAndConfigurationCache(
+            String gradleVersion,
+            String... arguments) {
+
+        String[] complete = new String[arguments.length + 1];
+        complete[0] = "--configuration-cache";
+        System.arraycopy(arguments, 0, complete, 1, arguments.length);
+
+        return runWithGradleVersion(
+                gradleVersion,
+                complete);
+    }
+
     private GradleRunner runner(String... arguments) {
         String[] completeArguments = new String[arguments.length + 2];
         System.arraycopy(arguments, 0, completeArguments, 0, arguments.length);
