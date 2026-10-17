@@ -41,7 +41,7 @@ class OpenApiGenericsClasspathFunctionalTest {
     void rejectsConflictingCodegenVersionDeclaredByConsumer() throws IOException {
         environment.writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumerWithCodegenDependency(
-                        FunctionalTestEnvironment.OPENAPI_GENERATOR_VERSION,
+                        environment.openApiGeneratorVersion(),
                         environment.pluginVersion(),
                         environment.fixtureRepositoryUri(),
                         "0.0.1"));

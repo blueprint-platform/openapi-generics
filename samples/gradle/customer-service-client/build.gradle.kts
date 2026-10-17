@@ -2,48 +2,33 @@ import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
 
 plugins {
     java
-    id("org.openapi.generator") version "7.25.0"
+    id("org.openapi.generator") version "7.26.0"
     id("io.github.blueprint-platform.openapi-generics")
 }
 
 group = "io.github.blueprint-platform.samples"
 version = "1.3.0-SNAPSHOT"
 
-val openApiGenericsVersion = "1.3.0-SNAPSHOT"
+val platformVersion = "1.3.0-SNAPSHOT"
 val springBootVersion = "3.5.16"
+val generatedPackage = "io.github.blueprintplatform.samples.gradle.customer.generated"
 
 repositories {
-    /*
-     * Snapshot platform and sample contract artifacts are installed by the
-     * repository-level Maven prerequisite documented in README.md.
-     */
     mavenLocal()
     mavenCentral()
 }
 
 java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 dependencies {
-    implementation(
-        "io.github.blueprint-platform:openapi-generics-contract:$openApiGenericsVersion"
-    )
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:$springBootVersion"))
 
-    implementation(
-        "io.github.blueprint-platform.samples:customer-contract:$openApiGenericsVersion"
-    )
-
-    implementation(
-        platform(
-            "org.springframework.boot:spring-boot-dependencies:$springBootVersion"
-        )
-    )
+    implementation("io.github.blueprint-platform:openapi-generics-contract:$platformVersion")
+    implementation("io.github.blueprint-platform.samples:customer-contract:$platformVersion")
 
     compileOnly("org.springframework.boot:spring-boot-starter-web")
-    compileOnly("org.springframework.boot:spring-boot-starter")
     compileOnly("jakarta.validation:jakarta.validation-api")
     compileOnly("jakarta.annotation:jakarta.annotation-api")
     compileOnly("org.apache.httpcomponents.client5:httpclient5")
@@ -52,31 +37,14 @@ dependencies {
 
 tasks.register<GenerateTask>("generateCustomerClient") {
     generatorName.set("java-generics-contract")
-
-    inputSpec.set(
-        layout.projectDirectory
-            .file("../../spring-boot-3/spec/customer-api-docs.yaml")
-            .asFile
-            .absolutePath
-    )
-
-    outputDir.set(
-        layout.buildDirectory.dir("generated/customer")
-    )
+    inputSpec.set(file("../../spring-boot-3/spec/customer-api-docs.yaml").absolutePath)
+    outputDir.set(layout.buildDirectory.dir("generated/customer"))
 
     library.set("restclient")
 
-    apiPackage.set(
-        "io.github.blueprintplatform.samples.gradle.customer.generated.api"
-    )
-
-    modelPackage.set(
-        "io.github.blueprintplatform.samples.gradle.customer.generated.dto"
-    )
-
-    invokerPackage.set(
-        "io.github.blueprintplatform.samples.gradle.customer.generated.invoker"
-    )
+    apiPackage.set("$generatedPackage.api")
+    modelPackage.set("$generatedPackage.dto")
+    invokerPackage.set("$generatedPackage.invoker")
 
     configOptions.set(
         mapOf(
@@ -87,14 +55,11 @@ tasks.register<GenerateTask>("generateCustomerClient") {
         )
     )
 
-    /*
-     * BYOC mapping: generated wrappers bind the shared CustomerDto contract
-     * rather than generating and owning a parallel customer model.
-     */
+    // BYOC: bind the generated CustomerDto schema to the shared domain contract.
     additionalProperties.set(
         mapOf(
             "openapi-generics.response-contract.CustomerDto" to
-                "io.github.blueprintplatform.contracts.customer.CustomerDto"
+                    "io.github.blueprintplatform.contracts.customer.CustomerDto"
         )
     )
 

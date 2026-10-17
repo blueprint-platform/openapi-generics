@@ -12,8 +12,6 @@ import org.gradle.testkit.runner.GradleRunner;
 
 public final class FunctionalTestEnvironment {
 
-    public static final String OPENAPI_GENERATOR_VERSION = "7.25.0";
-
     public static final String UNSUPPORTED_OPENAPI_GENERATOR_VERSION = "7.24.0";
 
     public static final String EFFECTIVE_JAVA_TEMPLATE_DIRECTORY =
@@ -22,18 +20,25 @@ public final class FunctionalTestEnvironment {
     private final Path projectDirectory;
     private final String pluginRepositoryUri;
     private final String pluginVersion;
+    private final String openApiGeneratorVersion;
     private final Path fixtureRepository;
 
     private FunctionalTestEnvironment(
             Path projectDirectory,
             String pluginRepositoryUri,
             String pluginVersion,
+            String openApiGeneratorVersion,
             Path fixtureRepository) {
 
         this.projectDirectory = projectDirectory;
         this.pluginRepositoryUri = pluginRepositoryUri;
         this.pluginVersion = pluginVersion;
+        this.openApiGeneratorVersion = openApiGeneratorVersion;
         this.fixtureRepository = fixtureRepository;
+    }
+
+    public String openApiGeneratorVersion() {
+        return openApiGeneratorVersion;
     }
 
     public static FunctionalTestEnvironment create(Path projectDirectory)
@@ -45,6 +50,8 @@ public final class FunctionalTestEnvironment {
                         .toString();
 
         String pluginVersion = requireSystemProperty("pluginUnderTestVersion");
+        String openApiGeneratorVersion =
+                requireSystemProperty("openApiGeneratorVersion");
 
         Path fixtureRepository = projectDirectory.resolve("fixture-repository");
 
@@ -53,6 +60,7 @@ public final class FunctionalTestEnvironment {
                         projectDirectory,
                         pluginRepositoryUri,
                         pluginVersion,
+                        openApiGeneratorVersion,
                         fixtureRepository);
 
         environment.publishCodegenFixture();
@@ -70,10 +78,6 @@ public final class FunctionalTestEnvironment {
         }
 
         return value;
-    }
-
-    public Path projectDirectory() {
-        return projectDirectory;
     }
 
     public String pluginVersion() {
@@ -99,7 +103,7 @@ public final class FunctionalTestEnvironment {
     public void writeOfficialJavaConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumer(
-                        OPENAPI_GENERATOR_VERSION,
+                        openApiGeneratorVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -107,7 +111,7 @@ public final class FunctionalTestEnvironment {
     public void writeOfficialJavaConsumerWithCodegenOnlyRepository() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumerWithCodegenOnlyRepository(
-                        OPENAPI_GENERATOR_VERSION,
+                        openApiGeneratorVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -115,7 +119,7 @@ public final class FunctionalTestEnvironment {
     public void writeMixedGeneratorConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.mixedGeneratorConsumer(
-                        OPENAPI_GENERATOR_VERSION,
+                        openApiGeneratorVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -123,7 +127,7 @@ public final class FunctionalTestEnvironment {
     public void writeMultipleGenericsTasksConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.multipleGenericsTasksConsumer(
-                        OPENAPI_GENERATOR_VERSION,
+                        openApiGeneratorVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }

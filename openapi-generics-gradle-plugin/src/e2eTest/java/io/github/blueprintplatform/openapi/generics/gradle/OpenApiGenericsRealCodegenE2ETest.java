@@ -247,7 +247,9 @@ class OpenApiGenericsRealCodegenE2ETest {
                                 "compileJava",
                                 "--info",
                                 "--stacktrace",
-                                "-PopenApiGeneratorVersion=7.25.0",
+                                "-PopenApiGeneratorVersion="
+                                        + requireSystemProperty(
+                                                "openApiGeneratorVersion"),
                                 "-PopenApiGenericsPluginVersion="
                                         + requireSystemProperty(
                                                 "pluginUnderTestVersion"),

@@ -14,7 +14,7 @@ plugins {
 group = "io.github.blueprint-platform"
 version = "1.3.0-SNAPSHOT"
 
-val openApiGeneratorVersion = "7.25.0"
+val openApiGeneratorVersion = "7.26.0"
 
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")
@@ -103,6 +103,27 @@ tasks.named<Jar>("jar") {
             "Implementation-Title" to "OpenAPI Generics Gradle Plugin",
             "Implementation-Version" to project.version.toString()
         )
+    }
+}
+
+fun Test.configurePluginVerification() {
+    useJUnitPlatform()
+
+    systemProperty(
+        "openApiGeneratorVersion",
+        openApiGeneratorVersion
+    )
+    systemProperty(
+        "functionalTestPluginRepository",
+        functionalTestPluginRepository.get().asFile.absolutePath
+    )
+    systemProperty(
+        "pluginUnderTestVersion",
+        project.version.toString()
+    )
+
+    testLogging {
+        showStandardStreams = true
     }
 }
 
@@ -266,22 +287,9 @@ val functionalTestTask =
         testClassesDirs = functionalTest.output.classesDirs
         classpath = functionalTest.runtimeClasspath
 
-        useJUnitPlatform()
+        configurePluginVerification()
         shouldRunAfter(tasks.named("test"))
         dependsOn(publishFunctionalTestPlugin)
-
-        systemProperty(
-            "functionalTestPluginRepository",
-            functionalTestPluginRepository.get().asFile.absolutePath
-        )
-        systemProperty(
-            "pluginUnderTestVersion",
-            project.version.toString()
-        )
-
-        testLogging {
-            showStandardStreams = true
-        }
     }
 
 val e2eTestTask =
@@ -293,28 +301,16 @@ val e2eTestTask =
         testClassesDirs = e2eTest.output.classesDirs
         classpath = e2eTest.runtimeClasspath
 
-        useJUnitPlatform()
+        configurePluginVerification()
         shouldRunAfter(functionalTestTask)
 
         dependsOn(publishFunctionalTestPlugin)
         dependsOn(prepareRealCodegenRepository)
 
         systemProperty(
-            "functionalTestPluginRepository",
-            functionalTestPluginRepository.get().asFile.absolutePath
-        )
-        systemProperty(
             "functionalTestCodegenRepository",
             functionalTestCodegenRepository.get().asFile.absolutePath
         )
-        systemProperty(
-            "pluginUnderTestVersion",
-            project.version.toString()
-        )
-
-        testLogging {
-            showStandardStreams = true
-        }
     }
 
 tasks.named("check") {

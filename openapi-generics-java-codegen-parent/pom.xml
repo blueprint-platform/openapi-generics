@@ -28,11 +28,11 @@
     </scm>
 
     <properties>
-        <openapi-generator.version>7.25.0</openapi-generator.version>
+        <openapi-generator.version>7.26.0</openapi-generator.version>
         <maven.resources.plugin.version>3.5.0</maven.resources.plugin.version>
         <maven-antrun-plugin.version>3.2.0</maven-antrun-plugin.version>
-        <build.helper.plugin.version>3.6.1</build.helper.plugin.version>
-        <spotless-maven-plugin.version>3.7.0</spotless-maven-plugin.version>
+        <build.helper.plugin.version>3.6.2</build.helper.plugin.version>
+        <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
 
         <openapi.templates.effective>${project.build.directory}/effective-templates</openapi.templates.effective>
         <openapi.generator.output>${project.build.directory}/generated-sources/openapi</openapi.generator.output>

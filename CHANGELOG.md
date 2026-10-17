@@ -33,7 +33,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 
 ### Changed
 
-- Upgraded OpenAPI Generator to **7.25.0**.
+- Upgraded OpenAPI Generator to **7.26.0**.
 - Updated sample projects to use Spring Boot dependency management for improved dependency alignment.
 - Upgraded the Spring Boot 4 sample baseline from **4.1.0** to **4.1.1**.
 - Improved documentation describing unsupported custom OpenAPI component schema naming.
@@ -49,7 +49,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Verified fail-fast validation of invalid wrapper metadata.
 - Verified asynchronous Spring MVC wrapper discovery using `CompletionStage` and `DeferredResult`.
 - Verified isolated multi-spec Maven generation within a single module.
-- Verified compatibility with OpenAPI Generator **7.25.0**.
+- Verified compatibility with OpenAPI Generator **7.26.0**.
 
 ### Compatibility
 

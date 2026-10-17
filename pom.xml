@@ -66,7 +66,7 @@
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <flatten-maven-plugin.version>1.7.3</flatten-maven-plugin.version>
-        <maven-dependency-plugin.version>3.10.0</maven-dependency-plugin.version>
+        <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
 
         <!-- Test Plugins -->
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
@@ -74,13 +74,13 @@
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
         <!-- Format Plugins -->
-        <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
-        <google-java-format.version>1.35.0</google-java-format.version>
+        <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>
+        <google-java-format.version>1.36.1</google-java-format.version>
 
         <!-- Release Plugins -->
-        <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+        <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
         <gpg.keyname>3F8AA661C1DBE5CD</gpg.keyname>
     </properties>
 

@@ -40,8 +40,7 @@ public class GenericAwareJavaCodegen extends JavaClientCodegen {
   private final ModelIgnoreDecider ignoreDecider = new ModelIgnoreDecider(registry);
   private final ExternalImportResolver importResolver = new ExternalImportResolver(registry);
   private final EnvelopeMetadataResolver envelopeResolver = new EnvelopeMetadataResolver();
-  private final WrapperMetadataValidator wrapperMetadataValidator =
-      new WrapperMetadataValidator();
+  private final WrapperMetadataValidator wrapperMetadataValidator = new WrapperMetadataValidator();
 
   @Override
   public void processOpts() {

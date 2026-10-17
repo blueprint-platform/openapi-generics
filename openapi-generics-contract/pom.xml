@@ -16,8 +16,8 @@
 
     <name>openapi-generics-contract</name>
     <description>
-        Canonical contract module of the OpenAPI Generics platform defining deterministic response semantics
-        (ServiceResponse&lt;T&gt;, pagination, and error extensions) shared across server and client boundaries.
+        Canonical contract module of the OpenAPI Generics platform, defining deterministic response semantics
+        for ServiceResponse&lt;T&gt;, pagination, and error extensions shared across server and client boundaries.
     </description>
     <url>https://github.com/blueprint-platform/openapi-generics</url>
 
@@ -48,7 +48,7 @@
     </dependencies>
 
     <properties>
-        <junit-jupiter-engine.version>5.14.3</junit-jupiter-engine.version>
+        <junit-jupiter-engine.version>5.14.4</junit-jupiter-engine.version>
     </properties>
 
     <build>
@@ -83,7 +83,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
             </plugin>
-
 
         </plugins>
     </build>
