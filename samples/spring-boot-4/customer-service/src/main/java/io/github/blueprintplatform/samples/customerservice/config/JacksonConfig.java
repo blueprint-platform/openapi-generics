@@ -15,30 +15,30 @@ import tools.jackson.databind.module.SimpleModule;
 @Configuration
 public class JacksonConfig {
 
-    @Bean
-    public SimpleModule sortDirectionModule() {
-        SimpleModule module = new SimpleModule();
+  @Bean
+  public SimpleModule sortDirectionModule() {
+    SimpleModule module = new SimpleModule();
 
-        module.addSerializer(
-                SortDirection.class,
-                new ValueSerializer<>() {
-                    @Override
-                    public void serialize(SortDirection value, JsonGenerator gen, SerializationContext ctxt)
-                            throws JacksonException {
-                        gen.writeString(value.value());
-                    }
-                });
+    module.addSerializer(
+        SortDirection.class,
+        new ValueSerializer<>() {
+          @Override
+          public void serialize(SortDirection value, JsonGenerator gen, SerializationContext ctxt)
+              throws JacksonException {
+            gen.writeString(value.value());
+          }
+        });
 
-        module.addDeserializer(
-                SortDirection.class,
-                new ValueDeserializer<>() {
-                    @Override
-                    public SortDirection deserialize(JsonParser parser, DeserializationContext ctxt)
-                            throws JacksonException {
-                        return SortDirection.from(parser.getValueAsString());
-                    }
-                });
+    module.addDeserializer(
+        SortDirection.class,
+        new ValueDeserializer<>() {
+          @Override
+          public SortDirection deserialize(JsonParser parser, DeserializationContext ctxt)
+              throws JacksonException {
+            return SortDirection.from(parser.getValueAsString());
+          }
+        });
 
-        return module;
-    }
+    return module;
+  }
 }

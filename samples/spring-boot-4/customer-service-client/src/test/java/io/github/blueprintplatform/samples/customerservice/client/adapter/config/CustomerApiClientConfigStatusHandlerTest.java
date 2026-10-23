@@ -134,20 +134,20 @@ class CustomerApiClientConfigStatusHandlerTest {
 
   private String problemJson() {
     return """
-        {
-          "type":"https://example.org/problem/bad-request",
-          "title":"Bad Request",
-          "status":400,
-          "detail":"Validation failed",
-          "instance":"https://example.org/trace/abc",
-          "errorCode":"VAL_001",
-          "extensions": {
-            "errors": [
-              { "code":"too_short", "message":"name too short" }
-            ]
-          }
-        }
-        """;
+    {
+      "type":"https://example.org/problem/bad-request",
+      "title":"Bad Request",
+      "status":400,
+      "detail":"Validation failed",
+      "instance":"https://example.org/trace/abc",
+      "errorCode":"VAL_001",
+      "extensions": {
+        "errors": [
+          { "code":"too_short", "message":"name too short" }
+        ]
+      }
+    }
+    """;
   }
 
   private record TestContext(RestClient client, MockRestServiceServer server) {}

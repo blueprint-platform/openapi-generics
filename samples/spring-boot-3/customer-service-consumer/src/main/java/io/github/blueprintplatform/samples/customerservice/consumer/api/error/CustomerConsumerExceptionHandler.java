@@ -34,7 +34,8 @@ public class CustomerConsumerExceptionHandler {
     }
 
     ProblemDetail pd =
-            ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(ex.getStatus()), "Upstream API problem occurred.");
+        ProblemDetail.forStatusAndDetail(
+            HttpStatusCode.valueOf(ex.getStatus()), "Upstream API problem occurred.");
     pd.setType(URI.create(PROBLEM_BASE + "upstream-api-problem"));
     pd.setTitle("Upstream API Problem");
     pd.setInstance(instance(req));
@@ -51,9 +52,9 @@ public class CustomerConsumerExceptionHandler {
     log.error("Unhandled exception", ex);
 
     ProblemDetail pd =
-            ProblemDetail.forStatusAndDetail(
-                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
-                    "An unexpected error occurred.");
+        ProblemDetail.forStatusAndDetail(
+            org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR,
+            "An unexpected error occurred.");
 
     pd.setType(URI.create(PROBLEM_BASE + "internal-error"));
     pd.setTitle("Internal Server Error");

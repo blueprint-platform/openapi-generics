@@ -56,12 +56,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>io.github.blueprint-platform.samples</groupId>
             <artifactId>service-response-contract</artifactId>
             <version>${service-response-contract.version}</version>

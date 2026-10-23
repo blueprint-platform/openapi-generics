@@ -7,10 +7,10 @@ import org.springframework.core.io.Resource;
 
 public interface TransportCoverageConsumerService {
 
-    ServiceResponse<UploadResultDto> upload(
-            byte[] content, String fileName, String description, String category);
+  ServiceResponse<UploadResultDto> upload(
+      byte[] content, String fileName, String description, String category);
 
-    Resource download(String documentId);
+  Resource download(String documentId);
 
-    ServiceResponse<RegistrationResultDto> register(String name, String category);
+  ServiceResponse<RegistrationResultDto> register(String name, String category);
 }

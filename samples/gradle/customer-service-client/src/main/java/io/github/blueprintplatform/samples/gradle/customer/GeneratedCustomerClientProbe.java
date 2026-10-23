@@ -6,8 +6,8 @@ import io.github.blueprintplatform.samples.gradle.customer.generated.dto.Service
 import java.util.List;
 
 /**
- * Compile-time proof that the Gradle plugin generated and registered both API
- * and generic wrapper source trees for normal Java compilation.
+ * Compile-time proof that the Gradle plugin generated and registered both API and generic wrapper
+ * source trees for normal Java compilation.
  */
 public final class GeneratedCustomerClientProbe {
 

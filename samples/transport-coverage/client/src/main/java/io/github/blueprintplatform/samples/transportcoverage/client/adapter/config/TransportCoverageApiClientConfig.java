@@ -12,30 +12,30 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class TransportCoverageApiClientConfig {
 
-    @Bean
-    RestClient transportCoverageRestClient(RestClient.Builder builder) {
-        return builder.build();
-    }
+  @Bean
+  RestClient transportCoverageRestClient(RestClient.Builder builder) {
+    return builder.build();
+  }
 
-    @Bean
-    ApiClient transportCoverageApiClient(
-            RestClient transportCoverageRestClient,
-            @Value("${transport-coverage.api.base-url}") String baseUrl) {
-        return new ApiClient(transportCoverageRestClient).setBasePath(baseUrl);
-    }
+  @Bean
+  ApiClient transportCoverageApiClient(
+      RestClient transportCoverageRestClient,
+      @Value("${transport-coverage.api.base-url}") String baseUrl) {
+    return new ApiClient(transportCoverageRestClient).setBasePath(baseUrl);
+  }
 
-    @Bean
-    MultipartTransportControllerApi multipartTransportControllerApi(ApiClient apiClient) {
-        return new MultipartTransportControllerApi(apiClient);
-    }
+  @Bean
+  MultipartTransportControllerApi multipartTransportControllerApi(ApiClient apiClient) {
+    return new MultipartTransportControllerApi(apiClient);
+  }
 
-    @Bean
-    BinaryTransportControllerApi binaryTransportControllerApi(ApiClient apiClient) {
-        return new BinaryTransportControllerApi(apiClient);
-    }
+  @Bean
+  BinaryTransportControllerApi binaryTransportControllerApi(ApiClient apiClient) {
+    return new BinaryTransportControllerApi(apiClient);
+  }
 
-    @Bean
-    FormTransportControllerApi formTransportControllerApi(ApiClient apiClient) {
-        return new FormTransportControllerApi(apiClient);
-    }
+  @Bean
+  FormTransportControllerApi formTransportControllerApi(ApiClient apiClient) {
+    return new FormTransportControllerApi(apiClient);
+  }
 }

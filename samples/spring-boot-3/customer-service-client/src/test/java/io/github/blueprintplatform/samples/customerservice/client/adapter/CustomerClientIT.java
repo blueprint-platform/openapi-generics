@@ -45,11 +45,11 @@ class CustomerClientIT {
   void createCustomer_shouldReturn201_andMapBody() {
     var body =
         """
-            {
-              "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-              "meta": { "serverTime": "2025-01-01T12:34:56Z", "sort": [] }
-            }
-            """;
+        {
+          "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
+          "meta": { "serverTime": "2025-01-01T12:34:56Z", "sort": [] }
+        }
+        """;
 
     server.enqueue(
         new MockResponse()
@@ -75,11 +75,11 @@ class CustomerClientIT {
   void getCustomer_shouldReturn200_andMapBody() {
     var body =
         """
-            {
-              "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-              "meta": { "requestId": "req-2", "serverTime": "2025-01-02T09:00:00Z", "sort": [] }
-            }
-            """;
+        {
+          "data": { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
+          "meta": { "requestId": "req-2", "serverTime": "2025-01-02T09:00:00Z", "sort": [] }
+        }
+        """;
 
     server.enqueue(
         new MockResponse()
@@ -103,22 +103,22 @@ class CustomerClientIT {
   void getCustomers_shouldReturn200_andMapPage() {
     var body =
         """
-            {
-              "data": {
-                "content": [
-                  { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
-                  { "customerId": 2, "name": "John Smith", "email": "john.smith@example.com" }
-                ],
-                "page": 0,
-                "size": 5,
-                "totalElements": 2,
-                "totalPages": 1,
-                "hasNext": false,
-                "hasPrev": false
-              },
-              "meta": { "serverTime": "2025-01-03T10:00:00Z", "sort": [] }
-            }
-            """;
+        {
+          "data": {
+            "content": [
+              { "customerId": 1, "name": "Jane Doe", "email": "jane@example.com" },
+              { "customerId": 2, "name": "John Smith", "email": "john.smith@example.com" }
+            ],
+            "page": 0,
+            "size": 5,
+            "totalElements": 2,
+            "totalPages": 1,
+            "hasNext": false,
+            "hasPrev": false
+          },
+          "meta": { "serverTime": "2025-01-03T10:00:00Z", "sort": [] }
+        }
+        """;
 
     server.enqueue(
         new MockResponse()
@@ -152,11 +152,11 @@ class CustomerClientIT {
   void updateCustomer_shouldReturn200_andMapBody() {
     var body =
         """
-            {
-              "data": { "customerId": 1, "name": "Jane Updated", "email": "jane.updated@example.com" },
-              "meta": { "serverTime": "2025-01-04T12:00:00Z", "sort": [] }
-            }
-            """;
+        {
+          "data": { "customerId": 1, "name": "Jane Updated", "email": "jane.updated@example.com" },
+          "meta": { "serverTime": "2025-01-04T12:00:00Z", "sort": [] }
+        }
+        """;
 
     server.enqueue(
         new MockResponse()

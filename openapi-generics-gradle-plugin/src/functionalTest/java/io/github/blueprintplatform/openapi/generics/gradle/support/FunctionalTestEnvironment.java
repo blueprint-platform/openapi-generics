@@ -12,6 +12,8 @@ import org.gradle.testkit.runner.GradleRunner;
 
 public final class FunctionalTestEnvironment {
 
+    public static final String MINIMUM_SUPPORTED_OPENAPI_GENERATOR_VERSION = "7.25.0";
+
     public static final String UNSUPPORTED_OPENAPI_GENERATOR_VERSION = "7.24.0";
 
     public static final String EFFECTIVE_JAVA_TEMPLATE_DIRECTORY =
@@ -44,15 +46,27 @@ public final class FunctionalTestEnvironment {
     public static FunctionalTestEnvironment create(Path projectDirectory)
             throws IOException {
 
+        return create(
+                projectDirectory,
+                requireSystemProperty("openApiGeneratorVersion"));
+    }
+
+    public static FunctionalTestEnvironment create(
+            Path projectDirectory,
+            String openApiGeneratorVersion)
+            throws IOException {
+
+        if (openApiGeneratorVersion == null || openApiGeneratorVersion.isBlank()) {
+            throw new IllegalArgumentException(
+                    "OpenAPI Generator version must not be blank.");
+        }
+
         String pluginRepositoryUri =
                 Path.of(requireSystemProperty("functionalTestPluginRepository"))
                         .toUri()
                         .toString();
 
         String pluginVersion = requireSystemProperty("pluginUnderTestVersion");
-        String openApiGeneratorVersion =
-                requireSystemProperty("openApiGeneratorVersion");
-
         Path fixtureRepository = projectDirectory.resolve("fixture-repository");
 
         FunctionalTestEnvironment environment =

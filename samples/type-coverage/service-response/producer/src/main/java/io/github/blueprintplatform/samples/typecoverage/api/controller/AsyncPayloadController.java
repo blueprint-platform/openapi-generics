@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /**
- * Verifies that supported Spring MVC asynchronous response wrappers are removed before
- * OpenAPI Generics inspects and projects the underlying response contract.
+ * Verifies that supported Spring MVC asynchronous response wrappers are removed before OpenAPI
+ * Generics inspects and projects the underlying response contract.
  */
 @RestController
 @RequestMapping(value = "/types/async", produces = MediaType.APPLICATION_JSON_VALUE)

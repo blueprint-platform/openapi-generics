@@ -126,15 +126,15 @@ class CustomerServiceImplTest {
   @DisplayName("deleteCustomer should remove the record and decrease total")
   void deleteCustomer_shouldRemove() {
     CustomerDto base =
-            service.createCustomer(new CustomerCreateRequest("Mark Lee", "mark.lee@example.com"));
+        service.createCustomer(new CustomerCreateRequest("Mark Lee", "mark.lee@example.com"));
 
     Page<CustomerDto> before =
-            service.getCustomers(
-                    new CustomerSearchCriteria(null, null),
-                    0,
-                    10,
-                    SortField.CUSTOMER_ID,
-                    SortDirection.ASC);
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            10,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
     long totalBefore = before.totalElements();
 
     Integer customerId = base.customerId();
@@ -142,12 +142,12 @@ class CustomerServiceImplTest {
     service.deleteCustomer(customerId);
 
     Page<CustomerDto> after =
-            service.getCustomers(
-                    new CustomerSearchCriteria(null, null),
-                    0,
-                    10,
-                    SortField.CUSTOMER_ID,
-                    SortDirection.ASC);
+        service.getCustomers(
+            new CustomerSearchCriteria(null, null),
+            0,
+            10,
+            SortField.CUSTOMER_ID,
+            SortDirection.ASC);
 
     assertEquals(totalBefore - 1, after.totalElements());
 

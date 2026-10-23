@@ -12,8 +12,8 @@ import io.github.blueprintplatform.samples.generationcoverage.serviceresponse.dt
 import java.util.List;
 
 /**
- * Compile-time proof that both OpenAPI Generator executions contributed isolated,
- * usable API and model source trees to the same Maven module.
+ * Compile-time proof that both OpenAPI Generator executions contributed isolated, usable API and
+ * model source trees to the same Maven module.
  *
  * <p>The selected types intentionally cover representative contract shapes rather than every
  * generated class:
@@ -32,14 +32,14 @@ public final class MultiSpecGenerationProbe {
 
   public static List<Class<?>> generatedTypes() {
     return List.of(
-            CustomerControllerApi.class,
-            ServiceResponseCustomerDto.class,
-            ServiceResponsePageCustomerDto.class,
-            ScalarPayloadControllerApi.class,
-            AsyncPayloadControllerApi.class,
-            ServiceResponseString.class,
-            ServiceResponseListTypeSummaryDto.class,
-            ServiceResponsePageTypeSummaryDto.class,
-            ServiceResponseWindowTypeSummaryDto.class);
+        CustomerControllerApi.class,
+        ServiceResponseCustomerDto.class,
+        ServiceResponsePageCustomerDto.class,
+        ScalarPayloadControllerApi.class,
+        AsyncPayloadControllerApi.class,
+        ServiceResponseString.class,
+        ServiceResponseListTypeSummaryDto.class,
+        ServiceResponsePageTypeSummaryDto.class,
+        ServiceResponseWindowTypeSummaryDto.class);
   }
 }

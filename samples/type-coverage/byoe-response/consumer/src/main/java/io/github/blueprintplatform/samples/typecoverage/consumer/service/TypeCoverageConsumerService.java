@@ -51,7 +51,7 @@ public interface TypeCoverageConsumerService {
 
   ApiResponse<Page<CoverageStatus>> pagedStatuses();
 
-    ApiResponse<Paging<TypeSummaryDto>> pagingSummaries();
+  ApiResponse<Paging<TypeSummaryDto>> pagingSummaries();
 
   ApiResponse<Paging<CoverageStatus>> pagingStatuses();
 

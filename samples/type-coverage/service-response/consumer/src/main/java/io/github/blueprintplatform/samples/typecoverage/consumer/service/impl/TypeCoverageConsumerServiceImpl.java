@@ -10,14 +10,13 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Typ
 import io.github.blueprintplatform.samples.typecoverage.consumer.service.TypeCoverageConsumerService;
 import io.github.blueprintplatform.samples.typecoverage.contract.Batch;
 import io.github.blueprintplatform.samples.typecoverage.contract.Window;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TypeCoverageConsumerServiceImpl implements TypeCoverageConsumerService {

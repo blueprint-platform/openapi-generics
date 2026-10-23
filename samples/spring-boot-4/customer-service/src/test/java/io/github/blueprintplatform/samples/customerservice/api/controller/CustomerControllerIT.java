@@ -81,8 +81,8 @@ class CustomerControllerIT {
   void createCustomer_validationError_methodArgumentNotValid() throws Exception {
     var badJson =
         """
-            {"name":"","email":"not-an-email"}
-            """;
+        {"name":"","email":"not-an-email"}
+        """;
 
     mvc.perform(
             post("/customers")
@@ -386,8 +386,8 @@ class CustomerControllerIT {
   void updateCustomer_validationError_methodArgumentNotValid() throws Exception {
     var badJson =
         """
-            {"name":"","email":"bad-email"}
-            """;
+        {"name":"","email":"bad-email"}
+        """;
 
     mvc.perform(
             put("/customers/{id}", 1)
