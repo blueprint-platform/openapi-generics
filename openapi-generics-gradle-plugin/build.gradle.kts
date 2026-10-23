@@ -15,6 +15,7 @@ group = "io.github.blueprint-platform"
 version = "1.3.0-SNAPSHOT"
 
 val openApiGeneratorVersion = "7.26.0"
+val spotlessLibVersion = "4.10.4"
 
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")
@@ -79,9 +80,16 @@ dependencies {
      * can instantiate GenerateTask without repeating the same coordinate.
      */
     compileOnly(openApiGeneratorGradlePlugin)
+    implementation("com.diffplug.spotless:spotless-lib:$spotlessLibVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("io.github.solven-eu.cleanthat:java:2.26")
+    testRuntimeOnly("com.github.javaparser:javaparser-symbol-solver-core:3.28.2")
+    testRuntimeOnly(
+        "com.google.googlejavaformat:google-java-format:" +
+            if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) "1.36.1" else "1.28.0"
+    )
 
     /*
      * java-gradle-plugin already contributes Gradle TestKit to testImplementation.

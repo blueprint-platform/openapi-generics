@@ -1,26 +1,39 @@
 package io.github.blueprintplatform.openapi.generics.gradle.generation;
 
+import io.github.blueprintplatform.openapi.generics.gradle.formatting.OpenApiGenericsFormattingSpec;
+import io.github.blueprintplatform.openapi.generics.gradle.formatting.OpenApiGenericsNormalizeGeneratedSourcesAction;
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateRuntime;
 import java.util.concurrent.Callable;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.tasks.ClasspathNormalizer;
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask;
 
 /**
- * Adds OpenAPI Generics-owned template and runtime classpath wiring to official generation tasks.
+ * Adds OpenAPI Generics-owned template, runtime classpath, and generated-source normalization wiring
+ * to official generation tasks.
  *
  * <p>The configurer never assigns or overrides {@code generatorName}. Generator selection remains
  * an explicit consumer decision.
  */
 public final class OpenApiGenericsGenerateTaskConfigurer {
 
+    private final OpenApiGenericsSourceLayout sourceLayout;
+
+    public OpenApiGenericsGenerateTaskConfigurer(
+            OpenApiGenericsSourceLayout sourceLayout) {
+
+        this.sourceLayout = sourceLayout;
+    }
+
     public void configure(
             Project project,
             GenerateTask task,
             OpenApiGenericsTemplateRuntime templateRuntime,
-            FileCollection generatorRuntimeClasspath) {
+            FileCollection generatorRuntimeClasspath,
+            FileCollection formatterRuntimeClasspath) {
 
         OpenApiGenericsTaskSelection selection =
                 OpenApiGenericsTaskSelection.from(task);
@@ -42,6 +55,14 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                 selected ->
                                         selected
                                                 ? generatorRuntimeClasspath
+                                                : project.files());
+
+        Provider<FileCollection> selectedFormatterRuntimeClasspath =
+                selection.isSelected()
+                        .map(
+                                selected ->
+                                        selected
+                                                ? formatterRuntimeClasspath
                                                 : project.files());
 
         /*
@@ -71,6 +92,48 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                 selection.isSelected().get()
                                         ? templateRuntime.preparationTask()
                                         : null);
+
+        OpenApiGenericsFormattingSpec formatting =
+                task.getExtensions()
+                        .create(
+                                OpenApiGenericsFormattingSpec.EXTENSION_NAME,
+                                OpenApiGenericsFormattingSpec.class);
+
+        formatting.getFormatterClasspath()
+                .from(selectedFormatterRuntimeClasspath);
+
+        formatting.getGeneratedJavaDirectory()
+                .from(
+                        sourceLayout.generatedJavaDirectory(
+                                project,
+                                task,
+                                selection));
+
+        /*
+         * The formatter runtime participates in the GenerateTask input fingerprint.
+         * Normalization itself runs as the final action of the same GenerateTask so
+         * Gradle snapshots the already-clean generated output for up-to-date/build-cache
+         * purposes instead of observing a later task mutate another task's outputs.
+         */
+        task.getInputs()
+                .files(formatting.getFormatterClasspath())
+                .withPropertyName("openApiGenericsFormatterClasspath")
+                .withNormalizer(ClasspathNormalizer.class);
+
+        /*
+         * Capture every piece of execution-time state during configuration.
+         *
+         * The action must not look up task extensions while GenerateTask is executing:
+         * Gradle configuration cache explicitly prohibits Task.extensions access at
+         * execution time.
+         */
+        task.doLast(
+                "normalizeOpenApiGenericsGeneratedSources",
+                new OpenApiGenericsNormalizeGeneratedSourcesAction(
+                        selection.isSelected(),
+                        formatting.getFormatterClasspath().getElements(),
+                        formatting.getGeneratedJavaDirectory().getElements(),
+                        selection.getTaskPath()));
 
         task.doFirst(
                 ignored ->

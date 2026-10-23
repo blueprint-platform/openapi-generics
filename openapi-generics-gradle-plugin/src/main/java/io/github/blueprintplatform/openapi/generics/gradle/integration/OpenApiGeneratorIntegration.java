@@ -1,5 +1,6 @@
 package io.github.blueprintplatform.openapi.generics.gradle.integration;
 
+import io.github.blueprintplatform.openapi.generics.gradle.dependency.OpenApiGenericsFormattingClasspath;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGeneratedSourceRegistrar;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGenerateTaskConfigurer;
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateLifecycle;
@@ -15,17 +16,20 @@ public final class OpenApiGeneratorIntegration {
 
     private final OpenApiGeneratorCompatibility compatibility;
     private final OpenApiGenericsTemplateLifecycle templateLifecycle;
+    private final OpenApiGenericsFormattingClasspath formattingClasspath;
     private final OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar;
     private final OpenApiGenericsGenerateTaskConfigurer taskConfigurer;
 
     public OpenApiGeneratorIntegration(
             OpenApiGeneratorCompatibility compatibility,
             OpenApiGenericsTemplateLifecycle templateLifecycle,
+            OpenApiGenericsFormattingClasspath formattingClasspath,
             OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar,
             OpenApiGenericsGenerateTaskConfigurer taskConfigurer) {
 
         this.compatibility = compatibility;
         this.templateLifecycle = templateLifecycle;
+        this.formattingClasspath = formattingClasspath;
         this.generatedSourceRegistrar = generatedSourceRegistrar;
         this.taskConfigurer = taskConfigurer;
     }
@@ -38,6 +42,9 @@ public final class OpenApiGeneratorIntegration {
                 templateLifecycle.register(
                         project,
                         generatorRuntimeClasspath);
+
+        Configuration formatterRuntimeClasspath =
+                formattingClasspath.register(project);
 
         /*
          * Project-level Java compilation wiring must be installed before entering
@@ -54,11 +61,14 @@ public final class OpenApiGeneratorIntegration {
                                         project,
                                         task,
                                         templateRuntime,
-                                        generatorRuntimeClasspath));
+                                        generatorRuntimeClasspath,
+                                        formatterRuntimeClasspath));
 
         project.getLogger()
                 .info(
-                        "OpenAPI Generics integration installed with template task '{}'.",
-                        templateRuntime.preparationTask().getName());
+                        "OpenAPI Generics integration installed with template task '{}' "
+                                + "and embedded formatter configuration '{}'.",
+                        templateRuntime.preparationTask().getName(),
+                        OpenApiGenericsFormattingClasspath.CONFIGURATION_NAME);
     }
 }

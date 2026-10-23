@@ -2,6 +2,7 @@ package io.github.blueprintplatform.openapi.generics.gradle;
 
 import io.github.blueprintplatform.openapi.generics.gradle.dependency.OpenApiGeneratorTemplateClasspath;
 import io.github.blueprintplatform.openapi.generics.gradle.dependency.OpenApiGenericsCodegenClasspath;
+import io.github.blueprintplatform.openapi.generics.gradle.dependency.OpenApiGenericsFormattingClasspath;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGenerateTaskConfigurer;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsGeneratedSourceRegistrar;
 import io.github.blueprintplatform.openapi.generics.gradle.generation.OpenApiGenericsSourceLayout;
@@ -30,17 +31,20 @@ public final class OpenApiGenericsGradlePlugin implements Plugin<Project> {
                         new OpenApiGenericsCodegenClasspath(
                                 OpenApiGenericsGradlePlugin.class));
 
+        OpenApiGenericsSourceLayout sourceLayout =
+                new OpenApiGenericsSourceLayout();
+
         OpenApiGenericsGeneratedSourceRegistrar generatedSourceRegistrar =
-                new OpenApiGenericsGeneratedSourceRegistrar(
-                        new OpenApiGenericsSourceLayout());
+                new OpenApiGenericsGeneratedSourceRegistrar(sourceLayout);
 
         OpenApiGenericsGenerateTaskConfigurer taskConfigurer =
-                new OpenApiGenericsGenerateTaskConfigurer();
+                new OpenApiGenericsGenerateTaskConfigurer(sourceLayout);
 
         OpenApiGeneratorIntegration integration =
                 new OpenApiGeneratorIntegration(
                         new OpenApiGeneratorCompatibility(),
                         templateLifecycle,
+                        new OpenApiGenericsFormattingClasspath(),
                         generatedSourceRegistrar,
                         taskConfigurer);
 

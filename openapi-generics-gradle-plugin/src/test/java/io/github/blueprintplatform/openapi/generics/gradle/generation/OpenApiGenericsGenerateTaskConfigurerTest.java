@@ -3,10 +3,12 @@ package io.github.blueprintplatform.openapi.generics.gradle.generation;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.blueprintplatform.openapi.generics.gradle.formatting.OpenApiGenericsFormattingSpec;
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateRuntime;
 import io.github.blueprintplatform.openapi.generics.gradle.template.PrepareOpenApiGenericsTemplates;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.TaskProvider;
@@ -21,47 +23,90 @@ class OpenApiGenericsGenerateTaskConfigurerTest {
     File temporaryDirectory;
 
     @Test
-    void addsGeneratorRuntimeClasspathAfterTaskBecomesSelected() throws IOException {
+    void addsOwnedRuntimeClasspathsAfterTaskBecomesSelected() throws IOException {
         Project project = ProjectBuilder.builder().build();
         GenerateTask task = createGenerateTask(project, "generateClient");
-        File codegenJar = createCodegenJar();
-        FileCollection runtimeClasspath = project.files(codegenJar);
+        File codegenJar = createFile("openapi-generics-java-codegen-test.jar");
+        File formatterJar = createFile("openapi-generics-formatter-test.jar");
 
-        configure(project, task, runtimeClasspath);
+        configure(
+                project,
+                task,
+                project.files(codegenJar),
+                project.files(formatterJar));
 
         task.getGeneratorName()
                 .set(OpenApiGenericsTaskSelection.OPENAPI_GENERICS_GENERATOR_NAME);
 
+        task.getOutputDir()
+                .set(new File(temporaryDirectory, "generated/client"));
+
+        task.getConfigOptions().set(Map.of());
+
         assertTrue(task.getGeneratorClasspath().getFiles().contains(codegenJar));
+
+        OpenApiGenericsFormattingSpec formatting =
+                task.getExtensions()
+                        .getByType(OpenApiGenericsFormattingSpec.class);
+
+        assertTrue(
+                formatting.getFormatterClasspath()
+                        .getFiles()
+                        .contains(formatterJar));
+
+        assertTrue(
+                formatting.getGeneratedJavaDirectory()
+                        .getSingleFile()
+                        .getPath()
+                        .replace('\\', '/')
+                        .endsWith("generated/client/src/main/java"));
     }
 
     @Test
-    void doesNotAddGeneratorRuntimeClasspathToAnotherGenerator() throws IOException {
+    void doesNotAddOwnedRuntimeClasspathsToAnotherGenerator() throws IOException {
         Project project = ProjectBuilder.builder().build();
         GenerateTask task = createGenerateTask(project, "generateKotlin");
-        File codegenJar = createCodegenJar();
-        FileCollection runtimeClasspath = project.files(codegenJar);
+        File codegenJar = createFile("openapi-generics-java-codegen-test.jar");
+        File formatterJar = createFile("openapi-generics-formatter-test.jar");
 
-        configure(project, task, runtimeClasspath);
+        configure(
+                project,
+                task,
+                project.files(codegenJar),
+                project.files(formatterJar));
 
         task.getGeneratorName().set("kotlin");
 
+        task.getOutputDir()
+                .set(new File(temporaryDirectory, "generated/kotlin"));
+
+        task.getConfigOptions().set(Map.of());
+
         assertFalse(task.getGeneratorClasspath().getFiles().contains(codegenJar));
+
+        OpenApiGenericsFormattingSpec formatting =
+                task.getExtensions()
+                        .getByType(OpenApiGenericsFormattingSpec.class);
+
+        assertTrue(formatting.getFormatterClasspath().isEmpty());
     }
 
     private void configure(
             Project project,
             GenerateTask task,
-            FileCollection runtimeClasspath) {
+            FileCollection generatorRuntimeClasspath,
+            FileCollection formatterRuntimeClasspath) {
 
         OpenApiGenericsGenerateTaskConfigurer configurer =
-                new OpenApiGenericsGenerateTaskConfigurer();
+                new OpenApiGenericsGenerateTaskConfigurer(
+                        new OpenApiGenericsSourceLayout());
 
         configurer.configure(
                 project,
                 task,
                 templateRuntime(project),
-                runtimeClasspath);
+                generatorRuntimeClasspath,
+                formatterRuntimeClasspath);
     }
 
     private OpenApiGenericsTemplateRuntime templateRuntime(Project project) {
@@ -78,19 +123,18 @@ class OpenApiGenericsGenerateTaskConfigurerTest {
                         .dir("openapi-generics/templates/effective"));
     }
 
-    private GenerateTask createGenerateTask(Project project, String name) {
+    private GenerateTask createGenerateTask(
+            Project project,
+            String name) {
+
         return project.getTasks()
                 .register(name, GenerateTask.class)
                 .get();
     }
 
-    private File createCodegenJar() throws IOException {
-        File codegenJar =
-                new File(
-                        temporaryDirectory,
-                        "openapi-generics-java-codegen-test.jar");
-
-        assertTrue(codegenJar.createNewFile());
-        return codegenJar;
+    private File createFile(String name) throws IOException {
+        File file = new File(temporaryDirectory, name);
+        assertTrue(file.createNewFile());
+        return file;
     }
 }
