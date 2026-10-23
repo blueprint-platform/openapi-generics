@@ -65,7 +65,7 @@ Verified reference baselines are exact combinations exercised by maintained repo
 | Platform line | Java | Spring Boot | springdoc-openapi | Purpose                                                       |
 |---------------|------|-------------|-------------------|---------------------------------------------------------------|
 | Spring Boot 3 | 21   | 3.5.16      | 2.9.1             | Primary Spring Boot 3 integration and type-coverage reference |
-| Spring Boot 4 | 25   | 4.1.1       | 3.1.1             | Spring Boot 4 compatibility reference                         |
+| Spring Boot 4 | 25   | 4.1.2       | 3.1.1             | Spring Boot 4 compatibility reference                         |
 
 ### Client Generation Reference
 
