@@ -4,13 +4,62 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask;
 
 class OpenApiGenericsSourceLayoutTest {
+
+    @TempDir
+    Path directory;
+
+    static Stream<Arguments> configFiles() {
+        return Stream.of(
+                Arguments.of("config.json", "{\"sourceFolder\":\"src/custom/java\"}"),
+                Arguments.of("config.json", "{\"additionalProperties\":{\"sourceFolder\":\"src/custom/java\"}}"),
+                Arguments.of("config.yaml", "sourceFolder: src/custom/java\n"),
+                Arguments.of("config.yml", "additionalProperties:\n  sourceFolder: src/custom/java\n"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("configFiles")
+    void resolvesUpstreamConfigFileSourceFolder(String name, String content) throws IOException {
+        Project project = createProject();
+        GenerateTask task = selectedTask(project, "generated/client", null);
+        Path config = directory.resolve(name);
+        Files.writeString(config, content);
+        task.getConfigFile().fileValue(config.toFile());
+
+        assertEquals(new File(project.getLayout().getBuildDirectory().get().getAsFile(), "generated/client/src/custom/java"),
+                new OpenApiGenericsSourceLayout().generatedJavaDirectory(
+                        project, task, OpenApiGenericsTaskSelection.from(task)).get());
+    }
+
+    @Test
+    void preservesOfficialOptionPrecedence() throws IOException {
+        Project project = createProject();
+        GenerateTask task = selectedTask(project, "generated/client", null);
+        Path config = directory.resolve("config.json");
+        Files.writeString(config, "{\"sourceFolder\":\"src/file/java\"}");
+        task.getConfigFile().fileValue(config.toFile());
+        task.getAdditionalProperties().put("sourceFolder", "src/additional/java");
+        var root = new OpenApiGenericsSourceLayout().generatedJavaDirectory(
+                project, task, OpenApiGenericsTaskSelection.from(task));
+
+        assertEquals(new File(project.getLayout().getBuildDirectory().get().getAsFile(), "generated/client/src/additional/java"), root.get());
+        task.getConfigOptions().put("sourceFolder", "src/options/java");
+        assertEquals(new File(project.getLayout().getBuildDirectory().get().getAsFile(), "generated/client/src/options/java"), root.get());
+    }
 
     @Test
     void derivesConfiguredSourceFolder() {

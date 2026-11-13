@@ -212,7 +212,7 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
                         "--stacktrace",
                         "-PopenApiGeneratorVersion="
                                 + requireSystemProperty(
-                                        "openApiGeneratorVersion"),
+                                        "openApiGeneratorTestRuntimeVersion"),
                         "-PopenApiGenericsPluginVersion="
                                 + requireSystemProperty(
                                         "pluginUnderTestVersion"),

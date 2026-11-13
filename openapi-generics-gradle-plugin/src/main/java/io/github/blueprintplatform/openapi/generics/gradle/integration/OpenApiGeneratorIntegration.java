@@ -64,6 +64,16 @@ public final class OpenApiGeneratorIntegration {
                                         generatorRuntimeClasspath,
                                         formatterRuntimeClasspath));
 
+        /*
+         * Apply template ownership after consumer task configuration. Replacing templateDir
+         * with an absent provider would erase the official extension binding on ordinary
+         * tasks; resolving selection inside the earlier configureEach callback is premature.
+         */
+        project.afterEvaluate(
+                ignored -> project.getTasks()
+                        .withType(GenerateTask.class)
+                        .configureEach(task -> taskConfigurer.configureTemplate(task, templateRuntime)));
+
         project.getLogger()
                 .info(
                         "OpenAPI Generics integration installed with template task '{}' "

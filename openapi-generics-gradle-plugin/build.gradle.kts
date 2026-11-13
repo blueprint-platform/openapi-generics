@@ -14,7 +14,11 @@ plugins {
 group = "io.github.blueprint-platform"
 version = "1.3.0-SNAPSHOT"
 
-val openApiGeneratorVersion = "7.26.0"
+val minimumOpenApiGeneratorApiCompileVersion = "7.25.0"
+val currentOpenApiGeneratorVerificationVersion = "7.27.0"
+val selectedOpenApiGeneratorTestRuntimeVersion =
+    providers.gradleProperty("openApiGeneratorTestRuntimeVersion")
+        .orElse(currentOpenApiGeneratorVerificationVersion)
 val spotlessLibVersion = "4.10.4"
 
 val repositoryRoot = rootProject.projectDir.parentFile
@@ -51,10 +55,11 @@ val e2eTest: SourceSet = sourceSets.create("e2eTest")
 
 /*
  * Production compiles against the public OpenAPI Generator Gradle plugin API,
- * but does not publish or embed the official plugin implementation.
+ * at the minimum verified integration boundary, but does not publish or embed
+ * the official plugin implementation. Consumer runtime selection is independent.
  */
 val openApiGeneratorGradlePlugin =
-    "org.openapi.generator:org.openapi.generator.gradle.plugin:$openApiGeneratorVersion"
+    "org.openapi.generator:org.openapi.generator.gradle.plugin:$minimumOpenApiGeneratorApiCompileVersion"
 
 configurations.named(sourceSets.test.get().implementationConfigurationName) {
     extendsFrom(configurations.compileOnly.get())
@@ -80,6 +85,8 @@ dependencies {
      * can instantiate GenerateTask without repeating the same coordinate.
      */
     compileOnly(openApiGeneratorGradlePlugin)
+    // Config-file binding uses the running official runtime's public settings model.
+    compileOnly("org.openapitools:openapi-generator:$minimumOpenApiGeneratorApiCompileVersion")
     implementation("com.diffplug.spotless:spotless-lib:$spotlessLibVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
@@ -118,8 +125,8 @@ fun Test.configurePluginVerification() {
     useJUnitPlatform()
 
     systemProperty(
-        "openApiGeneratorVersion",
-        openApiGeneratorVersion
+        "openApiGeneratorTestRuntimeVersion",
+        selectedOpenApiGeneratorTestRuntimeVersion.get()
     )
     systemProperty(
         "functionalTestPluginRepository",
@@ -129,6 +136,16 @@ fun Test.configurePluginVerification() {
         "pluginUnderTestVersion",
         project.version.toString()
     )
+
+    doFirst {
+        logger.lifecycle(
+            "{}: selected official OpenAPI Generator test runtime = {} (reference = {}, API compile baseline = {})",
+            path,
+            selectedOpenApiGeneratorTestRuntimeVersion.get(),
+            currentOpenApiGeneratorVerificationVersion,
+            minimumOpenApiGeneratorApiCompileVersion
+        )
+    }
 
     testLogging {
         showStandardStreams = true

@@ -5,7 +5,6 @@ import io.github.blueprintplatform.openapi.generics.gradle.formatting.OpenApiGen
 import io.github.blueprintplatform.openapi.generics.gradle.template.OpenApiGenericsTemplateRuntime;
 import java.util.concurrent.Callable;
 import org.gradle.api.Project;
-import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.ClasspathNormalizer;
@@ -38,17 +37,6 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
         OpenApiGenericsTaskSelection selection =
                 OpenApiGenericsTaskSelection.from(task);
 
-        Provider<Directory> effectiveJavaTemplateDirectory =
-                selection.isSelected()
-                        .flatMap(
-                                selected ->
-                                        selected
-                                                ? templateRuntime
-                                                .effectiveTemplateDirectory()
-                                                .map(directory -> directory.dir("Java"))
-                                                : project.getProviders()
-                                                .provider(() -> null));
-
         Provider<FileCollection> selectedGeneratorRuntimeClasspath =
                 selection.isSelected()
                         .map(
@@ -64,16 +52,6 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                                         selected
                                                 ? formatterRuntimeClasspath
                                                 : project.files());
-
-        /*
-         * The official OpenAPI Generator plugin has already connected
-         * GenerateTask.templateDir with its extension property using set(provider).
-         * A convention added here therefore does not reliably become the effective
-         * value. Selected OpenAPI Generics tasks must explicitly use the prepared
-         * Java template root.
-         */
-        task.getTemplateDir()
-                .set(effectiveJavaTemplateDirectory);
 
         /*
          * Custom GenerateTask instances do not inherit the default openApiGenerate
@@ -140,6 +118,17 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                         reportSelection(
                                 task,
                                 selection));
+    }
+
+    public void configureTemplate(
+            GenerateTask task,
+            OpenApiGenericsTemplateRuntime templateRuntime) {
+
+        if (OpenApiGenericsTaskSelection.from(task).isSelected().get()) {
+            task.getTemplateDir().set(
+                    templateRuntime.effectiveTemplateDirectory()
+                            .map(directory -> directory.dir("Java")));
+        }
     }
 
     private void reportSelection(

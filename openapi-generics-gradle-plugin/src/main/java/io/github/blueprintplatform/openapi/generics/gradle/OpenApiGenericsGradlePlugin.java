@@ -25,6 +25,13 @@ public final class OpenApiGenericsGradlePlugin implements Plugin<Project> {
 
     @Override
     public void apply(@NonNull Project project) {
+        project.getPluginManager()
+                .withPlugin(
+                        OPENAPI_GENERATOR_PLUGIN_ID,
+                        ignored -> install(project));
+    }
+
+    private void install(Project project) {
         OpenApiGenericsTemplateLifecycle templateLifecycle =
                 new OpenApiGenericsTemplateLifecycle(
                         new OpenApiGeneratorTemplateClasspath(),
@@ -48,9 +55,6 @@ public final class OpenApiGenericsGradlePlugin implements Plugin<Project> {
                         generatedSourceRegistrar,
                         taskConfigurer);
 
-        project.getPluginManager()
-                .withPlugin(
-                        OPENAPI_GENERATOR_PLUGIN_ID,
-                        ignored -> integration.install(project));
+        integration.install(project);
     }
 }

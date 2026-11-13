@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import io.github.blueprintplatform.openapi.generics.gradle.support.ConsumerBuildFiles;
 import io.github.blueprintplatform.openapi.generics.gradle.support.FunctionalTestEnvironment;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import org.gradle.testkit.runner.BuildResult;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,43 @@ class OpenApiGenericsTaskWiringFunctionalTest {
     void prepare() throws IOException {
         environment = FunctionalTestEnvironment.create(projectDirectory);
         environment.writeMixedGeneratorConsumer();
+    }
+
+    @Test
+    void preservesOrdinaryExtensionTemplateDuringRealGeneration() throws IOException {
+        Files.writeString(projectDirectory.resolve("spec.yaml"), """
+                openapi: 3.0.3
+                info: {title: Ordinary template regression, version: "1"}
+                paths: {}
+                components:
+                  schemas:
+                    Pet:
+                      type: object
+                      properties:
+                        name: {type: string}
+                """);
+        Path templates = Files.createDirectories(projectDirectory.resolve("templates"));
+        Files.writeString(templates.resolve("model.mustache"), """
+                // ORDINARY_CONSUMER_TEMPLATE
+                package {{package}};
+                {{#models}}{{#model}}public class {{classname}} {}{{/model}}{{/models}}
+                """);
+        environment.writeBuildFile(
+                ConsumerBuildFiles.ordinaryJavaConsumerWithTemplate(
+                        environment.officialPluginRuntimeVersion(),
+                        environment.pluginVersion(),
+                        environment.fixtureRepositoryUri()));
+
+        BuildResult result = environment.run(
+                ConsumerBuildFiles.PRINT_TEMPLATE_DIRS, "openApiGenerate");
+
+        assertTrue(result.getOutput().contains(
+                "TEMPLATE_DIR_openApiGenerate=" + templates.toRealPath().toString().replace('\\', '/')),
+                result::getOutput);
+        assertTrue(Files.readString(projectDirectory.resolve(
+                "build/generated/ordinary/src/main/java/review/model/Pet.java"))
+                .contains("ORDINARY_CONSUMER_TEMPLATE"), result::getOutput);
+        assertTrue(result.task(":prepareOpenApiGenericsTemplates") == null, result::getOutput);
     }
 
     @Test

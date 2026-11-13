@@ -16,13 +16,48 @@ class OpenApiGenericsCompatibilityFunctionalTest {
     Path projectDirectory;
 
     @Test
+    void usesSelectedOfficialPluginRuntimeVersion() throws IOException {
+        FunctionalTestEnvironment environment =
+                FunctionalTestEnvironment.create(projectDirectory);
+
+        environment.writeBuildFile(
+                "import java.util.Properties\n"
+                        + ConsumerBuildFiles.officialJavaConsumer(
+                                environment.officialPluginRuntimeVersion(),
+                                environment.pluginVersion(),
+                                environment.fixtureRepositoryUri())
+                        + """
+                        tasks.register("printOfficialGeneratorRuntimeVersion") {
+                            doLast {
+                                val version = Properties()
+                                org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class.java
+                                    .classLoader.getResourceAsStream(
+                                        "META-INF/maven/org.openapitools/openapi-generator/pom.properties"
+                                    )!!.use { version.load(it) }
+                                println("OFFICIAL_GENERATOR_RUNTIME_VERSION=" + version.getProperty("version"))
+                            }
+                        }
+                        """);
+
+        BuildResult result = environment.run("printOfficialGeneratorRuntimeVersion");
+
+        assertTrue(
+                result.getOutput().contains(
+                        "OFFICIAL_GENERATOR_RUNTIME_VERSION="
+                                + environment.officialPluginRuntimeVersion()),
+                result::getOutput);
+        System.out.println(
+                "Verified official generator runtime: " + environment.officialPluginRuntimeVersion());
+    }
+
+    @Test
     void rejectsOfficialPluginWithoutRequiredCapability() throws IOException {
         FunctionalTestEnvironment environment =
                 FunctionalTestEnvironment.create(projectDirectory);
 
         environment.writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumer(
-                        FunctionalTestEnvironment.UNSUPPORTED_OPENAPI_GENERATOR_VERSION,
+                        FunctionalTestEnvironment.NEGATIVE_BOUNDARY_OFFICIAL_PLUGIN_VERSION,
                         environment.pluginVersion(),
                         environment.fixtureRepositoryUri()));
 
@@ -42,7 +77,7 @@ class OpenApiGenericsCompatibilityFunctionalTest {
         FunctionalTestEnvironment environment =
                 FunctionalTestEnvironment.create(
                         projectDirectory,
-                        FunctionalTestEnvironment.MINIMUM_SUPPORTED_OPENAPI_GENERATOR_VERSION);
+                        FunctionalTestEnvironment.MINIMUM_VERIFIED_OFFICIAL_PLUGIN_VERSION);
 
         environment.writeOfficialJavaConsumer();
 

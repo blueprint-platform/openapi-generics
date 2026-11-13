@@ -12,9 +12,9 @@ import org.gradle.testkit.runner.GradleRunner;
 
 public final class FunctionalTestEnvironment {
 
-    public static final String MINIMUM_SUPPORTED_OPENAPI_GENERATOR_VERSION = "7.25.0";
+    public static final String MINIMUM_VERIFIED_OFFICIAL_PLUGIN_VERSION = "7.25.0";
 
-    public static final String UNSUPPORTED_OPENAPI_GENERATOR_VERSION = "7.24.0";
+    public static final String NEGATIVE_BOUNDARY_OFFICIAL_PLUGIN_VERSION = "7.24.0";
 
     public static final String EFFECTIVE_JAVA_TEMPLATE_DIRECTORY =
             "build/openapi-generics/templates/effective/Java";
@@ -22,25 +22,25 @@ public final class FunctionalTestEnvironment {
     private final Path projectDirectory;
     private final String pluginRepositoryUri;
     private final String pluginVersion;
-    private final String openApiGeneratorVersion;
+    private final String officialPluginRuntimeVersion;
     private final Path fixtureRepository;
 
     private FunctionalTestEnvironment(
             Path projectDirectory,
             String pluginRepositoryUri,
             String pluginVersion,
-            String openApiGeneratorVersion,
+            String officialPluginRuntimeVersion,
             Path fixtureRepository) {
 
         this.projectDirectory = projectDirectory;
         this.pluginRepositoryUri = pluginRepositoryUri;
         this.pluginVersion = pluginVersion;
-        this.openApiGeneratorVersion = openApiGeneratorVersion;
+        this.officialPluginRuntimeVersion = officialPluginRuntimeVersion;
         this.fixtureRepository = fixtureRepository;
     }
 
-    public String openApiGeneratorVersion() {
-        return openApiGeneratorVersion;
+    public String officialPluginRuntimeVersion() {
+        return officialPluginRuntimeVersion;
     }
 
     public static FunctionalTestEnvironment create(Path projectDirectory)
@@ -48,15 +48,15 @@ public final class FunctionalTestEnvironment {
 
         return create(
                 projectDirectory,
-                requireSystemProperty("openApiGeneratorVersion"));
+                requireSystemProperty("openApiGeneratorTestRuntimeVersion"));
     }
 
     public static FunctionalTestEnvironment create(
             Path projectDirectory,
-            String openApiGeneratorVersion)
+            String officialPluginRuntimeVersion)
             throws IOException {
 
-        if (openApiGeneratorVersion == null || openApiGeneratorVersion.isBlank()) {
+        if (officialPluginRuntimeVersion == null || officialPluginRuntimeVersion.isBlank()) {
             throw new IllegalArgumentException(
                     "OpenAPI Generator version must not be blank.");
         }
@@ -74,7 +74,7 @@ public final class FunctionalTestEnvironment {
                         projectDirectory,
                         pluginRepositoryUri,
                         pluginVersion,
-                        openApiGeneratorVersion,
+                        officialPluginRuntimeVersion,
                         fixtureRepository);
 
         environment.publishCodegenFixture();
@@ -117,7 +117,7 @@ public final class FunctionalTestEnvironment {
     public void writeOfficialJavaConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumer(
-                        openApiGeneratorVersion,
+                        officialPluginRuntimeVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -125,7 +125,7 @@ public final class FunctionalTestEnvironment {
     public void writeOfficialJavaConsumerWithCodegenOnlyRepository() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumerWithCodegenOnlyRepository(
-                        openApiGeneratorVersion,
+                        officialPluginRuntimeVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -133,7 +133,7 @@ public final class FunctionalTestEnvironment {
     public void writeMixedGeneratorConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.mixedGeneratorConsumer(
-                        openApiGeneratorVersion,
+                        officialPluginRuntimeVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }
@@ -141,7 +141,7 @@ public final class FunctionalTestEnvironment {
     public void writeMultipleGenericsTasksConsumer() throws IOException {
         writeBuildFile(
                 ConsumerBuildFiles.multipleGenericsTasksConsumer(
-                        openApiGeneratorVersion,
+                        officialPluginRuntimeVersion,
                         pluginVersion,
                         fixtureRepositoryUri()));
     }

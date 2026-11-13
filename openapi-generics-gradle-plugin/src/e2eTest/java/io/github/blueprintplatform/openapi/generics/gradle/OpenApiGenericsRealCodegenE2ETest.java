@@ -249,7 +249,7 @@ class OpenApiGenericsRealCodegenE2ETest {
                                 "--stacktrace",
                                 "-PopenApiGeneratorVersion="
                                         + requireSystemProperty(
-                                                "openApiGeneratorVersion"),
+                                                "openApiGeneratorTestRuntimeVersion"),
                                 "-PopenApiGenericsPluginVersion="
                                         + requireSystemProperty(
                                                 "pluginUnderTestVersion"),
@@ -432,6 +432,68 @@ class OpenApiGenericsRealCodegenE2ETest {
                 "paged generic wrapper",
                 "ServiceResponsePageTypeSummaryDto",
                 result);
+    }
+
+    @Test
+    void configFileSourceFolderDrivesCompilationNormalizationAndConfigurationCache() throws IOException {
+        Path buildFile = projectDirectory.resolve("build.gradle.kts");
+        Files.writeString(buildFile, Files.readString(buildFile)
+                .replace("\"sourceFolder\" to \"src/gen/java\",", "") + """
+
+                tasks.named<GenerateTask>("openApiGenerate") {
+                    configFile.set(layout.projectDirectory.file("generator-config.json"))
+                }
+                """);
+        Path probe = projectDirectory.resolve("src/main/java/review/CompileProbe.java");
+        Files.createDirectories(probe.getParent());
+        Files.writeString(probe, """
+                package review;
+                import io.github.blueprintplatform.functional.generated.model.ServiceResponseTypeSummaryDto;
+                public class CompileProbe { public ServiceResponseTypeSummaryDto response; }
+                """);
+        Path config = projectDirectory.resolve("generator-config.json");
+        Files.writeString(config, "{\"sourceFolder\":\"src/custom/java\"}");
+
+        BuildResult first = runConfigFileCompile();
+        assertTrue(first.getOutput().contains("Configuration cache entry stored"), first::getOutput);
+        assertConfigFileOutput("src/custom/java", first);
+
+        BuildResult second = runConfigFileCompile();
+        assertTrue(second.getOutput().contains("Reusing configuration cache"), second::getOutput);
+        assertConfigFileOutput("src/custom/java", second);
+
+        Files.writeString(config, "{\"sourceFolder\":\"src/changed/java\"}");
+        BuildResult changed = runConfigFileCompile();
+        assertFalse(changed.getOutput().contains("Reusing configuration cache"), changed::getOutput);
+        assertConfigFileOutput("src/changed/java", changed);
+    }
+
+    private BuildResult runConfigFileCompile() {
+        return GradleRunner.create()
+                .withProjectDir(projectDirectory.toFile())
+                .withArguments(
+                        "compileJava", "--configuration-cache", "--rerun-tasks", "--info", "--stacktrace",
+                        "-PopenApiGeneratorVersion=" + requireSystemProperty("openApiGeneratorTestRuntimeVersion"),
+                        "-PopenApiGenericsPluginVersion=" + requireSystemProperty("pluginUnderTestVersion"),
+                        "-PopenApiGenericsPluginRepository=" + requireSystemProperty("functionalTestPluginRepository"),
+                        "-PopenApiGenericsCodegenRepository=" + requireSystemProperty("functionalTestCodegenRepository"))
+                .build();
+    }
+
+    private void assertConfigFileOutput(String sourceFolder, BuildResult result) throws IOException {
+        assertSuccessfulTask(result, ":openApiGenerate");
+        assertSuccessfulTask(result, ":compileJava");
+        Path wrapper = projectDirectory.resolve("build/generated/openapi/" + sourceFolder
+                + "/io/github/blueprintplatform/functional/generated/model/ServiceResponseTypeSummaryDto.java");
+        String source = Files.readString(wrapper);
+        assertFalse(source.contains("import java.util.Objects;"), () -> source);
+        assertFalse(source.contains("import java.util.Arrays;"), () -> source);
+        assertTrue(source.contains(
+                "public class ServiceResponseTypeSummaryDto extends ServiceResponse<TypeSummaryDto> {}"),
+                () -> source);
+        assertCompiledClass("config-file wrapper", "ServiceResponseTypeSummaryDto", result);
+        assertTrue(Files.isRegularFile(projectDirectory.resolve("build/classes/java/main/review/CompileProbe.class")),
+                result::getOutput);
     }
 
     private void copyFixture(String relativePath)

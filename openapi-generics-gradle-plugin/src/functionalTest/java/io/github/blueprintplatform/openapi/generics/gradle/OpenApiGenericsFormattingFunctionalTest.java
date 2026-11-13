@@ -26,7 +26,7 @@ class OpenApiGenericsFormattingFunctionalTest {
 
         environment.writeBuildFile(
                 ConsumerBuildFiles.officialJavaConsumer(
-                                environment.openApiGeneratorVersion(),
+                                environment.officialPluginRuntimeVersion(),
                                 environment.pluginVersion(),
                                 environment.fixtureRepositoryUri())
                         + """

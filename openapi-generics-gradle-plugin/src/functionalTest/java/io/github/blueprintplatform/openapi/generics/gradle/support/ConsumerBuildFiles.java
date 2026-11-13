@@ -163,6 +163,27 @@ public final class ConsumerBuildFiles {
                 """;
     }
 
+    public static String ordinaryJavaConsumerWithTemplate(
+            String officialPluginRuntimeVersion,
+            String pluginVersion,
+            String fixtureRepositoryUri) {
+        return plugins(officialPluginRuntimeVersion, pluginVersion, true)
+                + repositories(fixtureRepositoryUri)
+                + """
+                openApiGenerate {
+                    generatorName.set("java")
+                    inputSpec.set(file("spec.yaml").absolutePath)
+                    outputDir.set(layout.buildDirectory.dir("generated/ordinary"))
+                    templateDir.set(file("templates").absolutePath)
+                    modelPackage.set("review.model")
+                    globalProperties.set(mapOf(
+                        "models" to "", "apis" to "false", "supportingFiles" to "false",
+                        "modelDocs" to "false", "modelTests" to "false"))
+                }
+                """
+                + inspectionTasks(true);
+    }
+
     private static String mixedGenerateTasks() {
         return """
                 tasks.register<GenerateTask>("generateGenericsClient") {

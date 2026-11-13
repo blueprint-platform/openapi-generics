@@ -17,7 +17,7 @@ class OpenApiGenericsGradleVersionCompatibilityFunctionalTest {
     Path projectDirectory;
 
     @ParameterizedTest(name = "supports Gradle {0}")
-    @ValueSource(strings = {"9.0.0", "9.8.1"})
+    @ValueSource(strings = {"9.0.0", "9.9.1"})
     void supportsGradleNineLine(String gradleVersion) throws IOException {
         FunctionalTestEnvironment environment =
                 FunctionalTestEnvironment.create(projectDirectory);
