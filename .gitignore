@@ -75,8 +75,3 @@ buildNumber.properties
 
 # Samples intentionally commit generated OpenAPI snapshots when required.
 !samples/**/generated-sources/
-
-# =========================
-# AI tooling
-# =========================
-AGENTS.md
