@@ -67,7 +67,7 @@ BYOE identifies an application-owned envelope on the **producer** (`openapi-gene
 | `x-data-item` | Item type |
 | `x-ignore-model` | Retain schema, suppress duplicate model generation |
 
-`x-envelope-import`, `x-envelope-type`, and `x-extra-imports` are derived codegen-internal metadata, not producer requirements. `x-payload-property` is not an active canonical extension. Validate wrapper metadata before reconstruction; container name/type/item metadata travel together.
+`x-envelope-import`, `x-envelope-type`, and `x-extra-imports` are derived codegen-internal metadata, not producer requirements. Validate wrapper metadata before reconstruction; container name/type/item metadata travel together.
 
 - Container semantics are metadata-driven, not Page-specific branching. Built-ins are `List<T>`, `Set<T>`, and `Page<T>`. Explicit application containers require a concrete class/record with one type parameter and a declared `List<T>`/`Set<T>` item property using it directly; their shared Java type must be on the client classpath.
 - BYOE requires a concrete class with one generic parameter and one direct payload field of that parameter's type. Record envelopes, multiple generic parameters and nested generic payload slots are unsupported; supply containers as the envelope's type argument at usage sites.
