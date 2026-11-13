@@ -1,0 +1,102 @@
+# Gradle-first customer service
+
+A Spring Boot **4.1.2**, Java **25** application adoption stack using OpenAPI Generator **7.27.0**
+and Gradle **9.9.1**. These are this sample's verified references, not consumer support minimums.
+
+```text
+contract (pure Java CustomerDto)
+    ↓                        ↘
+producer → spec/customer-api-docs.json → client → consumer
+```
+
+- `producer`: Boot MVC application exposing direct and paged customer responses through the server starter.
+- `contract`: application-owned shared DTO; no framework dependency.
+- `client`: official `GenerateTask` with `java-generics-contract`, RestClient, Jackson 3 and BYOC mapping.
+- `consumer`: Boot application using generated API methods through a gateway whose public return types
+  are shared `ServiceResponse<CustomerDto>` and `ServiceResponse<Page<CustomerDto>>` contracts.
+
+The official generator version and ordinary generator options belong to the consumer build. The
+OpenAPI Generics plugin provides its aligned codegen, templates, generated-source registration,
+compilation dependency and normalization. There is no manual source-set, generator classpath or
+template wiring. The sample uses a custom `generateCustomerClient` task and non-default source folder.
+
+## Repository bootstrap
+
+Use JDK 25. From the repository root, install unchanged platform snapshot artifacts:
+
+```bash
+mvn -pl openapi-generics-server-starter,openapi-generics-java-codegen -am install -DskipTests
+```
+
+This sample uses the repository plugin through `includeBuild`, and restricts `mavenLocal()` to platform
+artifacts. Its shared DTO is a Gradle project dependency, not a Maven sample prerequisite. Published
+consumers replace `includeBuild` with the released OpenAPI Generics plugin version and resolve released
+platform artifacts from their configured repository; they still select the official generator version.
+
+## Build and verify
+
+From this directory:
+
+```bash
+./gradlew clean build --no-build-cache --configuration-cache
+./gradlew clean build --no-build-cache --configuration-cache
+```
+
+The second identical command must report configuration-cache reuse. Disabling the build cache here
+ensures compilation, generation and tests actually execute after each clean, rather than being restored.
+The ordinary `./gradlew build` also works with this sample's enabled configuration/build caches.
+
+`build` runs three acceptance tests:
+
+- Producer projection is compared semantically with the committed JSON snapshot; its independently
+  generated document is retained under `producer/build/openapi/`. Drift fails verification and never
+  silently overwrites the committed snapshot.
+- Generated contract bindings compile automatically, reuse shared types without duplicate models, and
+  have normalized wrapper declarations/imports.
+- A random-port Boot producer receives real HTTP calls from a separately configured consumer context
+  using the generated RestClient. Direct and paged payloads deserialize to the exact shared `CustomerDto`,
+  `Page`, and `ServiceResponse` hierarchy; metadata and page values are checked. No mocked HTTP or manual
+  JSON parsing substitutes for this test.
+
+Client generation reads only the committed spec; it never starts the producer:
+
+```bash
+./gradlew :client:build
+```
+
+Generated Java stays under `client/build/generated/customer/src/gen/java` and is not committed.
+
+## Intentional contract changes
+
+After reviewing a producer contract change, explicitly regenerate its snapshot:
+
+```bash
+./gradlew :producer:test -PupdateOpenApiSnapshot=true --rerun-tasks
+./gradlew clean build --no-build-cache --configuration-cache
+git diff -- spec/customer-api-docs.json
+```
+
+The first command is an explicit snapshot update, not the default verification behavior. Review and
+commit intentional spec changes with the corresponding contract/producer change. Fixed OpenAPI server
+metadata keeps the snapshot independent of test ports; the consumer configures the actual base URL.
+
+## Run applications separately
+
+In one terminal:
+
+```bash
+./gradlew :producer:bootRun
+```
+
+In another:
+
+```bash
+./gradlew :consumer:bootRun --args='--customer.base-url=http://localhost:8080'
+```
+
+The consumer prints the direct and paged responses and exits. Runtime tests start and close both
+application contexts automatically and use a random server port.
+
+This is an adoption example, not another coverage matrix. BYOE, custom containers, List/Set, async,
+transport variants, multiple specs/generators and arbitrary templates are intentionally left to their
+existing canonical verification areas.

@@ -1,12 +1,15 @@
-# Gradle Samples
+# Gradle adoption sample
 
-User-facing Gradle adoption examples for OpenAPI Generics.
+[`customer-service`](customer-service/README.md) is the canonical Gradle-first Spring Boot 4 stack:
 
-## Available Sample
+```text
+producer → committed OpenAPI spec → generated RestClient → consumer
+```
 
-| Sample | Purpose |
-| --- | --- |
-| [`customer-service-client`](customer-service-client/README.md) | Generates a Spring Boot 3 Java RestClient from the existing customer OpenAPI document, applies BYOC, and compiles the generated API and generic wrapper types. |
+The four-module build demonstrates shared Java contracts, direct and paged responses, real HTTP
+deserialization, automatic generated-source registration/normalization, and configuration-cache reuse.
+The former standalone `customer-service-client` example is superseded by this stack's `client` module;
+its custom GenerateTask and BYOC adoption path are preserved without a second independent example.
 
-The Gradle samples focus on client-generation build integration. Runtime producer and consumer
-flows remain in the Spring Boot integration stacks.
+BYOE, custom containers, type/transport matrices, and multiple/mixed generator scenarios remain in
+their existing dedicated samples and plugin regression tests.

@@ -27,19 +27,24 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Added fail-fast validation for generic wrapper metadata during client generation.
 - Added dedicated exception types for invalid generic wrapper contracts.
 - Added regression coverage for asynchronous Spring MVC response wrapper discovery and reconstruction.
-- Added dedicated Gradle client sample demonstrating end-to-end client generation.
+- Added a canonical Gradle-first Spring Boot 4.1.2 / Java 25 customer stack: producer → committed OpenAPI snapshot → generated RestClient → consumer, with shared/BYOC contracts and real direct/paged HTTP deserialization. The client module supersedes the former standalone Gradle client sample.
 - Added dedicated multi-spec Maven generation coverage validating multiple isolated generator executions within a single module.
 
 ### Changed
 
-- Upgraded OpenAPI Generator to **7.26.0**.
+- Kept the Maven/core OpenAPI Generator reference at **7.26.0**; promoted the Gradle plugin and canonical Gradle sample current verification reference to **7.27.0**.
 - Established OpenAPI Generator **7.25.0** as the minimum verified Gradle integration baseline.
-- Upgraded the Gradle Wrapper to **9.8.1**.
+- Promoted the Gradle plugin and canonical Gradle sample wrappers/current references to **9.9.1**; the minimum tested Gradle edge remains **9.0.0**.
 - Updated sample projects to use Spring Boot dependency management for improved dependency alignment.
 - Upgraded the Spring Boot 4 sample baseline from **4.1.0** to **4.1.2**.
 - Normalized sample Java sources using the project formatting standard.
 - Improved documentation describing unsupported custom OpenAPI component schema naming.
 - Expanded sample documentation covering asynchronous response wrappers, Gradle integration, and generation coverage.
+
+### Fixed
+
+- Preserved consumer `templateDir` settings on non-selected ordinary generator tasks.
+- Aligned generation, source registration and normalization with effective `sourceFolder` from JSON/YAML `configFile`, including option precedence and configuration-cache invalidation.
 
 ### Quality & Verification
 
@@ -47,8 +52,9 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Verified isolated multi-task Gradle generation and mixed-generator scenarios.
 - Verified generated-source registration and configuration-cache compatibility.
 - Verified generated Java normalization after real OpenAPI Generator execution.
-- Verified compatibility with Gradle **9.0.0** and **9.8.1**.
-- Verified OpenAPI Generator Gradle integration with **7.25.0** and **7.26.0**.
+- Verified canonical Gradle sample snapshot drift detection, automatic source registration, shared contract identity over real HTTP, and configuration-cache reuse with generation/compilation/tests re-executed after clean.
+- Verified compatibility with Gradle **9.0.0** and **9.9.1**.
+- Verified OpenAPI Generator Gradle integration with minimum API/capability baseline **7.25.0**, current reference **7.27.0**, and explicit **7.24.0** negative boundary. Production API dependencies remain `compileOnly`; consumers select the official generator version.
 - Verified fail-fast validation of invalid generic wrapper metadata.
 - Verified asynchronous Spring MVC wrapper discovery using `CompletionStage` and `DeferredResult`.
 - Verified isolated multi-spec Maven generation within a single module.
@@ -59,8 +65,8 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Java 17+
 - Spring Boot 3.x / 4.x
 - OpenAPI Generator 7.x
-- Verified OpenAPI Generator Gradle plugin baseline: **7.25.0+**
-- Verified Gradle versions: **9.0.0** and **9.8.1**
+- Gradle integration minimum verified OpenAPI Generator API/capability baseline: **7.25.0**; current reference **7.27.0**. The **7.24.0** negative case applies only to this integration boundary, not platform-wide 7.x support.
+- Gradle supported line: **9.x**; minimum tested edge **9.0.0**, current wrapper/reference **9.9.1**. Current references are not consumer requirements or support minimums; previous currents are not accumulated in a permanent matrix.
 - Maven and Gradle based client generation
 
 ---
