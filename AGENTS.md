@@ -35,12 +35,6 @@ Consumers choose concrete framework/tool versions within supported policy. The p
 - Read exact role values from build configuration and executable tests. Independently maintained surfaces may have different references. Sample pins, starter compile/test baselines, internal BOM values and wrapper versions are not universal consumer constraints; representative verification is not exhaustive support-line testing.
 - General OpenAPI Generator support is **7.x**; Gradle support is **9.x**. The Gradle integration's OAG minimum/negative boundary must not narrow platform-wide 7.x support.
 
-| Spring Boot supported line | springdoc-openapi supported lines |
-|---|---|
-| 3.4.x | 2.8.x |
-| 3.5.x | 2.8.x / 2.9.x |
-| 4.x | 3.x |
-
 ### Maven coherence
 
 The consumer-selected `openapi-generator.version` stays aligned across the official Maven plugin, `openapi-generator-core`, `openapi-generator`, and upstream `Java/model.mustache` extraction. The platform BOM does not manage these versions or pin consumer runtimes.
@@ -52,7 +46,7 @@ The consumer-selected `openapi-generator.version` stays aligned across the offic
 - Integrate through `withPlugin("org.openapi.generator", ...)`; never implicitly apply, replace, or override the official plugin/version. Generator name, spec, library, packages and ordinary options remain consumer-owned.
 - Discover upstream templates from the running official plugin classloader, not a second independently resolved upstream runtime in consumer repositories. Missing/ambiguous template ownership and required template patch-anchor drift fail explicitly.
 - Provision only the platform-version-aligned `openapi-generics-java-codegen` artifact; conflicting direct codegen declarations fail.
-- Production official API dependencies remain `compileOnly` at the minimum OAG API baseline. Functional/E2E runtime selection is independent (`-PopenApiGeneratorTestRuntimeVersion=...`). This is distinct from the minimum tested Gradle distribution edge; Gradle API compilation follows the build distribution, and the wrapper is a reference, not a support minimum.
+- Production official API dependencies remain `compileOnly` at the minimum OAG API baseline. Functional/E2E runtime selection is independent. This is distinct from the minimum tested Gradle distribution edge; Gradle API compilation follows the build distribution, and the wrapper is a reference, not a support minimum.
 - `openApiGeneratorExtra` is a resolvable, non-consumable capability boundary, not a platform-wide numeric version gate.
 - Apply templates, classpath wiring, preparation dependencies, source registration and normalization only to `GenerateTask` instances selecting `java-generics-contract`, including custom/multiple tasks. Custom tasks do not inherit the default task's worker classpath. Preserve non-selected tasks, especially consumer `templateDir` settings; an absent provider assigned with `set` can erase them.
 - With the Java plugin, register roots and compilation dependencies from each selected task's output and effective `sourceFolder`, including upstream `configFile` binding/option precedence. Generation, registration and normalization must use the same root; consumers must not need manual source-set or compile dependency workarounds.
@@ -89,34 +83,18 @@ BYOE identifies an application-owned envelope on the **producer** (`openapi-gene
 
 ## Verification commands
 
-Published platform artifacts target Java 17+; Boot 3 samples use Java 21 and Boot 4 samples Java 25. Use the appropriate JDK; do not infer a tested runtime matrix from the compile target.
-
 From repository root:
 
 ```bash
 mvn clean install
-mvn -pl openapi-generics-server-starter test
-mvn -f samples/pom.xml clean verify  # JDK 25
-mvn spotless:apply
+mvn -f samples/pom.xml clean verify
 ```
-
-Maven release publication uses `mvn clean deploy -P central-publish`; this is publication, not routine verification.
 
 From `openapi-generics-gradle-plugin/`:
 
 ```bash
-./gradlew test
-./gradlew functionalTest
 ./gradlew check
 ./gradlew e2eTest
 ```
 
 `check` includes unit + functional TestKit tests. `e2eTest` is explicit and builds real Maven codegen into an isolated repository. The root Maven reactor does not run Gradle plugin/sample verification.
-
-Canonical Gradle adoption lives at `samples/gradle/customer-service/` (JDK 25). Follow its README for platform snapshot bootstrap; shared CustomerDto is a Gradle project dependency. Run twice there:
-
-```bash
-./gradlew clean build --no-build-cache --configuration-cache
-```
-
-Confirm configuration-cache reuse and actual generation/compile/test execution. The client reads the committed spec without a live producer; acceptance tests start a real producer for direct/page HTTP deserialization. Keep this adoption stack separate from canonical type/transport/multi-spec/mixed-generator coverage.
