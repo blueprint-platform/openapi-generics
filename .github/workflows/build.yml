@@ -77,6 +77,17 @@ jobs:
         working-directory: openapi-generics-gradle-plugin
         run: ./gradlew check
 
+      - name: Upload Gradle plugin unit coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./openapi-generics-gradle-plugin/build/reports/jacoco/test/jacocoTestReport.xml
+          flags: gradle-plugin
+          name: gradle-plugin
+          disable_search: true
+          fail_ci_if_error: true
+          verbose: true
+
       - name: Verify Gradle plugin real codegen
         working-directory: openapi-generics-gradle-plugin
         run: ./gradlew e2eTest

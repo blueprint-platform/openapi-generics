@@ -20,6 +20,9 @@ import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.provider.Provider;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.io.TempDir;
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask;
 
@@ -141,6 +144,22 @@ class OpenApiGenericsNormalizeGeneratedSourcesActionTest {
                 Files.readString(
                         otherJava,
                         StandardCharsets.UTF_8));
+    }
+
+    @ParameterizedTest(name = "selected task with {0} generated roots")
+    @ValueSource(ints = {0, 2})
+    void rejectsAmbiguousOrMissingSelectedOutputBeforeFormatting(int count) {
+        Project project = ProjectBuilder.builder().build();
+        File[] roots = java.util.stream.IntStream.range(0, count)
+                .mapToObj(index -> new File(project.getProjectDir(), "generated-" + index))
+                .toArray(File[]::new);
+        var action = new OpenApiGenericsNormalizeGeneratedSourcesAction(
+                project.getProviders().provider(() -> true),
+                project.files().getElements(), project.files((Object[]) roots).getElements(), ":generateClient");
+
+        var exception = assertThrows(IllegalStateException.class, () -> action.execute(null));
+        assertTrue(exception.getMessage().contains(":generateClient"));
+        assertTrue(exception.getMessage().contains("found " + count));
     }
 
     private OpenApiGenericsFormattingSpec configureFormatting(

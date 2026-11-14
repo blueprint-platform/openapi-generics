@@ -5,10 +5,12 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.tasks.Jar
 import java.io.File
+import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
+    jacoco
 }
 
 group = "io.github.blueprint-platform"
@@ -110,6 +112,26 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+// Unit coverage measures production plugin classes in this build's test JVM only.
+// TestKit/real-codegen behavior runs in nested Gradle builds; do not inject agents there.
+jacoco {
+    toolVersion = "0.8.15" // Same reporting tool version as the Maven reactor.
+}
+tasks.withType<Test>().configureEach {
+    val unitTest = name == "test"
+    extensions.configure<JacocoTaskExtension> {
+        isEnabled = unitTest
+    }
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
 
 tasks.named<Jar>("jar") {
@@ -340,4 +362,5 @@ val e2eTestTask =
 
 tasks.named("check") {
     dependsOn(functionalTestTask)
+    dependsOn(tasks.jacocoTestReport)
 }

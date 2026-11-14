@@ -1,6 +1,7 @@
 package io.github.blueprintplatform.openapi.generics.gradle.generation;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.blueprintplatform.openapi.generics.gradle.formatting.OpenApiGenericsFormattingSpec;
@@ -89,6 +90,27 @@ class OpenApiGenericsGenerateTaskConfigurerTest {
                         .getByType(OpenApiGenericsFormattingSpec.class);
 
         assertTrue(formatting.getFormatterClasspath().isEmpty());
+    }
+
+    @Test
+    void assignsPreparedTemplatesOnlyAfterSelectedTaskConfiguration() {
+        Project project = ProjectBuilder.builder().build();
+        GenerateTask selected = createGenerateTask(project, "generateSelected");
+        GenerateTask ordinary = createGenerateTask(project, "generateOrdinary");
+        File consumerTemplate = new File(temporaryDirectory, "consumer-templates");
+        selected.getGeneratorName().set("java-generics-contract");
+        ordinary.getGeneratorName().set("java");
+        ordinary.getTemplateDir().set(consumerTemplate);
+        var runtime = templateRuntime(project);
+        var configurer = new OpenApiGenericsGenerateTaskConfigurer(new OpenApiGenericsSourceLayout());
+
+        configurer.configureTemplate(selected, runtime);
+        configurer.configureTemplate(ordinary, runtime);
+
+        assertEquals(runtime.effectiveTemplateDirectory().get().dir("Java").getAsFile(),
+                selected.getTemplateDir().get().getAsFile());
+        assertEquals(consumerTemplate, ordinary.getTemplateDir().get().getAsFile());
+        assertFalse(runtime.preparationTask().get().getState().getExecuted());
     }
 
     private void configure(

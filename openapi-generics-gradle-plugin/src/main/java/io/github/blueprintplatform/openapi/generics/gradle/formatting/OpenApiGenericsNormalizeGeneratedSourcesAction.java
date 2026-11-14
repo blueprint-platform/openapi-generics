@@ -68,8 +68,8 @@ public final class OpenApiGenericsNormalizeGeneratedSourcesAction
 
         if (generatedDirectories.size() != 1) {
             throw new IllegalStateException(
-                    "Expected exactly one generated Java directory for OpenAPI Generics task '%s', "
-                            + "but found %d."
+                    ("Expected exactly one generated Java directory for OpenAPI Generics task '%s', "
+                            + "but found %d.")
                             .formatted(
                                     taskPath,
                                     generatedDirectories.size()));

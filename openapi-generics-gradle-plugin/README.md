@@ -83,7 +83,7 @@ Place the producer's projected OpenAPI document at `spec/customer.yaml`, then ru
 ./gradlew build --configuration-cache
 ```
 
-The library, dependency platform and other dependencies above are one application choice, not platform-wide requirements. Boot 4/Jackson 3 configuration is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**, with Boot 3.4 support retained on **2.8.x**. A client generation build does not need Springdoc or a running producer.
+The library, dependency platform and other dependencies above are one application choice, not platform-wide requirements. Boot 4/Jackson 3 configuration is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**. A client generation build does not need Springdoc or a running producer.
 
 ## Configuration and generated-source wiring
 
@@ -148,6 +148,15 @@ From this plugin directory:
 ./gradlew check
 ./gradlew e2eTest
 ```
+
+`check` also creates unit-only JaCoCo reports: XML at
+`build/reports/jacoco/test/jacocoTestReport.xml` and HTML at
+`build/reports/jacoco/test/html/index.html`. Run `./gradlew test jacocoTestReport` for that report alone.
+All production plugin classes are included. Functional/TestKit and E2E JVMs are not instrumented;
+their build/cache behavior remains separate evidence. CI uploads the report under `gradle-plugin`.
+Codecov tracks this flag against its own automatic baseline with the existing 2% tolerance. The
+repository-wide aggregate and patch checks still include all reported production code; existing
+thresholds are unchanged. No new numeric coverage floor is inferred from the initial unit-only measurement.
 
 `check` runs unit and fixture-based TestKit tests; `e2eTest` separately builds real Maven codegen into an isolated repository and checks generation/compilation/cache behavior. The [canonical stack](../samples/gradle/customer-service/README.md) additionally verifies real direct/paged HTTP deserialization and committed snapshot equality, with two clean builds asserting configuration-cache reuse in CI.
 

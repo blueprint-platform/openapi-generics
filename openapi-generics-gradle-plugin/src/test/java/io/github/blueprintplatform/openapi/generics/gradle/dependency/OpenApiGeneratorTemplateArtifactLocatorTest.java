@@ -2,6 +2,7 @@ package io.github.blueprintplatform.openapi.generics.gradle.dependency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.blueprintplatform.openapi.generics.gradle.exception.TemplatePreparationException;
@@ -117,6 +118,42 @@ class OpenApiGeneratorTemplateArtifactLocatorTest {
             assertTrue(
                     exception.getMessage()
                             .contains("more than one runtime artifact"));
+        }
+    }
+
+    @Test
+    void preservesClasspathInspectionIoFailureAsExplicitTemplateFailure() {
+        IOException failure = new IOException("classpath unavailable");
+        ClassLoader loader = new ClassLoader(null) {
+            @Override
+            public java.util.Enumeration<URL> getResources(String name) throws IOException {
+                assertEquals(RESOURCE_PATH, name);
+                throw failure;
+            }
+        };
+        var exception = assertThrows(TemplatePreparationException.class,
+                () -> locator.locate(loader, RESOURCE_PATH));
+        assertTrue(exception.getMessage().contains(RESOURCE_PATH));
+        assertSame(failure, exception.getCause());
+    }
+
+    @Test
+    void rejectsNetworkOwnedTemplatesWithoutDownloadingAnIndependentRuntime() throws Exception {
+        for (String resource : java.util.List.of(
+                "https://example.invalid/Java/model.mustache",
+                "jar:https://example.invalid/generator.jar!/Java/model.mustache")) {
+            URL url = java.net.URI.create(resource).toURL();
+            ClassLoader loader = new ClassLoader(null) {
+                @Override
+                public java.util.Enumeration<URL> getResources(String name) {
+                    assertEquals(RESOURCE_PATH, name);
+                    return java.util.Collections.enumeration(java.util.List.of(url));
+                }
+            };
+            var exception = assertThrows(TemplatePreparationException.class,
+                    () -> locator.locate(loader, RESOURCE_PATH));
+            assertTrue(exception.getMessage().contains("Unsupported"));
+            assertTrue(exception.getMessage().contains("https"));
         }
     }
 

@@ -2,6 +2,9 @@ package io.github.blueprintplatform.openapi.generics.gradle.generation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,6 +123,21 @@ class OpenApiGenericsSourceLayoutTest {
                         .generatedJavaDirectory(
                                 project, task, OpenApiGenericsTaskSelection.from(task))
                         .isPresent());
+    }
+
+    @Test
+    void rejectsMalformedConfigWithItsPathAndParserCauseInsteadOfFallingBack() throws Exception {
+        Project project = createProject();
+        GenerateTask task = selectedTask(project, "generated/client", null);
+        var config = project.getLayout().getProjectDirectory().file("invalid-generator.json").getAsFile();
+        java.nio.file.Files.writeString(config.toPath(), "{ invalid JSON");
+        task.getConfigFile().set(config);
+        var directory = new OpenApiGenericsSourceLayout()
+                .generatedJavaDirectory(project, task, OpenApiGenericsTaskSelection.from(task));
+
+        var exception = assertThrows(IllegalStateException.class, directory::get);
+        assertTrue(exception.getMessage().contains(config.toString()));
+        assertInstanceOf(java.io.IOException.class, exception.getCause());
     }
 
     private GenerateTask selectedTask(

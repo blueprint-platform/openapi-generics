@@ -2,6 +2,10 @@ package io.github.blueprintplatform.openapi.generics.gradle.formatting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import io.github.blueprintplatform.openapi.generics.gradle.exception.GeneratedSourceNormalizationException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -56,6 +60,33 @@ class OpenApiGenericsGeneratedSourceNormalizerTest {
     void ignoresMissingGeneratedDirectory() {
         OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath())
                 .normalize(temporaryDirectory.resolve("missing"));
+    }
+
+    @Test
+    void reportsInvalidJavaWithTheFormatterStepAndLeavesSourceUntouched() throws IOException {
+        Path source = temporaryDirectory.resolve("Broken.java");
+        String malformed = "package example; public class Broken {";
+        Files.writeString(source, malformed);
+
+        var exception = assertThrows(GeneratedSourceNormalizationException.class,
+                () -> OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath())
+                        .normalize(temporaryDirectory));
+        assertTrue(exception.getMessage().contains("step '"));
+        assertTrue(exception.getMessage().contains(source.toString()));
+        assertNotNull(exception.getCause());
+        assertEquals(malformed, Files.readString(source));
+    }
+
+    @Test
+    void reportsUnreadableUtf8SourceWithDirectoryAndIoCause() throws IOException {
+        Path source = temporaryDirectory.resolve("InvalidEncoding.java");
+        Files.write(source, new byte[] {(byte) 0xc3, 0x28});
+
+        var exception = assertThrows(GeneratedSourceNormalizationException.class,
+                () -> OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath())
+                        .normalize(temporaryDirectory));
+        assertTrue(exception.getMessage().contains(temporaryDirectory.toString()));
+        assertInstanceOf(IOException.class, exception.getCause());
     }
 
     private Set<File> testRuntimeClasspath() {

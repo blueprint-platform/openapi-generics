@@ -23,10 +23,23 @@ coverage:
         flags:
           - java-codegen
 
+      gradle-plugin:
+        # Unit-only production coverage; track its measured baseline, not nested builds.
+        target: auto
+        threshold: 2%
+        flags:
+          - gradle-plugin
+
     patch:
       default:
         target: 70%
         threshold: 2%
+
+      gradle-plugin:
+        target: auto
+        threshold: 2%
+        flags:
+          - gradle-plugin
 
 comment:
   layout: "reach, diff, flags, files"
@@ -53,3 +66,7 @@ flags:
   java-codegen:
     paths:
       - openapi-generics-java-codegen/
+
+  gradle-plugin:
+    paths:
+      - openapi-generics-gradle-plugin/

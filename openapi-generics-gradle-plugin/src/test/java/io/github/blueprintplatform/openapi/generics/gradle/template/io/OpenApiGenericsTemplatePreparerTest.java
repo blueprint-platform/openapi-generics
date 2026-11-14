@@ -2,6 +2,7 @@ package io.github.blueprintplatform.openapi.generics.gradle.template.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.blueprintplatform.openapi.generics.gradle.exception.TemplatePreparationException;
@@ -20,6 +21,19 @@ class OpenApiGenericsTemplatePreparerTest {
 
     @TempDir
     Path tempDir;
+
+    @Test
+    void reportsBlockedOutputDirectoryWithItsPathAndIoCause() throws IOException {
+        Path blocker = tempDir.resolve("not-a-directory");
+        Files.writeString(blocker, "consumer file");
+        Path effective = blocker.resolve("effective");
+
+        var exception = assertThrows(TemplatePreparationException.class,
+                () -> preparer.prepare(List.of(), List.of(), effective));
+        assertTrue(exception.getMessage().contains(effective.toString()));
+        assertInstanceOf(IOException.class, exception.getCause());
+        assertTrue(Files.isRegularFile(blocker));
+    }
 
     @Test
     void patchesUpstreamModelAndOverlaysWrapperTemplate() throws IOException {
