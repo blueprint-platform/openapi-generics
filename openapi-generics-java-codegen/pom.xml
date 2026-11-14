@@ -8,7 +8,7 @@
     <parent>
         <groupId>io.github.blueprint-platform</groupId>
         <artifactId>openapi-generics</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>1.3.0</version>
     </parent>
 
     <artifactId>openapi-generics-java-codegen</artifactId>
@@ -16,7 +16,7 @@
 
     <name>openapi-generics-java-codegen</name>
     <description>
-        Internal OpenAPI Generator extension used by openapi-generics-java-codegen-parent.
+        Internal OpenAPI Generator extension shared by the platform Maven and Gradle integrations.
         Provides the java-generics-contract generator for contract-aligned wrapper generation.
         Not intended to be used directly as an application dependency.
     </description>
@@ -29,9 +29,9 @@
     </scm>
 
     <properties>
-        <openapi-generator.version>7.24.0</openapi-generator.version>
+        <openapi-generator.version>7.27.0</openapi-generator.version>
         <slf4j-api.version>2.0.18</slf4j-api.version>
-        <junit.jupiter.version>5.14.3</junit.jupiter.version>
+        <junit.jupiter.version>5.14.4</junit.jupiter.version>
     </properties>
 
     <dependencyManagement>

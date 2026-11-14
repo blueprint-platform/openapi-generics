@@ -18,25 +18,30 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/transport")
 public class MultipartTransportController {
 
-    @PostMapping(
-            value = "/multipart",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ServiceResponse<UploadResultDto>> upload(
-            @RequestPart("file") MultipartFile file,
-            @RequestBody(
-                    content = @Content(encoding = @Encoding(name = "metadata", contentType = MediaType.APPLICATION_JSON_VALUE)))
-            @RequestPart("metadata")
-            UploadMetadataDto metadata) {
+  @PostMapping(
+      value = "/multipart",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<ServiceResponse<UploadResultDto>> upload(
+      @RequestPart("file") MultipartFile file,
+      @RequestBody(
+              content =
+                  @Content(
+                      encoding =
+                          @Encoding(
+                              name = "metadata",
+                              contentType = MediaType.APPLICATION_JSON_VALUE)))
+          @RequestPart("metadata")
+          UploadMetadataDto metadata) {
 
-        var result =
-                new UploadResultDto(
-                        file.getOriginalFilename(),
-                        file.getContentType(),
-                        file.getSize(),
-                        metadata.description(),
-                        metadata.category());
+    var result =
+        new UploadResultDto(
+            file.getOriginalFilename(),
+            file.getContentType(),
+            file.getSize(),
+            metadata.description(),
+            metadata.category());
 
-        return ResponseEntity.ok(ServiceResponse.of(result));
-    }
+    return ResponseEntity.ok(ServiceResponse.of(result));
+  }
 }

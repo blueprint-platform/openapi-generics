@@ -3,190 +3,118 @@ title: Compatibility & Support Policy
 nav_exclude: true
 ---
 
-# Compatibility & Support Policy
+# Compatibility & support reference
+
+Use this page for supported lines, exact verification inputs and ownership boundaries.
+For configuration, use [server](adoption/server-side-adoption.md) or [client](adoption/client-side-adoption.md) adoption.
 
-This page is the authoritative compatibility and support reference for OpenAPI Generics.
+[Supported lines](#supported-lines) · [Current references](#current-references-and-integration-edges) ·
+[Contract scope](#contract-scope) · [Verification](#verification-evidence)
 
-It defines:
+## Supported lines
+
+Published platform artifacts target **Java 17+**. Choose a JDK supported by your framework and build-tool
+version; the repository's verification JDKs are listed separately below.
 
-- the platform and build-tool lines currently supported
-- the exact reference stacks verified by the repository
-- what “supported” means for versions inside those lines
-- the boundary between OpenAPI Generics-owned behavior and surrounding ecosystem behavior
-
-For usage and architecture details, see the adoption and architecture guides rather than treating this page as a feature reference.
-
----
-
-## Contents
-
-- [Supported Platform Matrix](#supported-platform-matrix)
-- [Verified Reference Baselines](#verified-reference-baselines)
-- [Supported Contract Scope](#supported-contract-scope)
-- [Support Policy](#support-policy)
-- [Compatibility Notes](#compatibility-notes)
-- [Out of Scope](#out-of-scope)
-- [Further Reading](#further-reading)
-
----
-
-## Supported Platform Matrix
-
-### Server-Side Projection
-
-| Java | Spring Boot | springdoc-openapi | Integration | Status    |
-|------|-------------|-------------------|-------------|-----------|
-| 17+  | 3.4.x       | 2.8.x             | WebMvc      | Supported |
-| 17+  | 3.5.x       | 2.8.x, 2.9.x      | WebMvc      | Supported |
-| 17+  | 4.x         | 3.x               | WebMvc      | Supported |
-
-Published OpenAPI Generics artifacts target Java 17+.
-
-The matrix describes supported version lines. It does not mean that every patch combination inside a supported line is maintained as a separate repository sample.
-
-### Client-Side Reconstruction
-
-| Java | OpenAPI Generator | Build integration | Status    |
-|------|-------------------|-------------------|-----------|
-| 17+  | 7.x               | Maven             | Supported |
-
-The Maven codegen parent provides a tested OpenAPI Generator default while allowing consumers to select another version within the supported 7.x compatibility line.
-
-The selected OpenAPI Generator version is kept aligned across generator execution, generator dependencies, and upstream template extraction used by the reconstruction pipeline.
-
----
-
-## Verified Reference Baselines
-
-Verified reference baselines are exact combinations exercised by maintained repository verification paths. They are compatibility reference points, not minimum consumer requirements and not the only supported combinations.
-
-### Server Reference Stacks
-
-| Platform line | Java | Spring Boot | springdoc-openapi | Purpose                                                       |
-|---------------|------|-------------|-------------------|---------------------------------------------------------------|
-| Spring Boot 3 | 21   | 3.5.16      | 2.9.0             | Primary Spring Boot 3 integration and type-coverage reference |
-| Spring Boot 4 | 25   | 4.1.0       | 3.1.0             | Spring Boot 4 compatibility reference                         |
-
-### Client Generation Reference
-
-OpenAPI Generics 1.2.1 is verified with OpenAPI Generator **7.24.0**.
-
-Repository verification covers the complete contract lifecycle, including producer projection, OpenAPI metadata, Java reconstruction, generated-source validation, and consumer integration.
-
-Standard Java RestClient transport interoperability is also exercised for multipart, binary download, and form-urlencoded scenarios without transferring ownership of those transport behaviors to OpenAPI Generics.
-
----
-
-## Supported Contract Scope
-
-The supported contract surface includes:
-
-- the built-in `ServiceResponse<T>` envelope
-- built-in `List<T>`, `Set<T>`, and platform `Page<T>` container shapes
-- BYOE application-owned envelopes
-- BYOC reuse of externally owned Java models
-- explicitly registered application-defined generic containers
-- deterministic preservation and reconstruction of envelope and container identity
-
-BYOE envelopes participate in the same supported response-shape model as the built-in envelope.
-
-Application-defined generic containers participate in the same projection and reconstruction model when explicitly registered and available to the generated client.
-
-OpenAPI Generics does not infer arbitrary generic graphs or unregistered custom container semantics.
-
-For configuration examples and supported usage patterns, see the server-side and client-side adoption guides.
-
----
-
-## Support Policy
-
-A platform combination is officially supported when it:
-
-- falls within a version line declared in the supported platform matrix
-- remains inside the documented OpenAPI Generics platform and contract scope
-- relies on behavior owned by OpenAPI Generics rather than unsupported assumptions about surrounding frameworks or generated transport code
-
-Support for a declared version line is maintained through representative reference stacks, regression tests, contract snapshots, integration samples, and other maintained verification paths.
-
-An exact version combination does not need to appear as a dedicated sample to remain inside a supported line unless explicitly documented otherwise.
-
-Verified reference baselines therefore answer:
-
-> Which exact combinations does the repository continuously exercise as reference points?
-
-The supported matrix answers a different question:
-
-> Which version lines does the project currently support?
-
-### Ownership Boundary
-
-Inside the documented compatibility boundary, OpenAPI Generics owns:
-
-- generic contract projection and OpenAPI Generics metadata
-- preservation of Java envelope and container identity
-- application-defined generic container registration and validation
-- contract-aware Java reconstruction, including BYOE and BYOC semantics
-- generated wrapper correctness and reconstruction-specific source hygiene
-- fail-fast validation of OpenAPI Generics contract assumptions
-- fail-fast detection of supported upstream template patch incompatibilities
-
-The surrounding ecosystem continues to own:
-
-- HTTP client library internals
-- ordinary OpenAPI Generator API, model, authentication, and transport behavior
-- serialization-library behavior and customization
-- unrelated Spring configuration
-- downstream application architecture
-
-Compatibility samples may exercise those ecosystem behaviors to verify interoperability, but OpenAPI Generics does not take ownership of them.
-
----
-
-## Compatibility Notes
-
-### Producer and Codegen Alignment
-
-Contract metadata is the boundary between producer projection and client reconstruction.
-
-When relying on `x-api-wrapper-type` for contract-driven envelope reconstruction, producer and codegen components should be kept aligned so the client can consume the metadata model published by the producer.
-
-OpenAPI Generics 1.2.1 preserves 1.2.0 runtime contracts. Existing 1.2 contracts do not require migration.
-
-### OpenAPI Generator Version Ownership
-
-OpenAPI Generics declares the supported OpenAPI Generator compatibility line and provides a tested default through the Maven codegen parent.
-
-Consumers choose the OpenAPI Generator version they run within that supported line.
-
-The project does not use its platform BOM to manage OpenAPI Generator or OpenAPI Generator plugin versions.
-
-### OpenAPI Interoperability
-
-The generated document remains valid OpenAPI.
-
-OpenAPI tooling that does not understand OpenAPI Generics metadata can still consume the document and ignore the vendor extensions.
-
----
-
-## Out of Scope
-
-The following are not currently part of the supported scope:
-
-- Spring WebFlux
-- first-class Gradle client build integration
-- non-Java server frameworks
-- non-Java client reconstruction
-- arbitrary nested generic graphs
-- automatic inference of unregistered custom generic containers
-
-These boundaries describe the current supported product surface; they do not imply ownership of adjacent ecosystem capabilities.
-
----
-
-## Further Reading
-
-- [Server-Side Adoption](adoption/server-side-adoption.md)
-- [Client-Side Adoption](adoption/client-side-adoption.md)
-- [Architecture](architecture/architecture.md)
-- [README](../README.md)
-- [GitHub Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
+| Projection surface | Spring Boot | Springdoc | Integration |
+| --- | --- | --- | --- |
+| Boot 3.5 | 3.5.x | 2.8.x–2.10.x | Spring MVC |
+| Boot 4 | 4.x | 3.x | Spring MVC |
+
+| Reconstruction surface | OpenAPI Generator | Build line |
+| --- | --- | --- |
+| Maven | **7.x** | Maven integration |
+| Gradle | **7.x**, subject to the integration capability edge below | **9.x** |
+
+Support covers documented platform-owned behavior within these lines. Representative tests/samples
+maintain that support; not every patch combination has a separate test stack. Absence from the
+reference table does not make a version unsupported.
+
+## Current references and integration edges
+
+**Current/reference** means the repository's exact verification/default input, not a consumer requirement
+or support minimum. **Minimum edge** and **negative boundary** describe a specific integration.
+
+| Server reference | Verification Java | Spring Boot | Springdoc |
+| --- | --- | --- | --- |
+| Boot 3.5 compatibility/type coverage | 21 | 3.5.16 | **2.10.0** |
+| Boot 4 Maven and canonical Gradle stack | 25 | 4.1.2 | **3.2.0** |
+
+The public Gradle consumer example and canonical application reference use Boot 4/Jackson 3.
+Boot 3.5 compatibility remains verified through Maven application/type-coverage builds. Model-only
+Gradle E2E verifies reconstruction/compilation, not a Spring Boot runtime; its Jakarta annotation
+selection does not establish framework compatibility.
+
+| Tool surface | Supported line | Minimum edge | Current/reference | Negative boundary |
+| --- | --- | --- | --- | --- |
+| Maven/core OpenAPI Generator (OAG) | 7.x | No additional platform-wide numeric minimum declared here | **7.27.0** | No platform-wide numeric rejection declared here |
+| Gradle OAG integration | 7.x with required capability | **7.25.0** API/verified capability baseline | **7.27.0** verification runtime | **7.24.0**, this integration only |
+| Gradle distribution | 9.x | **9.0.0** minimum tested distribution | **9.9.1** wrapper/reference | No additional negative point declared here |
+
+The Gradle integration requires resolvable, non-consumable `openApiGeneratorExtra`; it is a capability
+boundary, not a platform-wide numeric version gate. Production official API dependencies remain
+`compileOnly` at the minimum OAG API baseline; test runtime selection is independent. Gradle API
+compilation follows the build distribution, not a separate minimum-distribution compile target.
+
+A new upstream release is a temporary candidate until verified, then replaces the current reference.
+Previous currents are not accumulated in a permanent matrix. Moving current does not move minimum or
+negative boundaries. In particular, the Gradle OAG edge does **not** narrow platform-wide 7.x support.
+
+## Version ownership and build coherence
+
+| Surface | Consumer chooses | Platform maintains |
+| --- | --- | --- |
+| Maven | `openapi-generator.version`, spec, library, packages and normal options | One selected version across official Maven plugin, core, generator and upstream `Java/model.mustache` extraction |
+| Gradle | Applies/versions official `org.openapi.generator`; selects tasks and normal options | `withPlugin` integration, templates from the running official classloader, matching platform codegen and selected-task wiring |
+| Framework/runtime | Boot, Springdoc, serialization and client-library stack within support policy | Projection/reconstruction interoperability within the documented scope |
+
+The internal platform bill of materials (BOM) does not manage consumer Boot/OAG/plugin versions. Sample pins and starter
+compile/test baselines are not universal runtime constraints. Gradle does not implicitly apply, replace
+or override the official plugin. Maven and Gradle share reconstruction semantics, not lifecycle settings.
+
+Keep producer and codegen components aligned around the published metadata protocol, especially
+`x-api-wrapper-type`. **1.3.0 preserves 1.2.x runtime contracts; no 1.2 contract migration is required.**
+
+## Contract scope
+
+| Supported capability | Boundary |
+| --- | --- |
+| Built-in envelope | Pure Java shared `ServiceResponse<T>` |
+| BYOE (Bring Your Own Envelope) envelope ownership | Concrete application class, one generic parameter, one direct payload field of that parameter's type; no record/multi-parameter/nested payload-slot envelope |
+| Built-in containers | `List<T>`, `Set<T>`, shared platform `Page<T>` |
+| Registered application containers | Concrete class/record, one type parameter, declared `List<T>`/`Set<T>` item property using it directly; shared type available to the client |
+| Optional BYOC (Bring Your Own Contract) reuse | Client schema-name → external Java contract mappings; dependency supplied separately; does not identify the envelope |
+| MVC wrapper discovery | Supported synchronous and async wrappers; no arbitrary generic-graph inference |
+
+Java contracts are authoritative; OpenAPI is their projection and the producer/client protocol.
+Generated wrappers are concrete transport/deserialization bindings. Keep generated API/invoker and
+wrapper classes behind a client adapter rather than making them application contracts.
+
+Out of scope: WebFlux, non-Java server frameworks or reconstruction, arbitrary nested generic graphs,
+unregistered container inference, and component names different from resolved Java simple names
+(including custom `@Schema(name = "...")`). See [server shape requirements](adoption/server-side-adoption.md#supported-response-shapes).
+
+## Ownership boundary
+
+| OpenAPI Generics owns | Surrounding ecosystem/application owns |
+| --- | --- |
+| Generic projection protocol and envelope/container identity | Ordinary OAG API/model/authentication/transport generation |
+| Metadata validation and contract-aware Java reconstruction, including BYOE/BYOC | HTTP library internals and serialization customization |
+| Reconstruction template preparation, required patch-drift detection and generated-source hygiene | Framework configuration, runtime/library choice and application architecture |
+
+Interoperability tests exercise surrounding behavior without transferring its ownership to the platform.
+OpenAPI tooling that does not understand these vendor extensions can still consume the document.
+
+## Verification evidence
+
+| Layer | Establishes | Does not establish |
+| --- | --- | --- |
+| Unit/context tests | Deterministic contract, projection, metadata and codegen component behavior | Every framework/tool patch combination |
+| Fixture-based Gradle TestKit | Plugin classpath, task/source wiring, templates and configuration-cache integration | Real codegen or HTTP interoperability |
+| Real-codegen E2E / Maven generation samples | Generated-source compilation, suppression/reuse and affected cache paths | Runtime HTTP interoperability for every shape |
+| Application/runtime tests | Specific exercised HTTP/deserialization paths; canonical Gradle tests call consumer endpoints through to the producer | Exhaustive type/transport combinations |
+| Committed spec drift checks | Reviewed projection stability against snapshots | Runtime client correctness by themselves |
+
+[Samples](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/README.md) separate type/container, multi-spec and transport checks; ordinary Java
+RestClient multipart/binary/form scenarios remain upstream-owned. Build/test definitions and executed
+results determine coverage; a test file's existence alone does not prove execution.

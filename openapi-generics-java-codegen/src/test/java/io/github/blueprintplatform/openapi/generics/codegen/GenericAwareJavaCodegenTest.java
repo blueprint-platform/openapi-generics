@@ -59,8 +59,6 @@ class GenericAwareJavaCodegenTest {
 
     CodegenModel wrapperModel = wrapperModel("ServiceResponseCustomerDto", SERVICE_RESPONSE_TYPE);
 
-    wrapperModel.vendorExtensions.put(CodegenVendorExtensions.DATA_ITEM, "CustomerDto");
-
     ModelsMap result = codegen.postProcessModels(modelsMap(wrapperModel));
 
     CodegenModel processed = result.getModels().get(0).getModel();
@@ -394,6 +392,8 @@ class GenericAwareJavaCodegenTest {
     model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER, Boolean.TRUE);
 
     model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_TYPE, wrapperType);
+
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER_DATATYPE, "CustomerDto");
 
     return model;
   }

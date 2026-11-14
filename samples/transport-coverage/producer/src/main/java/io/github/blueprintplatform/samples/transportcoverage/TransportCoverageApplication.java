@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class TransportCoverageApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(TransportCoverageApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(TransportCoverageApplication.class, args);
+  }
 }

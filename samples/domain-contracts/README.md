@@ -1,110 +1,24 @@
-# Domain Contracts
+# Application-owned customer contracts
 
-This module defines **shared domain-level contract models** used across services.
+`customer-contract` contains the framework-independent `CustomerDto` shared by the Maven customer
+producer and its client library's stable adapter API. It is a sample application contract, not the
+platform's envelope/container authority.
 
-It exists to separate **domain ownership** from:
-
-* server-side OpenAPI projection
-* client-side code generation
-
----
-
-## Why this exists
-
-In distributed systems, contract models are often:
-
-* duplicated across services
-* regenerated from OpenAPI
-* gradually drifted over time
-
-This module prevents that.
-
-> Contracts are defined once, owned by the domain, and reused everywhere.
-
----
-
-## Structure
-
-```
-domain-contracts/
-  └── customer-contract/
-```
-
-Each submodule represents a **domain boundary**.
-
-Example:
-
-* `customer-contract` → Customer domain models
-
----
-
-## Usage
-
-### Server (producer)
-
-Controllers return shared contract types:
-
-```java
-ServiceResponse<CustomerDto>
-```
-
-The server-side starter projects this into OpenAPI.
-
----
-
-### Client (consumer)
-
-Clients reuse the same contract dependency:
+The Maven client currently generates an ordinary transport DTO and maps it with `CustomerDtoMapper`
+into this shared type. Adding the dependency alone does **not** tell codegen to reuse a DTO. Optional
+BYOC (Bring Your Own Contract) additionally requires an explicit schema-name → Java-type mapping; the multi-spec Maven and
+canonical Gradle examples demonstrate that path.
 
 ```xml
 <dependency>
   <groupId>io.github.blueprint-platform.samples</groupId>
   <artifactId>customer-contract</artifactId>
+  <version>1.3.0</version>
 </dependency>
 ```
 
-The generator maps OpenAPI schemas to these types instead of regenerating them.
+Build/install it as part of the [Maven samples](../README.md#repository-build-and-local-runtime-setup).
+Do not copy these sample coordinates as a public platform dependency; supply your own contract module.
 
----
-
-## Design principle
-
-```text
-Domain owns the contract
-OpenAPI reflects it
-Clients reuse it
-```
-
----
-
-## Scope
-
-This module contains:
-
-* domain DTOs (e.g. `CustomerDto`)
-* no framework dependencies
-* no OpenAPI annotations
-* no transport concerns
-
-It is intentionally:
-
-* minimal
-* stable
-* framework-agnostic
-
----
-
-## Relation to openapi-generics
-
-This module works together with:
-
-* `openapi-generics-server-starter` → projects contract to OpenAPI
-* `openapi-generics-java-codegen` → reuses contract in generated clients
-
----
-
-## Summary
-
-```text
-Define once → reuse everywhere → no duplication → no drift
-```
+[Optional BYOC configuration](../../docs/adoption/client-side-adoption.md#optional-reuse-existing-dtos-with-byoc) ·
+[Client library example](../spring-boot-4/customer-service-client/README.md)

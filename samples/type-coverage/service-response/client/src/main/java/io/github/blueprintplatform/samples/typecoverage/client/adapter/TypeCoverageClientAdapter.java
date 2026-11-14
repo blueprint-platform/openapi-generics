@@ -17,6 +17,10 @@ import java.util.UUID;
 
 public interface TypeCoverageClientAdapter {
 
+  ServiceResponse<AddressDto> asyncAddress();
+
+  ServiceResponse<Page<TypeSummaryDto>> asyncPagedSummaries();
+
   ServiceResponse<String> stringValue();
 
   ServiceResponse<Boolean> booleanValue();

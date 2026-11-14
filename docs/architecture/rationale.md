@@ -4,7 +4,7 @@ title: Architectural Rationale
 nav_exclude: true
 ---
 
-#  Architectural Rationale: Why OpenAPI Generics Exists
+# Architectural rationale: why preserve Java contract identity?
 
 **Intended Audience:** Enterprise architects, platform engineers, OpenAPI specification contributors, language tooling maintainers, and teams responsible for API contract governance.
 
@@ -27,6 +27,18 @@ nav_exclude: true
 - [Conclusion](#conclusion)
 
 ---
+
+## Decision in brief
+
+The platform keeps Java envelopes/containers authoritative and uses OpenAPI as the protocol between
+projection and Java reconstruction. BYOE (Bring Your Own Envelope) keeps that envelope authority with the application; optional
+BYOC (Bring Your Own Contract) reuses existing DTOs. Generated wrapper subclasses bind concrete transport types and belong behind
+a client adapter. The benefit is shared contract identity; the cost is maintaining an explicit metadata
+protocol and a small, verified compatibility surface.
+
+This document examines those trade-offs, not installation steps or a forecast of upstream releases.
+For the current implementation use [architecture](architecture.md), and for exact version roles use
+[compatibility](../compatibility.md).
 
 ## The Enduring Problem
 
@@ -62,23 +74,28 @@ The gap manifests most clearly when generated clients must participate in the sa
 
 ## Theoretical Capabilities in OpenAPI 3.1 and JSON Schema 2020-12
 
-OpenAPI 3.1 aligned with JSON Schema Draft 2020-12, introducing `$dynamicRef` and `$dynamicAnchor`. These keywords support dynamic scope resolution, allowing a schema to declare extension points whose binding can be supplied by an enclosing context at evaluation time.
+OpenAPI 3.1 aligns its Schema Object with JSON Schema Draft 2020-12, whose core vocabulary defines `$dynamicRef` and `$dynamicAnchor`. These keywords support dynamic scope resolution, allowing a schema to declare extension points whose binding can be supplied by an enclosing context at evaluation time.
 
 In principle, this provides a mechanism to express generic-like behavior within an OpenAPI document: a container schema can declare a dynamic anchor for its type parameter, and a wrapper schema can supply the concrete binding during resolution. This represents a meaningful advance in the expressive power of the specification for use cases involving reusable generic structures.
 
-The specification therefore does not prohibit the expression of generic contract semantics. It provides a path, through dynamic references, that can in theory preserve the necessary relationships.
+These are schema evaluation mechanisms, not Java type parameters or a mapping to a shared Java superclass. A generator still needs an explicit interpretation to produce that binding. See the [JSON Schema core reference semantics](https://json-schema.org/draft/2020-12/json-schema-core#ref) and the [OpenAPI 3.1 Schema Object](https://spec.openapis.org/oas/v3.1.0.html#schema-object).
 
 ---
 
 ## Current State of the Tooling Ecosystem
 
-As of mid-2026, end-to-end support for using dynamic references to achieve generic contract preservation in production client generation remains incomplete across the dominant tooling chain:
+A schema feature and an end-to-end Java contract binding are different capabilities. This repository
+requires the composed toolchain to preserve three things:
 
-- **Parser and dereferencer behavior.** Implementations handling OpenAPI 3.1 documents continue to exhibit limitations when processing combinations of `$dynamicRef`, `$dynamicAnchor`, and `$id`. Dynamic metadata can be lost during dereferencing cycles, or resolution can produce unexpected scope behavior. These issues affect the availability of the information required for generic reconstruction.
-- **Code generation paths.** Standard OpenAPI Generator Java code generation does not contain logic to interpret dynamic references as generic type parameters for the purpose of producing `extends` relationships to shared contract types. The generator produces concrete models or falls back to less precise representations.
-- **Framework-level introspection.** Springdoc-openapi, widely used for runtime OpenAPI generation in Spring Boot, performs response type introspection that can lose information about nested generic parameters in certain configurations (for example, when a generic container such as `Page<T>` appears inside another generic envelope). The resulting OpenAPI document may lack sufficient metadata for downstream generic reconstruction.
+- **Projection:** concrete envelope, container and item identity must survive framework introspection.
+- **Schema transport:** parsers/transformations must preserve enough identity for reconstruction.
+- **Java generation:** the selected generator must bind a concrete response to the intended shared Java
+  hierarchy, not merely produce a structurally equivalent model.
 
-These limitations are documented in public issue trackers and reflect the current state of multiple independent projects. They are not universal failures of all possible implementations, but they represent the practical experience of organizations using the predominant OpenAPI tooling stack today.
+The maintained samples demonstrate an explicit metadata path through the selected Springdoc/OpenAPI Generator (OAG)
+references. They do not constitute a survey of every parser's dynamic-reference support or evidence
+that all other tools fail. The design does not depend on predicting when unrelated upstream projects
+will add or coordinate a different solution.
 
 ---
 
@@ -92,7 +109,7 @@ Clear separation of concerns is necessary for accurate analysis:
 | **Implementation** | Behavior of a specific parser, dereferencer, or generator.              | Partial or conservative handling of dynamic references in major implementations.      | Contributions to individual projects.          |
 | **Ecosystem**      | Emergent behavior from composition of multiple tools and frameworks.    | End-to-end loss of generic relationships across Springdoc → parser → generator paths. | Compatibility layers or coordinated evolution. |
 
-This project operates primarily at the ecosystem level. It accepts the current practical state of specification support and core implementation behavior as the baseline for production use and introduces a deterministic layer that works with existing OpenAPI documents.
+This project operates primarily at the ecosystem level. It uses the capabilities exercised by its maintained reference builds as its baseline and introduces a deterministic layer that works with existing OpenAPI documents.
 
 ---
 
@@ -100,7 +117,7 @@ This project operates primarily at the ecosystem level. It accepts the current p
 
 Organizations maintaining API platforms at scale face several constraints that make indefinite deferral to future upstream improvements difficult to justify:
 
-- **Coordination cost and timeline.** Achieving reliable, end-to-end support for dynamic generic reconstruction requires changes across parsers, dereferencers, multiple language generators, and framework integrations. These projects have independent release cycles, backward-compatibility requirements, and differing priorities. Historical patterns indicate multi-year timelines for comprehensive support.
+- **Coordination cost and timeline.** Achieving reliable, end-to-end support for dynamic generic reconstruction requires changes across parsers, dereferencers, multiple language generators, and framework integrations. These projects have independent release cycles, backward-compatibility requirements, and differing priorities. A consumer cannot infer a coordinated delivery date from support in one component.
 - **Risk to delivery commitments.** Roadmaps for client SDKs, contract testing, and service evolution cannot be conditioned on the uncertain completion date of cross-project coordination.
 - **Heterogeneous environments.** Many organizations operate a mix of code-first and spec-first workflows, multiple client languages, and both Springdoc-generated and manually maintained specifications. A solution that becomes viable only when every component reaches a future state is difficult to adopt incrementally.
 - **Need for deterministic behavior today.** Generated clients must produce stable, reproducible output for a given contract and configuration. This property supports diffing, testing, and safe upgrades regardless of when broader toolchain improvements arrive.
@@ -139,10 +156,10 @@ See the [Architecture](../architecture/architecture.md) document for the specifi
 
 Organizations facing generic contract loss have historically employed several approaches:
 
-- **Per-endpoint concrete DTOs.** Each operation returns a distinct response type. This eliminates generic reuse and increases maintenance burden when envelope structure changes.
-- **Manual Mustache template overrides.** Teams customize OpenAPI Generator templates to produce desired wrapper shapes. These overrides are fragile across generator version upgrades, difficult to maintain consistently across teams, and do not address server-side projection loss.
-- **Post-processing of generated code.** Scripts or annotation processors modify generated sources after the fact. This approach violates the principle that generated code should not be edited and introduces non-reproducible steps into the build.
-- **Fully spec-first workflows with manual generic modeling.** Teams maintain OpenAPI documents by hand and attempt to express generic relationships through composition. This increases the distance between implementation and contract and still requires generator customization for client reconstruction.
+- **Per-endpoint copied DTOs.** Copying envelope fields into each response class increases maintenance when the envelope changes. A concrete subclass that inherits a shared generic contract is different: it can be a valid transport binding without becoming another contract authority.
+- **Manual Mustache template overrides.** Teams customize OpenAPI Generator templates to produce desired wrapper shapes. Broad overrides are costly across generator upgrades and do not address server-side projection loss. A small overlay is not inherently problematic: its maintenance cost depends on how much upstream behavior it replaces and what drift/regression checks protect it.
+- **Post-processing of generated code.** Scripts or annotation processors modify generated sources after the fact. Untracked or ad hoc semantic rewrites obscure ownership and can make regeneration non-reproducible. This differs from a deterministic, platform-owned unused-import/formatting action inside the generation lifecycle; hygiene does not redefine contract semantics.
+- **Fully spec-first workflows with manual generic modeling.** Teams maintain OpenAPI documents by hand and attempt to express generic relationships through composition. When Java remains authoritative, independently maintained schema copies can drift and still need a Java reconstruction interpretation. A genuinely spec-first organization may instead choose a different authority model; this project does not require it to adopt the Java-owned model.
 
 These approaches can be effective for small surfaces or short-term needs. At organizational scale—where dozens or hundreds of services share common envelopes and generic containers—they tend to produce accumulating technical debt in the form of duplicated models, mapping layers, and drift between contract intent and generated artifacts.
 
@@ -155,7 +172,7 @@ The chosen architecture accepts several deliberate trade-offs:
 - It provides deterministic preservation of contract-owned generic response types and containers across the documented projection and reconstruction pipeline. It does not attempt to handle arbitrarily complex or unregistered generic graphs.
 - It introduces a metadata protocol and generator extension rather than modifying core OpenAPI tooling. This reduces coordination requirements and allows independent evolution, at the cost of maintaining the compatibility layer.
 - It requires explicit discovery or configuration of contract types on the server side and explicit generator configuration on the client side. It does not perform fully automatic inference of all possible generic structures.
-- Generated clients remain thin transport bindings. Application code is expected to depend on the shared contract module rather than on generated wrapper classes directly.
+- Generated wrappers remain thin transport bindings. Application code is expected to depend on the shared contract module rather than on generated wrapper classes directly.
 - The approach remains fully compatible with standard OpenAPI consumers that ignore the additional metadata.
 
 The project explicitly does not aim to replace OpenAPI Generator, to provide a general-purpose generic programming system, or to alter runtime serialization behavior.
@@ -168,7 +185,7 @@ OpenAPI Generics functions as an **architectural compatibility layer** rather th
 
 - It consumes and produces standard OpenAPI documents.
 - It augments those documents with additional metadata that standard tools can safely ignore.
-- It extends OpenAPI Generator through its supported extension points rather than forking template sets.
+- It specializes upstream JavaClientCodegen and owns a small wrapper overlay/dispatch surface; ordinary upstream templates remain upstream-owned. The narrow RestClient wrapper-model-doc overlay follows the same boundary, rather than claiming general API documentation or generated tests.
 - It can be adopted incrementally: server-side projection can be enabled without changing client generation, and client generation can be adopted without changing server implementation.
 
 This positioning allows organizations to retain their existing investment in OpenAPI tooling while addressing a specific, recurring gap in contract fidelity for generic response types.
@@ -201,7 +218,7 @@ The approach is less suitable when:
 
 ## Conclusion
 
-The loss of generic contract identity when moving between Java type systems and OpenAPI-based client generation is a consequence of differing design centers: named parametric polymorphism on one side and structural schema description on the other. OpenAPI 3.1 and JSON Schema 2020-12 provide theoretical mechanisms that can express the necessary relationships, yet practical end-to-end support across the dominant tooling chain remains incomplete.
+The loss of generic contract identity when moving between Java type systems and OpenAPI-based client generation is a consequence of differing design centers: named parametric polymorphism on one side and structural schema description on the other. OpenAPI 3.1 and JSON Schema 2020-12 provide theoretical mechanisms that can express the necessary relationships, but they do not by themselves specify how a generator should preserve a named shared Java hierarchy.
 
 For organizations that must deliver reliable, deterministic client generation and contract fidelity under current conditions, an additional compatibility layer can provide a pragmatic path. By treating the Java contract as the source of truth and OpenAPI as an enriched projection, the architecture documented here preserves contract identity and generic relationships without requiring changes to core specification support or coordinated upgrades across multiple independent projects.
 

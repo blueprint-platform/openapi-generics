@@ -212,6 +212,23 @@ class ResponseTypeIntrospectorTest {
   }
 
   @Test
+  @DisplayName("extract -> should unwrap DeferredResult while preserving Page identity")
+  void extract_shouldUnwrapDeferredResultWithPage() {
+    ResolvableType page =
+        ResolvableType.forClassWithGenerics(Page.class, ResolvableType.forClass(CustomerDto.class));
+    ResolvableType type = ResolvableType.forClassWithGenerics(DeferredResult.class, envelopeOf(page));
+
+    ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
+
+    assertEquals(ServiceResponse.class, descriptor.envelopeType());
+    assertEquals("PageCustomerDto", descriptor.dataRefName());
+    assertEquals("Page", descriptor.containerName());
+    assertEquals(Page.class.getName(), descriptor.containerTypeName());
+    assertEquals("CustomerDto", descriptor.itemRefName());
+    assertTrue(descriptor.isContainer());
+  }
+
+  @Test
   @DisplayName("extract -> should unwrap multiple supported response layers")
   void extract_shouldUnwrapMultipleSupportedResponseLayers() {
     ResolvableType type = envelopeOf(ResolvableType.forClass(CustomerDto.class));

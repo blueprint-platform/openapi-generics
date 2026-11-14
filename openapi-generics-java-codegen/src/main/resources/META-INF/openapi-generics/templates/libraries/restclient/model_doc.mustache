@@ -1,0 +1,9 @@
+{{#models}}{{#model}}
+{{#vendorExtensions.x-api-wrapper}}
+{{>api_wrapper_doc}}
+{{/vendorExtensions.x-api-wrapper}}
+{{^vendorExtensions.x-api-wrapper}}
+
+{{#isEnum}}{{>enum_outer_doc}}{{/isEnum}}{{^isEnum}}{{>pojo_doc}}{{/isEnum}}
+{{/vendorExtensions.x-api-wrapper}}
+{{/model}}{{/models}}

@@ -1,3 +1,8 @@
+codecov:
+  notify:
+    # Three Maven reports plus one combined Gradle report, across two parallel jobs.
+    after_n_builds: 4
+
 coverage:
   status:
     project:
@@ -23,14 +28,28 @@ coverage:
         flags:
           - java-codegen
 
+      gradle-plugin:
+        # Combined unit + nested TestKit/E2E production coverage; same class denominator.
+        target: auto
+        threshold: 2%
+        flags:
+          - gradle-plugin
+
     patch:
       default:
         target: 70%
         threshold: 2%
 
+      gradle-plugin:
+        target: auto
+        threshold: 2%
+        flags:
+          - gradle-plugin
+
 comment:
   layout: "reach, diff, flags, files"
   require_changes: true
+  after_n_builds: 4
 
 ignore:
   - "samples/**"
@@ -53,3 +72,7 @@ flags:
   java-codegen:
     paths:
       - openapi-generics-java-codegen/
+
+  gradle-plugin:
+    paths:
+      - openapi-generics-gradle-plugin/

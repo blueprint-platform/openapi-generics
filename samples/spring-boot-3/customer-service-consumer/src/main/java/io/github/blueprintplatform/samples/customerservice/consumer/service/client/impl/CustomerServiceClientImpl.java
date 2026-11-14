@@ -19,8 +19,7 @@ public class CustomerServiceClientImpl implements CustomerServiceClient {
   private final CustomerRequestMapper requestMapper;
 
   public CustomerServiceClientImpl(
-      CustomerClientAdapter adapter,
-      CustomerRequestMapper requestMapper) {
+      CustomerClientAdapter adapter, CustomerRequestMapper requestMapper) {
     this.adapter = adapter;
     this.requestMapper = requestMapper;
   }

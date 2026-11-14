@@ -10,18 +10,18 @@ import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.Typ
 import io.github.blueprintplatform.samples.typecoverage.client.generated.dto.TypeSummaryDto;
 import io.github.blueprintplatform.samples.typecoverage.contract.Batch;
 import io.github.blueprintplatform.samples.typecoverage.contract.Window;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter {
 
+  private final AsyncPayloadControllerApi asyncApi;
   private final ScalarPayloadControllerApi scalarApi;
   private final ValuePayloadControllerApi valueApi;
   private final ObjectPayloadControllerApi objectApi;
@@ -32,14 +32,16 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
   private final BatchPayloadControllerApi batchApi;
 
   public TypeCoverageClientAdapterImpl(
-          ScalarPayloadControllerApi scalarApi,
-          ValuePayloadControllerApi valueApi,
-          ObjectPayloadControllerApi objectApi,
-          PagedPayloadControllerApi pagedApi,
-          ListPayloadControllerApi listApi,
-          SetPayloadControllerApi setApi,
-          WindowPayloadControllerApi windowApi,
-          BatchPayloadControllerApi batchApi) {
+      AsyncPayloadControllerApi asyncApi,
+      ScalarPayloadControllerApi scalarApi,
+      ValuePayloadControllerApi valueApi,
+      ObjectPayloadControllerApi objectApi,
+      PagedPayloadControllerApi pagedApi,
+      ListPayloadControllerApi listApi,
+      SetPayloadControllerApi setApi,
+      WindowPayloadControllerApi windowApi,
+      BatchPayloadControllerApi batchApi) {
+    this.asyncApi = asyncApi;
     this.scalarApi = scalarApi;
     this.valueApi = valueApi;
     this.objectApi = objectApi;
@@ -48,6 +50,16 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
     this.setApi = setApi;
     this.windowApi = windowApi;
     this.batchApi = batchApi;
+  }
+
+  @Override
+  public ServiceResponse<AddressDto> asyncAddress() {
+    return asyncApi.completionStageAddress();
+  }
+
+  @Override
+  public ServiceResponse<Page<TypeSummaryDto>> asyncPagedSummaries() {
+    return asyncApi.deferredPagedSummaries();
   }
 
   @Override

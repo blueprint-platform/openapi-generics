@@ -1,0 +1,204 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Gradle Customer API",
+    "version" : "1.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:8080"
+  } ],
+  "paths" : {
+    "/customers" : {
+      "get" : {
+        "operationId" : "listCustomers",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServiceResponsePageCustomerDto"
+                }
+              }
+            },
+            "description" : "OK"
+          }
+        },
+        "tags" : [ "Customers" ]
+      }
+    },
+    "/customers/{id}" : {
+      "get" : {
+        "operationId" : "getCustomer",
+        "parameters" : [ {
+          "in" : "path",
+          "name" : "id",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ServiceResponseCustomerDto"
+                }
+              }
+            },
+            "description" : "Customer found"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Customer not found"
+          }
+        },
+        "tags" : [ "Customers" ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "CustomerDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "name" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Meta" : {
+        "type" : "object",
+        "properties" : {
+          "serverTime" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "sort" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Sort"
+            }
+          }
+        },
+        "x-ignore-model" : true
+      },
+      "PageCustomerDto" : {
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/CustomerDto"
+            }
+          },
+          "hasNext" : {
+            "type" : "boolean"
+          },
+          "hasPrev" : {
+            "type" : "boolean"
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int32"
+          }
+        },
+        "x-ignore-model" : true
+      },
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          }
+        }
+      },
+      "ServiceResponseCustomerDto" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/CustomerDto"
+          },
+          "meta" : {
+            "$ref" : "#/components/schemas/Meta"
+          }
+        },
+        "x-api-wrapper" : true,
+        "x-api-wrapper-datatype" : "CustomerDto",
+        "x-api-wrapper-type" : "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse"
+      },
+      "ServiceResponsePageCustomerDto" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageCustomerDto"
+          },
+          "meta" : {
+            "$ref" : "#/components/schemas/Meta"
+          }
+        },
+        "x-api-wrapper" : true,
+        "x-api-wrapper-datatype" : "PageCustomerDto",
+        "x-api-wrapper-type" : "io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse",
+        "x-data-container" : "Page",
+        "x-data-container-type" : "io.github.blueprintplatform.openapi.generics.contract.paging.Page",
+        "x-data-item" : "CustomerDto"
+      },
+      "Sort" : {
+        "type" : "object",
+        "properties" : {
+          "direction" : {
+            "type" : "string",
+            "enum" : [ "ASC", "DESC" ]
+          },
+          "field" : {
+            "type" : "string"
+          }
+        },
+        "x-ignore-model" : true
+      }
+    }
+  }
+}

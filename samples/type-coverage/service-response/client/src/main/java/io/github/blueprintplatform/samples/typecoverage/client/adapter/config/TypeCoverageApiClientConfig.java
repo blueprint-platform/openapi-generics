@@ -17,8 +17,13 @@ public class TypeCoverageApiClientConfig {
 
   @Bean
   ApiClient typeCoverageApiClient(
-          RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
+      RestClient typeCoverageRestClient, @Value("${type-coverage.api.base-url}") String baseUrl) {
     return new ApiClient(typeCoverageRestClient).setBasePath(baseUrl);
+  }
+
+  @Bean
+  AsyncPayloadControllerApi asyncPayloadControllerApi(ApiClient typeCoverageApiClient) {
+    return new AsyncPayloadControllerApi(typeCoverageApiClient);
   }
 
   @Bean

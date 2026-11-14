@@ -10,6 +10,74 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [1.3.0] - Release preparation
+
+Prepared for release; no tag, GitHub release or public artifact publication has been performed.
+
+### Minor release
+
+OpenAPI Generics 1.3.0 expands the platform with first-class Gradle integration, stricter client-generation contract validation, normalized generated Java output, and broader build-time verification coverage.
+
+This release introduces a dedicated Gradle plugin for contract-aware client generation, strengthens fail-fast validation of generic wrapper metadata, expands regression coverage for asynchronous Spring MVC response wrappers and multi-spec generation scenarios, and hardens compatibility across supported Gradle and OpenAPI Generator versions while preserving full backward compatibility.
+
+### Added
+
+- Added first-class Gradle support through the new `openapi-generics-gradle-plugin`.
+- Added automatic code generator provisioning, template management, generated-source registration, and multi-task support for Gradle builds.
+- Added generated Java source normalization for Gradle client generation.
+- Added configuration-cache compatible Gradle integration and Gradle 9.x verification.
+- Added fail-fast validation for generic wrapper metadata during client generation.
+- Added dedicated exception types for invalid generic wrapper contracts.
+- Added regression coverage for asynchronous Spring MVC response wrapper discovery and reconstruction.
+- Added a canonical Gradle-first Spring Boot 4.1.2 / Java 25 customer stack: producer → committed OpenAPI snapshot → generated RestClient → consumer, with shared contracts using BYOC (Bring Your Own Contract) and real direct/paged HTTP deserialization. The client module supersedes the former standalone Gradle client sample.
+- Added dedicated multi-spec Maven generation coverage validating multiple isolated generator executions within a single module.
+
+### Changed
+
+- Aligned Maven/core and Maven sample OpenAPI Generator current references to **7.27.0**, matching the existing Gradle reference; consumer-selected Maven plugin, core, generator and upstream template extraction remain coherent.
+- Aligned Spring Boot 3.5 reference surfaces to Springdoc **2.10.0** and Spring Boot 4 surfaces to **3.2.0**.
+- Established OpenAPI Generator **7.25.0** as the minimum verified Gradle integration baseline.
+- Promoted the Gradle plugin and canonical Gradle sample wrappers/current references to **9.9.1**; the minimum tested Gradle edge remains **9.0.0**.
+- Updated sample projects to use Spring Boot dependency management for improved dependency alignment.
+- Upgraded the Spring Boot 4 sample baseline from **4.1.0** to **4.1.2**.
+- Normalized sample Java sources using the project formatting standard.
+- Improved documentation describing unsupported custom OpenAPI component schema naming.
+- Expanded sample documentation covering asynchronous response wrappers, Gradle integration, and generation coverage.
+
+### Fixed
+
+- Added RestClient-scoped wrapper model documentation showing shared generic Java bindings without links to suppressed/BYOC local model docs; ordinary model/enum documentation remains upstream-owned. API documentation snippets and generated test behavior are unchanged.
+
+- Preserved consumer `templateDir` settings on non-selected ordinary generator tasks.
+- Aligned generation, source registration and normalization with effective `sourceFolder` from JSON/YAML `configFile`, including option precedence and configuration-cache invalidation.
+
+### Quality & Verification
+
+- Verified standalone Maven and Gradle documentation examples through real generation and generated-source compilation using locally staged 1.3.0 artifacts; public artifact availability remains a publication gate.
+- Added CI execution for Gradle plugin `check` and explicit `e2eTest`, plus canonical stack clean build/test and asserted configuration-cache reuse; Maven core → samples and spec drift checks remain in place.
+- Expanded unit, functional, integration, and real-codegen end-to-end coverage for Gradle integration.
+- Verified isolated multi-task Gradle generation and mixed-generator scenarios.
+- Verified generated-source registration and configuration-cache compatibility.
+- Verified generated Java normalization after real OpenAPI Generator execution.
+- Verified canonical Gradle sample snapshot drift detection, automatic source registration, shared contract identity over real HTTP, and configuration-cache reuse with generation/compilation/tests re-executed after clean.
+- Verified compatibility with Gradle **9.0.0** and **9.9.1**.
+- Verified OpenAPI Generator Gradle integration with minimum API/capability baseline **7.25.0**, current reference **7.27.0**, and explicit **7.24.0** negative boundary. Production API dependencies remain `compileOnly`; consumers select the official generator version.
+- Verified fail-fast validation of invalid generic wrapper metadata.
+- Verified asynchronous Spring MVC wrapper discovery using `CompletionStage` and `DeferredResult`.
+- Verified isolated multi-spec Maven generation within a single module.
+
+### Compatibility
+
+- Fully backward compatible with all 1.2.x runtime contracts.
+- Java 17+
+- Spring Boot 3.x / 4.x
+- OpenAPI Generator 7.x
+- Gradle integration minimum verified OpenAPI Generator API/capability baseline: **7.25.0**; current reference **7.27.0**. The **7.24.0** negative case applies only to this integration boundary, not platform-wide 7.x support.
+- Gradle supported line: **9.x**; minimum tested edge **9.0.0**, current wrapper/reference **9.9.1**. Current references are not consumer requirements or support minimums; previous currents are not accumulated in a permanent matrix.
+- Maven and Gradle based client generation
+
+---
+
 ## [1.2.1] - 2026-08-08
 
 ### Patch release
@@ -45,7 +113,7 @@ This release removes redundant client-side envelope configuration, completes end
 
 - Added regression coverage for `x-api-wrapper-type` metadata generation and consumption.
 - Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
-- Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
+- Verified built-in `ServiceResponse<T>` and BYOE (Bring Your Own Envelope) envelope generation using the same metadata-driven reconstruction pipeline.
 - Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
 - Added regression coverage for server-starter exception categorization across configuration, descriptor validation, projection, and contract validation failures.
 - Verified that server-starter failures preserve existing diagnostic messages and fail-fast behavior while exposing platform-specific exception types.
@@ -243,7 +311,7 @@ Fully compatible with the 1.0.0 and 1.0.1 GA contracts.
 
 ### Quality & Verification
 
-- Hardened external model registry validation for BYOC mappings, including invalid and empty FQCN detection with diagnostic warnings.
+- Hardened external model registry validation for BYOC mappings, including invalid and empty fully qualified class name detection with diagnostic warnings.
 - Added unit tests for invalid and edge-case external model configurations.
 - Stabilized Spring Boot 3 and Spring Boot 4 sample pipelines.
 - Improved Docker-based sample builds for self-contained local verification.

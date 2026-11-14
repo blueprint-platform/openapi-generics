@@ -47,15 +47,15 @@ class CustomerClientErrorIT {
   void getCustomer_404_problem() {
     var problem =
         """
-            {
-              "type":"https://example.org/problem/not-found",
-              "title":"Not Found",
-              "status":404,
-              "detail":"Customer 999 not found",
-              "instance":"https://example.org/trace/customer-999",
-              "errorCode":"CUS_404"
-            }
-            """;
+        {
+          "type":"https://example.org/problem/not-found",
+          "title":"Not Found",
+          "status":404,
+          "detail":"Customer 999 not found",
+          "instance":"https://example.org/trace/customer-999",
+          "errorCode":"CUS_404"
+        }
+        """;
 
     server.enqueue(
         new MockResponse()
@@ -86,16 +86,16 @@ class CustomerClientErrorIT {
   void createCustomer_400_problem() {
     var problem =
         """
-            {
-              "title":"Bad Request",
-              "status":400,
-              "detail":"email must be a well-formed email address",
-              "errorCode":"VAL_001",
-              "extensions": {
-                "errors":[{"code":"invalid_email","message":"email format"}]
-              }
-            }
-            """;
+        {
+          "title":"Bad Request",
+          "status":400,
+          "detail":"email must be a well-formed email address",
+          "errorCode":"VAL_001",
+          "extensions": {
+            "errors":[{"code":"invalid_email","message":"email format"}]
+          }
+        }
+        """;
 
     server.enqueue(
         new MockResponse()
@@ -126,7 +126,8 @@ class CustomerClientErrorIT {
 
   @Test
   @DisplayName(
-      "DELETE /customers/{id} -> 500 (no body) => throws ApiProblemException with fallback ProblemDetail")
+      "DELETE /customers/{id} -> 500 (no body) => throws ApiProblemException with fallback"
+          + " ProblemDetail")
   void deleteCustomer_500_no_body() {
     server.enqueue(
         new MockResponse()

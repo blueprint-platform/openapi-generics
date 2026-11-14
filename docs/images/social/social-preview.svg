@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title description">
+  <title id="title">OpenAPI Generics — Java response types preserved across OpenAPI</title>
+  <desc id="description">Keep shared Java envelope and container types in generated clients. A Java service's ServiceResponse of Page of CustomerDto passes through an OpenAPI description and becomes a Java client binding extending those same shared types. For Spring Boot services, using Maven or Gradle.</desc>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; fill: #18283f; }
+    .name { font-size: 46px; font-weight: 700; letter-spacing: -1px; }
+    .promise { font-size: 43px; font-weight: 700; letter-spacing: -.6px; }
+    .context { font-size: 24px; fill: #42556e; }
+    .label { font-size: 25px; font-weight: 700; }
+    .code { font-family: Menlo, Consolas, monospace; font-size: 21px; white-space: pre; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M1 1 L6 4 L1 7" fill="none" stroke="#5a6c83" stroke-width="1.5"/></marker>
+  </defs>
+  <rect width="1280" height="640" fill="#f8fafc"/>
+  <rect x="56" y="53" width="7" height="155" rx="3" fill="#087568"/>
+  <text x="82" y="94" class="name">OpenAPI Generics</text>
+  <text x="82" y="151" class="promise">Java response generics.</text>
+  <text x="82" y="203" class="promise">Preserved across OpenAPI.</text>
+  <text x="58" y="254" class="context">Keep shared envelopes and containers in your generated Java client.</text>
+
+  <rect x="56" y="301" width="340" height="185" rx="14" fill="#fff" stroke="#cbd9e8" stroke-width="1.5"/>
+  <text x="78" y="342" class="label">Java service</text>
+  <text x="78" y="396" class="code">ServiceResponse&lt;</text>
+  <text x="78" y="431" class="code">  Page&lt;CustomerDto&gt;&gt;</text>
+
+  <path d="M407 394 H437" fill="none" stroke="#5a6c83" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="452" y="301" width="250" height="185" rx="14" fill="#eaf0f7" stroke="#cbd9e8" stroke-width="1.5"/>
+  <text x="474" y="342" class="label">OpenAPI</text>
+  <text x="474" y="399" class="context">API description</text>
+
+  <path d="M713 394 H743" fill="none" stroke="#5a6c83" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="758" y="301" width="466" height="185" rx="14" fill="#f0faf7" stroke="#78bcae" stroke-width="1.5"/>
+  <text x="780" y="342" class="label">Generated Java client</text>
+  <text x="780" y="396" class="code">extends ServiceResponse&lt;</text>
+  <text x="780" y="431" class="code">  Page&lt;CustomerDto&gt;&gt;</text>
+
+  <line x1="56" y1="534" x2="1224" y2="534" stroke="#d5dfeb"/>
+  <text x="58" y="578" class="context">For Spring Boot services · Maven + Gradle</text>
+</svg>

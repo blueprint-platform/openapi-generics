@@ -7,9 +7,9 @@ import io.github.blueprintplatform.samples.transportcoverage.client.generated.dt
 import org.springframework.core.io.Resource;
 
 public interface TransportCoverageClientAdapter {
-    ServiceResponse<UploadResultDto> upload(Resource file, UploadMetadataDto metadata);
+  ServiceResponse<UploadResultDto> upload(Resource file, UploadMetadataDto metadata);
 
-    Resource download(String documentId);
+  Resource download(String documentId);
 
-    ServiceResponse<RegistrationResultDto> register(String name, String category);
+  ServiceResponse<RegistrationResultDto> register(String name, String category);
 }

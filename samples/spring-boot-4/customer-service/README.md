@@ -1,132 +1,34 @@
-# customer-service
+# Boot 4 customer producer
 
-> Minimal reference producer for **contract-first, generics-aware OpenAPI**
+A Boot MVC application exposing customer CRUD/search through shared `ServiceResponse<T>` and
+`ServiceResponse<Page<T>>` responses. Controllers call the service layer; the server starter projects
+those Java contracts into the committed `../spec/customer-api-docs.yaml`.
 
-This sample shows only one thing:
+## Run and inspect
 
-> How to expose a Spring Boot API using `ServiceResponse<T>` so that OpenAPI stays deterministic and clients stay aligned.
-
----
-
-## 🚀 Quick Start
-
-### 1. Add dependency
-
-```xml
-<dependency>
-  <groupId>io.github.blueprintplatform</groupId>
-  <artifactId>openapi-generics-server-starter</artifactId>
-</dependency>
-```
-
-### 2. Use contract in controllers
-
-```java
-ServiceResponse<CustomerDto>
-ServiceResponse<Page<CustomerDto>>
-```
-
-### 3. Run
+First follow the [sample build prerequisites](../../README.md#repository-build-and-local-runtime-setup).
+From this module, run `mvn spring-boot:run` (use JDK 25).
 
 ```bash
-mvn spring-boot:run
+curl -H 'API-Version: 1' http://localhost:8094/customer-service/customers/1
+curl http://localhost:8094/customer-service/v3/api-docs.yaml
 ```
 
----
+Swagger UI: `http://localhost:8094/customer-service/swagger-ui/index.html`.
+The producer base path/port come from `src/main/resources/application.yml`.
+Boot 4 routes use MVC API versioning; the example selects version 1 explicitly.
 
-## 📌 Rules (only these matter)
+## Follow the contract
 
-✔ Use only:
+The Java customer DTO belongs to [customer-contract](../../domain-contracts/README.md), while the
+platform owns the built-in envelope/page types. The starter publishes envelope/container identity;
+it does not intercept requests or own the business/error handlers. Error responses use ProblemDetail,
+not an invented generic success-envelope error shape.
 
-```text
-ServiceResponse<T>
-ServiceResponse<Page<T>>
-```
+A successful `/customers/1` response tests normal HTTP behavior. Separately inspect wrapper metadata
+and review snapshot drift to establish projection correctness, then compile/test the
+[client library](../customer-service-client/README.md).
 
-✔ `T` is yours (any DTO)
-
-❌ Do NOT:
-
-* create custom envelopes (unless explicitly configured)
-* wrap errors → use `ProblemDetail`
-* customize OpenAPI manually
-
----
-
-## 🔍 Verify
-
-```bash
-curl http://localhost:8094/customer-service/customers/1
-```
-
-Expected shape:
-
-```json
-{
-  "data": { ... },
-  "meta": { ... }
-}
-```
-
-If this is correct → everything downstream works (OpenAPI → client).
-
----
-
-## 🌐 OpenAPI
-
-* Swagger UI
-  [http://localhost:8094/customer-service/swagger-ui/index.html](http://localhost:8094/customer-service/swagger-ui/index.html)
-
-* YAML
-  [http://localhost:8094/customer-service/v3/api-docs.yaml](http://localhost:8094/customer-service/v3/api-docs.yaml)
-
----
-
-## ⚙️ Config (minimal)
-
-```yaml
-server:
-  port: 8094
-  servlet:
-    context-path: /customer-service
-
-spring:
-  mvc:
-    problemdetails:
-      enabled: true
-
-springdoc:
-  default-consumes-media-type: application/json
-  default-produces-media-type: application/json
-```
-
----
-
-## 🧩 BYOE (optional)
-
-You can replace the default envelope:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.ApiResponse
-```
-
-Requirements:
-
-* must be generic (`<T>`)
-* must have a single payload field
-* must be available as a dependency
-
-If not configured → `ServiceResponse<T>` is used.
-
----
-
-## 🧠 Mental Model
-
-```text
-Controller → ServiceResponse<T> → OpenAPI (projection)
-```
-
-You define the contract.
-The starter projects it deterministically.
+This sample chooses the built-in envelope. Existing application envelopes are supported through
+[producer BYOE (Bring Your Own Envelope) configuration](../../../docs/adoption/server-side-adoption.md#choose-the-envelope);
+this is an ownership choice, not a requirement to replace every envelope with ServiceResponse.

@@ -14,31 +14,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class TransportCoverageClientAdapterImpl implements TransportCoverageClientAdapter {
 
-    private final MultipartTransportControllerApi multipartApi;
-    private final BinaryTransportControllerApi binaryApi;
-    private final FormTransportControllerApi formApi;
+  private final MultipartTransportControllerApi multipartApi;
+  private final BinaryTransportControllerApi binaryApi;
+  private final FormTransportControllerApi formApi;
 
-    public TransportCoverageClientAdapterImpl(
-            MultipartTransportControllerApi multipartApi,
-            BinaryTransportControllerApi binaryApi,
-            FormTransportControllerApi formApi) {
-        this.multipartApi = multipartApi;
-        this.binaryApi = binaryApi;
-        this.formApi = formApi;
-    }
+  public TransportCoverageClientAdapterImpl(
+      MultipartTransportControllerApi multipartApi,
+      BinaryTransportControllerApi binaryApi,
+      FormTransportControllerApi formApi) {
+    this.multipartApi = multipartApi;
+    this.binaryApi = binaryApi;
+    this.formApi = formApi;
+  }
 
-    @Override
-    public ServiceResponse<UploadResultDto> upload(Resource file, UploadMetadataDto metadata) {
-        return multipartApi.upload(file, metadata);
-    }
+  @Override
+  public ServiceResponse<UploadResultDto> upload(Resource file, UploadMetadataDto metadata) {
+    return multipartApi.upload(file, metadata);
+  }
 
-    @Override
-    public Resource download(String documentId) {
-        return binaryApi.download(documentId);
-    }
+  @Override
+  public Resource download(String documentId) {
+    return binaryApi.download(documentId);
+  }
 
-    @Override
-    public ServiceResponse<RegistrationResultDto> register(String name, String category) {
-        return formApi.register(name, category);
-    }
+  @Override
+  public ServiceResponse<RegistrationResultDto> register(String name, String category) {
+    return formApi.register(name, category);
+  }
 }

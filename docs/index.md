@@ -2,303 +2,56 @@
 layout: default
 title: Home
 nav_order: 1
-description: "OpenAPI Generics for Spring Boot — keep your API contract intact end-to-end."
+description: "Adopt and verify contract-preserving Java client generation."
 permalink: /
 ---
 
-# OpenAPI Generics for Spring Boot
-
-> **Keep your Java contract intact from Spring Boot to generated clients.**
-
-OpenAPI Generics is a focused Java/Spring specialization that prevents generic API contracts from being flattened into newly generated wrapper models.
-
-Your Java contract remains the source of truth. OpenAPI carries the metadata required to reconstruct that contract deterministically on the client side.
-
-**Java Contract → OpenAPI Projection → Contract Metadata → Contract-Aligned Client**
-
-Generated clients bind to the envelope, container, and DTO types you already own instead of redefining them.
-
-[Get Started](#get-started) · [See How It Works](#how-it-works)
-
----
-
-## Explore
-
-- [The Problem](#the-problem)
-- [What's New in 1.2.1](#whats-new-in-121)
-- [Key Features](#key-features)
-- [How It Works](#how-it-works)
-- [Get Started](#get-started)
-- [Documentation](#documentation)
-- [Samples](#samples)
-- [Compatibility](#compatibility)
-- [Community](#community)
-
----
-
-## The Problem
-
-A Spring Boot API may expose a strongly typed generic contract:
-
-```java
-ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers()
-```
-
-That contract carries more than a JSON shape.
-
-`ServiceResponse<T>` defines the response envelope, `Page<T>` defines the pagination contract, and `CustomerDto` defines the payload.
-
-A conventional OpenAPI client generation flow can flatten that contract into a newly generated wrapper model:
-
-```java
-class ServiceResponsePageCustomerDto {
-    PageCustomerDto data;
-    Meta meta;
-}
-```
-
-The generated type may represent a similar JSON structure, but the original Java contract identity is no longer preserved.
-
-OpenAPI Generics keeps that identity intact:
-
-```java
-public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {}
-```
-
-The generated wrapper becomes a thin type binding: it reuses the shared envelope and container contracts instead of redefining them.
-
-<table>
-<tr>
-<td align="center">
-<b>Default OpenAPI Generator</b><br/>
-<sub>contract materialized as generated models</sub>
-</td>
-<td align="center">
-<b>OpenAPI Generics</b><br/>
-<sub>contract reconstructed from shared Java types</sub>
-</td>
-</tr>
-<tr>
-<td><img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-before.png" width="450"/></td>
-<td><img src="https://raw.githubusercontent.com/blueprint-platform/openapi-generics/main/docs/images/proof/generated-client-wrapper-after.png" width="450"/></td>
-</tr>
-</table>
-
-### Why It Matters
-
-For a single endpoint, duplicated wrapper types may look harmless.
-
-Across many generated clients, they accumulate into additional generated models, mapping layers, and opportunities for contract drift.
-
-OpenAPI Generics keeps the ownership boundary explicit:
-
-> **Shared Java contracts remain the authority. Generated clients provide transport bindings around them instead of becoming alternative contract definitions.**
-
----
-
-## What's New in 1.2.1
-
-OpenAPI Generics 1.2.1 completes the contract-driven reconstruction model by carrying Java envelope identity in the generated OpenAPI document through `x-api-wrapper-type`.
-
-Together with `x-data-container-type`, the document now carries the envelope and container identity required by the Java generator to reconstruct both platform-owned and application-owned generic response contracts.
-
-```text
-Java Contract
-      ↓
-OpenAPI Projection
-      ↓
-Envelope + Container Identity
-      ↓
-Generated Client Reconstruction
-```
-
-For aligned producer and codegen components, this removes the need to repeat the envelope declaration on the client through `openapi-generics.envelope`.
-
-Representative contract shapes include:
-
-```java
-ServiceResponse<Page<CustomerDto>>
-ApiResponse<Window<CustomerDto>>
-```
-
-### 1.2.1 highlights
-
-- Contract-driven envelope reconstruction through `x-api-wrapper-type`
-- No duplicate client-side envelope configuration for aligned components
-- Application-defined generic containers with both built-in and BYOE envelopes
-- Dedicated compatibility coverage for standard multipart, binary download, and form-urlencoded transport flows
-- Full backward compatibility with 1.2.0 runtime contracts
-
-No contract migration is required for existing 1.2 users.
-
-For the complete release history, see the [Changelog](https://github.com/blueprint-platform/openapi-generics/blob/main/CHANGELOG.md).
-
----
-
-## Key Features
-
-| Feature                              | Description                                                                 |
-|--------------------------------------|-----------------------------------------------------------------------------|
-| **Java contract authority**          | Java contracts remain the source of truth.                                  |
-| **BYOE**                             | Reuse your own response envelope instead of migrating to a platform wrapper. |
-| **BYOC**                             | Reuse externally owned DTOs instead of generating duplicates.               |
-| **Application-defined containers**   | Register custom generic containers such as `Paging<T>` or `Window<T>`.       |
-| **Contract-driven reconstruction**   | Reconstruct envelope identity directly from projected OpenAPI metadata.      |
-| **Container-aware reconstruction**   | Built-in and configured containers share one deterministic pipeline.        |
-| **Deterministic reconstruction**     | Stable projection, validation, and contract-aligned client reconstruction.   |
-| **Generated-source hygiene**         | Deterministic cleanup of duplicate and unused generated imports.             |
-| **Fail-fast validation**             | Invalid contract metadata and projection states fail during generation.      |
-| **Standard transport compatibility** | Generic reconstruction coexists with standard Java RestClient transport generation. |
-
----
-
-## How It Works
-
-```text
-Spring Boot Application
-      ↓
-openapi-generics-server-starter
-      ↓
-OpenAPI + Contract Metadata
-      ↓
-openapi-generics-java-codegen-parent
-      ↓
-java-generics-contract
-      ↓
-Contract-Aligned Java Client
-```
-
-The server-side projection phase discovers generic response contracts and publishes the metadata needed to preserve them across OpenAPI.
-
-Key metadata includes:
-
-- `x-api-wrapper`
-- `x-api-wrapper-type`
-- `x-api-wrapper-datatype`
-- `x-data-container`
-- `x-data-container-type`
-- `x-data-item`
-- `x-ignore-model`
-
-The Java code generator consumes that metadata and reconstructs contract-aligned wrapper types.
-
-The generated OpenAPI document remains valid OpenAPI and can still be consumed by standard tooling.
-
-OpenAPI Generics does not fork OpenAPI Generator.
-
-It adds a Java/Spring specialization layer on top of the upstream generator while leaving standard transport generation behavior intact.
-
----
-
-## Get Started
-
-OpenAPI Generics integrates at two points in the contract lifecycle:
-
-```text
-Java Producer Contract
-        ↓
-OpenAPI Projection
-        ↓
-Contract-Aware Client Reconstruction
-```
-
-### Producer
-
-Add `openapi-generics-server-starter` to the Spring Boot service that owns the Java contract.
-
-The starter participates when Springdoc generates the OpenAPI document. It discovers supported generic response contracts and projects the metadata required for deterministic client reconstruction without changing application request handling.
-
-For the built-in `ServiceResponse<T>` contract, no envelope configuration is required. BYOE envelopes and application-defined generic containers can be declared as part of the producer contract model.
-
-See [Server-Side Adoption](adoption/server-side-adoption.md) for dependency setup, BYOE configuration, custom containers, validation, and projection behavior.
-
-### Client
-
-Use `openapi-generics-java-codegen-parent` with the official OpenAPI Generator Maven plugin and select:
-
-```xml
-<generatorName>java-generics-contract</generatorName>
-```
-
-Normal OpenAPI Generator choices remain consumer-controlled, including the input specification, client library, package layout, and generator options.
-
-OpenAPI Generics prepares the reconstruction-specific environment and restores the projected Java contract semantics without replacing the ordinary OpenAPI Generator lifecycle.
-
-See [Client-Side Adoption](adoption/client-side-adoption.md) for the complete Maven configuration, BYOC mappings, fallback behavior, and generated-source setup.
-
----
-
-## Documentation
-
-- [Architectural Rationale](architecture/rationale.md)  
-  Why OpenAPI Generics exists, what problem it solves, and the architectural trade-offs behind the project.
-
-- [Architecture](architecture/architecture.md)  
-  Internal projection protocol, contract metadata model, reconstruction pipeline, and validation boundaries.
-
-- [Server-Side Adoption](adoption/server-side-adoption.md)  
-  Publish generics-aware OpenAPI documents from Spring Boot services without changing runtime behavior.
-
-- [Client-Side Adoption](adoption/client-side-adoption.md)  
-  Generate Java clients that reconstruct generic contracts instead of redefining them.
-
-- [Compatibility & Support Policy](compatibility.md)  
-  Supported and verified Java, Spring Boot, Springdoc, OpenAPI Generator, and build-time boundaries.
-
-- [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)  
-  Source code, releases, issues, and discussions.
-
----
-
-## Samples
-
-Repository samples validate the complete contract lifecycle:
-
-```text
-Producer
-    ↓
-OpenAPI
-    ↓
-Generated Client
-    ↓
-Consumer Runtime
-```
-
-The maintained sample suite covers Spring Boot 3 and Spring Boot 4 reference stacks, built-in `ServiceResponse<T>` contracts, BYOE envelopes, application-defined generic containers, type coverage, and standard transport interoperability.
-
-[Explore the sample projects](https://github.com/blueprint-platform/openapi-generics/tree/main/samples) for runnable end-to-end examples.
-
----
-
-## Compatibility
-
-OpenAPI Generics currently supports:
-
-- **Java:** 17+
-- **Spring Boot:** 3.4.x, 3.5.x, and 4.x
-- **springdoc-openapi:** 2.x with Spring Boot 3.x, and 3.x with Spring Boot 4.x
-- **OpenAPI Generator:** 7.x
-- **Server integration:** Spring WebMvc
-- **Client build integration:** Maven
-
-The repository maintains exact Spring Boot 3, Spring Boot 4, and OpenAPI Generator reference baselines to verify compatibility without narrowing support to those exact versions.
-
-See the authoritative [Compatibility & Support Policy](compatibility.md) for the full matrix, verified reference baselines, and support boundaries.
-
----
-
-## Community
-
-OpenAPI Generics is open source under the MIT License.
-
-- [GitHub Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
-- [GitHub Issues](https://github.com/blueprint-platform/openapi-generics/issues)
-- [GitHub Repository](https://github.com/blueprint-platform/openapi-generics)
-
-Questions, bug reports, design discussions, and real-world adoption feedback are welcome.
-
----
+# OpenAPI Generics documentation
+
+Preserve Java envelope and container identity across
+`ServiceResponse<Page<CustomerDto>> → OpenAPI metadata → generated wrapper extends shared contract`.
+For the problem, concrete before/after and project overview, start with the [README](https://github.com/blueprint-platform/openapi-generics/blob/main/README.md).
+
+## What are you trying to do?
+
+| Task | Start here | Result |
+| --- | --- | --- |
+| Publish generic contracts from a Spring MVC service | [Server adoption](adoption/server-side-adoption.md) | Springdoc output carries envelope, container and payload metadata |
+| Keep an existing application-owned envelope | [Choose the envelope](adoption/server-side-adoption.md#choose-the-envelope) | BYOE (Bring Your Own Envelope) preserves ownership without duplicate client configuration |
+| Generate a Maven client | [Maven setup](adoption/client-side-adoption.md#maven) | Prepared templates, reconstructed wrappers and registered Java sources |
+| Generate a Gradle client | [Gradle setup](adoption/client-side-adoption.md#gradle) | Official-plugin integration and automatic selected-task source wiring |
+| Reuse existing Java DTOs | [Optional BYOC (Bring Your Own Contract) mappings](adoption/client-side-adoption.md#optional-reuse-existing-dtos-with-byoc) | Existing DTOs satisfy selected schemas instead of duplicate generation |
+| Use an application-defined container | [Container registration](adoption/server-side-adoption.md#register-an-application-container) | Explicit Java identity survives projection and reconstruction |
+| Check tool versions or supported shapes | [Compatibility reference](compatibility.md) | Supported lines, current references and integration-specific edges |
+
+## Follow a working application
+
+- [Canonical Gradle Boot 4 stack](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/gradle/customer-service/README.md): consumer HTTP endpoint →
+  application service → remote client → library adapter → generated RestClient → producer.
+- [Maven Boot 4 client library](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/spring-boot-4/customer-service-client/README.md): generated code
+  behind an adapter, consumed by a separate Boot application.
+- [Sample catalog](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/README.md): Boot 3/4, BYOE, type/container, transport and multi-spec verification.
+
+Generated wrappers are transport bindings. Keep them and generated API/invoker classes behind the
+[client library boundary](adoption/client-side-adoption.md#keep-generated-types-behind-the-client-boundary).
+BYOC is optional; envelope/container preservation does not require sharing every DTO.
+
+## Verify or understand the implementation
+
+| Question | Reference |
+| --- | --- |
+| What metadata should the producer emit? | [Projection metadata and checks](adoption/server-side-adoption.md#check-the-projected-document) |
+| What should a generated client preserve? | [Client verification](adoption/client-side-adoption.md#verify-the-result) |
+| Which tests prove wiring, compilation or runtime interoperability? | [Verification layers](compatibility.md#verification-evidence) |
+| How are projection, reconstruction and build integrations separated? | [Architecture](architecture/architecture.md) |
+| Why preserve Java contract ownership? | [Design rationale](architecture/rationale.md) |
+| What changed in 1.3.0? | [Changelog](https://github.com/blueprint-platform/openapi-generics/blob/main/CHANGELOG.md) |
+
+Release consumer examples use explicit platform versions and release repositories; the repository
+samples also document their separate development bootstrap. See [release availability](adoption/client-side-adoption.md#before-you-start).
+
+[Source and issues](https://github.com/blueprint-platform/openapi-generics) ·
+[Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
 
 <!-- Scarf tracking pixel - Docs Home -->
 <img referrerpolicy="no-referrer-when-downgrade"
