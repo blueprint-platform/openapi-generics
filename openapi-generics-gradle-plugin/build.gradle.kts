@@ -272,6 +272,7 @@ publishing {
                 url = "https://github.com/blueprint-platform/openapi-generics"
                 connection = "scm:git:https://github.com/blueprint-platform/openapi-generics.git"
                 developerConnection = "scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git"
+                tag = "v1.3.0"
             }
         }
     }
