@@ -29,7 +29,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Added fail-fast validation for generic wrapper metadata during client generation.
 - Added dedicated exception types for invalid generic wrapper contracts.
 - Added regression coverage for asynchronous Spring MVC response wrapper discovery and reconstruction.
-- Added a canonical Gradle-first Spring Boot 4.1.2 / Java 25 customer stack: producer → committed OpenAPI snapshot → generated RestClient → consumer, with shared/BYOC contracts and real direct/paged HTTP deserialization. The client module supersedes the former standalone Gradle client sample.
+- Added a canonical Gradle-first Spring Boot 4.1.2 / Java 25 customer stack: producer → committed OpenAPI snapshot → generated RestClient → consumer, with shared contracts using BYOC (Bring Your Own Contract) and real direct/paged HTTP deserialization. The client module supersedes the former standalone Gradle client sample.
 - Added dedicated multi-spec Maven generation coverage validating multiple isolated generator executions within a single module.
 
 ### Changed
@@ -45,6 +45,8 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 - Expanded sample documentation covering asynchronous response wrappers, Gradle integration, and generation coverage.
 
 ### Fixed
+
+- Added RestClient-scoped wrapper model documentation showing shared generic Java bindings without links to suppressed/BYOC local model docs; ordinary model/enum documentation remains upstream-owned. API documentation snippets and generated test behavior are unchanged.
 
 - Preserved consumer `templateDir` settings on non-selected ordinary generator tasks.
 - Aligned generation, source registration and normalization with effective `sourceFolder` from JSON/YAML `configFile`, including option precedence and configuration-cache invalidation.
@@ -111,7 +113,7 @@ This release removes redundant client-side envelope configuration, completes end
 
 - Added regression coverage for `x-api-wrapper-type` metadata generation and consumption.
 - Added verification that generated clients reconstruct wrapper inheritance without client-side envelope configuration.
-- Verified built-in `ServiceResponse<T>` and BYOE envelope generation using the same metadata-driven reconstruction pipeline.
+- Verified built-in `ServiceResponse<T>` and BYOE (Bring Your Own Envelope) envelope generation using the same metadata-driven reconstruction pipeline.
 - Verified producer → OpenAPI → generated client → consumer flows after removing redundant client-side envelope configuration.
 - Added regression coverage for server-starter exception categorization across configuration, descriptor validation, projection, and contract validation failures.
 - Verified that server-starter failures preserve existing diagnostic messages and fail-fast behavior while exposing platform-specific exception types.
@@ -309,7 +311,7 @@ Fully compatible with the 1.0.0 and 1.0.1 GA contracts.
 
 ### Quality & Verification
 
-- Hardened external model registry validation for BYOC mappings, including invalid and empty FQCN detection with diagnostic warnings.
+- Hardened external model registry validation for BYOC mappings, including invalid and empty fully qualified class name detection with diagnostic warnings.
 - Added unit tests for invalid and edge-case external model configurations.
 - Stabilized Spring Boot 3 and Spring Boot 4 sample pipelines.
 - Improved Docker-based sample builds for self-contained local verification.

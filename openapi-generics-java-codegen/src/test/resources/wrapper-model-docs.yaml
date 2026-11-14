@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info: {title: Wrapper documentation regression, version: '1.0'}
+paths: {}
+components:
+  schemas:
+    CustomerDto:
+      type: object
+      properties:
+        name: {type: string}
+    OrderDto:
+      type: object
+      properties:
+        reference: {type: string}
+    Status:
+      type: string
+      enum: [ACTIVE, INACTIVE]
+    Meta:
+      type: object
+      x-ignore-model: true
+      properties:
+        serverTime: {type: string, format: date-time}
+    PageCustomerDto:
+      type: object
+      x-ignore-model: true
+      properties:
+        content:
+          type: array
+          items: {$ref: '#/components/schemas/CustomerDto'}
+    ServiceResponseCustomerDto:
+      type: object
+      properties:
+        data: {$ref: '#/components/schemas/CustomerDto'}
+        meta: {$ref: '#/components/schemas/Meta'}
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: CustomerDto
+    ServiceResponsePageCustomerDto:
+      type: object
+      properties:
+        data: {$ref: '#/components/schemas/PageCustomerDto'}
+        meta: {$ref: '#/components/schemas/Meta'}
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: PageCustomerDto
+      x-data-container: Page
+      x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
+      x-data-item: CustomerDto
+    ApiResponseCustomerDto:
+      type: object
+      properties:
+        payload: {$ref: '#/components/schemas/CustomerDto'}
+      x-api-wrapper: true
+      x-api-wrapper-type: com.example.contract.ApiResponse
+      x-api-wrapper-datatype: CustomerDto

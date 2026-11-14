@@ -1,0 +1,26 @@
+# {{classname}}
+
+{{#description}}{{&description}}
+
+{{/description}}This generated class is a transport binding around shared Java contracts.
+
+## Java binding
+
+```java
+{{>api_wrapper}}
+```
+
+This binding fragment uses the generated model package and its ordinary type imports.
+
+## Shared Java types
+
+- Envelope: `{{vendorExtensions.x-api-wrapper-type}}`
+{{#vendorExtensions.x-data-container-type}}
+- Container: `{{.}}`
+{{/vendorExtensions.x-data-container-type}}
+{{#vendorExtensions.x-extra-imports}}
+- Reused payload: `{{.}}`
+{{/vendorExtensions.x-extra-imports}}
+
+Shared-type schemas remain in OpenAPI without duplicate generated Java models or local model documentation.
+Keep this binding and generated API/invoker types behind a client adapter; expose shared contract types to application code.
