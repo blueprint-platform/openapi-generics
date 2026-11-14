@@ -39,7 +39,7 @@ val selectedOpenApiGeneratorTestRuntimeVersion =
     providers.gradleProperty("openApiGeneratorTestRuntimeVersion")
         .orElse(currentOpenApiGeneratorVerificationVersion)
 val spotlessLibVersion = "4.10.4"
-val jacocoVersion = "0.8.15" // Same reporting tool version as the Maven reactor.
+val jacocoVersion = "0.8.16" // Same reporting tool version as the Maven reactor.
 
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")

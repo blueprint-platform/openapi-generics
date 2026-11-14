@@ -24,7 +24,7 @@
         <openapi-generics-server-starter.version>1.3.0</openapi-generics-server-starter.version>
         <customer-contract.version>1.3.0</customer-contract.version>
         <springdoc-openapi-starter.version>3.2.0</springdoc-openapi-starter.version>
-        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
         <argLine/>
     </properties>
 
