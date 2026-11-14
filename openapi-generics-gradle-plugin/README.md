@@ -7,7 +7,7 @@ the shared generic contract. Keep generated API/invoker/wrapper classes behind a
 [canonical web stack](../samples/gradle/customer-service/README.md) shows the application boundary.
 Ordinary DTO/API/transport generation stays upstream-owned; DTO reuse through BYOC (Bring Your Own Contract) is optional.
 
-This checkout prepares **1.3.0**. The release consumer example below requires the platform plugin and matching codegen/contract artifacts to be available in the configured repositories. It does not claim that public publication has already occurred.
+The standalone consumer example uses platform **1.3.0**. Configure Gradle Plugin Portal for plugin ID resolution and Maven Central for the matching codegen/contract dependencies.
 
 ## Prerequisites and version roles
 
@@ -185,4 +185,4 @@ verified by the [Maven Boot 3.5 stack](../samples/spring-boot-3/customer-service
 it is not a second Gradle default application stack. The public Gradle path above and canonical
 application reference use Boot 4/Jackson 3; those example choices do not change supported version lines.
 
-The repository sample uses `includeBuild` and restricted `mavenLocal()` to test this checkout before publication. Those are development mechanisms, not release-consumer prerequisites. Public consumers use explicit plugin versions and their configured release repositories as above. Public plugin discovery and dependency resolution must be verified after publication; local tests do not establish public availability.
+The repository sample uses `includeBuild` and restricted `mavenLocal()` to test this checkout. Those are development mechanisms, not release-consumer prerequisites. Standalone consumers use explicit plugin versions, Gradle Plugin Portal for plugin discovery, and Maven Central for project dependencies as above.

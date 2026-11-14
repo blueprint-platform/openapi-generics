@@ -69,9 +69,9 @@ shared `ServiceResponse` and `Page` identities.
 
 ## Start with your project
 
-**1.3.0 is in release preparation, not yet publicly published.** The adoption examples target its
-artifacts in your configured repositories. To try this branch now, use the
-[sample development setup](samples/README.md#repository-build-and-local-runtime-setup);
+The adoption examples use explicit **1.3.0** platform versions. Configure Maven Central for platform
+dependencies and Gradle Plugin Portal for plugin ID resolution. Repository samples have a separate
+[development setup](samples/README.md#repository-build-and-local-runtime-setup);
 local installs and composite builds are not release-consumer requirements.
 
 ### 1. Project the contract from your service
@@ -159,7 +159,7 @@ Supported lines are **Java 17+**, Spring MVC on **Boot 3.5.x / 4.x**, **OpenAPI 
 **Gradle 9.x**. Exact framework/tool references, supported shapes and integration-specific edges belong
 in the [compatibility reference](docs/compatibility.md); current references are not consumer-wide pins.
 
-Prepared 1.3.0 adds first-class Gradle integration, stricter wrapper metadata validation and broader
+1.3.0 adds first-class Gradle integration, stricter wrapper metadata validation and broader
 async/multi-spec verification. Existing 1.2.x runtime contracts require no migration.
 [Changelog →](CHANGELOG.md)
 

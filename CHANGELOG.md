@@ -10,9 +10,7 @@ This project follows a contract-first release discipline:
 
 ---
 
-## [1.3.0] - Release preparation
-
-Prepared for release; no tag, GitHub release or public artifact publication has been performed.
+## [1.3.0]
 
 ### Minor release
 
@@ -23,6 +21,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 ### Added
 
 - Added first-class Gradle support through the new `openapi-generics-gradle-plugin`.
+- Added signed Gradle plugin publication support for Maven Central and Gradle Plugin Portal.
 - Added automatic code generator provisioning, template management, generated-source registration, and multi-task support for Gradle builds.
 - Added generated Java source normalization for Gradle client generation.
 - Added configuration-cache compatible Gradle integration and Gradle 9.x verification.
@@ -34,6 +33,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 
 ### Changed
 
+- Aligned Maven and Gradle coverage tooling on JaCoCo **0.8.16**.
 - Aligned Maven/core and Maven sample OpenAPI Generator current references to **7.27.0**, matching the existing Gradle reference; consumer-selected Maven plugin, core, generator and upstream template extraction remain coherent.
 - Aligned Spring Boot 3.5 reference surfaces to Springdoc **2.10.0** and Spring Boot 4 surfaces to **3.2.0**.
 - Established OpenAPI Generator **7.25.0** as the minimum verified Gradle integration baseline.
@@ -53,7 +53,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 
 ### Quality & Verification
 
-- Verified standalone Maven and Gradle documentation examples through real generation and generated-source compilation using locally staged 1.3.0 artifacts; public artifact availability remains a publication gate.
+- Verified standalone Maven and Gradle documentation examples through real generation and generated-source compilation using locally staged 1.3.0 artifacts.
 - Added CI execution for Gradle plugin `check` and explicit `e2eTest`, plus canonical stack clean build/test and asserted configuration-cache reuse; Maven core → samples and spec drift checks remain in place.
 - Expanded unit, functional, integration, and real-codegen end-to-end coverage for Gradle integration.
 - Verified isolated multi-task Gradle generation and mixed-generator scenarios.
