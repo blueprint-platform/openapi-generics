@@ -154,11 +154,23 @@ From this plugin directory:
 `check` also creates unit-only JaCoCo reports: XML at
 `build/reports/jacoco/test/jacocoTestReport.xml` and HTML at
 `build/reports/jacoco/test/html/index.html`. Run `./gradlew test jacocoTestReport` for that report alone.
-All production plugin classes are included. Functional/TestKit and E2E JVMs are not instrumented;
-their build/cache behavior remains separate evidence. CI uploads the report under `gradle-plugin`.
+All production plugin classes are included. For combined unit + nested Functional/TestKit +
+real-codegen E2E coverage, run:
+
+```bash
+./gradlew check e2eTest jacocoCombinedReport -PcombinedCoverage=true
+```
+
+CI uploads `build/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml` under
+`gradle-plugin`; HTML is beside it in `html/index.html`. The opt-in test harness instruments
+only plugin classes in nested Gradle JVMs and explicitly collects their execution data over
+loopback sockets, including after expected failures. Collection runs serially and retains
+configuration-cache assertions. The canonical Boot stack remains outside coverage. Without
+the property, verification and the unit-only report need no nested agent or socket.
 Codecov tracks this flag against its own automatic baseline with the existing 2% tolerance. The
 repository-wide aggregate and patch checks still include all reported production code; existing
-thresholds are unchanged. No new numeric coverage floor is inferred from the initial unit-only measurement.
+thresholds are unchanged. Coverage combines executed lines; each layer's assertions still
+establish its own behavioral evidence.
 
 | Layer | Evidence |
 | --- | --- |

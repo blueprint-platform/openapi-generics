@@ -73,24 +73,20 @@ jobs:
           verbose: true
 
       # Keep the Gradle 9.0.0 compatibility edge on JDK 21.
-      - name: Check Gradle plugin (unit and functional tests)
+      - name: Verify Gradle plugin and report combined coverage
         working-directory: openapi-generics-gradle-plugin
-        run: ./gradlew check
+        run: ./gradlew check e2eTest jacocoCombinedReport -PcombinedCoverage=true
 
-      - name: Upload Gradle plugin unit coverage to Codecov
+      - name: Upload Gradle plugin combined coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./openapi-generics-gradle-plugin/build/reports/jacoco/test/jacocoTestReport.xml
+          files: ./openapi-generics-gradle-plugin/build/reports/jacoco/jacocoCombinedReport/jacocoCombinedReport.xml
           flags: gradle-plugin
           name: gradle-plugin
           disable_search: true
           fail_ci_if_error: true
           verbose: true
-
-      - name: Verify Gradle plugin real codegen
-        working-directory: openapi-generics-gradle-plugin
-        run: ./gradlew e2eTest
 
       - name: Set up JDK 25 for samples
         uses: actions/setup-java@v4

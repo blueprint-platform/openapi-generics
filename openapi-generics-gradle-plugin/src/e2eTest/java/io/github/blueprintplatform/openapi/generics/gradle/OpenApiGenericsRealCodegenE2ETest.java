@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.blueprintplatform.openapi.generics.gradle.support.NestedCoverage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -241,7 +242,7 @@ class OpenApiGenericsRealCodegenE2ETest {
             throws IOException {
 
         BuildResult result =
-                GradleRunner.create()
+                NestedCoverage.build(GradleRunner.create()
                         .withProjectDir(projectDirectory.toFile())
                         .withArguments(
                                 "compileJava",
@@ -258,8 +259,7 @@ class OpenApiGenericsRealCodegenE2ETest {
                                                 "functionalTestPluginRepository"),
                                 "-PopenApiGenericsCodegenRepository="
                                         + requireSystemProperty(
-                                                "functionalTestCodegenRepository"))
-                        .build();
+                                                "functionalTestCodegenRepository")));
 
         assertSuccessfulTask(
                 result,
@@ -469,15 +469,14 @@ class OpenApiGenericsRealCodegenE2ETest {
     }
 
     private BuildResult runConfigFileCompile() {
-        return GradleRunner.create()
+        return NestedCoverage.build(GradleRunner.create()
                 .withProjectDir(projectDirectory.toFile())
                 .withArguments(
                         "compileJava", "--configuration-cache", "--rerun-tasks", "--info", "--stacktrace",
                         "-PopenApiGeneratorVersion=" + requireSystemProperty("openApiGeneratorTestRuntimeVersion"),
                         "-PopenApiGenericsPluginVersion=" + requireSystemProperty("pluginUnderTestVersion"),
                         "-PopenApiGenericsPluginRepository=" + requireSystemProperty("functionalTestPluginRepository"),
-                        "-PopenApiGenericsCodegenRepository=" + requireSystemProperty("functionalTestCodegenRepository"))
-                .build();
+                        "-PopenApiGenericsCodegenRepository=" + requireSystemProperty("functionalTestCodegenRepository")));
     }
 
     private void assertConfigFileOutput(String sourceFolder, BuildResult result) throws IOException {

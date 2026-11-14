@@ -24,7 +24,7 @@ coverage:
           - java-codegen
 
       gradle-plugin:
-        # Unit-only production coverage; track its measured baseline, not nested builds.
+        # Combined unit + nested TestKit/E2E production coverage; same class denominator.
         target: auto
         threshold: 2%
         flags:

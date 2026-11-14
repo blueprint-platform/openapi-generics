@@ -147,11 +147,11 @@ public final class FunctionalTestEnvironment {
     }
 
     public BuildResult run(String... arguments) {
-        return runner(arguments).build();
+        return NestedCoverage.build(runner(arguments));
     }
 
     public BuildResult runAndFail(String... arguments) {
-        return runner(arguments).buildAndFail();
+        return NestedCoverage.buildAndFail(runner(arguments));
     }
 
     public BuildResult runWithConfigurationCache(String... arguments) {
@@ -165,9 +165,7 @@ public final class FunctionalTestEnvironment {
             String gradleVersion,
             String... arguments) {
 
-        return runner(arguments)
-                .withGradleVersion(gradleVersion)
-                .build();
+        return NestedCoverage.build(runner(arguments).withGradleVersion(gradleVersion), gradleVersion);
     }
 
     public BuildResult runWithGradleVersionAndConfigurationCache(

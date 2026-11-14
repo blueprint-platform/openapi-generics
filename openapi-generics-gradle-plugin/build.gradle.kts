@@ -6,6 +6,7 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.tasks.Jar
 import java.io.File
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     `java-gradle-plugin`
@@ -22,6 +23,7 @@ val selectedOpenApiGeneratorTestRuntimeVersion =
     providers.gradleProperty("openApiGeneratorTestRuntimeVersion")
         .orElse(currentOpenApiGeneratorVerificationVersion)
 val spotlessLibVersion = "4.10.4"
+val jacocoVersion = "0.8.15" // Same reporting tool version as the Maven reactor.
 
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")
@@ -54,6 +56,13 @@ repositories {
  */
 val functionalTest: SourceSet = sourceSets.create("functionalTest")
 val e2eTest: SourceSet = sourceSets.create("e2eTest")
+functionalTest.java.srcDir("src/testSupport/java")
+e2eTest.java.srcDir("src/testSupport/java")
+val combinedCoverage = providers.gradleProperty("combinedCoverage").map(String::toBoolean).orElse(false)
+val nestedCoverageAgent = configurations.create("nestedCoverageAgent") {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
 
 /*
  * Production compiles against the public OpenAPI Generator Gradle plugin API,
@@ -82,6 +91,9 @@ configurations.named(e2eTest.runtimeOnlyConfigurationName) {
 }
 
 dependencies {
+    add(nestedCoverageAgent.name, "org.jacoco:org.jacoco.agent:$jacocoVersion:runtime")
+    add(functionalTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
+    add(e2eTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
     /*
      * Declared once. testImplementation inherits compileOnly so component tests
      * can instantiate GenerateTask without repeating the same coordinate.
@@ -115,14 +127,19 @@ tasks.named<Test>("test") {
 }
 
 // Unit coverage measures production plugin classes in this build's test JVM only.
-// TestKit/real-codegen behavior runs in nested Gradle builds; do not inject agents there.
+// Opt-in nested collection is owned by the TestKit harness, not the outer Test JVM.
 jacoco {
-    toolVersion = "0.8.15" // Same reporting tool version as the Maven reactor.
+    toolVersion = jacocoVersion
 }
 tasks.withType<Test>().configureEach {
     val unitTest = name == "test"
     extensions.configure<JacocoTaskExtension> {
         isEnabled = unitTest
+    }
+    inputs.property("combinedCoverage", combinedCoverage)
+    if (combinedCoverage.get()) {
+        outputs.upToDateWhen { false }
+        outputs.cacheIf { false }
     }
 }
 tasks.jacocoTestReport {
@@ -145,6 +162,19 @@ tasks.named<Jar>("jar") {
 
 fun Test.configurePluginVerification() {
     useJUnitPlatform()
+    if (combinedCoverage.get()) {
+        maxParallelForks = 1
+        systemProperty("junit.jupiter.execution.parallel.enabled", "false")
+        val coverageOutput = layout.buildDirectory.dir("jacoco/nested/$name")
+        outputs.dir(coverageOutput)
+        doFirst {
+            project.delete(coverageOutput)
+            systemProperty("nestedCoverage.agent", nestedCoverageAgent.singleFile.absolutePath)
+            systemProperty("nestedCoverage.output", coverageOutput.get().asFile.absolutePath)
+            systemProperty("nestedCoverage.testKit", layout.buildDirectory.dir("coverage-testkit/$name").get().asFile.absolutePath)
+            systemProperty("nestedCoverage.classes", layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath)
+        }
+    }
 
     systemProperty(
         "openApiGeneratorTestRuntimeVersion",
@@ -363,4 +393,26 @@ val e2eTestTask =
 tasks.named("check") {
     dependsOn(functionalTestTask)
     dependsOn(tasks.jacocoTestReport)
+}
+
+tasks.register<JacocoReport>("jacocoCombinedReport") {
+    group = "verification"
+    description = "Reports unit, nested TestKit and real-codegen plugin coverage (-PcombinedCoverage=true)."
+    dependsOn(tasks.test, functionalTestTask, e2eTestTask)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"),
+        fileTree(layout.buildDirectory.dir("jacoco/nested")) { include("**/*.exec") })
+    sourceSets(sourceSets.main.get())
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    doFirst {
+        check(combinedCoverage.get()) { "Combined report requires -PcombinedCoverage=true; use jacocoTestReport for unit-only." }
+        check(layout.buildDirectory.file("jacoco/test.exec").get().asFile.length() > 0) { "Missing unit execution data" }
+        for (suite in listOf("functionalTest", "e2eTest")) {
+            check(fileTree(layout.buildDirectory.dir("jacoco/nested/$suite")).matching { include("*.exec") }.files.any { it.length() > 0 }) {
+                "Missing fresh nested execution data for $suite"
+            }
+        }
+    }
 }

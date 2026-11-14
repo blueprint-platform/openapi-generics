@@ -5,6 +5,7 @@ import static org.gradle.testkit.runner.TaskOutcome.UP_TO_DATE;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.blueprintplatform.openapi.generics.gradle.support.NestedCoverage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -203,7 +204,7 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
     }
 
     private BuildResult runCompileJava() {
-        return GradleRunner.create()
+        return NestedCoverage.build(GradleRunner.create()
                 .withProjectDir(projectDirectory.toFile())
                 .withArguments(
                         "compileJava",
@@ -221,8 +222,7 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
                                         "functionalTestPluginRepository"),
                         "-PopenApiGenericsCodegenRepository="
                                 + requireSystemProperty(
-                                        "functionalTestCodegenRepository"))
-                .build();
+                                        "functionalTestCodegenRepository")));
     }
 
     private void assertGeneratedAndCompiledOutputs(BuildResult result)
