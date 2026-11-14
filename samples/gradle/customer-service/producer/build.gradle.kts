@@ -25,3 +25,8 @@ tasks.test {
     systemProperty("sample.generatedSnapshot", generatedSnapshot.get().asFile.absolutePath)
     systemProperty("sample.updateSnapshot", updateSnapshot.get())
 }
+
+// Avoid main-class discovery probing class output existence during cache configuration.
+tasks.bootJar {
+    mainClass.set("io.github.blueprintplatform.samples.gradle.customer.producer.ProducerApplication")
+}

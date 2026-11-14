@@ -96,7 +96,11 @@ jobs:
 
       - name: Build canonical Gradle stack
         working-directory: samples/gradle/customer-service
-        run: ./gradlew clean build --no-build-cache --configuration-cache
+        run: |
+          # Do not let pre-existing application classes mask first-build cache inputs.
+          test ! -e consumer/build/classes/java/main
+          test ! -e producer/build/classes/java/main
+          ./gradlew clean build --no-build-cache --configuration-cache
 
       - name: Verify canonical Gradle stack configuration-cache reuse
         working-directory: samples/gradle/customer-service

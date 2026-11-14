@@ -95,7 +95,10 @@ From this directory:
 
 The second identical command must report configuration-cache reuse. Both runs regenerate sources,
 compile and run tests after clean; build cache is disabled to prevent restored output from replacing
-execution. CI runs the same path and explicitly asserts cache reuse and snapshot stability.
+execution. CI checks that application class outputs are initially absent, then runs the same path
+and explicitly asserts cache reuse and snapshot stability. Both application `bootJar` tasks declare
+their main classes: Boot's automatic discovery otherwise probes output-directory existence during
+configuration, making a fresh first build invalidate its own configuration cache.
 
 Verification covers:
 

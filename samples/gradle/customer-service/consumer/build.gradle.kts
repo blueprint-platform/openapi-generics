@@ -11,3 +11,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+// Avoid main-class discovery probing class output existence during cache configuration.
+tasks.bootJar {
+    mainClass.set("io.github.blueprintplatform.samples.gradle.customer.consumer.ConsumerApplication")
+}
