@@ -7,15 +7,31 @@ import org.gradle.jvm.tasks.Jar
 import java.io.File
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.gradle.plugin.compatibility.compatibility
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.plugins.signing.Sign
+import com.gradle.publish.PublishTask
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
+    id("com.gradle.plugin-publish") version "2.2.1"
+    signing
     jacoco
 }
 
 group = "io.github.blueprint-platform"
 version = "1.3.0"
+
+// Explicit opt-in: ordinary verification and TestKit publication never need signing keys.
+val releasePublication = providers.gradleProperty("releasePublication")
+    .map(String::toBooleanStrict).orElse(false)
+signing {
+    isRequired = releasePublication.get()
+}
+tasks.withType<Sign>().configureEach {
+    onlyIf("release publication is enabled") { releasePublication.get() }
+}
 
 val minimumOpenApiGeneratorApiCompileVersion = "7.25.0"
 val currentOpenApiGeneratorVerificationVersion = "7.27.0"
@@ -205,6 +221,8 @@ fun Test.configurePluginVerification() {
 }
 
 gradlePlugin {
+    website = "https://github.com/blueprint-platform/openapi-generics"
+    vcsUrl = "https://github.com/blueprint-platform/openapi-generics.git"
     plugins {
         create("openApiGenerics") {
             id = "io.github.blueprint-platform.openapi-generics"
@@ -213,6 +231,12 @@ gradlePlugin {
             displayName = "OpenAPI Generics Gradle Plugin"
             description =
                 "Gradle integration for contract-aware Java client generation with OpenAPI Generics."
+            tags.addAll("openapi", "code-generation", "java", "generics")
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
@@ -222,10 +246,61 @@ gradlePlugin {
  * artifact from this isolated Maven repository.
  */
 publishing {
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name = "OpenAPI Generics Gradle Plugin"
+            description = "Gradle integration for contract-aware Java client generation with OpenAPI Generics."
+            url = "https://github.com/blueprint-platform/openapi-generics"
+            licenses {
+                license {
+                    name = "MIT License"
+                    url = "https://opensource.org/licenses/MIT"
+                    distribution = "repo"
+                }
+            }
+            developers {
+                developer {
+                    id = "bsayli"
+                    name = "Baris Sayli"
+                    url = "https://github.com/bsayli"
+                }
+            }
+            scm {
+                url = "https://github.com/blueprint-platform/openapi-generics"
+                connection = "scm:git:https://github.com/blueprint-platform/openapi-generics.git"
+                developerConnection = "scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git"
+            }
+        }
+    }
     repositories {
         maven {
             name = "functionalTest"
             url = functionalTestPluginRepository.get().asFile.toURI()
+        }
+        maven {
+            name = "releaseStaging"
+            url = layout.buildDirectory.dir("release-staging").get().asFile.toURI()
+        }
+    }
+}
+
+// Maven Publish creates a task per publication/repository pair. Only the implementation
+// belongs in the Central staging repository; Portal owns normal marker discovery.
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (name.endsWith("ToReleaseStagingRepository")) {
+        onlyIf("only pluginMaven is staged for Central") { publication.name == "pluginMaven" }
+        doFirst {
+            check(releasePublication.get()) {
+                "Release staging requires -PreleasePublication=true and a configured signing key."
+            }
+        }
+    }
+}
+
+tasks.named<PublishTask>("publishPlugins") {
+    doFirst {
+        check(validateOnly.get() || releasePublication.get()) {
+            "Portal upload requires -PreleasePublication=true and a configured signing key."
         }
     }
 }
