@@ -126,11 +126,11 @@ class WrapperMetadataValidatorTest {
         exception.getMessage());
   }
 
-  @ParameterizedTest(name = "{0}")
+  @ParameterizedTest(name = "{index}: key={0}, value=[{1}]")
   @MethodSource("invalidRequiredMetadata")
   @DisplayName("validate -> should fail for invalid required wrapper metadata")
   void validate_shouldFail_forInvalidRequiredWrapperMetadata(
-      String description, String key, Object value, String expectedMessage) {
+      String key, Object value, String expectedMessage) {
 
     CodegenModel model = validDirectWrapper();
 
@@ -191,11 +191,11 @@ class WrapperMetadataValidatorTest {
         exception.getMessage());
   }
 
-  @ParameterizedTest(name = "{0}")
+  @ParameterizedTest(name = "{index}: key={0}, value=[{1}]")
   @MethodSource("invalidContainerMetadata")
   @DisplayName("validate -> should fail for invalid container metadata values")
   void validate_shouldFail_forInvalidContainerMetadata(
-      String description, String key, Object value, String expectedMessage) {
+      String key, Object value, String expectedMessage) {
 
     CodegenModel model = validContainerWrapper();
     model.vendorExtensions.put(key, value);
@@ -215,44 +215,37 @@ class WrapperMetadataValidatorTest {
   private static Stream<Arguments> invalidRequiredMetadata() {
     return Stream.of(
         arguments(
-            "missing wrapper type",
             CodegenVendorExtensions.API_WRAPPER_TYPE,
             MissingValue.INSTANCE,
             "Invalid OpenAPI Generics metadata for wrapper model 'ApiResponseCustomerDto': "
                 + "required vendor extension 'x-api-wrapper-type' is missing."),
         arguments(
-            "blank wrapper type",
             CodegenVendorExtensions.API_WRAPPER_TYPE,
             " ",
             "Invalid OpenAPI Generics metadata for wrapper model 'ApiResponseCustomerDto': "
                 + "vendor extension 'x-api-wrapper-type' must not be blank."),
         arguments(
-            "wrong wrapper type value",
             CodegenVendorExtensions.API_WRAPPER_TYPE,
             42,
             "Invalid OpenAPI Generics metadata for model 'ApiResponseCustomerDto': vendor "
                 + "extension 'x-api-wrapper-type' must be a String but was java.lang.Integer."),
         arguments(
-            "unqualified wrapper type",
             CodegenVendorExtensions.API_WRAPPER_TYPE,
             "ApiResponse",
             "Invalid OpenAPI Generics metadata for wrapper model 'ApiResponseCustomerDto': vendor "
                 + "extension 'x-api-wrapper-type' must contain a fully qualified Java type but was "
                 + "'ApiResponse'."),
         arguments(
-            "missing wrapper datatype",
             CodegenVendorExtensions.API_WRAPPER_DATATYPE,
             MissingValue.INSTANCE,
             "Invalid OpenAPI Generics metadata for wrapper model 'ApiResponseCustomerDto': "
                 + "required vendor extension 'x-api-wrapper-datatype' is missing."),
         arguments(
-            "blank wrapper datatype",
             CodegenVendorExtensions.API_WRAPPER_DATATYPE,
             "",
             "Invalid OpenAPI Generics metadata for wrapper model 'ApiResponseCustomerDto': vendor "
                 + "extension 'x-api-wrapper-datatype' must not be blank."),
         arguments(
-            "wrong wrapper datatype value",
             CodegenVendorExtensions.API_WRAPPER_DATATYPE,
             42,
             "Invalid OpenAPI Generics metadata for model 'ApiResponseCustomerDto': vendor "
@@ -263,48 +256,41 @@ class WrapperMetadataValidatorTest {
   private static Stream<Arguments> invalidContainerMetadata() {
     return Stream.of(
         arguments(
-            "blank container name",
             CodegenVendorExtensions.DATA_CONTAINER,
             " ",
             "Invalid OpenAPI Generics metadata for wrapper model "
                 + "'ApiResponseWindowCustomerDto': vendor extension 'x-data-container' must not "
                 + "be blank."),
         arguments(
-            "wrong container name type",
             CodegenVendorExtensions.DATA_CONTAINER,
             42,
             "Invalid OpenAPI Generics metadata for model 'ApiResponseWindowCustomerDto': vendor "
                 + "extension 'x-data-container' must be a String but was java.lang.Integer."),
         arguments(
-            "blank container type",
             CodegenVendorExtensions.DATA_CONTAINER_TYPE,
             "",
             "Invalid OpenAPI Generics metadata for wrapper model "
                 + "'ApiResponseWindowCustomerDto': vendor extension 'x-data-container-type' must "
                 + "not be blank."),
         arguments(
-            "wrong container type value",
             CodegenVendorExtensions.DATA_CONTAINER_TYPE,
             42,
             "Invalid OpenAPI Generics metadata for model 'ApiResponseWindowCustomerDto': vendor "
                 + "extension 'x-data-container-type' must be a String but was "
                 + "java.lang.Integer."),
         arguments(
-            "unqualified container type",
             CodegenVendorExtensions.DATA_CONTAINER_TYPE,
             "Window",
             "Invalid OpenAPI Generics metadata for wrapper model "
                 + "'ApiResponseWindowCustomerDto': vendor extension 'x-data-container-type' must "
                 + "contain a fully qualified Java type but was 'Window'."),
         arguments(
-            "blank container item",
             CodegenVendorExtensions.DATA_ITEM,
             " ",
             "Invalid OpenAPI Generics metadata for wrapper model "
                 + "'ApiResponseWindowCustomerDto': vendor extension 'x-data-item' must not be "
                 + "blank."),
         arguments(
-            "wrong container item type",
             CodegenVendorExtensions.DATA_ITEM,
             42,
             "Invalid OpenAPI Generics metadata for model 'ApiResponseWindowCustomerDto': vendor "
