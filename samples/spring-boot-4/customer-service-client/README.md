@@ -1,175 +1,45 @@
-# customer-service-client
+# Boot 4 customer client library
 
-> Minimal reference consumer for **contract-aligned, generics-aware OpenAPI clients**
-
-This sample shows only one thing:
-
-> How to generate a Java client from the published OpenAPI and use it safely behind an adapter.
-
----
-
-## 🚀 Quick Start
-
-### 1. Inherit the parent
-
-```xml
-<parent>
-  <groupId>io.github.blueprint-platform</groupId>
-  <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.3.0</version>
-</parent>
-```
-
-### 2. Configure generator
-
-```xml
-<plugin>
-  <groupId>org.openapitools</groupId>
-  <artifactId>openapi-generator-maven-plugin</artifactId>
-
-  <executions>
-    <execution>
-      <id>generate-client</id>
-      <phase>generate-sources</phase>
-      <goals>
-        <goal>generate</goal>
-      </goals>
-
-      <configuration>
-        <generatorName>java-generics-contract</generatorName>
-        <inputSpec>${project.basedir}/src/main/resources/customer-api-docs.yaml</inputSpec>
-
-        <library>restclient</library>
-
-        <apiPackage>com.example.generated.api</apiPackage>
-        <modelPackage>com.example.generated.dto</modelPackage>
-        <invokerPackage>com.example.generated.invoker</invokerPackage>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
-```
-
-### 3. Build
-
-```bash
-mvn clean install
-```
-
----
-
-## 📌 Rules (only these matter)
-
-✔ Generate with:
+A reusable RestClient library around the committed producer spec. Consumers call `CustomerClientAdapter`;
+generated `CustomerControllerApi`, invoker setup and wrapper classes stay inside the library.
 
 ```text
-java-generics-contract
+Consumer service/client → CustomerClientAdapter
+  → CustomerClientAdapterImpl / CustomerApiClientConfig
+  → generated RestClient → producer
 ```
 
-✔ Keep generated code behind an adapter
+## What this sample actually does
 
-✔ Reuse external contract DTOs with BYOC when needed
+- The Maven parent prepares `java-generics-contract` templates and generated-source compilation.
+- Generation reads `../spec/customer-api-docs.yaml`; output is under
+  `target/generated-sources/openapi/src/gen/java`.
+- `CustomerDtoMapper` maps ordinary generated DTOs into the application-owned
+  `io.github.blueprintplatform.contracts.customer.CustomerDto`. This sample's adapter therefore does
+  perform payload mapping; the generated DTO is not declared the application contract.
+- Request DTOs for CRUD operations are generated and mapped at the consumer's request boundary;
+  API/invoker types and transport bindings are not consumer service dependencies.
+- `CustomerApiClientConfig` owns HTTP configuration and ProblemDetail status handling.
+  `ApiProblemException` is the stable error boundary, including empty/non-JSON/unparsable fallbacks.
 
-❌ Do NOT:
+The sample uses Boot 4 / Jackson 3 options. The POM is the source of exact library/options/dependency values.
 
-* call generated APIs directly from application code
-* duplicate envelope models
-* let generated types leak into your domain boundary
+## Build and use
 
----
+Follow the [repository sample setup](../../README.md#repository-build-and-local-runtime-setup), then from
+this module run `mvn clean verify`. Surefire and configured Failsafe client tests exercise JSON/error
+responses against MockWebServer; this is not a claim that every sample transport runs against a live producer.
 
-## 🧩 Optional contract alignment
+Use the stable adapter from the [consumer application](../customer-service-consumer/README.md). Its
+read methods return shared envelope/page and domain DTO types; do not expose generated wrapper subclasses
+as application contracts.
 
-### BYOC — external DTO reuse
+## Envelope ownership and optional DTO reuse
 
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
-  </additionalProperty>
-</additionalProperties>
-```
+This producer uses `ServiceResponse`. If a producer selects BYOE (Bring Your Own Envelope), codegen reads its `x-api-wrapper-type`;
+**do not configure `openapi-generics.envelope` on the client**. Supply the selected envelope dependency.
 
-### BYOE — custom envelope
-
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.envelope=io.example.contract.ApiResponse
-  </additionalProperty>
-</additionalProperties>
-```
-
-Notes:
-
-* BYOE is needed only if the service uses a custom envelope
-* the custom envelope must already be available as a dependency
-* if not configured, the default `ServiceResponse<T>` path is used
-
----
-
-## 🔍 What to look at
-
-### Generated client
-
-```text
-target/generated-sources/openapi/src/gen/java
-```
-
-### Adapter boundary
-
-```java
-public interface CustomerClientAdapter {
-  ServiceResponse<CustomerDto> getCustomer(Integer customerId);
-}
-```
-
-```java
-@Service
-public class CustomerClientAdapterImpl implements CustomerClientAdapter {
-
-  private final CustomerControllerApi api;
-
-  public CustomerClientAdapterImpl(CustomerControllerApi api) {
-    this.api = api;
-  }
-
-  @Override
-  public ServiceResponse<CustomerDto> getCustomer(Integer customerId) {
-    return api.getCustomer(customerId);
-  }
-}
-```
-
----
-
-## ⚠️ Error handling
-
-This sample handles upstream errors as:
-
-```text
-ProblemDetail → ApiProblemException
-```
-
-It also includes fallbacks for:
-
-* empty error body
-* non-JSON error response
-* unparsable problem response
-
----
-
-## 🧠 Mental Model
-
-```text
-OpenAPI → generated client → adapter → application
-```
-
-Generated code is replaceable.
-Your adapter is the stable boundary.
-
----
-
-## 📜 License
-
-MIT
+BYOC (Bring Your Own Contract) is optional: an existing DTO can instead be bound using its fully qualified Java class name (FQCN):
+`openapi-generics.response-contract.CustomerDto=<FQCN>` plus its shared dependency. That is a different
+reuse choice from the explicit mapper used here. See [client adoption](../../../docs/adoption/client-side-adoption.md#optional-reuse-existing-dtos-with-byoc)
+and the [Gradle BYOC sample](../../gradle/customer-service/README.md).

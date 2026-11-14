@@ -1,320 +1,73 @@
-# service-response-type-coverage
+# ServiceResponse shape coverage
 
-> End-to-end verification sample for OpenAPI projection, client generation, and runtime reconstruction of `ServiceResponse<T>` contracts.
+Inspect `ServiceResponse<T>` projection, generated transport bindings and consumer type compatibility.
+This is a focused regression harness, not a canonical business application.
 
-This sample validates that **generic type information survives the complete Producer → OpenAPI → Generated Client → Consumer pipeline** while using the built-in `ServiceResponse<T>` envelope together with both platform-provided and application-owned generic containers.
+The platform owns `ServiceResponse<T>` and `Page<T>`. Application `Window<T>` and `Batch<T>`
+containers are explicitly registered on the producer and shared with the client; they do not require
+Page-specific branches in reconstruction.
 
-## Table of Contents
+## Shape and endpoint inventory
 
-- [What This Sample Validates](#what-this-sample-validates)
-- [Modules](#modules)
-- [Covered Response Shapes](#covered-response-shapes)
-    - [Scalar Payloads](#scalar-payloads)
-    - [Value Payloads](#value-payloads)
-    - [Object Payloads](#object-payloads)
-    - [List Payloads](#list-payloads)
-    - [Set Payloads](#set-payloads)
-    - [Platform Container Payloads](#platform-container-payloads)
-    - [Application-owned Container Payloads](#application-owned-container-payloads)
-    - [Asynchronous Controller Wrappers](#asynchronous-controller-wrappers)
-- [Running the Sample](#running-the-sample)
-- [Quick Smoke Test](#quick-smoke-test)
-- [Verification Endpoints](#verification-endpoints)
-- [Mental Model](#mental-model)
+Paths are relative to the producer or consumer base URL below; braces list alternative path segments.
+Values/enums/DTOs are representative, not a claim of arbitrary generic-graph support.
 
-## What This Sample Validates
+| Family | Paths | Payloads |
+| --- | --- | --- |
+| Scalars | `/types/scalars/{string,boolean,integer,long,decimal}` | String / Boolean / Integer / Long / BigDecimal |
+| Values | `/types/values/{uuid,date,datetime,enum}` | UUID / LocalDate / OffsetDateTime / CoverageStatus |
+| Objects | `/types/objects/{address,profile}` | AddressDto / TypeProfileDto |
+| Collections | `/types/lists/{summaries,statuses}`; `/types/sets/{summaries,statuses}` | List/Set of DTO or enum |
+| Shared page | `/types/pages/{summaries,statuses}` | Platform `Page<T>` |
+| Application containers | `/types/windows/{summaries,statuses}`; `/types/batches/{summaries,statuses}` | Window<T> / Batch<T> |
+| Async (producer + consumer probe) | `/types/async/summary`, `/types/async/paged-summaries` | `CompletionStage` / `DeferredResult` unwrap to the existing direct/page bindings |
 
-The sample exercises the complete OpenAPI Generics lifecycle:
+The POMs/configuration register application containers; shared `contract` has no framework dependency.
 
-```text
-Producer
-    ↓
-OpenAPI Projection
-    ↓
-Generated Client
-    ↓
-Consumer Runtime
+## Build evidence and its limits
+
+After [repository setup](../../README.md#repository-build-and-local-runtime-setup), run from this directory:
+
+```bash
+mvn clean verify
 ```
 
-It verifies that:
+The producer's `OpenApiSnapshotGenerationTest` regenerates the committed spec and checks metadata;
+review the diff, which CI rejects if uncommitted. Generated client/consumer compilation checks that
+bindings, filtered infrastructure and shared container types agree. The POM does not add an automated
+HTTP/deserialization test for every row in the inventory.
 
-- OpenAPI projection preserves generic semantics.
-- Generated wrappers preserve Java type identity.
-- Runtime deserialization reconstructs the expected generic contracts.
-- The consumer uses only generated client artifacts.
-- No manual DTO mapping or wrapper reconstruction is required.
+The consumer intentionally calls generated APIs as a test harness. Generated DTOs may appear in its
+verification endpoints; they do not become shared application authorities. Use the
+[canonical web stack](../../gradle/customer-service/README.md) for controller/service/adapter architecture
+and automated real consumer-to-producer HTTP acceptance.
 
-## Modules
+## Manual HTTP verification
 
-```text
-service-response-type-coverage
-├── contract
-├── producer
-├── client
-└── consumer
+From this directory, start these in separate terminals after installing sample dependencies:
+
+```bash
+mvn -f producer/pom.xml spring-boot:run
 ```
 
-| Module | Responsibility |
+```bash
+mvn -f consumer/pom.xml spring-boot:run
+```
+
+| Surface | URL |
 | --- | --- |
-| `contract` | Application-owned generic container contracts used by every module |
-| `producer` | Publishes `ServiceResponse`-based endpoints |
-| `client` | Generated Java client |
-| `consumer` | Consumes the generated client without manual reconstruction |
-
-## Covered Response Shapes
-
-### Scalar Payloads
-
-```java
-ServiceResponse<String>
-ServiceResponse<Boolean>
-ServiceResponse<Integer>
-ServiceResponse<Long>
-ServiceResponse<BigDecimal>
-```
-
-### Value Payloads
-
-```java
-ServiceResponse<UUID>
-ServiceResponse<LocalDate>
-ServiceResponse<OffsetDateTime>
-ServiceResponse<CoverageStatus>
-```
-
-### Object Payloads
-
-```java
-ServiceResponse<AddressDto>
-ServiceResponse<TypeProfileDto>
-```
-
-### List Payloads
-
-```java
-ServiceResponse<List<TypeSummaryDto>>
-ServiceResponse<List<CoverageStatus>>
-```
-
-### Set Payloads
-
-```java
-ServiceResponse<Set<TypeSummaryDto>>
-ServiceResponse<Set<CoverageStatus>>
-```
-
-### Platform Container Payloads
-
-```java
-ServiceResponse<Page<TypeSummaryDto>>
-ServiceResponse<Page<CoverageStatus>>
-```
-
-### Application-owned Container Payloads
-
-```java
-ServiceResponse<Window<TypeSummaryDto>>
-ServiceResponse<Window<CoverageStatus>>
-
-ServiceResponse<Batch<TypeSummaryDto>>
-ServiceResponse<Batch<CoverageStatus>>
-
-CompletionStage<ServiceResponse<TypeSummaryDto>>
-
-DeferredResult<ServiceResponse<Page<TypeSummaryDto>>>
-```
-
-This demonstrates that application-owned generic containers can be reconstructed without replacing the built-in `ServiceResponse<T>` envelope.
-
-### Asynchronous Controller Wrappers
-
-```java
-CompletionStage<ServiceResponse<TypeSummaryDto>>
-
-DeferredResult<ServiceResponse<Page<TypeSummaryDto>>>
-```
-
-These endpoints verify the two asynchronous unwrapping branches used by the server-side
-response introspection pipeline:
-
-- `CompletionStage<T>` also represents the `Future<T>` branch.
-- `DeferredResult<T>` also represents the `WebAsyncTask<T>` branch.
-
-The asynchronous wrappers are server-side controller concerns only. They are removed before
-generic contract projection, so the generated client reuses the existing
-`ServiceResponseTypeSummaryDto` and `ServiceResponsePageTypeSummaryDto` binding types rather than
-introducing asynchronous client-side contract types.
-
-## Running the Sample
-
-### Start Producer
+| Producer | `http://localhost:8074/type-coverage/service-response` |
+| Consumer | `http://localhost:8075/type-coverage/service-response-consumer` |
+| OpenAPI | Producer base + `/v3/api-docs.yaml` |
+| Swagger UI | Producer base + `/swagger-ui/index.html` |
 
 ```bash
-cd producer
-mvn spring-boot:run
-```
-
-Swagger UI:
-
-```text
-http://localhost:8074/type-coverage/service-response/swagger-ui/index.html
-```
-
-OpenAPI document:
-
-```text
-http://localhost:8074/type-coverage/service-response/v3/api-docs.yaml
-```
-
-### Start Consumer
-
-```bash
-cd consumer
-mvn spring-boot:run
-```
-
-Use the verification endpoints below to validate the generated client at runtime.
-
-## Quick Smoke Test
-
-### Producer Verification
-
-```bash
-curl http://localhost:8074/type-coverage/service-response/types/scalars/string
-
-curl http://localhost:8074/type-coverage/service-response/types/lists/summaries
-
-curl http://localhost:8074/type-coverage/service-response/types/sets/statuses
-
 curl http://localhost:8074/type-coverage/service-response/types/pages/summaries
-
-curl http://localhost:8074/type-coverage/service-response/types/windows/summaries
-
-curl http://localhost:8074/type-coverage/service-response/types/batches/statuses
-
-curl http://localhost:8074/type-coverage/service-response/types/async/summary
-
-curl http://localhost:8074/type-coverage/service-response/types/async/paged-summaries
-```
-
-Expected generic contracts:
-
-```java
-ServiceResponse<String>
-
-ServiceResponse<List<TypeSummaryDto>>
-
-ServiceResponse<Set<CoverageStatus>>
-
-ServiceResponse<Page<TypeSummaryDto>>
-
-ServiceResponse<Window<TypeSummaryDto>>
-
-ServiceResponse<Batch<CoverageStatus>>
-```
-
-### Consumer Verification
-
-```bash
-curl http://localhost:8075/type-coverage/service-response-consumer/types/scalars/string
-
-curl http://localhost:8075/type-coverage/service-response-consumer/types/lists/summaries
-
-curl http://localhost:8075/type-coverage/service-response-consumer/types/sets/statuses
-
 curl http://localhost:8075/type-coverage/service-response-consumer/types/pages/summaries
-
 curl http://localhost:8075/type-coverage/service-response-consumer/types/windows/summaries
-
-curl http://localhost:8075/type-coverage/service-response-consumer/types/batches/statuses
 ```
 
-Successful responses verify that generic type information survives the entire pipeline unchanged.
-
-## Verification Endpoints
-
-### Scalars
-
-```text
-/types/scalars/*
-```
-
-### Values
-
-```text
-/types/values/*
-```
-
-### Objects
-
-```text
-/types/objects/*
-```
-
-### Lists
-
-```text
-/types/lists/*
-```
-
-### Sets
-
-```text
-/types/sets/*
-```
-
-### Platform Pages
-
-```text
-/types/pages/*
-```
-
-### Application-owned Containers
-
-```text
-/types/windows/*
-/types/batches/*
-```
-
-### Asynchronous Controller Wrappers
-
-```text
-/types/async/summary
-/types/async/paged-summaries
-```
-
-The sample validates:
-
-```java
-ServiceResponse<T>
-ServiceResponse<List<T>>
-ServiceResponse<Set<T>>
-ServiceResponse<Page<T>>
-ServiceResponse<Window<T>>
-ServiceResponse<Batch<T>>
-```
-
-The producer additionally verifies supported asynchronous controller wrappers around direct
-and paged response contracts. These wrappers are unwrapped before OpenAPI projection and do not
-change the generated client contract shape.
-
-Coverage spans primitive, value, enum, DTO, collection, platform container,
-application-owned generic container, and asynchronous controller scenarios.
-
-## Mental Model
-
-```text
-ServiceResponse<Window<TypeSummaryDto>>
-                ↓
-        OpenAPI Projection
-                ↓
-        Generated Client
-                ↓
-        Consumer Runtime
-                ↓
-ServiceResponse<Window<TypeSummaryDto>>
-```
-
-The same reconstruction flow applies across every supported response shape.
-
-The objective is to continuously verify that **contract ownership and generic type identity remain intact** throughout the complete OpenAPI Generics pipeline.
+These calls inspect runtime JSON through the generated client; they do not regenerate it or prove
+exact Java class identity merely from equivalent JSON. Shared contracts remain authoritative,
+and wrapper subclasses are concrete transport bindings. [Client adoption](../../../docs/adoption/client-side-adoption.md)
+explains optional DTO reuse and the application boundary.

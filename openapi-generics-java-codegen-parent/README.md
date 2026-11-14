@@ -1,211 +1,57 @@
 # openapi-generics-java-codegen-parent
 
-> Build-time orchestration for deterministic, contract-aware Java client generation.
-
-`openapi-generics-java-codegen-parent` is the Maven client-side integration point for OpenAPI Generics.
-
-It wires together:
-
-- upstream OpenAPI Generator
-- `openapi-generics-java-codegen`
-- platform templates
-- generated-source hygiene
-- generated source registration
-
-Its responsibility is:
-
-> **OpenAPI spec → deterministic contract-aware Java client**
-
----
-
-## Contents
-
-- [What It Provides](#what-it-provides)
-- [Generation Pipeline](#generation-pipeline)
-- [Usage](#usage)
-- [Contract Alignment](#contract-alignment)
-- [Generated-Source Hygiene](#generated-source-hygiene)
-- [Compatibility Mode](#compatibility-mode)
-- [User-Controlled Configuration](#user-controlled-configuration)
-- [Out of Scope](#out-of-scope)
-
----
-
-## What It Provides
-
-By inheriting this parent, a client project gets:
-
-- deterministic template extraction
-- fail-fast template patching
-- platform template overlay
-- `java-generics-contract` generator wiring
-- generated-source cleanup
-- generated source registration
-- BYOE and BYOC integration support
-
-Consumers do not need to assemble the generation lifecycle manually.
-
----
-
-## Generation Pipeline
-
-```text
-OpenAPI spec
-      ↓
-Extract upstream templates
-      ↓
-Patch wrapper insertion points
-      ↓
-Overlay OpenAPI Generics templates
-      ↓
-Run java-generics-contract
-      ↓
-Clean generated Java sources
-      ↓
-Register generated sources
-      ↓
-Compile
-```
-
-If the upstream template structure changes and the wrapper patch cannot be applied, the build fails fast instead of generating incorrect client code.
-
----
-
-## Usage
-
-Inherit the parent:
+Use this Maven parent to generate and compile a contract-aware Java client without assembling the
+platform template lifecycle yourself. You still configure the official OpenAPI Generator (OAG) execution and choose its
+spec, library, packages and normal options. [Complete Maven adoption →](../docs/adoption/client-side-adoption.md#maven)
 
 ```xml
 <parent>
-    <groupId>io.github.blueprint-platform</groupId>
-    <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>1.3.0</version>
-    <relativePath/>
+  <groupId>io.github.blueprint-platform</groupId>
+  <artifactId>openapi-generics-java-codegen-parent</artifactId>
+  <version>1.3.0</version>
+  <relativePath/>
 </parent>
 ```
 
-Declare the official plugin in `<build><plugins>` with a generate execution and your input spec; see the [complete Maven consumer configuration](../docs/adoption/client-side-adoption.md). Add the shared contract dependency and dependencies for the selected client library.
+In the official generator execution, select `java-generics-contract` and declare the shared-contract
+and selected client-library dependencies. Run `mvn clean verify`.
 
-Configure OpenAPI Generator normally, but use:
+## What the parent wires
 
-```xml
-<generatorName>java-generics-contract</generatorName>
-```
+| Stage | Responsibility |
+| --- | --- |
+| `generate-sources` | Extract selected upstream `Java/model.mustache`, patch wrapper dispatch, overlay platform templates and execute official generation |
+| Source registration | Add the default generated Java root; official generator executions also contribute their selected roots |
+| `process-sources` | Remove unused imports and normalize generated Java deterministically |
 
-Then build:
+The default root is `target/generated-sources/openapi/src/gen/java`. For custom/multiple outputs,
+review source registration **and** normalization includes: the default hygiene include does not
+implicitly cover arbitrary output directories. The [multi-spec sample](../samples/generation-coverage/multi-spec-maven-client/README.md)
+proves compilation/isolation, not normalization of every custom root.
 
-```bash
-mvn clean install
-```
+## One selected upstream toolchain
 
-Generated sources are registered automatically from:
+`openapi-generator.version` aligns the official Maven plugin, `openapi-generator-core`,
+`openapi-generator` and upstream template extraction. Override this property within supported policy,
+not these pieces independently. The platform codegen version follows the platform release; the
+internal bill of materials (BOM) does not pin consumer OAG or Boot runtimes. [Version roles →](../docs/compatibility.md)
 
-```text
-target/generated-sources/openapi/src/gen/java
-```
+BYOE (Bring Your Own Envelope) is producer envelope ownership; the client reads `x-api-wrapper-type` and supplies that shared
+envelope dependency. Optional BYOC (Bring Your Own Contract) is a client mapping for existing DTOs. Neither changes ordinary
+upstream API/transport ownership. Generated wrappers remain behind the client library adapter.
 
----
+## Opt out for comparison
 
-## Contract Alignment
+`openapi.generics.skip=true` skips platform extraction, patching, overlay and normalization.
+It does not change `generatorName`; stock generation also requires choosing upstream `java`.
+This property is Maven-specific, not a Gradle API.
 
-### BYOE — Bring Your Own Envelope
+## Scope
 
-For aligned OpenAPI Generics producer and codegen components, envelope identity is carried by the OpenAPI document through `x-api-wrapper-type`.
+The parent orchestrates builds; it does not define Java contracts, inspect Spring controllers or
+own application runtime behavior. Wrapper model docs are supplied by the shared codegen artifact;
+RestClient-specific docs customization does not change ordinary model/enum ownership. Generating
+upstream test sources does not by itself register their directory or supply JUnit dependencies.
 
-For example, a producer using an application-owned envelope may project:
-
-```yaml
-x-api-wrapper: true
-x-api-wrapper-type: io.example.contract.ApiResponse
-```
-
-The `java-generics-contract` generator consumes this metadata and reconstructs generated wrappers against the original envelope type.
-
-```java
-public class ApiResponseCustomerDto
-    extends ApiResponse<CustomerDto> {
-}
-```
-
-The envelope therefore does not need to be declared again on the client through `openapi-generics.envelope`.
-
-The application-owned envelope type must be available as a dependency of the generated client module.
-
-### BYOC — Bring Your Own Contract
-
-```xml
-<additionalProperties>
-  <additionalProperty>
-    openapi-generics.response-contract.CustomerDto=io.example.contract.CustomerDto
-  </additionalProperty>
-</additionalProperties>
-```
-
-Mapped DTOs are reused from the external contract module instead of being regenerated.
-
----
-
-## Generated-Source Hygiene
-
-After generation, the parent runs a generated-source cleanup phase.
-
-This removes duplicate and unused imports and formats generated Java sources deterministically.
-
-The cleanup applies only to generated OpenAPI sources under:
-
-```text
-target/generated-sources/openapi/src/gen/java/**/*.java
-```
-
-This improves generated artifact quality without changing contract semantics.
-
----
-
-## Compatibility Mode
-
-Skip the OpenAPI Generics generics-aware template lifecycle:
-
-```xml
-<openapi.generics.skip>true</openapi.generics.skip>
-```
-
-Use this for:
-
-- output comparison
-- debugging
-- migration validation
-
-To fully return to stock OpenAPI Generator behavior, use the standard `java` generator instead of `java-generics-contract`.
-
----
-
-## User-Controlled Configuration
-
-Consumers control normal OpenAPI Generator configuration:
-
-- input specification
-- client library
-- package names
-- config options
-- BYOC mappings
-- OpenAPI Generator version within the supported 7.x line
-
-BYOE envelope identity is contract-driven and is reconstructed from `x-api-wrapper-type`; it is not a client-side mapping for aligned components.
-
-The parent provides a tested OpenAPI Generator baseline while allowing consumers to choose a version within the supported compatibility range.
-
-The parent controls the OpenAPI Generics-specific deterministic preparation and integration lifecycle required for reconstruction. Normal OpenAPI Generator choices and generation intent remain consumer-controlled.
-
----
-
-## Out of Scope
-
-This module does not:
-
-- define runtime contracts
-- inspect Spring controllers
-- generate OpenAPI documents
-- replace OpenAPI Generator
-- own application runtime behavior
-
-Its role is build-time orchestration only.
+For Gradle use the [official-plugin integration](../openapi-generics-gradle-plugin/README.md);
+Maven parent settings are not Gradle configuration.

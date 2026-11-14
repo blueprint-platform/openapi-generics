@@ -2,6 +2,11 @@
 
 Generate Java clients that preserve shared Java envelope and container contracts. The plugin connects the official OpenAPI Generator Gradle plugin to the shared `java-generics-contract` specialization; it manages the reconstruction build lifecycle, while ordinary API/model/authentication/transport generation remains upstream-owned.
 
+For a response such as `ServiceResponse<Page<CustomerDto>>`, the client binds a generated subclass to
+the shared generic contract. Keep generated API/invoker/wrapper classes behind a library adapter; the
+[canonical web stack](../samples/gradle/customer-service/README.md) shows the application boundary.
+Ordinary DTO/API/transport generation stays upstream-owned; DTO reuse through BYOC (Bring Your Own Contract) is optional.
+
 This checkout prepares **1.3.0**. The release consumer example below requires the platform plugin and matching codegen/contract artifacts to be available in the configured repositories. It does not claim that public publication has already occurred.
 
 ## Prerequisites and version roles
@@ -60,9 +65,9 @@ openApiGenerate {
     inputSpec.set(layout.projectDirectory.file("spec/customer.yaml").asFile.absolutePath)
     outputDir.set(layout.buildDirectory.dir("generated/customer"))
     library.set("restclient")
-    apiPackage.set("com.example.client.api")
-    modelPackage.set("com.example.client.model")
-    invokerPackage.set("com.example.client.invoker")
+    apiPackage.set("com.example.client.generated.api")
+    modelPackage.set("com.example.client.generated.model")
+    invokerPackage.set("com.example.client.generated.invoker")
     configOptions.set(mapOf(
         "sourceFolder" to "src/gen/java",
         "useSpringBoot3" to "true",
@@ -78,7 +83,7 @@ Place the producer's projected OpenAPI document at `spec/customer.yaml`, then ru
 ./gradlew build --configuration-cache
 ```
 
-The library/BOM/dependencies above are one application choice, not platform-wide requirements. Boot 4/Jackson 3 configuration is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**, with Boot 3.4 support retained on **2.8.x**. A client generation build does not need Springdoc or a running producer.
+The library, dependency platform and other dependencies above are one application choice, not platform-wide requirements. Boot 4/Jackson 3 configuration is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**, with Boot 3.4 support retained on **2.8.x**. A client generation build does not need Springdoc or a running producer.
 
 ## Configuration and generated-source wiring
 
@@ -112,11 +117,16 @@ tasks.register<GenerateTask>("generateOrders") {
 
 Use separate outputs/packages for multiple tasks. Non-selected tasks retain ordinary upstream behavior and consumer `templateDir` settings. The platform owns effective templates for selected tasks. To use stock generation, select upstream `java`; Maven's `openapi.generics.skip` is not a Gradle opt-out API.
 
-## BYOE, BYOC and contract authority
+When `generateModelDocumentation` is enabled, the shared codegen artifact supplies a RestClient-only
+wrapper doc overlay: it shows the Java generic binding and shared identities without broken local
+links to suppressed models. Ordinary model/enum docs remain upstream-owned. API doc examples and
+generated tests are not rewritten by this feature; generating tests does not register a test source root.
+
+## Envelope ownership, optional DTO reuse and contract authority
 
 Java contracts are authoritative. OpenAPI is their projection and the protocol between producer and codegen. A generated wrapper such as `ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>>` binds concrete generic parameters for transport/deserialization; it is not another contract definition.
 
-**BYOE:** The producer configures `openapi-generics.envelope.type` and emits `x-api-wrapper-type`. The client derives envelope identity/imports from that metadata; there is no duplicate client envelope setting. Supply the application-owned envelope/container dependency to the client. BYOE requires a concrete class with one generic parameter and one direct payload field of that parameter's type.
+**BYOE (Bring Your Own Envelope):** The producer configures `openapi-generics.envelope.type` and emits `x-api-wrapper-type`. The client derives envelope identity/imports from that metadata; there is no duplicate client envelope setting. Supply the application-owned envelope/container dependency to the client. BYOE requires a concrete class with one generic parameter and one direct payload field of that parameter's type.
 
 **BYOC:** Map schema names to shared Java models through generator `additionalProperties`, independently of envelope identity:
 

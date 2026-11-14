@@ -7,10 +7,10 @@ has_toc: false
 permalink: /adoption/
 ---
 
-# 📘 Adoption Guides
+# Adoption guides
 
-Choose one of the following:
+Choose the task, then follow its build/configuration path. Envelope ownership is selected on the producer; optional DTO reuse is configured on the client.
 
 - [Server-Side Adoption](server-side-adoption.md)
-- [Client-Side Adoption](client-side-adoption.md) — Maven parent configuration and shared BYOE/BYOC reconstruction
-- [Gradle Plugin](../../openapi-generics-gradle-plugin/README.md) — standalone plugin consumer example, generated-source wiring and version boundaries
+- [Client-Side Adoption](client-side-adoption.md) — Maven/Gradle setup, envelope reconstruction and optional DTO reuse
+- [Gradle Plugin](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-gradle-plugin/README.md) — standalone plugin consumer example, generated-source wiring and version boundaries

@@ -1,76 +1,18 @@
-# generation-coverage
+# Build topology verification
 
-> Build-time verification samples for OpenAPI Generics generation topologies.
+Use [multi-spec-maven-client](multi-spec-maven-client/README.md) when one Maven library consumes
+multiple specifications. It proves that independent generation executions contribute usable Java
+source trees to a single artifact without deleting or overwriting one another.
 
-The runtime-oriented samples validate what happens across producer, OpenAPI, generated client, and
-consumer boundaries. `generation-coverage` focuses on a different question:
+This family checks output/package isolation, execution-scoped BYOC (Bring Your Own Contract) and source compilation. It has no
+producer/consumer runtime and does not duplicate the type or transport verification matrices.
+Committed input specs are projections owned by their producer samples; Java contracts remain authoritative.
 
-> **Can OpenAPI Generics be used safely in non-trivial Maven generation layouts?**
-
-The initial sample verifies a common real-world setup in which one Maven client module generates
-code from more than one OpenAPI specification.
-
-## Table of Contents
-
-- [Purpose](#purpose)
-- [Available Samples](#available-samples)
-- [Validation Scope](#validation-scope)
-- [Running the Samples](#running-the-samples)
-- [Design Boundary](#design-boundary)
-
-## Purpose
-
-The sample families have distinct responsibilities:
-
-```text
-type-coverage
-    → generic contract shape fidelity
-
-transport-coverage
-    → standard HTTP transport compatibility
-
-generation-coverage
-    → build-time generator topology and isolation
-```
-
-`generation-coverage` exists to verify Maven and OpenAPI Generator integration patterns that are
-not naturally exercised by a single producer-to-consumer runtime flow.
-
-## Available Samples
-
-| Sample | Purpose |
-| --- | --- |
-| [`multi-spec-maven-client`](multi-spec-maven-client/README.md) | Runs two independent OpenAPI Generics Maven executions in one client module and compiles both generated source trees into one artifact. |
-
-## Validation Scope
-
-The suite is intended to cover build-time concerns such as:
-
-- multiple generator executions in one Maven module;
-- isolated output directories;
-- isolated API, model, and invoker packages;
-- safe use of `cleanupOutput`;
-- execution-specific BYOC configuration;
-- compilation of all generated source trees in one artifact.
-
-## Running the Samples
-
-From the `samples` directory:
+After [platform setup](../README.md#repository-build-and-local-runtime-setup), from repository root:
 
 ```bash
-mvn -pl generation-coverage -am clean verify
+mvn -f samples/pom.xml -pl generation-coverage/multi-spec-maven-client -am clean verify
 ```
 
-## Design Boundary
-
-These samples validate build topology.
-
-They intentionally do not introduce:
-
-- additional producer applications;
-- consumer applications;
-- runtime HTTP communication;
-- transport-specific behavior;
-- duplicate OpenAPI specifications.
-
-Existing committed specifications are reused as authoritative inputs wherever possible.
+Select the actual client module, not only its aggregator, when running a targeted reactor build.
+See the child README for output paths and the compile-time probe.

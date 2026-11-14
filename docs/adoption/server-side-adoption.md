@@ -6,284 +6,21 @@ nav_order: 1
 has_toc: false
 ---
 
-# Server-Side Adoption
+# Server-side adoption
 
-> Publish a generics-aware OpenAPI document from your Spring Boot service without changing runtime behavior.
+**Keep your controller contract; publish the Java identity needed by generated clients.**
+The starter participates when Springdoc produces OpenAPI, leaving normal request handling and
+serialization with Spring MVC and your application.
 
-This guide explains how to enable OpenAPI Generics on the producer side.
+## What changes in the output?
 
-For client generation, see [Client-Side Adoption](./client-side-adoption.md).  
-For implementation details, see [Architecture](../architecture/architecture.md).
-
----
-
-## Contents
-
-- [Quick Start](#quick-start)
-- [What the Starter Does](#what-the-starter-does)
-- [Supported Controller Shapes](#supported-controller-shapes)
-- [Application-Defined Generic Containers](#application-defined-generic-containers)
-- [BYOE — Bring Your Own Envelope](#byoe)
-- [Published Contract Metadata](#published-contract-metadata)
-- [Validation and Failure Behavior](#validation-and-failure-behavior)
-- [Verification](#verification)
-- [Further Reading](#further-reading)
-
----
-
-## Quick Start
-
-Add the starter:
-
-```xml
-<dependency>
-    <groupId>io.github.blueprint-platform</groupId>
-    <artifactId>openapi-generics-server-starter</artifactId>
-    <version>1.3.0</version>
-</dependency>
-```
-
-Add Springdoc to the producer application as well; the platform starter does not select the application's Springdoc UI/runtime. For the Boot 3.5 reference:
-
-```xml
-<dependency>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    <version>2.10.0</version>
-</dependency>
-```
-
-Use **3.2.0** for the Boot 4 reference; retain **2.8.x** for Boot 3.4. Choose the application Boot version independently within the [supported policy](../compatibility.md). These are reference pins, not universal consumer constraints. The 1.3.0 platform dependency requires its release artifact to be available in the configured repository.
-
-Write controller methods normally:
+Your endpoint still returns:
 
 ```java
-@GetMapping("/{id}")
-public ResponseEntity<ServiceResponse<CustomerDto>> getCustomer(...) {
-    return ResponseEntity.ok(ServiceResponse.of(service.findById(id)));
-}
+ResponseEntity<ServiceResponse<Page<CustomerDto>>> getCustomers() { ... }
 ```
 
-Container payloads are supported as well:
-
-```java
-ServiceResponse<List<CustomerDto>>
-ServiceResponse<Set<CustomerDto>>
-ServiceResponse<Page<CustomerDto>>
-```
-
-No controller-specific OpenAPI Generics annotations or runtime response adapters are required for supported shapes.
-
-Application-defined generic containers are also supported when registered through the optional `openapi-generics.containers` configuration.
-
----
-
-## What the Starter Does
-
-The starter runs only when Springdoc generates an OpenAPI document, for example:
-
-```text
-/v3/api-docs
-/v3/api-docs.yaml
-```
-
-It:
-
-- discovers supported generic response contracts
-- introspects wrapper, container, and payload types
-- projects generic wrapper schemas into OpenAPI
-- preserves envelope identity through `x-api-wrapper-type`
-- preserves container identity through `x-data-container-type`
-- publishes the remaining OpenAPI Generics vendor extensions
-- validates configuration, descriptors, projection state, and generated contract metadata
-- marks infrastructure or contract-owned schemas so they can be excluded from generated client models
-
-It does **not**:
-
-- intercept HTTP requests
-- change runtime serialization
-- modify controller behavior
-- replace Spring MVC request handling
-- alter standard endpoint transport behavior
-
-Projection pipeline:
-
-```text
-Java Contract
-      ↓
-Response Introspection
-      ↓
-Envelope / Container Resolution
-      ↓
-OpenAPI Projection
-      ↓
-Contract Metadata Enrichment
-      ↓
-Contract Validation
-      ↓
-Validated OpenAPI Document
-```
-
-The generated OpenAPI document becomes the boundary between server-side projection and client-side reconstruction.
-
----
-
-## Supported Controller Shapes
-
-Built-in contracts include:
-
-```java
-ServiceResponse<T>
-ServiceResponse<List<T>>
-ServiceResponse<Set<T>>
-ServiceResponse<Page<T>>
-```
-
-BYOE envelopes participate in the same response-shape model.
-
-Application-defined generic containers such as `Paging<T>`, `Window<T>`, or `Batch<T>` participate in the same projection pipeline when registered through configuration.
-
-Examples:
-
-```java
-ServiceResponse<Window<CustomerDto>>
-ServiceResponse<Batch<CustomerDto>>
-```
-
-and, with a BYOE envelope:
-
-```java
-ApiResponse<Paging<CustomerDto>>
-ApiResponse<Window<CustomerDto>>
-```
-
-Supported asynchronous wrappers are unwrapped automatically during response type introspection, including:
-
-```java
-CompletionStage<T>
-Future<T>
-DeferredResult<T>
-WebAsyncTask<T>
-```
-
-OpenAPI Generics reconstructs supported generic contract shapes after the framework wrapper has been unwrapped.
-
-> OpenAPI Generics expects projected OpenAPI component schema names to match the Java simple type names resolved during response introspection. Custom component schema names, including names declared through `@Schema(name = "...")`, are outside the supported contract scope.
-
----
-
-## Application-Defined Generic Containers
-
-Applications may register their own generic container contracts.
-
-Example:
-
-```yaml
-openapi-generics:
-  containers:
-    - type: io.example.contract.Paging
-      item-property: content
-
-    - type: io.example.contract.Window
-      item-property: items
-```
-
-Each configured container contributes:
-
-- the fully qualified Java container type
-- the property that contains the generic item collection
-- the metadata required to preserve container identity through OpenAPI
-
-Configured containers participate in the same descriptor, projection, metadata, and reconstruction model as built-in container types.
-
-The projected OpenAPI metadata preserves the Java container type through:
-
-```yaml
-x-data-container-type: io.example.contract.Window
-```
-
-This prevents the client generator from requiring container-specific reconstruction logic.
-
-Application-defined containers are independent from BYOE.
-
-You may use them with the built-in platform envelope:
-
-```java
-ServiceResponse<Window<CustomerDto>>
-```
-
-or with an application-owned envelope:
-
-```java
-ApiResponse<Window<CustomerDto>>
-```
-
----
-
-## BYOE — Bring Your Own Envelope
-
-Use your own shared response envelope instead of `ServiceResponse<T>`.
-
-Configure the envelope on the producer:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.contract.ApiResponse
-```
-
-You can combine BYOE with application-defined generic containers:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.contract.ApiResponse
-
-  containers:
-    - type: io.example.contract.Paging
-      item-property: content
-
-    - type: io.example.contract.Window
-      item-property: items
-```
-
-The configured envelope remains the Java contract authority for projected wrapper schemas.
-
-Its fully qualified Java identity is preserved through:
-
-```yaml
-x-api-wrapper-type: io.example.contract.ApiResponse
-```
-
-The generated OpenAPI document therefore carries the envelope identity required by the Java code generator.
-
-When producer and codegen components are aligned, the same envelope does not need to be configured again on the client side through `openapi-generics.envelope`.
-
-```text
-Producer configuration
-        ↓
-Java envelope contract
-        ↓
-x-api-wrapper-type
-        ↓
-OpenAPI document
-        ↓
-Generated client reconstruction
-```
-
-The producer remains responsible for publishing the envelope metadata.
-
-The generated client is responsible for consuming it.
-
-The envelope type itself must still be available on the generated client's classpath when generated wrapper classes extend it.
-
----
-
-## Published Contract Metadata
-
-OpenAPI Generics projects contract semantics through vendor extensions.
-
-A built-in container wrapper may look like:
+Its projected wrapper schema carries:
 
 ```yaml
 x-api-wrapper: true
@@ -294,98 +31,133 @@ x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.pag
 x-data-item: CustomerDto
 ```
 
-An application-defined container with a BYOE envelope may look like:
+The [Java client generator](client-side-adoption.md) can then emit:
 
-```yaml
-x-api-wrapper: true
-x-api-wrapper-type: io.example.contract.ApiResponse
-x-api-wrapper-datatype: WindowCustomerDto
-x-data-container: Window
-x-data-container-type: io.example.contract.Window
-x-data-item: CustomerDto
+```java
+public class ServiceResponsePageCustomerDto
+    extends ServiceResponse<Page<CustomerDto>> {}
 ```
 
-The principal metadata fields are:
+The Java contracts own behavior and fields. OpenAPI is their projection and the protocol between
+producer and client reconstruction; the generated subclass binds a concrete transport response.
 
-- `x-api-wrapper` — identifies a projected generic wrapper schema
-- `x-api-wrapper-type` — preserves the fully qualified Java envelope type
-- `x-api-wrapper-datatype` — identifies the projected wrapper payload datatype
-- `x-data-container` — identifies container semantics
-- `x-data-container-type` — preserves the fully qualified Java container type
-- `x-data-item` — identifies the concrete item or payload type
-- `x-ignore-model` — marks infrastructure or contract-owned schemas that should not become generated models
+[Dependencies](#add-the-projection-dependencies) · [Envelope choice](#choose-the-envelope) ·
+[Containers](#register-an-application-container) · [Verification](#check-the-projected-document)
 
-Infrastructure schemas that are contract-owned or externally provided may therefore also be marked with:
+## Add the projection dependencies
 
-```yaml
-x-ignore-model: true
+In an existing supported Spring MVC application, add:
+
+```xml
+<dependency>
+  <groupId>io.github.blueprint-platform</groupId>
+  <artifactId>openapi-generics-server-starter</artifactId>
+  <version>1.3.0</version>
+</dependency>
+<dependency>
+  <groupId>org.springdoc</groupId>
+  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+  <version>2.10.0</version>
+</dependency>
 ```
 
-Together, these metadata allow the client generator to reconstruct the original Java contract deterministically.
+The Springdoc pin above is the **Boot 3.5** reference. Use **3.2.0** for the Boot 4 reference;
+Boot 3.4 remains on **2.8.x**. Your application chooses its framework versions within the
+[compatibility policy](../compatibility.md#supported-lines); the starter does not select a UI/runtime
+for you. Platform examples target prepared **1.3.0** artifacts, which must be available in your repository.
 
----
+Keep supported controller methods unchanged. No OpenAPI Generics-specific controller annotation or
+runtime response adapter is needed. `ServiceResponse<T>` is the default envelope and needs no setting.
 
-## Validation and Failure Behavior
+## Choose the envelope
 
-The server starter follows fail-fast validation.
-
-Invalid configuration or unsupported projected contract state fails while the OpenAPI document is being generated rather than producing ambiguous metadata for downstream code generation.
-
-The server-side failure model distinguishes platform-specific categories covering:
-
-- configuration failures
-- generic container descriptor validation failures
-- projection failures
-- generated contract validation failures
-
-This exception model improves categorization while preserving the existing fail-fast behavior and diagnostic intent.
-
-Typical validation includes:
-
-- envelope configuration validity
-- configured container type validity
-- configured container generic structure
-- configured container item-property validity
-- supported response shape discovery
-- projected wrapper metadata consistency
-- generated contract metadata validation
-
-Because the starter participates only in OpenAPI document generation, these failures belong to the contract publication path rather than normal HTTP request processing.
-
----
-
-## Verification
-
-After starting the application, verify that the generated OpenAPI document contains the expected OpenAPI Generics metadata.
-
-A projected wrapper may look like:
+**BYOE — Bring Your Own Envelope** keeps an application-owned generic envelope authoritative instead
+of requiring adoption of the platform's `ServiceResponse<T>`:
 
 ```yaml
-x-api-wrapper: true
-x-api-wrapper-type: io.example.contract.ApiResponse
-x-api-wrapper-datatype: WindowCustomerDto
-x-data-container: Window
-x-data-container-type: io.example.contract.Window
-x-data-item: CustomerDto
+openapi-generics:
+  envelope:
+    type: com.example.contract.ApiResponse
 ```
 
-Verify the metadata relevant to the projected contract:
+For an endpoint returning `ApiResponse<Page<CustomerDto>>`, the producer emits the fully qualified Java class name (FQCN) of the envelope in
+`x-api-wrapper-type`. The client derives `extends ApiResponse<Page<CustomerDto>>` from it and needs
+**no duplicate envelope configuration**. Supply the shared envelope dependency to the client.
 
-- `x-api-wrapper-type` preserves the Java envelope identity
-- `x-data-container-type` preserves the Java container identity when a generic container is present
-- `x-data-item` identifies the concrete item or payload type
-- `x-ignore-model` is present on infrastructure or contract-owned schemas where exclusion from generated client models is expected
-- built-in and BYOE envelopes publish the same reconstruction metadata model
-- application-defined containers work with both built-in and BYOE envelopes
-- OpenAPI document generation succeeds without changing normal HTTP request behavior
+The envelope must be a concrete class with exactly one type parameter and one direct payload field
+of that parameter's type. Record envelopes, multiple type parameters and nested payload slots are
+unsupported. Define `T data`, then use `ApiResponse<List<CustomerDto>>` at the endpoint; do not define
+a payload slot such as `List<T> data` inside the envelope itself.
 
-The repository additionally verifies the complete producer → OpenAPI → generated client → consumer lifecycle through maintained end-to-end samples and regression coverage.
+BYOC (Bring Your Own Contract) is a separate, optional [client-side DTO mapping](client-side-adoption.md#optional-reuse-existing-dtos-with-byoc).
+It does not establish producer envelope identity.
 
----
+## Supported response shapes
 
-## Further Reading
+| Payload | Example |
+| --- | --- |
+| Direct value/object | `ServiceResponse<CustomerDto>` |
+| Built-in collection | `ServiceResponse<List<CustomerDto>>`, `ServiceResponse<Set<CustomerDto>>` |
+| Shared platform page | `ServiceResponse<Page<CustomerDto>>` |
+| Registered application container | `ServiceResponse<Window<CustomerDto>>` |
 
-- [Client-Side Adoption](./client-side-adoption.md)
-- [Architecture](../architecture/architecture.md)
-- [Compatibility & Support Policy](../compatibility.md)
-- [GitHub Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
+BYOE supports the same payload shapes. Platform `Page<T>` is the shared Java contract, not Spring
+Data's `Page<T>`. Supported MVC wrappers such as `ResponseEntity`, `CompletionStage`/`Future`,
+`DeferredResult` and `WebAsyncTask` are unwrapped during introspection. Enum payloads should use
+`@Schema(enumAsRef = true)`.
+
+Component schema names must match the resolved Java simple type names; custom names such as
+`@Schema(name = "...")` are outside scope. See the [full shape boundaries](../compatibility.md#contract-scope)
+for the limits on nested generic graphs and non-MVC integrations.
+
+## Register an application container
+
+To project `ServiceResponse<Window<CustomerDto>>` or `ApiResponse<Window<CustomerDto>>`, register the
+container type and its item collection property:
+
+```yaml
+openapi-generics:
+  containers:
+    - type: com.example.contract.Window
+      item-property: items
+```
+
+The type must be a concrete class/record with one type parameter and a declared `List<T>` or `Set<T>`
+item property using that parameter directly. Unregistered, inherited or nested generic item structures
+are not inferred. Make this shared container type available on the generated client's classpath.
+
+Container registration is independent of envelope selection. Metadata preserves the container FQCN
+and item type, so reconstruction uses the same path as built-in containers rather than special-casing
+`Window` or `Page`.
+
+## Check the projected document
+
+Start the producer and inspect `/v3/api-docs` or `/v3/api-docs.yaml`. Check the wrapper schema for the
+endpoint you intend to generate; successful application startup alone does not establish shape coverage.
+
+| Metadata | Check |
+| --- | --- |
+| `x-api-wrapper` | Boolean `true` identifies the generic wrapper |
+| `x-api-wrapper-type` | FQCN of the selected Java envelope |
+| `x-api-wrapper-datatype` | Projected payload name, e.g. `PageCustomerDto` |
+| `x-data-container` | Semantic/simple container name, e.g. `Page` or `Window` |
+| `x-data-container-type` | Shared Java container FQCN |
+| `x-data-item` | Concrete container item type, e.g. `CustomerDto` |
+| `x-ignore-model` | Retains a schema while suppressing duplicate Java model generation |
+
+Container name/type/item metadata travel together; direct payloads need no container trio.
+`x-envelope-import`, `x-envelope-type` and `x-extra-imports` are derived codegen metadata, not producer inputs.
+Other OpenAPI tooling can ignore the vendor extensions and still consume the document.
+
+Configured envelope/container invariants and projected contract inconsistencies fail explicitly through
+the server's configuration, descriptor, projection or contract-validation exceptions. Some unresolved
+introspection paths intentionally skip projection; check that the expected wrapper metadata is present.
+These checks belong to contract publication, not ordinary HTTP request processing.
+
+For maintained evidence, see [type/BYOE coverage](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/type-coverage/README.md) and the
+[canonical web stack](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/gradle/customer-service/README.md). Review snapshot differences
+before accepting producer contract changes; generated Java compilation and runtime HTTP behavior
+are separate verification layers.
+
+Next: [Maven or Gradle client adoption](client-side-adoption.md) ·
+[Compatibility reference](../compatibility.md) · [Architecture](../architecture/architecture.md)

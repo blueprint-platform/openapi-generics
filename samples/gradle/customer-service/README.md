@@ -31,7 +31,7 @@ and supplies `customer.base-url`.
 
 The read-only application exposes `GET /customers/1` and `GET /customers` on both web applications.
 The in-memory directory contains customer `1` (`Ada`); unknown IDs return 404. Responses use shared
-`ServiceResponse<CustomerDto>` and `ServiceResponse<Page<CustomerDto>>` types. BYOC already binds the
+`ServiceResponse<CustomerDto>` and `ServiceResponse<Page<CustomerDto>>` types. BYOC (Bring Your Own Contract) already binds the
 payload to the shared DTO, so there is no duplicate request DTO or artificial mapping layer for these
 read-only operations. The service, remote-client and adapter boundaries follow the Maven example
 without copying its larger CRUD/search API or transport coverage matrix.
@@ -159,5 +159,5 @@ git diff -- spec/customer-api-docs.json
 The update flag is never part of ordinary verification. Fixed producer OpenAPI server metadata keeps
 the snapshot independent of test ports; the adapter uses the configured runtime base URL.
 
-BYOE/custom containers/List/Set/async, multipart/binary/form transport, multiple specs/generators and
+Application-owned envelopes, custom containers, List/Set/async, multipart/binary/form transport, multiple specs/generators and
 arbitrary template coverage remain in their existing dedicated verification areas.

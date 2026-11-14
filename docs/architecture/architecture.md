@@ -4,381 +4,189 @@ title: Architecture
 nav_exclude: true
 ---
 
-# Architecture
+# Architecture: preserve ownership across a projection boundary
 
-> Internal architecture of OpenAPI Generics.
+The design preserves **Java envelope/container identity**, not just equivalent JSON. A concrete
+OpenAPI response is reconstructed as a transport subclass such as
+`ServiceResponsePageCustomerDto extends ServiceResponse<Page<CustomerDto>>`. Shared Java contracts
+own fields and behavior; generated bindings do not become application contracts.
 
-OpenAPI Generics preserves contract semantics across the complete Java → OpenAPI → Client lifecycle.
+Use [adoption](../adoption/index.md) for configuration and [rationale](rationale.md) for the design
+trade-offs. This page explains how the implementation separates authority, protocol and lifecycle.
 
-Its architecture is based on a simple principle:
+## Architecture overview
 
-> Java contracts are the source of truth.  
-> OpenAPI is a deterministic projection of those contracts.  
-> Generated clients reconstruct the original contract from projected metadata.
+![Java contracts project through OpenAPI metadata into generated transport bindings; a client adapter exposes the application boundary.](../images/architecture/openapi-generics-architecture.svg)
 
----
+This is the projection/build flow, not the runtime HTTP call sequence.
+[Editable visual sources](../images/README.md).
 
-## Contents
+The OpenAPI document is the protocol between independent projection/reconstruction phases. Codegen
+reads no producer controllers and needs no live producer. A client receives the shared Java types
+through its own compile/runtime dependencies. Schema metadata identifies them; metadata alone does
+not supply a classpath dependency.
 
-- [Architecture Overview](#architecture-overview)
-- [Projection Protocol](#projection-protocol)
-- [Projection](#projection)
-- [Client Generation](#client-generation)
-- [Deterministic Pipeline](#deterministic-pipeline)
-- [Validation and Failure Boundaries](#validation-and-failure-boundaries)
-- [Supported Scope](#supported-scope)
-- [Module Map](#module-map)
-- [Mental Model](#mental-model)
+| Authority / integration | Owns | Does not own |
+| --- | --- | --- |
+| Platform `contract` | Built-in ServiceResponse, Page, metadata and error-extension Java types | Spring/runtime integration or every application's DTO/envelope |
+| Application contracts | BYOE (Bring Your Own Envelope) envelope, optional shared DTOs and registered containers in that domain | Generated transport implementation |
+| Server starter | MVC discovery, supported shape resolution, projection and metadata validation | Request handling or runtime serialization |
+| Java codegen | Shared reconstruction semantics, filtering/import resolution and small template overlays | Ordinary upstream API/model/authentication/transport behavior |
+| Maven parent / Gradle plugin | Their own template/classpath/source/normalization lifecycles | Reimplementing reconstruction semantics or choosing consumer upstream versions |
 
----
+## Projection protocol
 
-## Architecture Overview
-
-OpenAPI Generics consists of two independent phases connected by the generated OpenAPI document.
-
-```text
-Spring Boot Service
-        │
-        ▼
-openapi-generics-server-starter
-        │
-        ▼
-OpenAPI + Contract Metadata
-        │
-        ▼
-openapi-generics-java-codegen
-        │
-        ▼
-Generated Java Client
-```
-
-The server publishes the metadata required to preserve contract identity.
-
-The client generator consumes that metadata to reconstruct contract-aligned Java types without requiring the same envelope information to be configured again on the client side.
-
-The generated OpenAPI document therefore acts as the protocol boundary between projection and reconstruction.
-
----
-
-## Projection Protocol
-
-Contract semantics are projected through OpenAPI vendor extensions.
-
-A projected generic wrapper schema may contain metadata such as:
+A page wrapper schema carries:
 
 ```yaml
 x-api-wrapper: true
-x-api-wrapper-type: io.example.contract.ServiceResponse
+x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
 x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
 x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page
 x-data-item: CustomerDto
-x-ignore-model: true
 ```
 
-The extension model is intentionally flat and semantic.
-
-The principal extensions are:
-
-- `x-api-wrapper` — marks a projected schema as a generic response wrapper
-- `x-api-wrapper-type` — preserves the fully qualified Java envelope type
-- `x-api-wrapper-datatype` — identifies the projected wrapper payload datatype
-- `x-data-container` — identifies generic container semantics
-- `x-data-container-type` — preserves the fully qualified Java container type
-- `x-data-item` — identifies the concrete item or payload type
-- `x-ignore-model` — marks infrastructure schemas that should not become standalone generated models
-
-Together, these extensions preserve the identities required for deterministic client reconstruction while keeping the document valid OpenAPI.
-
-Envelope identity is carried by `x-api-wrapper-type`.
-
-This completes the same contract-driven metadata model used for container identity through `x-data-container-type`.
-
-```text
-Envelope identity
-        +
-Container identity
-        +
-Payload / item identity
-        │
-        ▼
-Deterministic client reconstruction
-```
-
-For aligned producer and codegen components, the envelope type no longer needs to be repeated through client-side `openapi-generics.envelope` configuration.
-
----
-
-## Projection
-
-`openapi-generics-server-starter` analyzes Java response contracts and projects their semantics into OpenAPI.
-
-Its responsibilities include:
-
-- response contract discovery
-- generic type introspection
-- supported wrapper unwrapping
-- generic container resolution
-- wrapper schema projection
-- contract metadata enrichment
-- infrastructure schema exclusion
-- generated contract validation
-
-Built-in response contracts include:
-
-```java
-ServiceResponse<T>
-ServiceResponse<List<T>>
-ServiceResponse<Set<T>>
-ServiceResponse<Page<T>>
-```
-
-Applications may also register their own generic container contracts.
-
-Example:
-
-```yaml
-openapi-generics:
-  containers:
-    - type: io.example.contract.Paging
-      item-property: content
-
-    - type: io.example.contract.Window
-      item-property: items
-```
-
-Configured containers participate in the same discovery, descriptor, projection, metadata, and reconstruction model as built-in containers.
-
-Examples include:
-
-```java
-ServiceResponse<Window<CustomerDto>>
-ServiceResponse<Batch<CustomerDto>>
-```
-
-Application-defined containers are independent from BYOE.
-
-Applications that own their envelope can configure it on the producer:
-
-```yaml
-openapi-generics:
-  envelope:
-    type: io.example.contract.ApiResponse
-```
-
-The projected wrapper schema then carries the envelope identity through `x-api-wrapper-type`, allowing the generated OpenAPI document to become the source of reconstruction metadata for the client generator.
-
-The server starter operates only as part of OpenAPI document generation.
-
-It does not intercept application requests and does not alter endpoint runtime behavior.
-
----
-
-## Client Generation
-
-`GenericAwareJavaCodegen` extends OpenAPI Generator with contract awareness.
-
-Its responsibilities include:
-
-- contract-driven wrapper reconstruction
-- envelope type reconstruction from `x-api-wrapper-type`
-- container-aware reconstruction
-- application-defined container reconstruction from `x-data-container-type`
-- BYOE support
-- BYOC support
-- infrastructure model filtering
-- deterministic generated-source hygiene
-
-Generated wrappers intentionally remain thin.
-
-Example:
-
-```java
-public class ServiceResponsePageCustomerDto
-    extends ServiceResponse<Page<CustomerDto>> {}
-```
-
-The generated wrapper does not redefine the envelope contract.
-
-It binds concrete generic parameters to an existing contract type.
-
-The same reconstruction model applies to application-owned envelopes:
-
-```java
-public class ApiResponseWindowCustomerDto
-    extends ApiResponse<Window<CustomerDto>> {}
-```
-
-The envelope and configured container types must be available on the client classpath when the generated wrapper references them.
-
-OpenAPI Generics specializes the upstream Java generator rather than maintaining a fork.
-
-The upstream generator continues to own standard client and transport generation behavior, while OpenAPI Generics adds the metadata-aware reconstruction layer required for generic contract preservation.
-
----
-
-## Deterministic Pipeline
-
-The complete lifecycle is:
-
-```text
-Java Contract
-      ↓
-Type Introspection
-      ↓
-OpenAPI Projection
-      ↓
-Contract Metadata
-      ↓
-Generated Client Reconstruction
-      ↓
-Contract-Aligned Java Types
-```
-
-For a given supported contract and configuration, projection and reconstruction are designed to remain deterministic.
-
-OpenAPI acts as the boundary between the two phases:
-
-```text
-Producer
-   │
-   │  publishes contract metadata
-   ▼
-OpenAPI Document
-   │
-   │  consumed by code generation
-   ▼
-Generated Client
-```
-
-This separation prevents the client generator from depending directly on producer implementation details.
-
-Envelope identity joins container identity as contract metadata carried through that boundary.
-
-As a result, aligned producer and codegen components reconstruct the wrapper hierarchy from the document itself instead of duplicating envelope configuration on both sides.
-
----
-
-## Validation and Failure Boundaries
-
-The projection and reconstruction pipelines are intentionally fail-fast.
-
-The server starter validates configuration and projected contract state before publishing unsupported or ambiguous metadata.
-
-Its failure model distinguishes platform-specific categories such as:
-
-- configuration failures
-- descriptor validation failures
-- projection failures
-- generated contract validation failures
-
-These exception categories improve diagnostic precision without changing the runtime scope of the starter.
-
-The code generation pipeline also performs deterministic validation and generated-source hygiene to detect incompatible template or metadata changes during the build rather than at application runtime.
-
-Repository verification covers the complete lifecycle:
-
-```text
-Producer
-    ↓
-OpenAPI
-    ↓
-Generated Client
-    ↓
-Consumer Runtime
-```
-
-Verification includes:
-
-- built-in `ServiceResponse<T>` reconstruction
-- BYOE reconstruction
-- built-in containers
-- application-defined containers
-- `x-api-wrapper-type` generation and consumption
-- `x-data-container-type` generation and consumption
-- removal of redundant client-side envelope configuration
-- BYOC external model reuse
-- infrastructure model filtering
-- generated-source hygiene
-- standard HTTP transport compatibility
-
-Transport coverage verifies that generics-aware reconstruction does not interfere with standard OpenAPI Generator Java RestClient behavior for:
-
-- `multipart/form-data`
-- `application/octet-stream`
-- `application/x-www-form-urlencoded`
-
----
-
-## Supported Scope
-
-Built-in platform contracts:
-
-```java
-ServiceResponse<T>
-ServiceResponse<List<T>>
-ServiceResponse<Set<T>>
-ServiceResponse<Page<T>>
-```
-
-Supported capabilities include:
-
-- BYOE — Bring Your Own Envelope
-- BYOC — Bring Your Own Contract
-- application-defined generic containers
-- deterministic OpenAPI contract metadata
-- contract-driven envelope reconstruction
-- container-aware reconstruction
-- contract-aware Java client generation
-- generated-source hygiene
-- fail-fast contract validation
-
-The current architectural scope is intentionally focused on:
-
-- Java 17+ for published platform artifacts
-- Spring Boot WebMvc
-- springdoc-openapi WebMvc integration
-- OpenAPI Generator 7.x
-- Maven and Gradle-based client generation; both use the shared `java-generics-contract` reconstruction semantics. Maven aligns the selected generator toolchain and extracts its upstream template; Gradle uses the running official plugin classloader and preserves consumer plugin/version ownership.
-
-The Maven parent and Gradle plugin orchestrate the same codegen artifact rather than implementing separate contract semantics. Gradle selects only `java-generics-contract` tasks, preserves ordinary upstream tasks, registers effective generated roots with the Java plugin, and normalizes sources before task output snapshots. See the [Gradle consumer guide](../../openapi-generics-gradle-plugin/README.md) for configuration and version boundaries.
-
-These boundaries define the platform and tooling surface OpenAPI Generics currently owns. Exact verified framework and generator versions are maintained separately from the architecture definition.
-
-For the authoritative compatibility matrix, verified reference baselines, and support policy, see [Compatibility & Support Policy](../compatibility.md).
-
----
-
-## Module Map
-
-| Module                                                                                                                                          | Responsibility                                                                  |
-|-------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|
-| [`openapi-generics-contract`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-contract)                       | Shared contracts and platform-owned generic types                               |
-| [`openapi-generics-server-starter`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-server-starter)           | Spring Boot contract discovery, projection, metadata enrichment, and validation |
-| [`openapi-generics-java-codegen`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-java-codegen)               | Contract-aware OpenAPI Generator specialization and reconstruction              |
-| [`openapi-generics-java-codegen-parent`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-java-codegen-parent) | Generator orchestration, template lifecycle, and generated-source hygiene       |
-| [`openapi-generics-platform-bom`](https://github.com/blueprint-platform/openapi-generics/tree/main/openapi-generics-platform-bom)               | Dependency alignment                                                            |
-
----
-
-## Mental Model
-
-```text
-Java Contract
-      ↓
-OpenAPI Projection
-      ↓
-Contract Metadata
-      ↓
-Contract Reconstruction
-```
-
-The producer owns the Java contract.
-
-OpenAPI transports the metadata required to preserve that contract across the generation boundary.
-
-The generated client reconstructs the contract instead of redefining it.
-
-OpenAPI Generics does not make generated code the contract authority.
-
-It preserves the original contract identity end-to-end.
+| Extension | Meaning |
+| --- | --- |
+| `x-api-wrapper` | Boolean wrapper marker |
+| `x-api-wrapper-type` | Fully qualified Java envelope identity |
+| `x-api-wrapper-datatype` | Projected payload datatype |
+| `x-data-container` | Container semantic/simple name used by the binding |
+| `x-data-container-type` | Shared container fully qualified Java class name |
+| `x-data-item` | Concrete container item type |
+| `x-ignore-model` | Retain a schema while suppressing duplicate Java model generation |
+
+`x-ignore-model` belongs on schemas being suppressed, such as projected infrastructure, **not on a
+wrapper that must be emitted**. A protocol example must not mark its required wrapper ignored.
+Container name/type/item travel together. Built-in List/Set/Page and explicit application containers
+follow this model without Page-specific reconstruction branches.
+
+The client derives `x-envelope-import`, `x-envelope-type` and `x-extra-imports` internally. They are not
+producer requirements or alternative envelope selectors. Other OpenAPI tooling can ignore the vendor
+extensions; equivalent metadata can be supplied in an externally maintained spec without transferring
+Java contract ownership to that spec.
+
+## Projection internals
+
+`OpenApiGenericsAutoConfiguration` connects Springdoc customization to
+`OpenApiPipelineOrchestrator`. Discovery uses MVC handler mappings, then introspection and policy
+resolution determine the supported envelope/payload/container descriptors. Schema processing enriches
+concrete wrappers, marks duplicate infrastructure for exclusion and runs the contract guard.
+
+The orchestrator processes an OpenAPI instance idempotently by identity. This prevents repeat
+customization of the same document; it is not a global schema cache or a runtime request interceptor.
+The starter runs when publishing OpenAPI, not while normal controller responses are serialized.
+
+Envelope/container descriptors are explicit boundaries:
+
+- **BYOE** selects a concrete application class with one generic parameter and one direct field of
+  that parameter's type. Usage sites bind containers as the parameter; the envelope itself does not
+  define a nested generic payload slot. Envelope identity is selected once on the producer.
+- Built-in List/Set arrays and platform Page preserve their distinct Java identities. A Set cannot be
+  reconstructed from array shape alone; semantic metadata matters.
+- An application container is explicitly registered as a concrete class/record with one type parameter
+  and a declared List/Set item property using it directly. Its Java type must also reach the client.
+- Supported MVC wrappers are unwrapped before generic projection. Async server signatures therefore
+  reuse the same response schema/binding as their synchronous equivalents; they do not create a new
+  client-side async contract shape.
+
+[Server adoption](../adoption/server-side-adoption.md) owns practical examples and validation requirements.
+
+## Reconstruction internals
+
+`GenericAwareJavaCodegen` specializes upstream `JavaClientCodegen` through normal hooks:
+
+1. `processOpts` initializes the optional external-model registry.
+2. `fromModel` records schemas suppressed by protocol metadata or BYOC (Bring Your Own Contract).
+3. `postProcessModels` filters ignored entries, validates wrapper metadata and resolves external payload
+   imports plus envelope identity.
+4. `postProcessAllModels` removes ignored entries from the global graph, delegates upstream processing
+   and cleans dangling ignored model imports.
+5. Upstream templates continue generating ordinary models/APIs/supporting files; the platform wrapper
+   partial renders the shared generic superclass for marked wrappers.
+
+**BYOC is optional DTO reuse**, expressed by client schema-name → fully qualified Java class name mappings. It neither selects the
+envelope nor means every ordinary model must be shared. Without a mapping, DTO generation stays
+upstream-owned. The external Java dependency is still the consumer's responsibility.
+
+The generated wrapper has concrete generic parameters for transport/deserialization. A reusable client
+library configures the generated API/invoker and exposes a stable adapter API; controllers/services
+should consume that API and shared contracts, mapping ordinary generated DTOs where their application
+boundary requires it. Focused codegen harnesses may inspect generated types directly as test subjects.
+
+## Template ownership and documentation
+
+Upstream `Java/model.mustache` owns ordinary enum/oneOf/POJO dispatch. Integrations discover/extract that
+selected upstream resource, patch its wrapper dispatch and apply the small codegen overlay. Required
+anchor drift or missing/ambiguous template ownership fails explicitly rather than guessing a replacement.
+The platform does not maintain a wholesale Java template fork.
+
+The RestClient-specific **model documentation** overlay dispatches only marked wrapper docs to a small
+partial that reuses the Java wrapper fragment. It shows generic/shared identities without links to
+suppressed/reused local model docs. Ordinary RestClient model/enum docs delegate to upstream partials;
+other libraries retain their documentation templates. API documentation snippets and generated test
+scaffolding remain upstream-owned. Doc display does not modify model graph, producer metadata or Java
+binding semantics.
+
+## Build integrations: same semantics, different lifecycles
+
+| Concern | Maven parent | Gradle plugin |
+| --- | --- | --- |
+| Official tool/version | Consumer `openapi-generator.version` aligns official plugin/core/generator | Consumer applies/versions official plugin; platform integrates via `withPlugin` |
+| Upstream template origin | Extract from the selected OpenAPI Generator (OAG) artifact | Discover from the running official plugin classloader; no independently resolved upstream template runtime |
+| Platform codegen | Same platform release as parent | Same platform release as plugin manifest; conflicting direct declarations fail |
+| Selection | Consumer generator execution configuration | Only `GenerateTask` instances selecting `java-generics-contract`, including custom/multiple tasks |
+| Sources / compilation | Default build-helper root plus official execution source registration | Java plugin registers each selected task's effective output/sourceFolder and compilation dependency |
+| Normalization | Parent `process-sources` hygiene over configured includes | Selected generation task's final action, before output snapshots |
+
+Maven custom outputs need a separate check that normalization includes cover them; compilation alone
+does not prove this. Gradle default/custom tasks do not inherit one another's worker classpath, so
+selected-task wiring is explicit. Non-selected tasks retain consumer template settings; setting an
+absent provider can erase those settings and is intentionally avoided.
+
+Gradle source registration is installed outside `GenerateTask.configureEach` mutation scope. Effective
+`sourceFolder` follows upstream config binding and option precedence (`configOptions`, task
+`additionalProperties`, config-file values, default). Config-file contents are tracked; source root
+providers avoid output dependencies that would introduce task cycles. Execution actions capture state
+during configuration and do not look up Project/task extensions at execution time. These choices
+support configuration-cache replay; they are not a general Isolated Projects or cache-relocation guarantee.
+
+The internal bill of materials (BOM) aligns platform dependencies, not consumer framework/tool versions. Exact current,
+minimum and negative references live in [compatibility](../compatibility.md); build wrappers and sample
+pins must not become universal consumer constraints.
+
+## Validation and evidence
+
+Configured envelope/container invariants, inconsistent wrapper metadata, reconstruction errors and
+required template drift fail explicitly at the owning layer. This does not erase intentional behavior:
+unsupported/unresolved introspection can return `Optional.empty`, invalid optional BYOC registrations
+can warn-and-skip, and missing normalization directories can be no-ops. Treat successful startup or
+absence of an exception as insufficient proof that every intended contract was projected.
+
+| Evidence | What it establishes |
+| --- | --- |
+| Unit/context tests | Deterministic descriptor, metadata, filtering/import and orchestration behavior |
+| Fixture-based TestKit | Gradle integration wiring, source/classpath and configuration-cache behavior with fixtures |
+| Real codegen / generated compilation | Actual template use, binding/source compatibility and exercised cache paths |
+| Application runtime tests | The specific real HTTP/deserialization paths executed |
+| Committed spec checks | Reviewed projection stability and visible drift |
+
+Canonical Gradle acceptance calls real consumer endpoints through controller/service/remote client and
+adapter to the producer. Type/transport harnesses have different runtime coverage; their README/test
+bindings specify what actually executes. Transport interoperability checks do not make multipart,
+binary or form serialization platform-owned.
+
+## Scope and navigation
+
+Published platform code targets Java 17+; current projection is Spring MVC, reconstruction is Java,
+and integrations are Maven/Gradle. Arbitrary nested generic graphs, unregistered container inference,
+WebFlux and custom component names differing from Java simple names are outside supported scope.
+See [compatibility](../compatibility.md) for the authoritative support/reference distinction.
+
+- [Java contract module](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-contract/README.md)
+- [Server starter](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-server-starter/README.md)
+- [Shared codegen](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-java-codegen/README.md)
+- [Maven parent](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-java-codegen-parent/README.md)
+- [Gradle plugin](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-gradle-plugin/README.md)
+- [Internal BOM](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-platform-bom/README.md)
