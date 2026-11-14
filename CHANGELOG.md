@@ -10,7 +10,7 @@ This project follows a contract-first release discipline:
 
 ---
 
-## [1.3.0]
+## [1.3.0] - 2026-11-15
 
 ### Minor release
 
