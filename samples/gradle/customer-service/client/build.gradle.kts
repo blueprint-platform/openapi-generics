@@ -8,10 +8,10 @@ plugins {
 val platformVersion = providers.gradleProperty("platformVersion").get()
 val generatedPackage = "io.github.blueprintplatform.samples.gradle.customer.generated"
 dependencies {
-    api(platform("org.springframework.boot:spring-boot-dependencies:4.1.2"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.2"))
     api(project(":contract"))
     api("io.github.blueprint-platform:openapi-generics-contract:$platformVersion")
-    api("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     testImplementation("org.junit.jupiter:junit-jupiter")

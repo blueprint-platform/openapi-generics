@@ -11,14 +11,37 @@ producer → spec/customer-api-docs.json → client → consumer
 
 - `producer`: Boot MVC application exposing direct and paged customer responses through the server starter.
 - `contract`: application-owned shared DTO; no framework dependency.
-- `client`: official `GenerateTask` with `java-generics-contract`, RestClient, Jackson 3 and BYOC mapping.
-- `consumer`: Boot application using generated API methods through a gateway whose public return types
-  are shared `ServiceResponse<CustomerDto>` and `ServiceResponse<Page<CustomerDto>>` contracts.
+- `client`: client library containing official `GenerateTask` generation, RestClient/Jackson 3 setup,
+  BYOC mapping and the stable `CustomerClientAdapter` interface. Generated API/invoker types are used
+  only inside its adapter implementation/configuration.
+- `consumer`: Boot application using its own `CustomerServiceClient` interface/implementation, which
+  delegates to `CustomerClientAdapter`. Public methods return shared `ServiceResponse<CustomerDto>`
+  and `ServiceResponse<Page<CustomerDto>>` contracts.
 
 The official generator version and ordinary generator options belong to the consumer build. The
 OpenAPI Generics plugin provides its aligned codegen, templates, generated-source registration,
 compilation dependency and normalization. There is no manual source-set, generator classpath or
 template wiring. The sample uses a custom `generateCustomerClient` task and non-default source folder.
+
+## Client library boundary
+
+The separation follows the [Maven Boot 4 stack](../../spring-boot-4/customer-service-client/README.md):
+
+```text
+ConsumerApplication
+  → consumer.service.client.CustomerServiceClient
+  → CustomerServiceClientImpl
+  → client.adapter.CustomerClientAdapter
+  → CustomerClientAdapterImpl
+  → generated CustomersApi / ApiClient
+  → producer HTTP
+```
+
+`CustomerApiClientConfig` lives in `client` and builds the generated transport behind the adapter.
+The consumer discovers client configuration through Spring scanning and supplies `customer.base-url`;
+it neither creates nor imports generated API/invoker types. Only shared contract dependencies are
+exported through the client library's Gradle `api` dependencies; RestClient and its Boot BOM are
+implementation dependencies. The consumer selects its own Boot runtime dependencies.
 
 ## Repository development bootstrap
 
@@ -48,15 +71,17 @@ The second identical command must report configuration-cache reuse. Disabling th
 ensures compilation, generation and tests actually execute after each clean, rather than being restored.
 The ordinary `./gradlew build` also works with this sample's enabled configuration/build caches.
 
-`build` runs three acceptance tests:
+`build` checks four acceptance cases:
 
 - Producer projection is compared semantically with the committed JSON snapshot; its independently
   generated document is retained under `producer/build/openapi/`. Drift fails verification and never
   silently overwrites the committed snapshot.
 - Generated contract bindings compile automatically, reuse shared types without duplicate models, and
   have normalized wrapper declarations/imports.
+- The client adapter interface exposes exact shared direct/paged contract types without generated types.
 - A random-port Boot producer receives real HTTP calls from a separately configured consumer context
-  using the generated RestClient. Direct and paged payloads deserialize to the exact shared `CustomerDto`,
+  through the consumer-owned service-client interface and library adapter to the generated RestClient.
+  Direct and paged payloads deserialize to the exact shared `CustomerDto`,
   `Page`, and `ServiceResponse` hierarchy; metadata and page values are checked. No mocked HTTP or manual
   JSON parsing substitutes for this test.
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
+import io.github.blueprintplatform.samples.gradle.customer.consumer.service.client.CustomerServiceClient;
 import io.github.blueprintplatform.samples.gradle.customer.contract.CustomerDto;
 import io.github.blueprintplatform.samples.gradle.customer.producer.ProducerApplication;
 import org.junit.jupiter.api.Test;
@@ -23,14 +24,14 @@ class CustomerHttpTest {
                 .run(
                     "--customer.base-url=http://localhost:"
                         + producer.getEnvironment().getRequiredProperty("local.server.port"))) {
-      var gateway = consumer.getBean(CustomerGateway.class);
-      ServiceResponse<CustomerDto> direct = gateway.customer(42);
+      var client = consumer.getBean(CustomerServiceClient.class);
+      ServiceResponse<CustomerDto> direct = client.getCustomer(42);
       assertThat(direct.getClass().getSuperclass()).isEqualTo(ServiceResponse.class);
       assertThat(direct.getData())
           .isExactlyInstanceOf(CustomerDto.class)
           .isEqualTo(new CustomerDto(42, "Ada"));
       assertThat(direct.getMeta().serverTime()).isNotNull();
-      ServiceResponse<Page<CustomerDto>> paged = gateway.customers();
+      ServiceResponse<Page<CustomerDto>> paged = client.getCustomers();
       assertThat(paged.getClass().getSuperclass()).isEqualTo(ServiceResponse.class);
       assertThat(paged.getData()).isExactlyInstanceOf(Page.class);
       assertThat(paged.getData().content()).containsExactly(new CustomerDto(1, "Ada"));

@@ -3,6 +3,9 @@ package io.github.blueprintplatform.samples.gradle.customer.client;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
+import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
+import io.github.blueprintplatform.samples.gradle.customer.client.adapter.CustomerClientAdapter;
+import io.github.blueprintplatform.samples.gradle.customer.contract.CustomerDto;
 import io.github.blueprintplatform.samples.gradle.customer.generated.dto.ServiceResponseCustomerDto;
 import io.github.blueprintplatform.samples.gradle.customer.generated.dto.ServiceResponsePageCustomerDto;
 import java.nio.file.Files;
@@ -10,6 +13,24 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
 class GeneratedContractTest {
+  @Test
+  void clientAdapterExposesSharedContractsWithoutGeneratedTypes() throws Exception {
+    assertEquals(
+        ServiceResponse.class.getName() + "<" + CustomerDto.class.getName() + ">",
+        CustomerClientAdapter.class
+            .getMethod("getCustomer", long.class)
+            .getGenericReturnType()
+            .getTypeName());
+    assertEquals(
+        ServiceResponse.class.getName()
+            + "<"
+            + Page.class.getName()
+            + "<"
+            + CustomerDto.class.getName()
+            + ">>",
+        CustomerClientAdapter.class.getMethod("getCustomers").getGenericReturnType().getTypeName());
+  }
+
   @Test
   void generatedBindingsReuseContractsAndAreNormalized() throws Exception {
     var dto =
