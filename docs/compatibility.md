@@ -37,8 +37,13 @@ or support minimum. **Minimum edge** and **negative boundary** describe a specif
 
 | Server reference | Verification Java | Spring Boot | Springdoc |
 | --- | --- | --- | --- |
-| Boot 3 integration/type coverage | 21 | 3.5.16 | **2.10.0** |
+| Boot 3.5 compatibility/type coverage | 21 | 3.5.16 | **2.10.0** |
 | Boot 4 Maven and canonical Gradle stack | 25 | 4.1.2 | **3.2.0** |
+
+The public Gradle consumer example and canonical application reference use Boot 4/Jackson 3.
+Boot 3.5 compatibility remains verified through Maven application/type-coverage builds. Model-only
+Gradle E2E verifies reconstruction/compilation, not a Spring Boot runtime; its Jakarta annotation
+selection does not establish framework compatibility.
 
 | Tool surface | Supported line | Minimum edge | Current/reference | Negative boundary |
 | --- | --- | --- | --- | --- |

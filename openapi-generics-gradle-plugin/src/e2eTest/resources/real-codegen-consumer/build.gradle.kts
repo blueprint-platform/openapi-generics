@@ -72,8 +72,8 @@ tasks.named<GenerateTask>("openApiGenerate") {
     )
 
     /*
-     * Match the maintained Maven client samples. The custom generator
-     * specializes the upstream Java RestClient/Jackson templates.
+     * Select the upstream Java template library, not a Boot runtime.
+     * This model-only fixture has annotation dependencies, no Boot BOM or HTTP stack.
      */
     library.set("restclient")
 
@@ -90,7 +90,7 @@ tasks.named<GenerateTask>("openApiGenerate") {
     configOptions.set(
         mapOf(
             "sourceFolder" to "src/gen/java",
-            "useSpringBoot3" to "true",
+            "useJakartaEe" to "true",
             "serializationLibrary" to "jackson",
             "openApiNullable" to "false"
         )

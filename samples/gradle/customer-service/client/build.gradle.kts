@@ -13,7 +13,6 @@ dependencies {
     api("io.github.blueprint-platform:openapi-generics-contract:$platformVersion")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     implementation("jakarta.annotation:jakarta.annotation-api")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

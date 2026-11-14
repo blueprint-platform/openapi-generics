@@ -116,7 +116,8 @@ openApiGenerate {
     invokerPackage.set("com.example.client.generated.invoker")
     configOptions.set(mapOf(
         "sourceFolder" to "src/gen/java",
-        "useSpringBoot3" to "true",
+        "useSpringBoot4" to "true",
+        "useJackson3" to "true",
         "serializationLibrary" to "jackson",
         "openApiNullable" to "false"
     ))
@@ -141,11 +142,12 @@ for settings/dependencies and [custom task configuration](https://github.com/blu
 For both build tools, put shared `openapi-generics-contract:1.3.0` and application-owned envelope/container
 contracts on the compile classpath. Add DTO contracts only when using BYOC or when your adapter requires them.
 
-The examples above select **Boot 3 RestClient / Jackson 2**. The following dependency set was verified
-with the Boot **3.5.16** BOM; other library/Boot/Jackson choices need their corresponding dependencies.
+The Maven example uses **Boot 3.5 RestClient / Jackson 2**; the Gradle reference uses
+**Boot 4 RestClient / Jackson 3**. Match dependencies to the selected generation profile.
+The following are verified example sets, not platform-wide dependency requirements.
 
 <details markdown="1">
-<summary>Maven dependency configuration</summary>
+<summary>Maven dependencies — Boot 3.5 / Jackson 2</summary>
 
 ```xml
 <dependencyManagement>
@@ -192,23 +194,21 @@ with the Boot **3.5.16** BOM; other library/Boot/Jackson choices need their corr
 </details>
 
 <details markdown="1">
-<summary>Equivalent Gradle dependencies</summary>
+<summary>Gradle dependencies — Boot 4 / Jackson 3</summary>
 
 ```kotlin
 dependencies {
-    api(platform("org.springframework.boot:spring-boot-dependencies:3.5.16"))
+    api(platform("org.springframework.boot:spring-boot-dependencies:4.1.2"))
     api("io.github.blueprint-platform:openapi-generics-contract:1.3.0")
     api("org.springframework:spring-web")
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    api("tools.jackson.core:jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
 ```
 
 </details>
 
-These are example client-library choices, not platform-wide consumer requirements. For Boot 4/Jackson 3,
+For the complete Boot 4/Jackson 3 application boundary and runtime verification,
 see the [canonical Gradle stack](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/gradle/customer-service/README.md).
 
 ## Envelope and container identity come from the producer

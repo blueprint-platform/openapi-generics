@@ -46,6 +46,7 @@ dependencies {
     )
 }
 
+// Framework-neutral model compilation; application interoperability belongs to the Boot 4 stack.
 fun GenerateTask.configureModelOnlyGeneration() {
     generatorName.set(
         "java-generics-contract"
@@ -56,7 +57,7 @@ fun GenerateTask.configureModelOnlyGeneration() {
     configOptions.set(
         mapOf(
             "sourceFolder" to "src/gen/java",
-            "useSpringBoot3" to "true",
+            "useJakartaEe" to "true",
             "serializationLibrary" to "jackson",
             "openApiNullable" to "false"
         )

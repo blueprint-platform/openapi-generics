@@ -33,7 +33,7 @@ pluginManagement {
 rootProject.name = "customer-client"
 ```
 
-`build.gradle.kts` (Boot 3 RestClient/Jackson 2 example):
+`build.gradle.kts` (Boot 4 RestClient/Jackson 3 reference example):
 
 ```kotlin
 plugins {
@@ -51,13 +51,11 @@ java {
 }
 
 dependencies {
-    api(platform("org.springframework.boot:spring-boot-dependencies:3.5.16"))
+    api(platform("org.springframework.boot:spring-boot-dependencies:4.1.2"))
     api("io.github.blueprint-platform:openapi-generics-contract:1.3.0")
     api("org.springframework:spring-web")
-    api("com.fasterxml.jackson.core:jackson-databind")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    api("tools.jackson.core:jackson-databind")
     implementation("jakarta.annotation:jakarta.annotation-api")
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
 }
 
 openApiGenerate {
@@ -70,12 +68,16 @@ openApiGenerate {
     invokerPackage.set("com.example.client.generated.invoker")
     configOptions.set(mapOf(
         "sourceFolder" to "src/gen/java",
-        "useSpringBoot3" to "true",
+        "useSpringBoot4" to "true",
+        "useJackson3" to "true",
         "serializationLibrary" to "jackson",
         "openApiNullable" to "false"
     ))
 }
 ```
+
+This profile generates `jakarta.annotation.Generated`, `Nonnull` and `Nullable`, supplied by
+`jakarta.annotation-api` above.
 
 Place the producer's projected OpenAPI document at `spec/customer.yaml`, then run:
 
@@ -83,7 +85,7 @@ Place the producer's projected OpenAPI document at `spec/customer.yaml`, then ru
 ./gradlew build --configuration-cache
 ```
 
-The library, dependency platform and other dependencies above are one application choice, not platform-wide requirements. Boot 4/Jackson 3 configuration is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**. A client generation build does not need Springdoc or a running producer.
+The library, dependency platform and other dependencies above are one application choice, not platform-wide requirements. The matching Boot 4/Jackson 3 application architecture is demonstrated by the [canonical stack](../samples/gradle/customer-service/README.md). The producer selects Springdoc: Boot 3.5 reference **2.10.0**, Boot 4 reference **3.2.0**. A client generation build does not need Springdoc or a running producer.
 
 ## Configuration and generated-source wiring
 
@@ -158,6 +160,17 @@ Codecov tracks this flag against its own automatic baseline with the existing 2%
 repository-wide aggregate and patch checks still include all reported production code; existing
 thresholds are unchanged. No new numeric coverage floor is inferred from the initial unit-only measurement.
 
-`check` runs unit and fixture-based TestKit tests; `e2eTest` separately builds real Maven codegen into an isolated repository and checks generation/compilation/cache behavior. The [canonical stack](../samples/gradle/customer-service/README.md) additionally verifies real direct/paged HTTP deserialization and committed snapshot equality, with two clean builds asserting configuration-cache reuse in CI.
+| Layer | Evidence |
+| --- | --- |
+| Unit | Plugin-owned selection, source layout/precedence, compatibility/version guards, template ownership/patching and normalization |
+| Functional/TestKit | Gradle application/lifecycle, classpath/source/task wiring, mixed/multiple tasks and configuration cache |
+| Real-codegen E2E | Actual shared reconstruction artifact, generation, compilation and cache behavior; model-focused, with no Boot runtime |
+| [Canonical Boot 4 stack](../samples/gradle/customer-service/README.md) | Real producer/consumer applications, direct/page HTTP deserialization, errors, snapshot equality and clean-build cache reuse |
+
+The model-only E2E fixtures select Jakarta annotations with `useJakartaEe`, not a Spring Boot runtime.
+A `useSpringBoot3` generation option alone would not prove Boot 3.5 compatibility. Boot 3.5 remains
+verified by the [Maven Boot 3.5 stack](../samples/spring-boot-3/customer-service-client/README.md) and type-coverage builds;
+it is not a second Gradle default application stack. The public Gradle path above and canonical
+application reference use Boot 4/Jackson 3; those example choices do not change supported version lines.
 
 The repository sample uses `includeBuild` and restricted `mavenLocal()` to test this checkout before publication. Those are development mechanisms, not release-consumer prerequisites. Public consumers use explicit plugin versions and their configured release repositories as above. Public plugin discovery and dependency resolution must be verified after publication; local tests do not establish public availability.

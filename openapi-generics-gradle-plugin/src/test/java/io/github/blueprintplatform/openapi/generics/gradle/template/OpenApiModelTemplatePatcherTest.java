@@ -62,6 +62,17 @@ class OpenApiModelTemplatePatcherTest {
     }
 
     @Test
+    void rejectsAmbiguousClosingAnchorIndependentlyOfOpeningDispatch() {
+        String duplicatedClosing = UpstreamJavaModelTemplate.UNPATCHED
+                + "{{/isEnum}}{{/model}}{{/models}}";
+
+        var exception = assertThrows(TemplatePreparationException.class,
+                () -> patcher.patch(duplicatedClosing));
+        assertTrue(exception.getMessage().contains("closing"));
+        assertTrue(exception.getMessage().contains("more than once"));
+    }
+
+    @Test
     void rejectsNullTemplate() {
         assertThrows(NullPointerException.class, () -> patcher.patch(null));
     }

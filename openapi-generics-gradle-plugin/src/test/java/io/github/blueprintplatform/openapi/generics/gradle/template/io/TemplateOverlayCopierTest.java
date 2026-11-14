@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.io.TempDir;
 
 class TemplateOverlayCopierTest {
@@ -48,6 +50,21 @@ class TemplateOverlayCopierTest {
         assertEquals(
                 "DIRECTORY_WRAPPER",
                 Files.readString(destination.resolve("api_wrapper.mustache")));
+    }
+
+    @ParameterizedTest(name = "nested library overlay from JAR: {0}")
+    @ValueSource(booleans = {true, false})
+    void preservesLibraryScopedDocumentationOverlayLocation(boolean jar) throws IOException {
+        String relative = "libraries/restclient/model_doc.mustache";
+        String dispatch = "{{#vendorExtensions.x-api-wrapper}}{{>api_wrapper_doc}}{{/vendorExtensions.x-api-wrapper}}";
+        Path artifact = jar
+                ? TemplateArtifactFixtures.jar(tempDir.resolve("codegen.jar"), OVERLAY_ROOT + relative, dispatch)
+                : TemplateArtifactFixtures.directoryArtifact(tempDir.resolve("exploded"), OVERLAY_ROOT + relative, dispatch);
+        Path destination = tempDir.resolve("effective/Java");
+
+        assertEquals(1, copier.copy(List.of(artifact), OVERLAY_ROOT, destination));
+        assertEquals(dispatch, Files.readString(destination.resolve(relative)));
+        assertTrue(Files.notExists(destination.resolve("model_doc.mustache")));
     }
 
     @Test
