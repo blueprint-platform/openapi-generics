@@ -47,7 +47,17 @@
                 }
               }
             },
-            "description" : "OK"
+            "description" : "Customer found"
+          },
+          "404" : {
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetail"
+                }
+              }
+            },
+            "description" : "Customer not found"
           }
         },
         "tags" : [ "Customers" ]
@@ -117,6 +127,33 @@
           }
         },
         "x-ignore-model" : true
+      },
+      "ProblemDetail" : {
+        "type" : "object",
+        "properties" : {
+          "detail" : {
+            "type" : "string"
+          },
+          "instance" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "properties" : {
+            "type" : "object",
+            "additionalProperties" : { }
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "type" : {
+            "type" : "string",
+            "format" : "uri"
+          }
+        }
       },
       "ServiceResponseCustomerDto" : {
         "type" : "object",
