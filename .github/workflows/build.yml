@@ -72,6 +72,15 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
+      # Keep the Gradle 9.0.0 compatibility edge on JDK 21.
+      - name: Check Gradle plugin (unit and functional tests)
+        working-directory: openapi-generics-gradle-plugin
+        run: ./gradlew check
+
+      - name: Verify Gradle plugin real codegen
+        working-directory: openapi-generics-gradle-plugin
+        run: ./gradlew e2eTest
+
       - name: Set up JDK 25 for samples
         uses: actions/setup-java@v4
         with:
@@ -84,3 +93,18 @@ jobs:
 
       - name: Verify generated specs are committed
         run: git diff --exit-code -- samples
+
+      - name: Build canonical Gradle stack
+        working-directory: samples/gradle/customer-service
+        run: ./gradlew clean build --no-build-cache --configuration-cache
+
+      - name: Verify canonical Gradle stack configuration-cache reuse
+        working-directory: samples/gradle/customer-service
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew clean build --no-build-cache --configuration-cache | tee "$RUNNER_TEMP/gradle-stack-cache-reuse.log"
+          grep -Fq "Configuration cache entry reused." "$RUNNER_TEMP/gradle-stack-cache-reuse.log"
+
+      - name: Verify Gradle stack snapshot is unchanged
+        run: git diff --exit-code -- samples/gradle/customer-service/spec
