@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openapitools.codegen.CodegenModel;
 
 @Tag("unit")
@@ -30,6 +32,48 @@ class WrapperMetadataValidatorTest {
   @DisplayName("validate -> should skip ordinary model when wrapper metadata is absent")
   void validate_shouldSkip_whenWrapperMetadataAbsent() {
     assertDoesNotThrow(() -> validator.validate(model("CustomerDto")));
+  }
+
+  @Test
+  @DisplayName("validate -> should skip ordinary model with a null extension map")
+  void validate_shouldSkip_whenVendorExtensionsNull() {
+    CodegenModel model = model("CustomerDto");
+    model.vendorExtensions = null;
+
+    assertDoesNotThrow(() -> validator.validate(model));
+  }
+
+  @Test
+  @DisplayName("validate -> should distinguish a null wrapper marker from a missing marker")
+  void validate_shouldFail_whenWrapperMarkerNull() {
+    CodegenModel model = validDirectWrapper();
+    model.vendorExtensions.put(CodegenVendorExtensions.API_WRAPPER, null);
+
+    OpenApiGenericsContractException exception =
+        assertThrows(OpenApiGenericsContractException.class, () -> validator.validate(model));
+
+    assertEquals(
+        "Invalid OpenAPI Generics metadata for model 'ApiResponseCustomerDto': vendor extension "
+            + "'x-api-wrapper' must be a Boolean but was null.",
+        exception.getMessage());
+  }
+
+  @ParameterizedTest(name = "unnamed model: name=[{0}]")
+  @NullSource
+  @ValueSource(strings = " ")
+  @DisplayName("validate -> should retain contract diagnostics when the model has no name")
+  void validate_shouldIdentifyUnnamedModel(String name) {
+    CodegenModel model = validDirectWrapper();
+    model.name = name;
+    model.vendorExtensions.remove(CodegenVendorExtensions.API_WRAPPER_TYPE);
+
+    OpenApiGenericsContractException exception =
+        assertThrows(OpenApiGenericsContractException.class, () -> validator.validate(model));
+
+    assertEquals(
+        "Invalid OpenAPI Generics metadata for wrapper model '<unnamed>': "
+            + "required vendor extension 'x-api-wrapper-type' is missing.",
+        exception.getMessage());
   }
 
   @Test
@@ -214,6 +258,16 @@ class WrapperMetadataValidatorTest {
 
   private static Stream<Arguments> invalidRequiredMetadata() {
     return Stream.of(
+        arguments(
+            CodegenVendorExtensions.API_WRAPPER_TYPE,
+            null,
+            "Invalid OpenAPI Generics metadata for model 'ApiResponseCustomerDto': vendor "
+                + "extension 'x-api-wrapper-type' must be a String but was null."),
+        arguments(
+            CodegenVendorExtensions.API_WRAPPER_DATATYPE,
+            null,
+            "Invalid OpenAPI Generics metadata for model 'ApiResponseCustomerDto': vendor "
+                + "extension 'x-api-wrapper-datatype' must be a String but was null."),
         arguments(
             CodegenVendorExtensions.API_WRAPPER_TYPE,
             MissingValue.INSTANCE,
