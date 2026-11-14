@@ -20,7 +20,6 @@ public final class OpenApiGenericsFormattingClasspath {
 
         configuration.setCanBeResolved(true);
         configuration.setCanBeConsumed(false);
-        configuration.setVisible(false);
         configuration.setDescription(
                 "OpenAPI Generics embedded generated-source formatter runtime.");
 

@@ -159,6 +159,14 @@ public final class OpenApiGeneratorTemplateArtifactLocator {
                     index >= 0;
                     index--) {
 
+                if (current == null) {
+                    throw new TemplatePreparationException(
+                            "Could not determine the classpath root for OpenAPI Generator "
+                                    + "template resource '"
+                                    + resource
+                                    + "'.");
+                }
+
                 Path fileName =
                         current.getFileName();
 
@@ -177,15 +185,6 @@ public final class OpenApiGeneratorTemplateArtifactLocator {
                 current =
                         current.getParent();
 
-                if (current == null
-                        && index > 0) {
-
-                    throw new TemplatePreparationException(
-                            "Could not determine the classpath root for OpenAPI Generator "
-                                    + "template resource '"
-                                    + resource
-                                    + "'.");
-                }
             }
 
             if (current == null) {

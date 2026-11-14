@@ -17,6 +17,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class OpenApiGeneratorTemplateArtifactLocatorTest {
 
@@ -155,6 +157,34 @@ class OpenApiGeneratorTemplateArtifactLocatorTest {
             assertTrue(exception.getMessage().contains("Unsupported"));
             assertTrue(exception.getMessage().contains("https"));
         }
+    }
+
+    @ParameterizedTest(name = "rejects shallow resource URL: {0}")
+    @ValueSource(strings = {"", "model.mustache"})
+    void rejectsResourceUrlsThatRunOutOfPathSegments(String relative) throws Exception {
+        URL resource = tempDir.getRoot().resolve(relative).toUri().toURL();
+        var exception = assertThrows(TemplatePreparationException.class,
+                () -> locator.locate(loaderReturning(resource), RESOURCE_PATH));
+
+        assertTrue(exception.getMessage().contains("does not end with expected resource path"));
+    }
+
+    @Test
+    void acceptsFilesystemRootAsTheOwningClasspathRoot() throws Exception {
+        Path root = tempDir.getRoot();
+        URL resource = root.resolve(RESOURCE_PATH).toUri().toURL();
+
+        assertEquals(root, locator.locate(loaderReturning(resource), RESOURCE_PATH));
+    }
+
+    private ClassLoader loaderReturning(URL resource) {
+        return new ClassLoader(null) {
+            @Override
+            public java.util.Enumeration<URL> getResources(String name) {
+                assertEquals(RESOURCE_PATH, name);
+                return java.util.Collections.enumeration(java.util.List.of(resource));
+            }
+        };
     }
 
     private URLClassLoader isolatedClassLoader(URL... urls) {

@@ -3,6 +3,7 @@ package io.github.blueprintplatform.openapi.generics.gradle.template.io;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -90,6 +91,7 @@ public final class TemplateOverlayCopier {
             throws IOException {
 
         int copiedResourceCount = 0;
+        Path root = destinationRoot.toAbsolutePath().normalize();
 
         try (JarFile jarFile =
                      new JarFile(
@@ -120,9 +122,38 @@ public final class TemplateOverlayCopier {
                     continue;
                 }
 
-                Path destination =
-                        destinationRoot.resolve(
-                                relativePath);
+                Path entryPath;
+                try {
+                    entryPath = Path.of(relativePath);
+                } catch (InvalidPathException exception) {
+                    throw new IOException("Unsafe template overlay entry '" + entryName + "'.", exception);
+                }
+
+                // JAR names use '/' regardless of the host OS. Reject Windows path forms
+                // explicitly so an artifact cannot become unsafe on another supported host.
+                if (entryPath.isAbsolute()
+                        || relativePath.indexOf('\\') >= 0
+                        || (relativePath.length() >= 2
+                            && Character.isLetter(relativePath.charAt(0))
+                            && relativePath.charAt(1) == ':')) {
+                    throw new IOException("Unsafe template overlay entry '" + entryName + "'.");
+                }
+
+                Path destination = root.resolve(entryPath).normalize();
+                if (!destination.startsWith(root) || destination.equals(root)) {
+                    throw new IOException("Unsafe template overlay entry '" + entryName
+                            + "': destination must remain inside template root '" + root + "'.");
+                }
+
+                // Normalization alone cannot contain an existing symlink below the root.
+                Path current = root;
+                for (Path segment : root.relativize(destination)) {
+                    current = current.resolve(segment);
+                    if (Files.isSymbolicLink(current)) {
+                        throw new IOException("Unsafe template overlay entry '" + entryName
+                                + "': destination contains a symbolic link.");
+                    }
+                }
 
                 Files.createDirectories(
                         destination.getParent());

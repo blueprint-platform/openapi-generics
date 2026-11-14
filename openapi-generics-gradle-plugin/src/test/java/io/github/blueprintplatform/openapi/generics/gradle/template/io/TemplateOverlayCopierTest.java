@@ -2,6 +2,7 @@ package io.github.blueprintplatform.openapi.generics.gradle.template.io;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.blueprintplatform.openapi.generics.gradle.support.TemplateArtifactFixtures;
 import java.io.IOException;
@@ -21,6 +22,111 @@ class TemplateOverlayCopierTest {
 
     @TempDir
     Path tempDir;
+
+    @Test
+    void rejectsTraversalOutsideTemplateRoot() throws IOException {
+        Path outside = tempDir.resolve("outside.mustache");
+        Files.writeString(outside, "UNCHANGED");
+        Files.createDirectories(tempDir.resolve("effective/Java"));
+        Path jar = TemplateArtifactFixtures.jar(tempDir.resolve("unsafe.jar"),
+                OVERLAY_ROOT + "../../outside.mustache", "MALICIOUS");
+
+        assertThrows(IOException.class,
+                () -> copier.copy(List.of(jar), OVERLAY_ROOT, tempDir.resolve("effective/Java")));
+        assertEquals("UNCHANGED", Files.readString(outside));
+    }
+
+    @ParameterizedTest(name = "rejects unsafe JAR overlay path: {0}")
+    @ValueSource(strings = {
+            "../escaped.mustache", "nested/../../../escaped.mustache",
+            "../Java-sibling/escaped.mustache", ".", "nested/..",
+            "..\\escaped.mustache", "nested\\..\\escaped.mustache",
+            "\\absolute.mustache", "\\\\server\\share\\escaped.mustache",
+            "//server/share/escaped.mustache", "C:/escaped.mustache", "C:escaped.mustache",
+            "file\0.mustache"
+    })
+    void rejectsUnsafeJarEntryPathsBeforeWriting(String relativePath) throws IOException {
+        Path destination = Files.createDirectories(tempDir.resolve("effective/Java"));
+        Path jar = TemplateArtifactFixtures.jar(tempDir.resolve("unsafe.jar"),
+                OVERLAY_ROOT + relativePath, "MALICIOUS");
+
+        IOException failure = assertThrows(IOException.class,
+                () -> copier.copy(List.of(jar), OVERLAY_ROOT, destination));
+
+        assertTrue(failure.getMessage().contains("Unsafe template overlay entry"));
+        try (var paths = Files.walk(destination)) {
+            assertEquals(0, paths.filter(Files::isRegularFile).count());
+        }
+        assertTrue(Files.notExists(tempDir.resolve("effective/escaped.mustache")));
+        assertTrue(Files.notExists(tempDir.resolve("effective/Java-sibling")));
+    }
+
+    @ParameterizedTest(name = "rejects absolute entry, inside root={0}")
+    @ValueSource(booleans = {true, false})
+    void rejectsAbsoluteEntriesInsideOrOutsideTheRoot(boolean inside) throws IOException {
+        Path destination = Files.createDirectories(tempDir.resolve("effective/Java"));
+        Path existing = (inside ? destination : tempDir).resolve("existing.mustache");
+        Files.writeString(existing, "UNCHANGED");
+        Path jar = TemplateArtifactFixtures.jar(tempDir.resolve("absolute.jar"),
+                OVERLAY_ROOT + existing.toAbsolutePath(), "MALICIOUS");
+
+        IOException failure = assertThrows(IOException.class,
+                () -> copier.copy(List.of(jar), OVERLAY_ROOT, destination));
+
+        assertTrue(failure.getMessage().contains("Unsafe template overlay entry"));
+        assertEquals("UNCHANGED", Files.readString(existing));
+    }
+
+    @ParameterizedTest(name = "normalizes safe relative JAR path: {0}")
+    @ValueSource(strings = {"libraries/restclient/nested.mustache", "nested/../model.mustache", "x"})
+    void normalizesSafePathsAndPreservesReplacement(String relativePath) throws IOException {
+        Path destination = tempDir.resolve("effective/unused/../Java");
+        Path target = destination.normalize().resolve(relativePath).normalize();
+        Files.createDirectories(target.getParent());
+        Files.writeString(target, "OLD");
+        Path jar = TemplateArtifactFixtures.jar(tempDir.resolve("safe.jar"),
+                OVERLAY_ROOT + relativePath, "NEW");
+        Path relativeRoot = Path.of("").toAbsolutePath().relativize(destination);
+
+        assertEquals(1, copier.copy(List.of(jar), OVERLAY_ROOT, relativeRoot));
+        assertEquals("NEW", Files.readString(target));
+    }
+
+    @ParameterizedTest(name = "rejects existing destination symlink, directory={0}")
+    @ValueSource(booleans = {true, false})
+    void rejectsSymlinksBelowDestinationRoot(boolean directory) throws IOException {
+        Path destination = Files.createDirectories(tempDir.resolve("effective/Java"));
+        Path outside = directory ? Files.createDirectory(tempDir.resolve("outside"))
+                : Files.writeString(tempDir.resolve("outside.mustache"), "UNCHANGED");
+        Path link = Files.createSymbolicLink(destination.resolve("linked"), outside);
+        String relative = directory ? "linked/new-directory/escaped.mustache" : "linked";
+        Path jar = TemplateArtifactFixtures.jar(tempDir.resolve("symlink.jar"),
+                OVERLAY_ROOT + relative, "MALICIOUS");
+
+        IOException failure = assertThrows(IOException.class,
+                () -> copier.copy(List.of(jar), OVERLAY_ROOT, destination));
+
+        assertTrue(failure.getMessage().contains("symbolic link"));
+        assertTrue(Files.isSymbolicLink(link));
+        if (directory) {
+            assertTrue(Files.notExists(outside.resolve("new-directory")));
+        } else {
+            assertEquals("UNCHANGED", Files.readString(outside));
+        }
+    }
+
+    @Test
+    void preservesIgnoredDirectoryAndBlankEntries() throws IOException {
+        Path directoryJar = TemplateArtifactFixtures.jar(tempDir.resolve("directory.jar"),
+                OVERLAY_ROOT + "../../ignored/", "");
+        Path blankJar = TemplateArtifactFixtures.jar(tempDir.resolve("blank.jar"),
+                OVERLAY_ROOT + " ", "");
+        Path destination = tempDir.resolve("effective/Java");
+
+        assertEquals(0, copier.copy(List.of(directoryJar, blankJar), OVERLAY_ROOT, destination));
+        assertTrue(Files.notExists(destination));
+        assertTrue(Files.notExists(tempDir.resolve("ignored")));
+    }
 
     @Test
     void copiesOverlayFromJarIntoJavaTemplateRoot() throws IOException {
