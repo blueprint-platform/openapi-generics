@@ -283,18 +283,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponseBatchCoverageStatus"
-  /types/async/summary:
-    get:
-      tags:
-      - async-payload-controller
-      operationId: completionStageSummary
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServiceResponseTypeSummaryDto"
   /types/async/paged-summaries:
     get:
       tags:
@@ -307,6 +295,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServiceResponsePageTypeSummaryDto"
+  /types/async/address:
+    get:
+      tags:
+      - async-payload-controller
+      operationId: completionStageAddress
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceResponseAddressDto"
 components:
   schemas:
     CoverageStatus:
@@ -745,13 +745,3 @@ components:
       x-data-container: Batch
       x-data-container-type: io.github.blueprintplatform.samples.typecoverage.contract.Batch
       x-data-item: CoverageStatus
-    ServiceResponseTypeSummaryDto:
-      type: object
-      properties:
-        data:
-          $ref: "#/components/schemas/TypeSummaryDto"
-        meta:
-          $ref: "#/components/schemas/Meta"
-      x-api-wrapper: true
-      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
-      x-api-wrapper-datatype: TypeSummaryDto

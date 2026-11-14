@@ -20,7 +20,7 @@ Values/enums/DTOs are representative, not a claim of arbitrary generic-graph sup
 | Collections | `/types/lists/{summaries,statuses}`; `/types/sets/{summaries,statuses}` | List/Set of DTO or enum |
 | Shared page | `/types/pages/{summaries,statuses}` | Platform `Page<T>` |
 | Application containers | `/types/windows/{summaries,statuses}`; `/types/batches/{summaries,statuses}` | Window<T> / Batch<T> |
-| Async (producer + consumer probe) | `/types/async/summary`, `/types/async/paged-summaries` | `CompletionStage` / `DeferredResult` unwrap to the existing direct/page bindings |
+| Async (producer + consumer probe) | `/types/async/address`, `/types/async/paged-summaries` | `CompletionStage` / `DeferredResult` unwrap to the existing direct/page bindings |
 
 The POMs/configuration register application containers; shared `contract` has no framework dependency.
 
@@ -32,7 +32,14 @@ After [repository setup](../../README.md#repository-build-and-local-runtime-setu
 mvn clean verify
 ```
 
-The producer's `OpenApiSnapshotGenerationTest` regenerates the committed spec and checks metadata;
+The producer's `OpenApiSnapshotGenerationTest` verifies that async address/page responses reference
+exactly the synchronous address/page wrapper schemas, including shared envelope/container metadata.
+A synchronous-only OpenAPI group is a test fixture: its complete model schema set must equal the
+normal document's, so async endpoints add operations rather than models. MockMvc also verifies actual
+Spring MVC async dispatch. The direct async fixture uses the existing `AddressDto` shape; it does not
+introduce a separate summary wrapper just for async coverage.
+
+The same test class regenerates the committed spec;
 review the diff, which CI rejects if uncommitted. Generated client/consumer compilation checks that
 bindings, filtered infrastructure and shared container types agree. The POM does not add an automated
 HTTP/deserialization test for every row in the inventory.

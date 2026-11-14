@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public interface TypeCoverageConsumerService {
 
-  ServiceResponse<TypeSummaryDto> asyncSummary();
+  ServiceResponse<AddressDto> asyncAddress();
 
   ServiceResponse<Page<TypeSummaryDto>> asyncPagedSummaries();
 

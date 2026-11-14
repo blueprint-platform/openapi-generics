@@ -4,6 +4,7 @@ import io.github.blueprintplatform.openapi.generics.contract.envelope.Meta;
 import io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse;
 import io.github.blueprintplatform.openapi.generics.contract.paging.Page;
 import io.github.blueprintplatform.openapi.generics.contract.paging.SortDirection;
+import io.github.blueprintplatform.samples.typecoverage.api.dto.AddressDto;
 import io.github.blueprintplatform.samples.typecoverage.api.dto.CoverageStatus;
 import io.github.blueprintplatform.samples.typecoverage.api.dto.TypeSummaryDto;
 import java.util.List;
@@ -24,14 +25,10 @@ import org.springframework.web.context.request.async.DeferredResult;
 @RequestMapping(value = "/types/async", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AsyncPayloadController {
 
-  @GetMapping("/summary")
-  public CompletionStage<ServiceResponse<TypeSummaryDto>> completionStageSummary() {
+  @GetMapping("/address")
+  public CompletionStage<ServiceResponse<AddressDto>> completionStageAddress() {
     return CompletableFuture.completedFuture(
-        ServiceResponse.of(
-            new TypeSummaryDto(
-                UUID.fromString("77777777-7777-7777-7777-777777777777"),
-                "ASYNC-SUMMARY-001",
-                CoverageStatus.ACTIVE)));
+        ServiceResponse.of(new AddressDto("Istanbul", "TR", "34700")));
   }
 
   @GetMapping("/paged-summaries")

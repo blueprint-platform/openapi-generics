@@ -53,8 +53,8 @@ public class TypeCoverageClientAdapterImpl implements TypeCoverageClientAdapter 
   }
 
   @Override
-  public ServiceResponse<TypeSummaryDto> asyncSummary() {
-    return asyncApi.completionStageSummary();
+  public ServiceResponse<AddressDto> asyncAddress() {
+    return asyncApi.completionStageAddress();
   }
 
   @Override
