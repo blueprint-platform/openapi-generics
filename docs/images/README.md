@@ -1,13 +1,89 @@
 # Documentation visuals
 
-These two editable SVGs are the source artifacts; there is no separate HTML/draw.io version to keep
-in sync. They use local fonts and contain accessible titles/descriptions. Code excerpts are shortened
-for reading, not screenshots of complete generated files.
+Assets are grouped by purpose. Keep editable sources and any required exported files together:
 
-| Visual | Purpose | Used by |
-| --- | --- | --- |
-| [Generic binding comparison](proof/generic-binding-comparison.svg) | Show how the same response schema becomes fields with upstream `java`, or a subclass of the shared envelope/container with `java-generics-contract` | [Root README](../../README.md#see-the-proof) |
-| [Architecture](architecture/openapi-generics-architecture.svg) | Separate Java authority, OpenAPI projection, reconstruction and application boundaries; distinguish optional DTO reuse from envelope ownership | [Architecture guide](../architecture/architecture.md#architecture-overview) |
+```text
+docs/images/
+├── architecture/
+│   └── openapi-generics-architecture.svg   # Editable source + documentation render
+├── proof/
+│   └── generic-binding-comparison.svg     # Editable source + documentation render
+├── social/
+│   ├── social-preview.svg                 # Editable source
+│   └── social-preview.png                 # Final GitHub upload image
+└── README.md                              # Asset inventory and reproduction
+```
+
+| Purpose | Reference / destination | Editable source | Final render |
+| --- | --- | --- | --- |
+| Architecture / projection and reconstruction flow | [Architecture guide](../architecture/architecture.md#architecture-overview) | [openapi-generics-architecture.svg](architecture/openapi-generics-architecture.svg) | Same SVG, displayed directly at 1280×940 |
+| Before/after generated-binding proof | [Root README, “See the proof”](../../README.md#see-the-proof) | [generic-binding-comparison.svg](proof/generic-binding-comparison.svg) | Same SVG, displayed directly at 1280×620 |
+| GitHub repository Social preview | **Manually uploaded by the maintainer in GitHub repository settings**, not embedded in the README | [social-preview.svg](social/social-preview.svg) | **[social-preview.png](social/social-preview.png)**, 1280×640 |
+
+The SVGs are directly editable, self-contained source assets with accessible titles/descriptions and
+local font fallbacks. They are not generated from a separate HTML, draw.io or Mermaid source. Browser
+rendering produces the Social preview PNG; the two documentation SVGs need no duplicate PNG exports.
+Code excerpts are shortened for reading, not screenshots of complete generated files.
+
+### Updating an asset
+
+- **Architecture:** edit the SVG directly and check its flow and ownership labels against the
+  [architecture guide](../architecture/architecture.md). Open the SVG in a browser to render it.
+- **Proof:** regenerate and inspect the Java evidence using [the steps below](#reproduce-the-comparison),
+  then edit the SVG excerpts if the verified output changes. Open the SVG in a browser to render it.
+- **Social preview:** edit the SVG and [regenerate its PNG](#render-the-upload-image) together.
+  Keep both in the repository. The maintainer uploads the final PNG separately; no repository script
+  changes GitHub settings, and committing the files does not update the live preview.
+
+An asset's destination may be external to Markdown. In particular, the Social preview is maintained
+for manual upload even though no public guide embeds it. Check this inventory before removing assets.
+
+## README first impression and Social preview
+
+The README leads with a short pitch and the concrete Java → metadata → binding example. Keep that
+content near the top rather than repeating it inside a large hero. The comparison image belongs in
+the proof section; the architecture image belongs in the architecture guide.
+
+The [Social preview](social/social-preview.png) has a separate role: identify the project and explain
+its value when a repository link is shared without the README. Its [editable SVG](social/social-preview.svg)
+shows envelope/container identity, Maven + Gradle integration, envelope choice and optional DTO reuse.
+The concrete `ServiceResponse<Page<CustomerDto>>` example is illustrative, not an envelope restriction.
+BYOE (Bring Your Own Envelope) keeps an application's envelope authoritative; BYOC (Bring Your Own
+Contract) optionally reuses existing DTOs. The card uses plain language rather than unexplained acronyms.
+Ordinary API/DTO/transport generation remains explicitly upstream-owned. Exact reference versions and
+release badges are left to the compatibility docs so the image does not become a parallel version matrix.
+
+### Previous cover and GitHub setting
+
+The previous `cover.html` / `cover.png` pair was introduced in `1ffb109`. At review, the README on `main`
+(`223e658`) embedded that PNG at the top. GitHub's custom Social preview displayed the old
+cover design; it is a separately uploaded image, not a live reference to the file in git.
+The old HTML specifies a 1200×630 social-share frame. This is why the old asset was serving both roles,
+and why removing its README reference did not make it unused.
+
+The replacement starts from a small SVG instead of carrying forward the old HTML/CSS, decorations
+and “zero duplication / zero drift” copy. Its navy/teal palette matches the proof and architecture
+visuals. Upload **[social-preview.png](social/social-preview.png)** as the repository's GitHub Social
+preview image when adopting it. Adding or merging the file does not update that repository setting.
+
+### Render the upload image
+
+From the repository root, with Chrome installed (substitute your Chromium binary on other systems):
+
+```bash
+chrome_bin="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+preview_profile=$(mktemp -d)
+"$chrome_bin" --headless=new --disable-gpu --hide-scrollbars \
+  --no-first-run --no-default-browser-check \
+  --user-data-dir="$preview_profile" \
+  --window-size=1280,640 \
+  --screenshot="$PWD/docs/images/social/social-preview.png" \
+  "file://$PWD/docs/images/social/social-preview.svg"
+```
+
+The PNG uses GitHub's [recommended 1280×640 size](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/customizing-your-repositorys-social-media-preview).
+Check it at full and half size. The project name and identity-preservation message should
+remain clear at link-card size; the full metadata/code examples are available in the README.
 
 ## Reproduce the comparison
 
@@ -36,5 +112,5 @@ The stock file declares `PageCustomerDto data` and `Meta meta`. The binding file
 other boilerplate; it does not imply that all stock model fields are shown or that API/transport
 code has moved into platform ownership.
 
-When changing either visual, render the SVG in a browser and check text at both its native size and
+When changing any visual, render the SVG in a browser and check text at both its native size and
 normal documentation width. Keep the excerpts aligned with generated Java, not just schema names.
