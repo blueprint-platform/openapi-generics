@@ -11,6 +11,9 @@ import org.gradle.plugin.compatibility.compatibility
 import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.plugins.signing.Sign
 import com.gradle.publish.PublishTask
+import io.github.blueprintplatform.release.CentralBundleTask
+import java.nio.file.Files
+import java.nio.file.Path
 
 plugins {
     `java-gradle-plugin`
@@ -307,6 +310,71 @@ tasks.named<PublishTask>("publishPlugins") {
 
 val publishFunctionalTestPlugin =
     tasks.named("publishAllPublicationsToFunctionalTestRepository")
+
+// Repository-only, upload-free release tooling. No connection to check/TestKit/E2E.
+val implementationPublication = providers.provider {
+    publishing.publications.getByName("pluginMaven") as MavenPublication
+}
+tasks.withType<CentralBundleTask>().configureEach {
+    group = "publishing"
+    coordinates.set("${project.group}:${project.name}:${project.version}")
+    releaseEnabled.set(releasePublication)
+    validationOnly.set(providers.gradleProperty("releaseValidationOnly").map(String::toBooleanStrict).orElse(false))
+    signingFingerprint.set(providers.gradleProperty("releaseSigningFingerprint").orElse(""))
+    productionCommand.set(signingFingerprint.zip(validationOnly) { fingerprint, disposable ->
+        "./gradlew -PreleasePublication=true -PreleaseSigningFingerprint=$fingerprint " +
+            (if (disposable) "-PreleaseValidationOnly=true " else "") + "centralReleaseBundle"
+    })
+    gpgExecutable.set(providers.gradleProperty("releaseGpgExecutable").orElse("gpg"))
+    gpgHome.set(providers.gradleProperty("releaseGpgHome").orElse(""))
+    sourceRoot.set(repositoryRoot)
+    stagingDirectory.set(layout.buildDirectory.dir("release-staging"))
+    evidenceDirectory.set(layout.buildDirectory.dir("central-release"))
+    publicationFiles.set(providers.provider {
+        val publication = implementationPublication.get()
+        val files = publication.artifacts.filter {
+            it.extension != "asc" && !it.extension.endsWith(".asc")
+        }.associate { artifact ->
+            val classifier = artifact.classifier?.let { "-$it" }.orEmpty()
+            "${publication.artifactId}-${publication.version}$classifier.${artifact.extension}" to artifact.file.absolutePath
+        }.toMutableMap()
+        files["${publication.artifactId}-${publication.version}.pom"] =
+            layout.buildDirectory.file("publications/pluginMaven/pom-default.xml").get().asFile.absolutePath
+        files["${publication.artifactId}-${publication.version}.module"] =
+            layout.buildDirectory.file("publications/pluginMaven/module.json").get().asFile.absolutePath
+        files
+    })
+}
+val prepareCentralRelease = tasks.register<CentralBundleTask>("prepareCentralRelease") {
+    description = "Captures source provenance and clears owned release staging/evidence (no upload)."
+    phase.set("prepare")
+}
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (name == "publishPluginMavenPublicationToReleaseStagingRepository") {
+        dependsOn(prepareCentralRelease)
+        // Maven Publish generates an artifact-level repository index. Central accepts
+        // versioned components, not this local repository index. Remove only this known
+        // generated index here; validation rejects any metadata or extra files remaining.
+        val index = layout.buildDirectory.file(
+            "release-staging/${project.group.toString().replace('.', '/')}/${project.name}/maven-metadata.xml"
+        )
+        doLast {
+            val metadata = index.get().asFile.toPath()
+            for (suffix in listOf("", ".md5", ".sha1", ".sha256", ".sha512")) {
+                Files.deleteIfExists(Path.of(metadata.toString() + suffix))
+            }
+        }
+    }
+}
+tasks.register<CentralBundleTask>("validateCentralReleaseStaging") {
+    description = "Validates existing signed staging and writes external provenance/inventory; never restages or uploads."
+    phase.set("validate")
+}
+tasks.register<CentralBundleTask>("centralReleaseBundle") {
+    description = "Stages, validates and packages only the signed implementation for manual Central upload."
+    phase.set("bundle")
+    dependsOn("publishPluginMavenPublicationToReleaseStagingRepository")
+}
 
 fun resolveMavenExecutable(): String {
     val wrapperName =
