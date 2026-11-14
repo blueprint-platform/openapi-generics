@@ -5,9 +5,10 @@
 [![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Keep your Java response envelope and container types intact in generated clients.**
-OpenAPI Generics projects their identity into OpenAPI, then specializes OpenAPI Generator's Java client
-generation to bind concrete payloads back to those contracts.
+A generated client can match your JSON and still replace your shared Java response types.
+**Keep your envelope and container contracts intact in generated Java clients.**
+OpenAPI Generics carries their identity through OpenAPI metadata, then specializes OpenAPI Generator's
+Java generation to bind concrete payloads back to those contracts.
 
 ## The transformation in 30 seconds
 
@@ -118,7 +119,7 @@ and client-library dependencies. Then place the generated client behind an [appl
 
 ![The stock generator emits response fields; java-generics-contract binds the shared ServiceResponse and Page Java types.](docs/images/proof/generic-binding-comparison.svg)
 
-Both excerpts come from compiled output for the same spec with OpenAPI Generator 7.27.0 and RestClient.
+Both excerpts come from compiled output for the same spec and client options.
 Optional DTO reuse is disabled: `CustomerDto` remains ordinarily generated in both outputs.
 [Proof source and reproduction](docs/images/README.md) · [All samples and run instructions](samples/README.md)
 
@@ -126,7 +127,7 @@ Sample interoperability checks do not transfer ownership of ordinary transport b
 
 ## Compatibility and 1.3.0
 
-Supported lines: **Java 17+**, Spring MVC on **Boot 3.4.x / 3.5.x / 4.x**, **OAG 7.x**, Maven and
+Supported lines: **Java 17+**, Spring MVC on **Boot 3.5.x / 4.x**, **OAG 7.x**, Maven and
 **Gradle 9.x**. The current OAG reference is **7.27.0**; the Gradle integration has its own minimum
 capability edge. Exact references are verification inputs, not consumer-wide pins.
 See [compatibility, version roles and scope](docs/compatibility.md).

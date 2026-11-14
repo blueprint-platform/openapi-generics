@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="620" viewBox="0 0 1280 620" role="img" aria-labelledby="title description">
 <title id="title">Generated response structure versus shared Java binding</title>
-<desc id="description">Verified excerpts from OpenAPI Generator 7.27.0 with the same response schema and RestClient options. Stock java generates a concrete wrapper containing PageCustomerDto and Meta. java-generics-contract generates ServiceResponsePageCustomerDto extending shared ServiceResponse of Page of CustomerDto. CustomerDto remains ordinarily generated in both runs; optional existing DTO reuse is not enabled.</desc>
+<desc id="description">Illustrated excerpts from verified Java client output for the same response schema and client options. Stock java generates a concrete wrapper containing PageCustomerDto and Meta. java-generics-contract generates ServiceResponsePageCustomerDto extending shared ServiceResponse of Page of CustomerDto. CustomerDto remains ordinarily generated in both runs; optional existing DTO reuse is not enabled.</desc>
 <style>
 text { font-family: Arial, Helvetica, sans-serif; fill: #18283f; }
 .title { font-size: 32px; font-weight: 700; }
@@ -13,7 +13,7 @@ text { font-family: Arial, Helvetica, sans-serif; fill: #18283f; }
 <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto-start-reverse"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#5a6c83" stroke-width="1.5"/></marker></defs>
 <rect width="1280" height="620" fill="#f8fafc"/>
 <text x="40" y="49" class="title">Same response schema. Preserve Java identity.</text>
-<text x="40" y="83" class="note">OpenAPI Generator 7.27.0 · RestClient · same options · optional DTO reuse disabled</text>
+<text x="40" y="83" class="note">Same response schema and client options · optional DTO reuse disabled</text>
 <rect x="40" y="116" width="584" height="340" rx="12" fill="#ffffff" stroke="#cfdae6" stroke-width="1.5"/>
 <rect x="656" y="116" width="584" height="340" rx="12" fill="#f0faf7" stroke="#78bcae" stroke-width="1.5"/>
 <text x="64" y="155" class="heading">Stock Java generator</text>

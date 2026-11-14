@@ -61,8 +61,8 @@ In an existing supported Spring MVC application, add:
 </dependency>
 ```
 
-The Springdoc pin above is the **Boot 3.5** reference. Use **3.2.0** for the Boot 4 reference;
-Boot 3.4 remains on **2.8.x**. Your application chooses its framework versions within the
+The Springdoc pin above is the **Boot 3.5** reference. Use **3.2.0** for the Boot 4 reference.
+Your application chooses its framework versions within the
 [compatibility policy](../compatibility.md#supported-lines); the starter does not select a UI/runtime
 for you. Platform examples target prepared **1.3.0** artifacts, which must be available in your repository.
 

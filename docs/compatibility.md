@@ -18,7 +18,6 @@ version; the repository's verification JDKs are listed separately below.
 
 | Projection surface | Spring Boot | Springdoc | Integration |
 | --- | --- | --- | --- |
-| Boot 3.4 | 3.4.x | 2.8.x | Spring MVC |
 | Boot 3.5 | 3.5.x | 2.8.x–2.10.x | Spring MVC |
 | Boot 4 | 4.x | 3.x | Spring MVC |
 

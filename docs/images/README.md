@@ -44,14 +44,13 @@ The README leads with a short pitch and the concrete Java → metadata → bindi
 content near the top rather than repeating it inside a large hero. The comparison image belongs in
 the proof section; the architecture image belongs in the architecture guide.
 
-The [Social preview](social/social-preview.png) has a separate role: identify the project and explain
-its value when a repository link is shared without the README. Its [editable SVG](social/social-preview.svg)
-shows envelope/container identity, Maven + Gradle integration, envelope choice and optional DTO reuse.
-The concrete `ServiceResponse<Page<CustomerDto>>` example is illustrative, not an envelope restriction.
-BYOE (Bring Your Own Envelope) keeps an application's envelope authoritative; BYOC (Bring Your Own
-Contract) optionally reuses existing DTOs. The card uses plain language rather than unexplained acronyms.
-Ordinary API/DTO/transport generation remains explicitly upstream-owned. Exact reference versions and
-release badges are left to the compatibility docs so the image does not become a parallel version matrix.
+The [Social preview](social/social-preview.png) introduces the product when a repository link is shared
+without the README. Its [editable SVG](social/social-preview.svg) leads with preserving Java response
+generics across OpenAPI, then illustrates the same envelope/container types on both sides. It needs no
+knowledge of Spring MVC projection, vendor-extension keys or project-specific abbreviations.
+Envelope selection and optional DTO reuse belong in adoption/architecture explanations, not the card.
+The example is illustrative, not a promise of arbitrary generic-graph support or replacement of ordinary
+OpenAPI Generator DTO/API/transport generation.
 
 ### Previous cover and GitHub setting
 
@@ -85,11 +84,41 @@ The PNG uses GitHub's [recommended 1280×640 size](https://docs.github.com/en/re
 Check it at full and half size. The project name and identity-preservation message should
 remain clear at link-card size; the full metadata/code examples are available in the README.
 
+## Version and verification lifecycle
+
+The three SVGs describe product value, ownership or concrete binding behavior. None embeds exact
+upstream versions, even in accessibility metadata. Compatibility roles and current/minimum/negative
+values remain in the [compatibility reference](../compatibility.md); the record below describes a
+specific verification run, not an additional consumer version policy.
+
+When promoting an upstream reference:
+
+1. Update the owning build/test references and compatibility/current-reference text, including the
+   README compatibility section where applicable. Run the relevant regression and comparison checks.
+2. Update **the verification record below and its reproduction inputs** after successful verification.
+   An upstream patch change alone does not require editing an SVG or re-exporting the Social preview.
+3. If generated snippets or ownership semantics actually change, review that behavior and update only
+   the affected visual. Re-export the social PNG only when its SVG changes. Keep source and final together.
+
+The architecture has no release/reference labels and stays valid while ownership and flow stay the same.
+The proof illustrates verified snippets; tool/library/options provenance lives below, not inside the image.
+The Social preview is product communication, not a compatibility matrix or an executable proof.
+
 ## Reproduce the comparison
 
-The comparison was checked with **OpenAPI Generator 7.27.0**, **RestClient**, Boot 3/Jackson 2 options
-and no external DTO mappings. Both outputs compiled. `CustomerDto` is ordinarily generated in both;
-this comparison isolates shared `ServiceResponse<T>` and `Page<T>` reconstruction.
+Last verified comparison inputs (both outputs compiled):
+
+| Input | Verified value |
+| --- | --- |
+| OpenAPI Generator | 7.27.0, selected coherently through the Maven parent |
+| Input spec | [Canonical customer snapshot](../../samples/gradle/customer-service/spec/customer-api-docs.json) |
+| Library / serialization | RestClient, Boot 3 / Jackson 2 |
+| Options | `useSpringBoot3=true`, `serializationLibrary=jackson`, `openApiNullable=false` |
+| External DTO mappings | None: `CustomerDto` is ordinarily generated in both outputs |
+| Generator comparison | Upstream `java` versus `java-generics-contract` |
+
+This isolates shared `ServiceResponse<T>` and `Page<T>` reconstruction. These inputs can be updated
+without changing the visual when the verified binding stays identical.
 
 1. Install the root Maven reactor (`mvn clean install`).
 2. Make two temporary copies of the [transport client POM](../../samples/transport-coverage/client/pom.xml),

@@ -35,7 +35,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 ### Changed
 
 - Aligned Maven/core and Maven sample OpenAPI Generator current references to **7.27.0**, matching the existing Gradle reference; consumer-selected Maven plugin, core, generator and upstream template extraction remain coherent.
-- Aligned Spring Boot 3.5 reference surfaces to Springdoc **2.10.0** and Spring Boot 4 surfaces to **3.2.0**; Spring Boot 3.4 support remains on **2.8.x**.
+- Aligned Spring Boot 3.5 reference surfaces to Springdoc **2.10.0** and Spring Boot 4 surfaces to **3.2.0**.
 - Established OpenAPI Generator **7.25.0** as the minimum verified Gradle integration baseline.
 - Promoted the Gradle plugin and canonical Gradle sample wrappers/current references to **9.9.1**; the minimum tested Gradle edge remains **9.0.0**.
 - Updated sample projects to use Spring Boot dependency management for improved dependency alignment.
