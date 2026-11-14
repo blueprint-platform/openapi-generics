@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -42,8 +43,7 @@ import org.w3c.dom.Element;
 public abstract class CentralBundleTask extends DefaultTask {
     private static final Set<String> LOCAL_PLANS = Set.of(
             "OPENAPI_GENERICS_PLATFORM_UPGRADE_PLAN.md", "OPENAPI_GENERICS_1_3_0_RELEASE_PLAN.md");
-    private static final Map<String, String> CHECKSUMS = Map.of(
-            ".md5", "MD5", ".sha1", "SHA-1", ".sha256", "SHA-256", ".sha512", "SHA-512");
+    private static final List<String> CHECKSUM_SUFFIXES = List.of(".md5", ".sha1", ".sha256", ".sha512");
 
     @Input public abstract Property<String> getPhase();
     @Input public abstract Property<String> getCoordinates();
@@ -111,7 +111,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         for (String name : payload.keySet()) {
             permitted.add(name);
             permitted.add(name + ".asc");
-            for (String suffix : CHECKSUMS.keySet()) permitted.add(name + suffix);
+            for (String suffix : CHECKSUM_SUFFIXES) permitted.add(name + suffix);
         }
         Map<String, Path> actual = new TreeMap<>();
         try (var paths = Files.walk(staging)) {
@@ -137,19 +137,20 @@ public abstract class CentralBundleTask extends DefaultTask {
             require(file != null && Files.size(file) > 0, "Missing/empty artifact: " + name);
             require(Files.isRegularFile(item.getValue(), LinkOption.NOFOLLOW_LINKS)
                             && !Files.isSymbolicLink(item.getValue())
-                            && hash(file, "SHA-256").equals(hash(item.getValue(), "SHA-256")),
+                            && sha256(file).equals(sha256(item.getValue())),
                     "Staged artifact differs from generated publication output: " + name);
             Path signature = actual.get(name + ".asc");
             require(signature != null && Files.size(signature) > 0, "Missing signature: " + name);
             signers.put(name, verifySignature(file, signature, fingerprint));
-            for (var checksum : CHECKSUMS.entrySet()) {
-                Path sidecar = actual.get(name + checksum.getKey());
+            for (String suffix : CHECKSUM_SUFFIXES) {
+                Path sidecar = actual.get(name + suffix);
                 if (sidecar == null) {
-                    require(!Set.of(".md5", ".sha1").contains(checksum.getKey()),
-                            "Missing required checksum: " + name + checksum.getKey());
+                    require(!Set.of(".md5", ".sha1").contains(suffix),
+                            "Missing required checksum: " + name + suffix);
                 } else {
-                    require(Files.readString(sidecar).trim().equalsIgnoreCase(hash(file, checksum.getValue())),
-                            "Checksum mismatch: " + name + checksum.getKey());
+                    String expected = Files.readString(sidecar).trim().toLowerCase(Locale.ROOT);
+                    require(centralRepositoryChecksumMatches(file, suffix, expected),
+                            "Checksum mismatch: " + name + suffix);
                 }
             }
         }
@@ -199,7 +200,7 @@ public abstract class CentralBundleTask extends DefaultTask {
             try (ZipOutputStream stream = new ZipOutputStream(Files.newOutputStream(zip))) {
                 for (var item : actual.entrySet()) {
                     byte[] bytes = Files.readAllBytes(item.getValue());
-                    require(hash(bytes, "SHA-256").equals(inventory.get(item.getKey())),
+                    require(sha256(bytes).equals(inventory.get(item.getKey())),
                             "Staging changed during packaging: " + item.getKey());
                     ZipEntry entry = new ZipEntry(item.getKey());
                     entry.setTimeLocal(java.time.LocalDateTime.of(1980, 1, 1, 0, 0));
@@ -210,7 +211,7 @@ public abstract class CentralBundleTask extends DefaultTask {
             }
             require(inventory.equals(inventory(actual)) && source.equals(sourceState()),
                     "Staging/source changed during packaging");
-            Files.writeString(output.resolve(filename + ".sha256"), hash(zip, "SHA-256") + "  " + filename + "\n");
+            Files.writeString(output.resolve(filename + ".sha256"), sha256(zip) + "  " + filename + "\n");
             getLogger().lifecycle("Local Central bundle: {} ({} files, releaseReady={})", zip, actual.size(),
                     !getValidationOnly().get());
         }
@@ -229,13 +230,13 @@ public abstract class CentralBundleTask extends DefaultTask {
             if (file.isEmpty() || LOCAL_PLANS.contains(file)) continue;
             Path path = root.resolve(file);
             contents.put(file, Files.isSymbolicLink(path) ? "symlink:" + Files.readSymbolicLink(path)
-                    : Files.exists(path) ? hash(path, "SHA-256") : "deleted");
+                    : Files.exists(path) ? sha256(path) : "deleted");
         }
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("commit", commit);
         state.put("tree", tree);
         state.put("dirty", extra || !diff.isBlank());
-        state.put("sourceContentsSha256", hash(JsonOutput.toJson(contents).getBytes(StandardCharsets.UTF_8), "SHA-256"));
+        state.put("sourceContentsSha256", sha256(JsonOutput.toJson(contents).getBytes(StandardCharsets.UTF_8)));
         return state;
     }
 
@@ -293,9 +294,9 @@ public abstract class CentralBundleTask extends DefaultTask {
                 Path artifact = actual.get(directory + url);
                 require(url != null && !url.contains("/") && artifact != null, "Invalid module artifact reference");
                 require(((Number) file.get("size")).longValue() == Files.size(artifact), "Module artifact size mismatch");
-                for (var checksum : CHECKSUMS.entrySet()) {
-                    String field = checksum.getKey().substring(1);
-                    if (file.containsKey(field)) require(hash(artifact, checksum.getValue()).equals(file.get(field)),
+                for (String suffix : CHECKSUM_SUFFIXES) {
+                    String field = suffix.substring(1);
+                    if (file.containsKey(field)) require(centralRepositoryChecksumMatches(artifact, suffix, file.get(field)),
                             "Module artifact checksum mismatch: " + url);
                 }
             }
@@ -304,7 +305,7 @@ public abstract class CentralBundleTask extends DefaultTask {
 
     private static Map<String, String> inventory(Map<String, Path> files) throws Exception {
         Map<String, String> result = new TreeMap<>();
-        for (var entry : files.entrySet()) result.put(entry.getKey(), hash(entry.getValue(), "SHA-256"));
+        for (var entry : files.entrySet()) result.put(entry.getKey(), sha256(entry.getValue()));
         return result;
     }
 
@@ -317,12 +318,37 @@ public abstract class CentralBundleTask extends DefaultTask {
         Files.writeString(file, JsonOutput.prettyPrint(JsonOutput.toJson(data)) + "\n");
     }
 
-    private static String hash(Path file, String algorithm) throws Exception {
-        return hash(Files.readAllBytes(file), algorithm);
+    private static String sha256(Path file) throws Exception {
+        return sha256(Files.readAllBytes(file));
     }
 
-    private static String hash(byte[] bytes, String algorithm) throws Exception {
-        return HexFormat.of().formatHex(MessageDigest.getInstance(algorithm).digest(bytes));
+    private static String sha256(byte[] bytes) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
+    }
+
+    // Repository-format equality only. Authenticity is verified by GPG; source,
+    // artifact, inventory and ZIP integrity checks always use the SHA-256 path above.
+    private static boolean centralRepositoryChecksumMatches(Path file, String suffix, Object expected) throws Exception {
+        return switch (suffix) {
+            case ".md5", ".sha1" -> legacyCentralChecksumMatches(file, suffix, expected);
+            case ".sha256" -> sha256(file).equals(expected);
+            case ".sha512" -> HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(file))).equals(expected);
+            default -> throw new GradleException("Unsupported Central checksum sidecar: " + suffix);
+        };
+    }
+
+    private static boolean legacyCentralChecksumMatches(Path file, String suffix, Object expected) throws Exception {
+        MessageDigest checksum = switch (suffix) {
+            // Central repository compatibility checksum; not used for security/authenticity.
+            // codeql[java/potentially-weak-cryptographic-algorithm]
+            case ".md5" -> MessageDigest.getInstance("MD5");
+            // Central repository compatibility checksum; not used for security/authenticity.
+            // codeql[java/potentially-weak-cryptographic-algorithm]
+            case ".sha1" -> MessageDigest.getInstance("SHA-1");
+            default -> throw new GradleException("Unsupported legacy Central checksum sidecar: " + suffix);
+        };
+        return HexFormat.of().formatHex(checksum.digest(Files.readAllBytes(file))).equals(expected);
     }
 
     private static String command(Path directory, List<String> args) throws Exception {
