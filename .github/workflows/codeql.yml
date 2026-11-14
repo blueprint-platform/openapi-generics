@@ -47,6 +47,11 @@ jobs:
       - name: Build core modules
         run: mvn -B -ntp -DskipTests clean verify
 
+      # Outside the Maven reactor: compile production sources under the same CodeQL tracer.
+      - name: Compile Gradle plugin production sources
+        working-directory: openapi-generics-gradle-plugin
+        run: ./gradlew --no-daemon --no-build-cache clean classes
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
         with:

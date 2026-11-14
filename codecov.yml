@@ -1,3 +1,8 @@
+codecov:
+  notify:
+    # Three Maven reports plus one combined Gradle report, across two parallel jobs.
+    after_n_builds: 4
+
 coverage:
   status:
     project:
@@ -44,6 +49,7 @@ coverage:
 comment:
   layout: "reach, diff, flags, files"
   require_changes: true
+  after_n_builds: 4
 
 ignore:
   - "samples/**"
