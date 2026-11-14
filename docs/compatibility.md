@@ -37,7 +37,7 @@ For usage and architecture details, see the adoption and architecture guides rat
 | Java | Spring Boot | springdoc-openapi | Integration | Status    |
 |------|-------------|-------------------|-------------|-----------|
 | 17+  | 3.4.x       | 2.8.x             | WebMvc      | Supported |
-| 17+  | 3.5.x       | 2.8.x, 2.9.x      | WebMvc      | Supported |
+| 17+  | 3.5.x       | 2.8.x–2.10.x       | WebMvc      | Supported |
 | 17+  | 4.x         | 3.x               | WebMvc      | Supported |
 
 Published OpenAPI Generics artifacts target Java 17+.
@@ -49,6 +49,7 @@ The matrix describes supported version lines. It does not mean that every patch 
 | Java | OpenAPI Generator | Build integration | Status    |
 |------|-------------------|-------------------|-----------|
 | 17+  | 7.x               | Maven             | Supported |
+| 17+  | 7.x               | Gradle 9.x        | Supported |
 
 The Maven codegen parent provides a tested OpenAPI Generator default while allowing consumers to select another version within the supported 7.x compatibility line.
 
@@ -64,12 +65,14 @@ Verified reference baselines are exact combinations exercised by maintained repo
 
 | Platform line | Java | Spring Boot | springdoc-openapi | Purpose                                                       |
 |---------------|------|-------------|-------------------|---------------------------------------------------------------|
-| Spring Boot 3 | 21   | 3.5.16      | 2.9.1             | Primary Spring Boot 3 integration and type-coverage reference |
-| Spring Boot 4 | 25   | 4.1.2       | 3.1.1             | Spring Boot 4 compatibility reference                         |
+| Spring Boot 3 | 21   | 3.5.16      | 2.10.0            | Primary Spring Boot 3 integration and type-coverage reference |
+| Spring Boot 4 | 25   | 4.1.2       | 3.2.0             | Spring Boot 4 compatibility reference                         |
 
 ### Client Generation Reference
 
-OpenAPI Generics 1.3.0 is verified with OpenAPI Generator **7.26.0**.
+OpenAPI Generics 1.3.0 is verified with OpenAPI Generator **7.27.0**.
+
+The Gradle integration compiles against the minimum OpenAPI Generator API/capability baseline **7.25.0** with `compileOnly` dependencies and verifies **7.24.0** as an unsupported capability boundary. These integration-specific edges do not narrow platform-wide 7.x support. Its current runtime reference is **7.27.0**. Gradle **9.x** is supported, with minimum tested distribution **9.0.0** and current wrapper/reference **9.9.1**. Consumers select the official plugin version; the platform plugin integrates through `withPlugin` and does not apply or replace it.
 
 Repository verification covers the complete contract lifecycle, including producer projection, OpenAPI metadata, Java reconstruction, generated-source validation, and consumer integration.
 
@@ -173,7 +176,6 @@ OpenAPI tooling that does not understand OpenAPI Generics metadata can still con
 The following are not currently part of the supported scope:
 
 - Spring WebFlux
-- first-class Gradle client build integration
 - non-Java server frameworks
 - non-Java client reconstruction
 - arbitrary nested generic graphs

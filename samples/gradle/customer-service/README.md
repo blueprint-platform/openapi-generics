@@ -1,7 +1,7 @@
 # Gradle-first customer service
 
-A Spring Boot **4.1.2**, Java **25** application adoption stack using OpenAPI Generator **7.27.0**
-and Gradle **9.9.1**. These are this sample's verified references, not consumer support minimums.
+A Spring Boot **4.1.2**, Java **25** application adoption stack using OpenAPI Generator **7.27.0**,
+Springdoc **3.2.0** and Gradle **9.9.1**. These are this sample's verified references, not consumer support minimums.
 
 ```text
 contract (pure Java CustomerDto)

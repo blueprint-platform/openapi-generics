@@ -32,6 +32,7 @@ Consumers choose concrete framework/tool versions within supported policy. The p
 
 - Verify a new upstream release against the existing implementation as a candidate. Pass replaces the current reference; failure requires investigating the concrete break.
 - Do not accumulate previous currents in the permanent matrix. Removal from the matrix does not make a version unsupported. Change minimum/negative boundaries only when the actual compatibility boundary changes.
+- Springdoc references follow the Boot line: Boot 3.5 uses 2.10.0 and Boot 4 uses 3.2.0; Boot 3.4 remains supported on 2.8.x. These references do not impose consumer-wide pins.
 - Read exact role values from build configuration and executable tests. Independently maintained surfaces may have different references. Sample pins, starter compile/test baselines, internal BOM values and wrapper versions are not universal consumer constraints; representative verification is not exhaustive support-line testing.
 - General OpenAPI Generator support is **7.x**; Gradle support is **9.x**. The Gradle integration's OAG minimum/negative boundary must not narrow platform-wide 7.x support.
 

@@ -339,7 +339,7 @@ The current architectural scope is intentionally focused on:
 - Spring Boot WebMvc
 - springdoc-openapi WebMvc integration
 - OpenAPI Generator 7.x
-- Maven-based client generation
+- Maven and Gradle-based client generation; both use the shared `java-generics-contract` reconstruction semantics. Maven aligns the selected generator toolchain and extracts its upstream template; Gradle uses the running official plugin classloader and preserves consumer plugin/version ownership.
 
 These boundaries define the platform and tooling surface OpenAPI Generics currently owns. Exact verified framework and generator versions are maintained separately from the architecture definition.
 

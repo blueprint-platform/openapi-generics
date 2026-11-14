@@ -430,6 +430,7 @@ OpenAPI Generics currently supports:
 - **Spring Boot:** 3.4.x, 3.5.x, and 4.x
 - **springdoc-openapi:** 2.x with Spring Boot 3.x, and 3.x with Spring Boot 4.x
 - **OpenAPI Generator:** 7.x
+- **Client build integration:** Maven and Gradle 9.x
 - **Server integration:** Spring WebMvc via `springdoc-openapi-starter-webmvc-ui`
 
 The repository maintains verified Spring Boot 3, Spring Boot 4, and OpenAPI Generator reference baselines within these supported ranges.
@@ -470,9 +471,11 @@ This boundary is deliberate: OpenAPI Generics reconstructs generic contract sema
 
 OpenAPI Generics does not lock consumers to a specific OpenAPI Generator version.
 
-The provided parent configuration includes a tested default and defines the supported compatibility line, while consumers may override the `openapi-generator.version` property within the supported 7.x range.
+The Maven parent provides the current tested default, **7.27.0**, within the supported compatibility line, while consumers may override the `openapi-generator.version` property within the supported 7.x range.
 
-The parent keeps the selected OpenAPI Generator version aligned across plugin execution, generator dependencies, and upstream template extraction so that the reconstruction pipeline uses a consistent toolchain.
+The parent keeps the selected OpenAPI Generator version aligned across plugin execution, `openapi-generator-core`, `openapi-generator`, and upstream `Java/model.mustache` extraction.
+
+For Gradle, consumers select and apply the official plugin. The platform plugin integrates with it and discovers upstream templates from its running classloader. See the [canonical Gradle sample](samples/gradle/customer-service/README.md).
 
 > OpenAPI Generics owns contract semantics and declares generator compatibility.  
 > Consumers choose the OpenAPI Generator version they run within the supported compatibility line.

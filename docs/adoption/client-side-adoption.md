@@ -20,6 +20,7 @@ For architecture details, see [Architecture](../architecture/architecture.md).
 ## Contents
 
 - [Quick Start](#quick-start)
+- [Gradle Integration](#gradle-integration)
 - [Contract-Driven Envelope Reconstruction](#contract-driven-envelope-reconstruction)
 - [BYOE — Bring Your Own Envelope](#byoe)
 - [BYOC — Bring Your Own Contract](#byoc)
@@ -136,6 +137,14 @@ target/generated-sources/openapi/src/gen/java
 ```
 
 The generator reconstructs supported wrapper and container contracts from OpenAPI Generics metadata in the input document.
+
+---
+
+## Gradle Integration
+
+The [canonical Gradle sample](../../samples/gradle/customer-service/README.md) uses the official `org.openapi.generator` plugin with `io.github.blueprint-platform.openapi-generics` and selects `java-generics-contract` on a `GenerateTask`. Consumers apply and version the official plugin and retain ordinary generation options. The platform plugin provisions its matching codegen artifact, discovers templates from the running official plugin classloader, and prepares templates only for selected tasks.
+
+With the Java plugin, selected tasks automatically register their output and effective `sourceFolder`, wire compilation dependencies, and normalize generated sources before output snapshots. Custom and multiple tasks use the same shared reconstruction semantics as Maven. Maven parent properties, including `openapi.generics.skip`, are not Gradle configuration APIs. See [Compatibility](../compatibility.md) for supported lines and integration-specific boundaries.
 
 ---
 

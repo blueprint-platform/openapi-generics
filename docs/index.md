@@ -225,7 +225,7 @@ Normal OpenAPI Generator choices remain consumer-controlled, including the input
 
 OpenAPI Generics prepares the reconstruction-specific environment and restores the projected Java contract semantics without replacing the ordinary OpenAPI Generator lifecycle.
 
-See [Client-Side Adoption](adoption/client-side-adoption.md) for the complete Maven configuration, BYOC mappings, fallback behavior, and generated-source setup.
+See [Client-Side Adoption](adoption/client-side-adoption.md) for Maven configuration, BYOC mappings, and Gradle integration through the consumer-selected official plugin. The [Gradle sample](../samples/gradle/customer-service/README.md) demonstrates automatic source registration and compilation wiring.
 
 ---
 
@@ -280,7 +280,7 @@ OpenAPI Generics currently supports:
 - **springdoc-openapi:** 2.x with Spring Boot 3.x, and 3.x with Spring Boot 4.x
 - **OpenAPI Generator:** 7.x
 - **Server integration:** Spring WebMvc
-- **Client build integration:** Maven
+- **Client build integration:** Maven and Gradle 9.x
 
 The repository maintains exact Spring Boot 3, Spring Boot 4, and OpenAPI Generator reference baselines to verify compatibility without narrowing support to those exact versions.
 
