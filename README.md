@@ -1,15 +1,18 @@
-# OpenAPI Generics for Spring Boot
+<h1 align="center">OpenAPI Generics for Spring Boot</h1>
 
-[![Build](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml)
-[![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
-[![Codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.blueprint-platform/openapi-generics-server-starter)](https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter)
-[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-[![Java: 17+](https://img.shields.io/badge/Java-17%2B-lightgrey?logo=openjdk)](docs/compatibility.md)
-[![Spring Boot: 3.5.x → 4.x](https://img.shields.io/badge/Spring%20Boot-3.5.x%20%E2%86%92%204.x-6DB33F?logo=springboot&logoColor=white)](docs/compatibility.md)
-[![OpenAPI Generator: 7.x](https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative)](docs/compatibility.md)
+<p align="center">
+  <a href="https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml"><img src="https://github.com/blueprint-platform/openapi-generics/actions/workflows/build.yml/badge.svg" alt="Build" /></a>
+  <a href="https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml"><img src="https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
+  <a href="https://codecov.io/gh/blueprint-platform/openapi-generics"><img src="https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg" alt="Codecov" /></a>
+  <br />
+  <a href="https://github.com/blueprint-platform/openapi-generics/releases/latest"><img src="https://img.shields.io/github/v/release/blueprint-platform/openapi-generics" alt="Release" /></a>
+  <a href="https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter"><img src="https://img.shields.io/maven-central/v/io.github.blueprint-platform/openapi-generics-server-starter" alt="Maven Central" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <br />
+  <a href="docs/compatibility.md"><img src="https://img.shields.io/badge/Java-17%2B-lightgrey?logo=openjdk" alt="Java: 17+" /></a>
+  <a href="docs/compatibility.md"><img src="https://img.shields.io/badge/Spring%20Boot-3.5.x%20%E2%86%92%204.x-6DB33F?logo=springboot&amp;logoColor=white" alt="Spring Boot: 3.5.x → 4.x" /></a>
+  <a href="docs/compatibility.md"><img src="https://img.shields.io/badge/OpenAPI%20Generator-7.x-blue?logo=openapiinitiative" alt="OpenAPI Generator: 7.x" /></a>
+</p>
 
 A generated client can match your JSON and still replace your shared Java response types.
 **Keep your envelope and container contracts intact in generated Java clients.**
