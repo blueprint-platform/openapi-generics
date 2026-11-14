@@ -153,7 +153,7 @@ Contract metadata is the boundary between producer projection and client reconst
 
 When relying on `x-api-wrapper-type` for contract-driven envelope reconstruction, producer and codegen components should be kept aligned so the client can consume the metadata model published by the producer.
 
-OpenAPI Generics 1.2.1 preserves 1.2.0 runtime contracts. Existing 1.2 contracts do not require migration.
+OpenAPI Generics 1.3.0 preserves 1.2.x runtime contracts. Existing 1.2 contracts do not require migration.
 
 ### OpenAPI Generator Version Ownership
 

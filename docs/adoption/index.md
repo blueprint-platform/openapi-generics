@@ -12,4 +12,5 @@ permalink: /adoption/
 Choose one of the following:
 
 - [Server-Side Adoption](server-side-adoption.md)
-- [Client-Side Adoption](client-side-adoption.md)
+- [Client-Side Adoption](client-side-adoption.md) — Maven parent configuration and shared BYOE/BYOC reconstruction
+- [Gradle Plugin](../../openapi-generics-gradle-plugin/README.md) — standalone plugin consumer example, generated-source wiring and version boundaries

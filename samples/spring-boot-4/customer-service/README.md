@@ -2,7 +2,7 @@
 
 > Minimal reference producer for **contract-first, generics-aware OpenAPI**
 
-This sample shows only one thing:
+This sample focuses on:
 
 > How to expose a Spring Boot API using `ServiceResponse<T>` so that OpenAPI stays deterministic and clients stay aligned.
 
@@ -14,8 +14,9 @@ This sample shows only one thing:
 
 ```xml
 <dependency>
-  <groupId>io.github.blueprintplatform</groupId>
+  <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
+  <version>1.3.0</version>
 </dependency>
 ```
 

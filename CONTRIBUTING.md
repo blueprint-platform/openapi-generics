@@ -67,7 +67,7 @@ Small, focused pull requests are easier to review.
 
 ### Prerequisites
 
-- Java 17+ (Java 21 recommended)
+- JDK 21 for core/plugin verification; JDK 25 for the Boot 4 and full sample suite. Published platform bytecode targets Java 17+.
 - Maven 3.9+
 
 ### Build
@@ -86,6 +86,7 @@ openapi-generics-platform-bom
 openapi-generics-server-starter
 openapi-generics-java-codegen
 openapi-generics-java-codegen-parent
+openapi-generics-gradle-plugin (independent Gradle build)
 ```
 
 ---
@@ -115,11 +116,19 @@ openapi-generics-java-codegen-parent
 
 ## Testing
 
-Run the complete verification suite before submitting changes:
+Run the affected verification layers before submitting changes. The complete local path is:
 
 ```bash
-mvn clean verify
+# JDK 21, repository root
+mvn clean install
+(cd openapi-generics-gradle-plugin && ./gradlew check && ./gradlew e2eTest)
+# Switch to JDK 25
+mvn -f samples/pom.xml clean verify
+(cd samples/gradle/customer-service && ./gradlew clean build --no-build-cache --configuration-cache)
+(cd samples/gradle/customer-service && ./gradlew clean build --no-build-cache --configuration-cache)
 ```
+
+The second stack build must reuse the configuration cache. Review committed spec diffs after verification; generated Java/build outputs stay uncommitted. CI runs these Maven/Gradle layers and asserts stack cache reuse. The root Maven reactor does not run the independent Gradle builds.
 
 Core platform modules focus on deterministic contract projection and client generation. End-to-end validation is performed through the sample projects.
 

@@ -39,9 +39,21 @@ Add the starter:
 <dependency>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-server-starter</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
 </dependency>
 ```
+
+Add Springdoc to the producer application as well; the platform starter does not select the application's Springdoc UI/runtime. For the Boot 3.5 reference:
+
+```xml
+<dependency>
+    <groupId>org.springdoc</groupId>
+    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+    <version>2.10.0</version>
+</dependency>
+```
+
+Use **3.2.0** for the Boot 4 reference; retain **2.8.x** for Boot 3.4. Choose the application Boot version independently within the [supported policy](../compatibility.md). These are reference pins, not universal consumer constraints. The 1.3.0 platform dependency requires its release artifact to be available in the configured repository.
 
 Write controller methods normally:
 
@@ -275,7 +287,7 @@ A built-in container wrapper may look like:
 
 ```yaml
 x-api-wrapper: true
-x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.response.ServiceResponse
+x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
 x-api-wrapper-datatype: PageCustomerDto
 x-data-container: Page
 x-data-container-type: io.github.blueprintplatform.openapi.generics.contract.paging.Page

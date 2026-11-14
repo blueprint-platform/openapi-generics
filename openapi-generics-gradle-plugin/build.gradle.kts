@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "io.github.blueprint-platform"
-version = "1.3.0-SNAPSHOT"
+version = "1.3.0"
 
 val minimumOpenApiGeneratorApiCompileVersion = "7.25.0"
 val currentOpenApiGeneratorVerificationVersion = "7.27.0"

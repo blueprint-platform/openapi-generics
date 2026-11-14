@@ -20,18 +20,20 @@ OpenAPI Generics plugin provides its aligned codegen, templates, generated-sourc
 compilation dependency and normalization. There is no manual source-set, generator classpath or
 template wiring. The sample uses a custom `generateCustomerClient` task and non-default source folder.
 
-## Repository bootstrap
+## Repository development bootstrap
 
-Use JDK 25. From the repository root, install unchanged platform snapshot artifacts:
+Use JDK 25. From the repository root, install the platform 1.3.0 artifacts from this checkout:
 
 ```bash
 mvn -pl openapi-generics-server-starter,openapi-generics-java-codegen -am install -DskipTests
 ```
 
 This sample uses the repository plugin through `includeBuild`, and restricts `mavenLocal()` to platform
-artifacts. Its shared DTO is a Gradle project dependency, not a Maven sample prerequisite. Published
+artifacts. Its shared DTO is a Gradle project dependency, not a Maven sample prerequisite. Release
 consumers replace `includeBuild` with the released OpenAPI Generics plugin version and resolve released
 platform artifacts from their configured repository; they still select the official generator version.
+
+For a standalone release consumer, use the [Gradle plugin guide](../../../openapi-generics-gradle-plugin/README.md). Its explicit plugin versions and standard repositories replace this checkout's development-only composite/local repository setup. The 1.3.0 artifacts must be published before public resolution can succeed.
 
 ## Build and verify
 

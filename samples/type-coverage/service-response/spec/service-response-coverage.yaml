@@ -26,7 +26,7 @@ info:
     removed before OpenAPI projection. The generated client therefore preserves
     the underlying ServiceResponse<T> contract without exposing CompletionStage
     or DeferredResult as client-side contract types.
-  version: 1.3.0-SNAPSHOT
+  version: 1.3.0
 servers:
 - url: http://localhost:8074/type-coverage/service-response
   description: Local ServiceResponse type coverage producer

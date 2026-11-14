@@ -275,3 +275,7 @@ Thin Wrapper Types
 This module does not generate additional business models.
 
 It generates only the minimum Java wrapper types required to preserve the original generic contract defined by the OpenAPI document.
+
+## Build integrations
+
+Use the [Maven parent](../openapi-generics-java-codegen-parent/README.md) or [Gradle plugin](../openapi-generics-gradle-plugin/README.md) to prepare upstream templates and run this generator. Both use these shared reconstruction semantics. The Maven parent aligns the consumer-selected upstream toolchain; Gradle discovers templates from the running official plugin classloader. Platform codegen remains version-aligned with the selected platform integration, independently of the consumer's official generator version.

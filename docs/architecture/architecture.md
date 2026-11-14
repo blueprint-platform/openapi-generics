@@ -105,7 +105,7 @@ Payload / item identity
 Deterministic client reconstruction
 ```
 
-For aligned 1.2.1 producer and codegen components, the envelope type no longer needs to be repeated through client-side `openapi-generics.envelope` configuration.
+For aligned producer and codegen components, the envelope type no longer needs to be repeated through client-side `openapi-generics.envelope` configuration.
 
 ---
 
@@ -253,7 +253,7 @@ Generated Client
 
 This separation prevents the client generator from depending directly on producer implementation details.
 
-In 1.2.1, envelope identity joins container identity as contract metadata carried through that boundary.
+Envelope identity joins container identity as contract metadata carried through that boundary.
 
 As a result, aligned producer and codegen components reconstruct the wrapper hierarchy from the document itself instead of duplicating envelope configuration on both sides.
 
@@ -340,6 +340,8 @@ The current architectural scope is intentionally focused on:
 - springdoc-openapi WebMvc integration
 - OpenAPI Generator 7.x
 - Maven and Gradle-based client generation; both use the shared `java-generics-contract` reconstruction semantics. Maven aligns the selected generator toolchain and extracts its upstream template; Gradle uses the running official plugin classloader and preserves consumer plugin/version ownership.
+
+The Maven parent and Gradle plugin orchestrate the same codegen artifact rather than implementing separate contract semantics. Gradle selects only `java-generics-contract` tasks, preserves ordinary upstream tasks, registers effective generated roots with the Java plugin, and normalizes sources before task output snapshots. See the [Gradle consumer guide](../../openapi-generics-gradle-plugin/README.md) for configuration and version boundaries.
 
 These boundaries define the platform and tooling surface OpenAPI Generics currently owns. Exact verified framework and generator versions are maintained separately from the architecture definition.
 

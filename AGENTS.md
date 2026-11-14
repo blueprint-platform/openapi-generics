@@ -99,3 +99,5 @@ From `openapi-generics-gradle-plugin/`:
 ```
 
 `check` includes unit + functional TestKit tests. `e2eTest` is explicit and builds real Maven codegen into an isolated repository. The root Maven reactor does not run Gradle plugin/sample verification.
+
+CI preserves Maven core → samples and spec drift checks. Plugin `check` and explicit `e2eTest` run on JDK 21; the canonical Gradle stack runs two clean builds on JDK 25 with build cache disabled and an explicit configuration-cache reuse assertion. Workflow wiring/local success is distinct from a verified remote workflow result.

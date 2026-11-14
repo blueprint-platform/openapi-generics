@@ -41,13 +41,62 @@ For architecture details, see [Architecture](../architecture/architecture.md).
 <parent>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
+    <relativePath/>
 </parent>
 ```
 
 The parent provides the OpenAPI Generics-specific template preparation, generator integration, tested OpenAPI Generator alignment, source registration, and generated-source hygiene required for reconstruction.
 
 ---
+
+The examples target the prepared 1.3.0 release; its artifacts must be available in your configured release repository. A standalone consumer does not need this repository or a local Maven install.
+
+Declare compile/runtime dependencies for the chosen upstream client library. For a Boot 3 RestClient/Jackson 2 client, use:
+
+```xml
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-dependencies</artifactId>
+      <version>3.5.16</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+<dependencies>
+  <dependency>
+    <groupId>io.github.blueprint-platform</groupId>
+    <artifactId>openapi-generics-contract</artifactId>
+    <version>1.3.0</version>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-web</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.fasterxml.jackson.datatype</groupId>
+    <artifactId>jackson-datatype-jsr310</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>jakarta.annotation</groupId>
+    <artifactId>jakarta.annotation-api</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>com.google.code.findbugs</groupId>
+    <artifactId>jsr305</artifactId>
+    <version>3.0.2</version>
+  </dependency>
+</dependencies>
+```
+
+These are application/library choices, not platform requirements. Add application-owned shared contract dependencies when using BYOE/BYOC. Put the generator plugin below inside `<build><plugins>`; the parent activates the platform extraction, patch, overlay, source registration and normalization plugins.
 
 ### 2. Configure OpenAPI Generator
 
@@ -141,6 +190,8 @@ The generator reconstructs supported wrapper and container contracts from OpenAP
 ---
 
 ## Gradle Integration
+
+See the [Gradle plugin README](../../openapi-generics-gradle-plugin/README.md) for a complete standalone 1.3.0 consumer build using explicit plugin versions and release repositories. The repository sample uses development-only composite/local resolution; consumers do not need that bootstrap.
 
 The [canonical Gradle sample](../../samples/gradle/customer-service/README.md) uses the official `org.openapi.generator` plugin with `io.github.blueprint-platform.openapi-generics` and selects `java-generics-contract` on a `GenerateTask`. Consumers apply and version the official plugin and retain ordinary generation options. The platform plugin provisions its matching codegen artifact, discovers templates from the running official plugin classloader, and prepares templates only for selected tasks.
 

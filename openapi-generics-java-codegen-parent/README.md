@@ -2,7 +2,7 @@
 
 > Build-time orchestration for deterministic, contract-aware Java client generation.
 
-`openapi-generics-java-codegen-parent` is the primary client-side integration point for OpenAPI Generics.
+`openapi-generics-java-codegen-parent` is the Maven client-side integration point for OpenAPI Generics.
 
 It wires together:
 
@@ -79,10 +79,12 @@ Inherit the parent:
 <parent>
     <groupId>io.github.blueprint-platform</groupId>
     <artifactId>openapi-generics-java-codegen-parent</artifactId>
-    <version>1.2.1</version>
+    <version>1.3.0</version>
     <relativePath/>
 </parent>
 ```
+
+Declare the official plugin in `<build><plugins>` with a generate execution and your input spec; see the [complete Maven consumer configuration](../docs/adoption/client-side-adoption.md). Add the shared contract dependency and dependencies for the selected client library.
 
 Configure OpenAPI Generator normally, but use:
 

@@ -67,7 +67,9 @@ samples
 ├── type-coverage
 │   ├── service-response
 │   └── byoe-response
-└── transport-coverage
+├── transport-coverage
+├── generation-coverage
+└── gradle/customer-service
 ```
 
 | Directory | Purpose |
@@ -77,10 +79,12 @@ samples
 | `spring-boot-4` | Runnable Spring Boot 4 producer → generated client → consumer stack. |
 | `type-coverage` | Focused validation suites for supported generic response shapes and regression coverage. |
 | `transport-coverage` | Focused validation suite for transport compatibility and regression coverage. |
+| `generation-coverage` | Isolated multi-spec Maven generation and compilation. |
+| `gradle/customer-service` | Canonical Gradle Boot 4 stack with shared contracts, real HTTP deserialization and cache replay. |
 
 ## Available Sample Types
 
-The repository contains three kinds of samples.
+The repository includes adoption stacks and focused verification samples.
 
 | Sample Type | Purpose |
 | --- | --- |
@@ -298,11 +302,14 @@ overwrites the other.
 
 ## Local Maven Build
 
-From the `samples` directory:
+Use JDK 25. From the repository root, install the platform from this checkout, then verify the Maven samples:
 
 ```bash
 mvn clean install
+mvn -f samples/pom.xml clean verify
 ```
+
+These commands are repository development verification. Standalone consumers use versioned dependencies from their configured release repository; they do not require this checkout or a local install. The separate [Gradle stack](gradle/customer-service/README.md) is not part of the Maven reactor.
 
 This builds every sample module and verifies that generated client artifacts compile successfully.
 

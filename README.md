@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg)](https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml)
 [![codecov](https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg)](https://codecov.io/gh/blueprint-platform/openapi-generics)
 
-[![Release](https://img.shields.io/badge/release-v1.2.1-blue)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
+[![Release](https://img.shields.io/github/v/release/blueprint-platform/openapi-generics)](https://github.com/blueprint-platform/openapi-generics/releases/latest)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.blueprint-platform/openapi-generics-server-starter)](https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter)
 
 [![Java](https://img.shields.io/badge/Java-17%2B-lightgrey?logo=openjdk)](https://openjdk.org/)
@@ -33,7 +33,7 @@
 * [The problem in 30 seconds](#the-problem-in-30-seconds)
 * [Get started](#get-started)
 * [Real-World Example](#real-world-example)
-* [What's New in 1.2.1](#whats-new-in-121)
+* [What's New in 1.3.0](#whats-new-in-130)
 * [Key Features](#key-features)
 * [How it works](#how-it-works)
 * [Compatibility](#compatibility)
@@ -147,7 +147,7 @@ Start with [samples/README.md](samples/README.md) for the runnable projects, Doc
 
 ### 2. Add OpenAPI Generics to your project
 
-OpenAPI Generics has separate producer-side and client-side integration points.
+OpenAPI Generics has separate producer-side and client-side integration points. This checkout prepares **1.3.0**; versioned consumer examples target that release and require its artifacts to be available in your repositories. No publication is performed by this preparation.
 
 #### Producer — project Java contract semantics into OpenAPI
 
@@ -157,7 +157,7 @@ Add the server starter:
 <dependency>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-server-starter</artifactId>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
@@ -169,7 +169,7 @@ For the built-in `ServiceResponse<T>` contract, no envelope configuration is req
 
 See [Server-Side Adoption](docs/adoption/server-side-adoption.md) for the complete configuration model.
 
-#### Client — reconstruct the Java contract during generation
+#### Maven client — reconstruct the Java contract during generation
 
 Use the OpenAPI Generics codegen parent:
 
@@ -177,7 +177,7 @@ Use the OpenAPI Generics codegen parent:
 <parent>
   <groupId>io.github.blueprint-platform</groupId>
   <artifactId>openapi-generics-java-codegen-parent</artifactId>
-  <version>1.2.1</version>
+  <version>1.3.0</version>
 </parent>
 ```
 
@@ -195,6 +195,10 @@ See [Client-Side Adoption](docs/adoption/client-side-adoption.md) for the comple
 
 ---
 
+### Gradle client
+
+Apply `org.openapi.generator` at your selected supported version and `io.github.blueprint-platform.openapi-generics` at **1.3.0**. Select `java-generics-contract` on your `GenerateTask`; generated Java sources and compilation dependencies are registered automatically with the Java plugin. See the [complete Gradle consumer example](openapi-generics-gradle-plugin/README.md) for repositories, dependencies and configuration. Repository-local composite builds are for development only.
+
 ## Real-World Example
 
 See the [Licensing Project](https://github.com/bsayli/licensing) for a complete end-to-end BYOE example using a shared `ApiResponse<T>` contract.
@@ -209,46 +213,19 @@ The project demonstrates:
 
 ---
 
-## What's New in 1.2.1
+## What's New in 1.3.0
 
-OpenAPI Generics 1.2.1 completes the contract-driven reconstruction metadata model by carrying Java envelope identity in the projected OpenAPI document through `x-api-wrapper-type`.
+OpenAPI Generics 1.3.0 adds first-class Gradle client generation alongside Maven, using the same `java-generics-contract` reconstruction semantics.
 
-Together with the container identity metadata introduced in 1.2 through `x-data-container-type`, the document now carries the contract identity required by the Java generator to reconstruct both platform-owned and application-owned generic response contracts.
+- The Gradle plugin integrates with the consumer-selected official OpenAPI Generator plugin, provisions aligned codegen, prepares upstream templates, and registers generated Java sources and compilation dependencies for selected default/custom/multiple tasks.
+- Generated Java normalization runs before task output snapshots; effective `sourceFolder`, config-file option precedence and configuration-cache reuse are covered by regression tests.
+- Wrapper metadata validation fails explicitly on inconsistent envelope/container contracts. Supported async MVC responses and isolated multi-spec Maven generation have dedicated coverage.
+- Current OpenAPI Generator reference: **7.27.0**. Boot 3.5 reference surfaces use Springdoc **2.10.0**; Boot 4 uses **3.2.0**. Boot 3.4 remains supported on **2.8.x**.
+- The canonical Gradle stack verifies producer projection, snapshot drift, generated-source compilation and real direct/paged HTTP deserialization. CI also runs plugin unit/functional tests, explicit real-codegen E2E, and stack configuration-cache replay.
 
-```text
-Java Contract
-      ↓
-OpenAPI Projection
-      ↓
-Envelope + Container Identity
-      ↓
-Generated Client Reconstruction
-```
+Java contracts remain authoritative. BYOE envelope identity comes from producer metadata; BYOC reuses external Java models. Generated wrappers bind generic parameters without taking ownership of those contracts. Existing 1.2.x runtime contracts require no migration.
 
-For aligned 1.2.1 producer and codegen components, the Java generator derives the envelope type from the OpenAPI document instead of requiring the same `openapi-generics.envelope` declaration on the client.
-
-The same reconstruction model applies to built-in and application-owned contracts, for example:
-
-```java
-ServiceResponse<Page<CustomerDto>>
-ApiResponse<Window<CustomerDto>>
-```
-
-Highlights in 1.2.1 include:
-
-- contract-driven envelope reconstruction through `x-api-wrapper-type`
-- no duplicate client-side envelope configuration for aligned 1.2.1 components
-- end-to-end validation of application-defined containers with both built-in and BYOE envelopes
-- dedicated transport compatibility coverage for multipart, binary download, and form-urlencoded scenarios
-- clearer server-side failure diagnostics through a dedicated exception hierarchy
-- Spring Boot 3 and Spring Boot 4 reference-stack verification
-- OpenAPI Generator 7.24.0 verification
-
-All 1.2.0 runtime contracts remain backward compatible.
-
-No contract migration is required for existing 1.2 users.
-
-For the complete release history, see the [Changelog](CHANGELOG.md).
+See the [Gradle plugin guide](openapi-generics-gradle-plugin/README.md), [compatibility policy](docs/compatibility.md), and [Changelog](CHANGELOG.md) for usage, version roles and verification boundaries.
 
 ---
 
@@ -489,6 +466,7 @@ For Gradle, consumers select and apply the official plugin. The platform plugin 
 | [`openapi-generics-contract`](openapi-generics-contract/README.md)                       | Shared response contracts and platform-owned generic types.                          |
 | [`openapi-generics-server-starter`](openapi-generics-server-starter/README.md)           | Spring Boot integration that projects generic contract metadata into OpenAPI.        |
 | [`openapi-generics-java-codegen`](openapi-generics-java-codegen/README.md)               | OpenAPI Generator specialization that reconstructs contract-aligned Java clients.    |
+| [`openapi-generics-gradle-plugin`](openapi-generics-gradle-plugin/README.md) | Official Gradle plugin integration, selected-task template preparation, generated-source wiring and normalization. |
 | [`openapi-generics-java-codegen-parent`](openapi-generics-java-codegen-parent/README.md) | Maven parent for client generation, template patching, and generated-source hygiene. |
 | [`openapi-generics-platform-bom`](openapi-generics-platform-bom/README.md)               | Dependency alignment for OpenAPI Generics modules.                                   |
 

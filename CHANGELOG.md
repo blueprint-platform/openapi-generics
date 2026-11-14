@@ -10,7 +10,9 @@ This project follows a contract-first release discipline:
 
 ---
 
-## [Unreleased]
+## [1.3.0] - Release preparation
+
+Prepared for release; no tag, GitHub release or public artifact publication has been performed.
 
 ### Minor release
 
@@ -49,6 +51,8 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 
 ### Quality & Verification
 
+- Verified standalone Maven and Gradle documentation examples through real generation and generated-source compilation using locally staged 1.3.0 artifacts; public artifact availability remains a publication gate.
+- Added CI execution for Gradle plugin `check` and explicit `e2eTest`, plus canonical stack clean build/test and asserted configuration-cache reuse; Maven core → samples and spec drift checks remain in place.
 - Expanded unit, functional, integration, and real-codegen end-to-end coverage for Gradle integration.
 - Verified isolated multi-task Gradle generation and mixed-generator scenarios.
 - Verified generated-source registration and configuration-cache compatibility.
