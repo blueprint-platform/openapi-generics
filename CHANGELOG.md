@@ -15,6 +15,7 @@ This project follows a contract-first release discipline:
 ### Changed
 
 - Improved public Maven/Gradle quickstarts, adoption guidance and docs navigation, with generation/compilation and internal-link validation in CI.
+- Clarified shared Maven/Gradle Spring Boot support and verified example version roles; removed the obsolete `jsr305` client dependency from adoption guidance.
 - Simplified README navigation and reduced repeated deep-links while preserving contract/codegen evidence.
 - Removed ungated Google Analytics, clarified Scarf measurement disclosure and disabled pixel referrer forwarding.
 
@@ -22,6 +23,7 @@ This project follows a contract-first release discipline:
 
 - Hardened release validation with safe Portal validation defaults, complete source-cleanliness checks and structured provenance without raw command arguments.
 - Added scheduled and on-demand CodeQL freshness controls while preserving Maven core and Gradle plugin coverage; retired obsolete analysis configurations.
+- Routed docs/quickstart changes to relevant CI workflows without changing verification jobs or CodeQL PR/scheduled coverage.
 - Updated the GitHub Pages dependency set to resolve patched rubyzip 3.7.0 and aligned deployment with the validated lockfile.
 
 ---
