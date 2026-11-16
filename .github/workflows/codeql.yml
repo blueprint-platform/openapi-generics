@@ -3,9 +3,18 @@ name: CodeQL
 on:
   push:
     branches: [ main ]
+    # These paths do not affect the production Java extraction; PR scans remain unfiltered.
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - 'quickstart/**'
+      - 'scripts/check-docs.rb'
+      - 'scripts/test-docs-checks.rb'
+      - 'scripts/verify-first-client.py'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/workflows/docs.yml'
+      - '.github/workflows/jekyll-gh-pages.yml'
+      - '.github/workflows/build.yml'
 
   pull_request:
     branches: [ main ]

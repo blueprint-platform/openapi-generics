@@ -3,14 +3,32 @@ name: Build & Test
 on:
   push:
     branches: [ main ]
+    # Public quickstart/docs have their own verification lane; build.yml still tests itself.
     paths-ignore:
       - "**/*.md"
       - "docs/**"
+      - "quickstart/**"
+      - "scripts/check-docs.rb"
+      - "scripts/test-docs-checks.rb"
+      - "scripts/verify-first-client.py"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/docs.yml"
+      - ".github/workflows/jekyll-gh-pages.yml"
+      - ".github/workflows/codeql.yml"
 
   pull_request:
+    # Public quickstart/docs have their own verification lane; build.yml still tests itself.
     paths-ignore:
       - "**/*.md"
       - "docs/**"
+      - "quickstart/**"
+      - "scripts/check-docs.rb"
+      - "scripts/test-docs-checks.rb"
+      - "scripts/verify-first-client.py"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/docs.yml"
+      - ".github/workflows/jekyll-gh-pages.yml"
+      - ".github/workflows/codeql.yml"
 
 permissions:
   contents: read

@@ -10,14 +10,18 @@ on:
       - 'scripts/test-docs-checks.rb'
       - 'scripts/verify-first-client.py'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/jekyll-gh-pages.yml'
   push:
     branches: [main]
     paths:
       - '**/*.md'
       - 'docs/**'
       - 'quickstart/**'
-      - 'scripts/**'
+      - 'scripts/check-docs.rb'
+      - 'scripts/test-docs-checks.rb'
+      - 'scripts/verify-first-client.py'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/jekyll-gh-pages.yml'
   workflow_dispatch:
 
 permissions:
