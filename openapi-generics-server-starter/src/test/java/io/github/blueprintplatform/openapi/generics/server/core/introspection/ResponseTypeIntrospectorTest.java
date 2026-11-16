@@ -216,7 +216,8 @@ class ResponseTypeIntrospectorTest {
   void extract_shouldUnwrapDeferredResultWithPage() {
     ResolvableType page =
         ResolvableType.forClassWithGenerics(Page.class, ResolvableType.forClass(CustomerDto.class));
-    ResolvableType type = ResolvableType.forClassWithGenerics(DeferredResult.class, envelopeOf(page));
+    ResolvableType type =
+        ResolvableType.forClassWithGenerics(DeferredResult.class, envelopeOf(page));
 
     ResponseTypeDescriptor descriptor = introspector.extract(type).orElseThrow();
 
