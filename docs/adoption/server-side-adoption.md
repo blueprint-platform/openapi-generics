@@ -64,7 +64,7 @@ In an existing supported Spring MVC application, add:
 The Springdoc pin above is the **Boot 3.5** reference. Use **3.2.0** for the Boot 4 reference.
 Your application chooses its framework versions within the
 [compatibility policy](../compatibility.md#supported-lines); the starter does not select a UI/runtime
-for you. Platform examples target prepared **1.3.0** artifacts, which must be available in your repository.
+for you. The platform dependency example uses **1.3.0**.
 
 Keep supported controller methods unchanged. No OpenAPI Generics-specific controller annotation or
 runtime response adapter is needed. `ServiceResponse<T>` is the default envelope and needs no setting.

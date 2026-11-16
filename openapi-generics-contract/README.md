@@ -24,7 +24,7 @@ It can be used without projection or client generation.
 
 Keep producer and client contract versions aligned. A client library should expose shared types as
 part of its API dependencies and make them available at runtime; a `provided` scope requires the
-consuming application to supply them. Prepared 1.3.0 examples require artifacts in your repository.
+consuming application to supply them.
 
 ## Types and behavior
 

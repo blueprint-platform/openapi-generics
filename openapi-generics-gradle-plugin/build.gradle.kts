@@ -7,15 +7,34 @@ import org.gradle.jvm.tasks.Jar
 import java.io.File
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.gradle.plugin.compatibility.compatibility
+import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
+import org.gradle.plugins.signing.Sign
+import com.gradle.publish.PublishTask
+import io.github.blueprintplatform.release.CentralBundleTask
+import java.nio.file.Files
+import java.nio.file.Path
 
 plugins {
     `java-gradle-plugin`
     `maven-publish`
+    id("com.gradle.plugin-publish") version "2.2.1"
+    signing
     jacoco
 }
 
 group = "io.github.blueprint-platform"
 version = "1.3.0"
+
+// Explicit opt-in: ordinary verification and TestKit publication never need signing keys.
+val releasePublication = providers.gradleProperty("releasePublication")
+    .map(String::toBooleanStrict).orElse(false)
+signing {
+    isRequired = releasePublication.get()
+}
+tasks.withType<Sign>().configureEach {
+    onlyIf("release publication is enabled") { releasePublication.get() }
+}
 
 val minimumOpenApiGeneratorApiCompileVersion = "7.25.0"
 val currentOpenApiGeneratorVerificationVersion = "7.27.0"
@@ -23,7 +42,7 @@ val selectedOpenApiGeneratorTestRuntimeVersion =
     providers.gradleProperty("openApiGeneratorTestRuntimeVersion")
         .orElse(currentOpenApiGeneratorVerificationVersion)
 val spotlessLibVersion = "4.10.4"
-val jacocoVersion = "0.8.15" // Same reporting tool version as the Maven reactor.
+val jacocoVersion = "0.8.16" // Same reporting tool version as the Maven reactor.
 
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")
@@ -205,6 +224,8 @@ fun Test.configurePluginVerification() {
 }
 
 gradlePlugin {
+    website = "https://github.com/blueprint-platform/openapi-generics"
+    vcsUrl = "https://github.com/blueprint-platform/openapi-generics.git"
     plugins {
         create("openApiGenerics") {
             id = "io.github.blueprint-platform.openapi-generics"
@@ -213,6 +234,12 @@ gradlePlugin {
             displayName = "OpenAPI Generics Gradle Plugin"
             description =
                 "Gradle integration for contract-aware Java client generation with OpenAPI Generics."
+            tags.addAll("openapi", "code-generation", "java", "generics")
+            compatibility {
+                features {
+                    configurationCache = true
+                }
+            }
         }
     }
 }
@@ -222,16 +249,133 @@ gradlePlugin {
  * artifact from this isolated Maven repository.
  */
 publishing {
+    publications.withType<MavenPublication>().configureEach {
+        pom {
+            name = "OpenAPI Generics Gradle Plugin"
+            description = "Gradle integration for contract-aware Java client generation with OpenAPI Generics."
+            url = "https://github.com/blueprint-platform/openapi-generics"
+            licenses {
+                license {
+                    name = "MIT License"
+                    url = "https://opensource.org/licenses/MIT"
+                    distribution = "repo"
+                }
+            }
+            developers {
+                developer {
+                    id = "bsayli"
+                    name = "Baris Sayli"
+                    url = "https://github.com/bsayli"
+                }
+            }
+            scm {
+                url = "https://github.com/blueprint-platform/openapi-generics"
+                connection = "scm:git:https://github.com/blueprint-platform/openapi-generics.git"
+                developerConnection = "scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git"
+                tag = "v1.3.0"
+            }
+        }
+    }
     repositories {
         maven {
             name = "functionalTest"
             url = functionalTestPluginRepository.get().asFile.toURI()
+        }
+        maven {
+            name = "releaseStaging"
+            url = layout.buildDirectory.dir("release-staging").get().asFile.toURI()
+        }
+    }
+}
+
+// Maven Publish creates a task per publication/repository pair. Only the implementation
+// belongs in the Central staging repository; Portal owns normal marker discovery.
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (name.endsWith("ToReleaseStagingRepository")) {
+        onlyIf("only pluginMaven is staged for Central") { publication.name == "pluginMaven" }
+        doFirst {
+            check(releasePublication.get()) {
+                "Release staging requires -PreleasePublication=true and a configured signing key."
+            }
+        }
+    }
+}
+
+tasks.named<PublishTask>("publishPlugins") {
+    doFirst {
+        check(validateOnly.get() || releasePublication.get()) {
+            "Portal upload requires -PreleasePublication=true and a configured signing key."
         }
     }
 }
 
 val publishFunctionalTestPlugin =
     tasks.named("publishAllPublicationsToFunctionalTestRepository")
+
+// Repository-only, upload-free release tooling. No connection to check/TestKit/E2E.
+val implementationPublication = providers.provider {
+    publishing.publications.getByName("pluginMaven") as MavenPublication
+}
+tasks.withType<CentralBundleTask>().configureEach {
+    group = "publishing"
+    coordinates.set("${project.group}:${project.name}:${project.version}")
+    releaseEnabled.set(releasePublication)
+    validationOnly.set(providers.gradleProperty("releaseValidationOnly").map(String::toBooleanStrict).orElse(false))
+    signingFingerprint.set(providers.gradleProperty("releaseSigningFingerprint").orElse(""))
+    productionCommand.set(signingFingerprint.zip(validationOnly) { fingerprint, disposable ->
+        "./gradlew -PreleasePublication=true -PreleaseSigningFingerprint=$fingerprint " +
+            (if (disposable) "-PreleaseValidationOnly=true " else "") + "centralReleaseBundle"
+    })
+    gpgExecutable.set(providers.gradleProperty("releaseGpgExecutable").orElse("gpg"))
+    gpgHome.set(providers.gradleProperty("releaseGpgHome").orElse(""))
+    sourceRoot.set(repositoryRoot)
+    stagingDirectory.set(layout.buildDirectory.dir("release-staging"))
+    evidenceDirectory.set(layout.buildDirectory.dir("central-release"))
+    publicationFiles.set(providers.provider {
+        val publication = implementationPublication.get()
+        val files = publication.artifacts.filter {
+            it.extension != "asc" && !it.extension.endsWith(".asc")
+        }.associate { artifact ->
+            val classifier = artifact.classifier?.let { "-$it" }.orEmpty()
+            "${publication.artifactId}-${publication.version}$classifier.${artifact.extension}" to artifact.file.absolutePath
+        }.toMutableMap()
+        files["${publication.artifactId}-${publication.version}.pom"] =
+            layout.buildDirectory.file("publications/pluginMaven/pom-default.xml").get().asFile.absolutePath
+        files["${publication.artifactId}-${publication.version}.module"] =
+            layout.buildDirectory.file("publications/pluginMaven/module.json").get().asFile.absolutePath
+        files
+    })
+}
+val prepareCentralRelease = tasks.register<CentralBundleTask>("prepareCentralRelease") {
+    description = "Captures source provenance and clears owned release staging/evidence (no upload)."
+    phase.set("prepare")
+}
+tasks.withType<PublishToMavenRepository>().configureEach {
+    if (name == "publishPluginMavenPublicationToReleaseStagingRepository") {
+        dependsOn(prepareCentralRelease)
+        // Maven Publish generates an artifact-level repository index. Central accepts
+        // versioned components, not this local repository index. Remove only this known
+        // generated index here; validation rejects any metadata or extra files remaining.
+        val index = layout.buildDirectory.file(
+            "release-staging/${project.group.toString().replace('.', '/')}/${project.name}/maven-metadata.xml"
+        )
+        doLast {
+            val metadata = index.get().asFile.toPath()
+            for (suffix in listOf("", ".md5", ".sha1", ".sha256", ".sha512")) {
+                Files.deleteIfExists(Path.of(metadata.toString() + suffix))
+            }
+        }
+    }
+}
+tasks.register<CentralBundleTask>("validateCentralReleaseStaging") {
+    description = "Validates existing signed staging and writes external provenance/inventory; never restages or uploads."
+    phase.set("validate")
+}
+tasks.register<CentralBundleTask>("centralReleaseBundle") {
+    description = "Stages, validates and packages only the signed implementation for manual Central upload."
+    phase.set("bundle")
+    dependsOn("publishPluginMavenPublicationToReleaseStagingRepository")
+}
 
 fun resolveMavenExecutable(): String {
     val wrapperName =

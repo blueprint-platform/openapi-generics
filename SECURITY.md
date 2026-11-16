@@ -24,7 +24,8 @@ Security fixes are provided for the latest stable release line and the `main` br
 | Version | Status |
 |---------|--------|
 | `main` | Active development |
-| `1.2.x` | Supported |
+| `1.3.x` | Supported |
+| `1.2.x` | End of support |
 | `1.1.x` | End of support |
 | `1.0.x` | End of support |
 | `< 1.0.0` | Not supported |

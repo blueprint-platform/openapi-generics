@@ -81,8 +81,7 @@ mvn -pl openapi-generics-server-starter,openapi-generics-java-codegen -am instal
 This checkout uses `includeBuild` for the plugin and restricted `mavenLocal()` for platform artifacts.
 The shared DTO is a Gradle project dependency. These are repository development mechanisms, not
 release-consumer prerequisites. Standalone consumers use explicit plugin versions and release
-repositories as shown in the [plugin guide](../../../openapi-generics-gradle-plugin/README.md);
-1.3.0 must be published before public resolution can succeed.
+repositories as shown in the [plugin guide](../../../openapi-generics-gradle-plugin/README.md).
 
 ## Build and acceptance verification
 

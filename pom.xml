@@ -29,7 +29,7 @@
         <url>https://github.com/blueprint-platform/openapi-generics</url>
         <connection>scm:git:https://github.com/blueprint-platform/openapi-generics.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.3.0</tag>
     </scm>
 
     <developers>
@@ -71,7 +71,7 @@
         <!-- Test Plugins -->
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.5</maven-failsafe-plugin.version>
-        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
 
         <!-- Format Plugins -->
         <spotless-maven-plugin.version>3.10.4</spotless-maven-plugin.version>

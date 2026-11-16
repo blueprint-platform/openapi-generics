@@ -48,7 +48,7 @@ BYOC is optional; envelope/container preservation does not require sharing every
 | What changed in 1.3.0? | [Changelog](https://github.com/blueprint-platform/openapi-generics/blob/main/CHANGELOG.md) |
 
 Release consumer examples use explicit platform versions and release repositories; the repository
-samples also document their separate development bootstrap. See [release availability](adoption/client-side-adoption.md#before-you-start).
+samples also document their separate development bootstrap. See [consumer prerequisites](adoption/client-side-adoption.md#before-you-start).
 
 [Source and issues](https://github.com/blueprint-platform/openapi-generics) ·
 [Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)

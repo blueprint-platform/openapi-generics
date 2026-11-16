@@ -30,9 +30,9 @@ client library. Generation reads the spec; it does not need a running producer o
 An externally maintained spec can supply the same reconstruction metadata directly; Java contracts
 retain authority.
 
-Examples target prepared platform **1.3.0** artifacts and require them in your configured release
-repositories. Public publication has not been performed by this checkout. Release consumers use
-explicit versions; repository `includeBuild`/`mavenLocal` bootstrap is for development.
+Examples use explicit platform **1.3.0** versions. Configure Maven Central for platform dependencies
+and Gradle Plugin Portal for plugin ID resolution; plugin discovery and project dependency resolution
+are separate repository settings. Repository `includeBuild`/`mavenLocal` bootstrap is for development.
 
 | Build | Platform entry point | Who selects upstream OpenAPI Generator (OAG)? |
 | --- | --- | --- |
