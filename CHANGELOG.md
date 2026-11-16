@@ -10,6 +10,22 @@ This project follows a contract-first release discipline:
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- Improved public Maven/Gradle quickstarts, adoption guidance and docs navigation, with generation/compilation and internal-link validation in CI.
+- Simplified README navigation and reduced repeated deep-links while preserving contract/codegen evidence.
+- Removed ungated Google Analytics, clarified Scarf measurement disclosure and disabled pixel referrer forwarding.
+
+### Security & Maintenance
+
+- Hardened release validation with safe Portal validation defaults, complete source-cleanliness checks and structured provenance without raw command arguments.
+- Added scheduled and on-demand CodeQL freshness controls while preserving Maven core and Gradle plugin coverage; retired obsolete analysis configurations.
+- Updated the GitHub Pages dependency set to resolve patched rubyzip 3.7.0 and aligned deployment with the validated lockfile.
+
+---
+
 ## [1.3.0] - 2026-11-15
 
 ### Minor release
