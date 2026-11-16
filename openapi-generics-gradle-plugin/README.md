@@ -21,6 +21,9 @@ Current references are verification inputs, not universal consumer pins. See the
 
 ## Standalone consumer example
 
+The Gradle plugin supports the platform’s documented Spring Boot compatibility range, including
+**Boot 3.5.x and 4.x**. Boot 4/Jackson 3 below is the canonical/reference example, not a Gradle support limit.
+
 `settings.gradle.kts`:
 
 ```kotlin
