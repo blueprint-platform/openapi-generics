@@ -303,7 +303,7 @@ tasks.withType<PublishToMavenRepository>().configureEach {
 
 tasks.named<PublishTask>("publishPlugins") {
     doFirst {
-        check(validateOnly.get() || releasePublication.get()) {
+        check(validateOnly.getOrElse(false) || releasePublication.get()) {
             "Portal upload requires -PreleasePublication=true and a configured signing key."
         }
     }
@@ -322,10 +322,6 @@ tasks.withType<CentralBundleTask>().configureEach {
     releaseEnabled.set(releasePublication)
     validationOnly.set(providers.gradleProperty("releaseValidationOnly").map(String::toBooleanStrict).orElse(false))
     signingFingerprint.set(providers.gradleProperty("releaseSigningFingerprint").orElse(""))
-    productionCommand.set(signingFingerprint.zip(validationOnly) { fingerprint, disposable ->
-        "./gradlew -PreleasePublication=true -PreleaseSigningFingerprint=$fingerprint " +
-            (if (disposable) "-PreleaseValidationOnly=true " else "") + "centralReleaseBundle"
-    })
     gpgExecutable.set(providers.gradleProperty("releaseGpgExecutable").orElse("gpg"))
     gpgHome.set(providers.gradleProperty("releaseGpgHome").orElse(""))
     sourceRoot.set(repositoryRoot)

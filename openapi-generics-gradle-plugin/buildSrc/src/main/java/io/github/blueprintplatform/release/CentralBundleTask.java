@@ -10,7 +10,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -41,8 +40,6 @@ import org.w3c.dom.Element;
 /** Repository build tooling only; never included in the published plugin. No upload code. */
 @DisableCachingByDefault(because = "Release provenance and signatures must be verified on every invocation")
 public abstract class CentralBundleTask extends DefaultTask {
-    private static final Set<String> LOCAL_PLANS = Set.of(
-            "OPENAPI_GENERICS_PLATFORM_UPGRADE_PLAN.md", "OPENAPI_GENERICS_1_3_0_RELEASE_PLAN.md");
     private static final List<String> CHECKSUM_SUFFIXES = List.of(".md5", ".sha1", ".sha256", ".sha512");
 
     @Input public abstract Property<String> getPhase();
@@ -50,7 +47,6 @@ public abstract class CentralBundleTask extends DefaultTask {
     @Input public abstract Property<Boolean> getReleaseEnabled();
     @Input public abstract Property<Boolean> getValidationOnly();
     @Input public abstract Property<String> getSigningFingerprint();
-    @Input public abstract Property<String> getProductionCommand();
     @Input public abstract Property<String> getGpgExecutable();
     @Input public abstract Property<String> getGpgHome();
     // All files and repository state are inspected explicitly, with no up-to-date/cache bypass.
@@ -72,7 +68,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         Path evidence = getEvidenceDirectory().get().getAsFile().toPath();
         Map<String, Object> source = sourceState();
         require(getValidationOnly().get() || !(Boolean) source.get("dirty"),
-                "Release source must be clean, including untracked source files; only the two local plans are excluded. "
+                "Release source and index must be clean, including all non-ignored untracked files. "
                         + "Disposable tests may use -PreleaseValidationOnly=true; their bundle is NOT release-ready.");
         if (getPhase().get().equals("prepare")) {
             deleteOwnedDirectory(getStagingDirectory().get().getAsFile().toPath());
@@ -190,7 +186,12 @@ public abstract class CentralBundleTask extends DefaultTask {
         provenance.put("gradle", GradleVersion.current().getVersion());
         provenance.put("signingFingerprint", fingerprint);
         provenance.put("verifiedSigningFingerprints", signers);
-        provenance.put("productionCommand", getProductionCommand().get());
+        // Describe this upload-free operation, never a raw command line, environment or property map.
+        provenance.put("invocation", Map.of(
+                "tool", "gradle",
+                "operation", "central-release-" + getPhase().get(),
+                "releasePublication", true,
+                "validationOnly", getValidationOnly().get()));
         provenance.put("files", inventory);
         writeJson(output.resolve("provenance.json"), provenance);
         if (getPhase().get().equals("bundle")) {
@@ -221,13 +222,11 @@ public abstract class CentralBundleTask extends DefaultTask {
         Path root = getSourceRoot().get().getAsFile().toPath();
         String commit = command(root, List.of("git", "rev-parse", "HEAD")).trim();
         String tree = command(root, List.of("git", "rev-parse", "HEAD^{tree}")).trim();
-        String untracked = command(root, List.of("git", "ls-files", "--others", "--exclude-standard", "-z"));
-        boolean extra = Arrays.stream(untracked.split("\0")).anyMatch(s -> !s.isEmpty() && !LOCAL_PLANS.contains(s));
-        String diff = command(root, List.of("git", "diff", "HEAD", "--name-only"));
+        String status = command(root, List.of("git", "status", "--porcelain=v1", "--untracked-files=all", "-z"));
         Map<String, String> contents = new TreeMap<>();
         String files = command(root, List.of("git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"));
         for (String file : files.split("\0")) {
-            if (file.isEmpty() || LOCAL_PLANS.contains(file)) continue;
+            if (file.isEmpty()) continue;
             Path path = root.resolve(file);
             contents.put(file, Files.isSymbolicLink(path) ? "symlink:" + Files.readSymbolicLink(path)
                     : Files.exists(path) ? sha256(path) : "deleted");
@@ -235,7 +234,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("commit", commit);
         state.put("tree", tree);
-        state.put("dirty", extra || !diff.isBlank());
+        state.put("dirty", !status.isEmpty());
         state.put("sourceContentsSha256", sha256(JsonOutput.toJson(contents).getBytes(StandardCharsets.UTF_8)));
         return state;
     }

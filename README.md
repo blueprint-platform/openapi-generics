@@ -19,6 +19,8 @@ A generated client can match your JSON and still replace your shared Java respon
 OpenAPI Generics carries their identity through OpenAPI metadata, then specializes OpenAPI Generator's
 Java generation to bind concrete payloads back to those contracts.
 
+Available from [Maven Central](https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter) and the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.blueprint-platform.openapi-generics).
+
 ## The transformation in 30 seconds
 
 Your Spring MVC endpoint returns a shared Java contract:
