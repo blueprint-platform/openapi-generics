@@ -1,7 +1,8 @@
 # Quickstart: your first working client
 
 Follow the [tutorial](../docs/first-client.md). Choose `maven/` or `gradle/`; both read `spec.yaml`
-and compile the same small API-use probe. JDK 21, Maven 3.9.x or Gradle 9.x is required.
+and compile the same small API-use probe. Use JDK 21 and either Maven (verified with 3.9.9) or
+Gradle 9.x (verified with 9.9.1); the verified Maven version is not a declared support minimum.
 
 ```bash
 mvn -f maven/pom.xml clean verify

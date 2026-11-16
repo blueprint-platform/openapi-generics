@@ -10,7 +10,8 @@ Start with one `Greeting` payload and the built-in `ServiceResponse<T>` envelope
 released **1.3.0** artifacts, official OpenAPI Generator **7.27.0**, and the same Boot 4.1.2 / Jackson 3
 RestClient dependency profile. These are example inputs, not support minima or build-tool requirements.
 
-You need **JDK 21** and either **Maven 3.9.x** or **Gradle 9.x** (verified with 9.9.1).
+Use **JDK 21** for this quickstart and either Maven (verified with **3.9.9**) or
+**Gradle 9.x** (verified with **9.9.1**). The verified Maven version is not a declared support minimum.
 No platform checkout build, local artifact install, producer process, BYOE or BYOC setup is needed.
 
 ## Get the files
