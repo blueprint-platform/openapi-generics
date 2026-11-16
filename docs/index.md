@@ -60,13 +60,13 @@ samples also document their separate development bootstrap. See [consumer prereq
 
 ## Documentation measurement
 
-The repository README and this home page include Scarf page-view pixels. The docs site configures
-Google Analytics (`G-4NH21XZLBN`). These are documentation-visit measurements; the Java libraries and
-Gradle plugin do not gain runtime telemetry from these settings. Page views are not a count of unique
-users or verified production adoption.
+The repository README and this home page use [Scarf page-view pixels](https://docs.scarf.sh/web-traffic/).
+These cookie-free image requests reach Scarf, which uses IP addresses to look up company information.
+The pixels do not send a referrer. The Java libraries and Gradle plugin contain no runtime telemetry.
+Page views do not establish unique users or production adoption.
 
 <!-- Scarf tracking pixel - Docs Home -->
-<img referrerpolicy="no-referrer-when-downgrade"
+<img referrerpolicy="no-referrer"
 src="https://static.scarf.sh/a.png?x-pxid=6d755e89-9777-4da0-9e21-018c95a2755d&page=docs-home"
 width="1" height="1" alt=""
 style="display:none;" />

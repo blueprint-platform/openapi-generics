@@ -194,11 +194,10 @@ or [design rationale](docs/architecture/rationale.md) for the trade-offs.
 
 MIT — see [LICENSE](LICENSE). **Barış Saylı** · [GitHub](https://github.com/bsayli)
 
-Documentation measurement: this README uses a Scarf page-view pixel; the docs site also uses Google Analytics.
-These measure documentation visits, not library runtime activity. [Details](docs/index.md#documentation-measurement).
+Documentation measurement: this README and the docs home use Scarf page-view pixels, not library runtime telemetry. [Details](docs/index.md#documentation-measurement).
 
 <!-- Scarf tracking pixel - README -->
-<img referrerpolicy="no-referrer-when-downgrade"
+<img referrerpolicy="no-referrer"
 src="https://static.scarf.sh/a.png?x-pxid=c623cace-dbdd-4882-96c2-ade255cfad1b&page=README.md"
 width="1" height="1" alt=""
 style="display:none;" />

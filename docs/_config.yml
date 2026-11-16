@@ -21,5 +21,3 @@ search_enabled: true
 
 mermaid:
   version: "11.6.0"
-
-ga_tracking: G-4NH21XZLBN
