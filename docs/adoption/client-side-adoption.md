@@ -155,7 +155,9 @@ contracts on the compile classpath. Add DTO contracts only when using BYOC or wh
 
 The Maven example uses **Boot 3.5 RestClient / Jackson 2**; the Gradle reference uses
 **Boot 4 RestClient / Jackson 3**. Match dependencies to the selected generation profile.
-The following are verified example sets, not platform-wide dependency requirements.
+Both Maven and Gradle support the [documented Spring Boot compatibility range](../compatibility.md).
+These are representative verified examples, not build-tool-specific support limits or platform-wide
+dependency requirements.
 
 <details markdown="1">
 <summary>Maven dependencies — Boot 3.5 / Jackson 2</summary>
@@ -193,11 +195,6 @@ The following are verified example sets, not platform-wide dependency requiremen
   <dependency>
     <groupId>jakarta.annotation</groupId>
     <artifactId>jakarta.annotation-api</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>com.google.code.findbugs</groupId>
-    <artifactId>jsr305</artifactId>
-    <version>3.0.2</version>
   </dependency>
 </dependencies>
 ```
