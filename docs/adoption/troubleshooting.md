@@ -23,5 +23,5 @@ that reproduction when the checks below do not explain the failure.
 | Spring/Jackson classes cannot compile | Selected generator library and Boot/Jackson option/dependency profile | Use one coherent [client dependency set](client-side-adoption.md#add-the-client-dependencies); Boot/Jackson choices are consumer-owned. |
 | Generated files exist but are not compiled | Maven parent inheritance or Gradle selected task and effective source folder | Use the [Maven lifecycle](client-side-adoption.md#maven), or Java plugin plus `java-generics-contract` tasks in Gradle. Check JSON/YAML `configFile` and option precedence before adding manual roots. |
 
-[First working client](../first-client.md) · [Client adoption](client-side-adoption.md) ·
+[Quickstart](../first-client.md) · [Client adoption](client-side-adoption.md) ·
 [Server adoption](server-side-adoption.md)

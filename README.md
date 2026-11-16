@@ -19,7 +19,7 @@ A generated client can match your JSON and still replace your shared Java respon
 OpenAPI Generics carries their identity through OpenAPI metadata, then specializes OpenAPI Generator's
 Java generation to bind concrete payloads back to those contracts.
 
-[First working client](docs/first-client.md) · [Documentation](https://blueprint-platform.github.io/openapi-generics/) · [Releases](https://github.com/blueprint-platform/openapi-generics/releases)
+[Quickstart](docs/first-client.md) · [Documentation](https://blueprint-platform.github.io/openapi-generics/) · [Releases](https://github.com/blueprint-platform/openapi-generics/releases)
 
 ## The transformation in 30 seconds
 

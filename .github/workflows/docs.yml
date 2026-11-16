@@ -5,7 +5,7 @@ on:
     paths:
       - '**/*.md'
       - 'docs/**'
-      - 'examples/first-client/**'
+      - 'quickstart/**'
       - 'scripts/check-docs.rb'
       - 'scripts/test-docs-checks.rb'
       - 'scripts/verify-first-client.py'
@@ -15,7 +15,7 @@ on:
     paths:
       - '**/*.md'
       - 'docs/**'
-      - 'examples/first-client/**'
+      - 'quickstart/**'
       - 'scripts/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
@@ -70,7 +70,7 @@ jobs:
           GRADLE_USER_HOME: ${{ runner.temp }}/first-client-gradle-home
         run: |
           set -euo pipefail
-          cp -R examples/first-client "$RUNNER_TEMP/first-client"
+          cp -R quickstart "$RUNNER_TEMP/first-client"
           printf '<settings/>\n' > "$RUNNER_TEMP/first-client-settings.xml"
           mvn -B -ntp -s "$RUNNER_TEMP/first-client-settings.xml" -gs "$RUNNER_TEMP/first-client-settings.xml" \
             -Dmaven.repo.local="$RUNNER_TEMP/first-client-maven-cache" \

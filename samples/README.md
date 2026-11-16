@@ -16,6 +16,10 @@ Generated wrappers bind generic parameters for transport. They are not applicati
 Application stacks expose stable adapters/shared types; focused coverage harnesses may use generated
 classes directly to probe their behavior. Do not copy harness boundaries into application code.
 
+For a small first build using released artifacts and public repositories only, use the
+[quickstart](../quickstart/README.md). This directory keeps the fuller application and verification
+surfaces, including their repository development bootstrap.
+
 ## Repository build and local runtime setup
 
 Use JDK 25 for the full Maven sample reactor (some modules target Java 21, others Java 25); platform

@@ -22,7 +22,7 @@ contracts. Ordinary DTO/API/authentication/transport generation stays upstream-o
 is generated normally unless you opt into BYOC (Bring Your Own Contract). Treat the wrapper as a transport binding: expose a
 stable adapter API and keep generated API/invoker classes inside the client library.
 
-New to the platform? Start with the [first working client](../first-client.md), then return here for
+New to the platform? Start with the [quickstart](../first-client.md), then return here for
 application configuration and ownership choices.
 
 ## Before you start

@@ -20,7 +20,7 @@ Consumer examples target the public **1.3.0** release. This site is built from `
 
 | Task | Start here | Result |
 | --- | --- | --- |
-| Generate and compile your first client | [First working client](first-client.md) | One payload, public dependencies, Maven or Gradle |
+| Generate and compile your first client | [Quickstart](first-client.md) | One payload, public dependencies, Maven or Gradle |
 | Publish generic contracts from a Spring MVC service | [Server adoption](adoption/server-side-adoption.md) | Springdoc output carries envelope, container and payload metadata |
 | Keep an existing application-owned envelope | [Choose the envelope](adoption/server-side-adoption.md#choose-the-envelope) | BYOE (Bring Your Own Envelope) preserves ownership without duplicate client configuration |
 | Generate a Maven client | [Maven setup](adoption/client-side-adoption.md#maven) | Prepared templates, reconstructed wrappers and registered Java sources |

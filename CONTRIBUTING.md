@@ -78,7 +78,7 @@ BUNDLE_GEMFILE=docs/Gemfile bundle exec ruby scripts/check-docs.rb --site _site
 The link checker reads tracked Markdown, so stage new documentation files before running it. It checks
 local files/anchors and the rendered site; external URL availability is deliberately outside the gate.
 The Pages workflow still deploys only from main. The public-client fixture uses released dependencies,
-not a reactor install: [first-client instructions](examples/first-client/README.md).
+not a reactor install: [quickstart instructions](quickstart/README.md).
 
 ### Java formatting
 

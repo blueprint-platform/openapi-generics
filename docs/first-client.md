@@ -1,6 +1,6 @@
 ---
 layout: default
-title: First working client
+title: Quickstart
 nav_order: 2
 ---
 
@@ -16,11 +16,11 @@ No platform checkout build, local artifact install, producer process, BYOE or BY
 ## Get the files
 
 Download or clone the repository and copy
-[`examples/first-client`](https://github.com/blueprint-platform/openapi-generics/tree/main/examples/first-client)
+[`quickstart`](https://github.com/blueprint-platform/openapi-generics/tree/main/quickstart)
 to an empty directory. Keep this structure; choose only one build tool:
 
 ```text
-first-client/
+quickstart/
   spec.yaml
   maven/pom.xml
   maven/src/main/java/example/UseClient.java
@@ -34,7 +34,7 @@ They stay pinned to released platform dependencies while the repository itself d
 
 ## Inspect the input
 
-[`spec.yaml`](https://github.com/blueprint-platform/openapi-generics/blob/main/examples/first-client/spec.yaml)
+[`spec.yaml`](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/spec.yaml)
 contains one operation, one ordinary DTO and a concrete envelope schema. Its reconstruction metadata is:
 
 ```yaml
@@ -49,13 +49,13 @@ is independent of the platform artifact version.
 
 ## Maven
 
-From `first-client/`:
+From `quickstart/`:
 
 ```bash
 mvn -f maven/pom.xml clean verify
 ```
 
-The [complete POM](https://github.com/blueprint-platform/openapi-generics/blob/main/examples/first-client/maven/pom.xml)
+The [complete POM](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/maven/pom.xml)
 inherits the public codegen parent, declares the generator execution and includes shared contract and
 RestClient dependencies. Maven Central is Maven's default repository. If your organization requires a
 corporate parent, read the [parent decision](adoption/client-side-adoption.md#maven) before adapting it.
@@ -65,17 +65,17 @@ Expected wrapper:
 
 ## Gradle
 
-From `first-client/`, with Gradle 9.x installed:
+From `quickstart/`, with Gradle 9.x installed:
 
 ```bash
 gradle -p gradle clean build
 ```
 
-The [settings](https://github.com/blueprint-platform/openapi-generics/blob/main/examples/first-client/gradle/settings.gradle.kts)
+The [settings](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/gradle/settings.gradle.kts)
 resolve plugin markers through the public Plugin Portal. Content filters keep the platform
 implementation and dependency graph on Maven Central; the official OAG Gradle implementation is
 resolved from the Portal normally. This is channel selection, not a dependency/version override.
-The [build](https://github.com/blueprint-platform/openapi-generics/blob/main/examples/first-client/gradle/build.gradle.kts)
+The [build](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/gradle/build.gradle.kts)
 applies both plugins and lets the platform register generated sources automatically.
 
 Expected wrapper:
