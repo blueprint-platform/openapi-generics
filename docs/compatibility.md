@@ -1,6 +1,7 @@
 ---
-title: Compatibility & Support Policy
-nav_exclude: true
+layout: default
+title: Compatibility & Support
+nav_order: 4
 ---
 
 # Compatibility & support reference
@@ -74,6 +75,9 @@ or override the official plugin. Maven and Gradle share reconstruction semantics
 
 Keep producer and codegen components aligned around the published metadata protocol, especially
 `x-api-wrapper-type`. **1.3.0 preserves 1.2.x runtime contracts; no 1.2 contract migration is required.**
+
+Contract backward compatibility is separate from security maintenance. Preserving 1.2.x contracts does
+not promise security backports to 1.2.x binaries; see the [security maintenance table](https://github.com/blueprint-platform/openapi-generics/blob/main/SECURITY.md#supported-versions).
 
 ## Contract scope
 

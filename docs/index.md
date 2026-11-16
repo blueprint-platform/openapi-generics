@@ -12,10 +12,15 @@ Preserve Java envelope and container identity across
 `ServiceResponse<Page<CustomerDto>> → OpenAPI metadata → generated wrapper extends shared contract`.
 For the problem, concrete before/after and project overview, start with the [README](https://github.com/blueprint-platform/openapi-generics/blob/main/README.md).
 
+Consumer examples target the public **1.3.0** release. This site is built from `main`, currently on
+**1.3.1-SNAPSHOT**, and may include later documentation improvements. For the release snapshot use
+[tagged 1.3.0 documentation](https://github.com/blueprint-platform/openapi-generics/tree/v1.3.0/docs).
+
 ## What are you trying to do?
 
 | Task | Start here | Result |
 | --- | --- | --- |
+| Generate and compile your first client | [First working client](first-client.md) | One payload, public dependencies, Maven or Gradle |
 | Publish generic contracts from a Spring MVC service | [Server adoption](adoption/server-side-adoption.md) | Springdoc output carries envelope, container and payload metadata |
 | Keep an existing application-owned envelope | [Choose the envelope](adoption/server-side-adoption.md#choose-the-envelope) | BYOE (Bring Your Own Envelope) preserves ownership without duplicate client configuration |
 | Generate a Maven client | [Maven setup](adoption/client-side-adoption.md#maven) | Prepared templates, reconstructed wrappers and registered Java sources |
@@ -52,6 +57,13 @@ samples also document their separate development bootstrap. See [consumer prereq
 
 [Source and issues](https://github.com/blueprint-platform/openapi-generics) ·
 [Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
+
+## Documentation measurement
+
+The repository README and this home page include Scarf page-view pixels. The docs site configures
+Google Analytics (`G-4NH21XZLBN`). These are documentation-visit measurements; the Java libraries and
+Gradle plugin do not gain runtime telemetry from these settings. Page views are not a count of unique
+users or verified production adoption.
 
 <!-- Scarf tracking pixel - Docs Home -->
 <img referrerpolicy="no-referrer-when-downgrade"

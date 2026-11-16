@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: First contract-preserving client
+  version: "1.0"
+paths:
+  /greeting:
+    get:
+      tags: [Greeting]
+      operationId: getGreeting
+      responses:
+        '200':
+          description: A greeting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponseGreeting'
+components:
+  schemas:
+    Greeting:
+      type: object
+      properties:
+        message:
+          type: string
+    Meta:
+      type: object
+      x-ignore-model: true
+    ServiceResponseGreeting:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Greeting'
+        meta:
+          $ref: '#/components/schemas/Meta'
+      x-api-wrapper: true
+      x-api-wrapper-type: io.github.blueprintplatform.openapi.generics.contract.envelope.ServiceResponse
+      x-api-wrapper-datatype: Greeting

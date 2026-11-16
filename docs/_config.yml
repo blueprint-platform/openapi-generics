@@ -1,10 +1,11 @@
 title: OpenAPI Generics
-description: Deterministic, generics-aware API platform (contract + server + codegen)
+description: Preserve shared Java envelope and container contracts across OpenAPI and generated clients.
 
 remote_theme: just-the-docs/just-the-docs
 
 plugins:
   - jekyll-remote-theme
+  - jekyll-relative-links
 
 baseurl: "/openapi-generics"
 

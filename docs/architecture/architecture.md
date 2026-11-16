@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Architecture
-nav_exclude: true
+parent: Understand
+nav_order: 1
 ---
 
 # Architecture: preserve ownership across a projection boundary

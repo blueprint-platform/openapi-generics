@@ -1,8 +1,15 @@
+---
+layout: default
+title: Visual assets
+nav_exclude: true
+search_exclude: true
+---
+
 # Visual assets
 
 | Purpose / reference | Editable source | Final render |
 | --- | --- | --- |
-| [README proof](../../README.md#see-the-proof): stock generated model versus shared generic binding | [proof/generic-binding-comparison.svg](proof/generic-binding-comparison.svg) | Same SVG, displayed directly |
+| [README proof](https://github.com/blueprint-platform/openapi-generics/blob/main/README.md#see-the-proof): stock generated model versus shared generic binding | [proof/generic-binding-comparison.svg](proof/generic-binding-comparison.svg) | Same SVG, displayed directly |
 | [Architecture](../architecture/architecture.md#architecture-overview): Java authority, projection/reconstruction and application boundaries | [architecture/openapi-generics-architecture.svg](architecture/openapi-generics-architecture.svg) | Same SVG, displayed directly |
 | GitHub repository Social preview: product value at link-card size | [social/social-preview.svg](social/social-preview.svg) | **[social/social-preview.png](social/social-preview.png)**, 1280×640 |
 
@@ -24,10 +31,10 @@ there is no separate HTML/draw.io source to synchronize.
 ## Proof verification
 
 Last verified: **OpenAPI Generator 7.27.0**, **RestClient**, **Boot 4/Jackson 3**, no external DTO mappings.
-Input: [canonical customer snapshot](../../samples/gradle/customer-service/spec/customer-api-docs.json).
+Input: [canonical customer snapshot](https://github.com/blueprint-platform/openapi-generics/blob/main/samples/gradle/customer-service/spec/customer-api-docs.json).
 Options: `useSpringBoot4=true`, `useJackson3=true`, `serializationLibrary=jackson`, `openApiNullable=false`.
 
-Use the [standalone Gradle consumer example](../../openapi-generics-gradle-plugin/README.md#standalone-consumer-example)
+Use the [standalone Gradle consumer example](https://github.com/blueprint-platform/openapi-generics/blob/main/openapi-generics-gradle-plugin/README.md#standalone-consumer-example)
 with that input. Generate and compile once with upstream `java` and once with `java-generics-contract`,
 keeping the same options and DTO reuse disabled. Stock `java` needs upstream source/task wiring;
 the platform registers sources only for its selected generator. Compare `ServiceResponsePageCustomerDto.java`:

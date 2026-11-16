@@ -5,7 +5,7 @@
   <a href="https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml"><img src="https://github.com/blueprint-platform/openapi-generics/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
   <a href="https://codecov.io/gh/blueprint-platform/openapi-generics"><img src="https://codecov.io/gh/blueprint-platform/openapi-generics/branch/main/graph/badge.svg" alt="Codecov" /></a>
   <br />
-  <a href="https://github.com/blueprint-platform/openapi-generics/releases/latest"><img src="https://img.shields.io/github/v/release/blueprint-platform/openapi-generics" alt="Release" /></a>
+  <a href="https://plugins.gradle.org/plugin/io.github.blueprint-platform.openapi-generics"><img src="https://img.shields.io/gradle-plugin-portal/v/io.github.blueprint-platform.openapi-generics?label=Gradle%20Plugin%20Portal" alt="Gradle Plugin Portal version" /></a>
   <a href="https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter"><img src="https://img.shields.io/maven-central/v/io.github.blueprint-platform/openapi-generics-server-starter" alt="Maven Central" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
   <br />
@@ -19,7 +19,7 @@ A generated client can match your JSON and still replace your shared Java respon
 OpenAPI Generics carries their identity through OpenAPI metadata, then specializes OpenAPI Generator's
 Java generation to bind concrete payloads back to those contracts.
 
-Available from [Maven Central](https://central.sonatype.com/artifact/io.github.blueprint-platform/openapi-generics-server-starter) and the [Gradle Plugin Portal](https://plugins.gradle.org/plugin/io.github.blueprint-platform.openapi-generics).
+[First working client](docs/first-client.md) · [Documentation](https://blueprint-platform.github.io/openapi-generics/) · [Releases](https://github.com/blueprint-platform/openapi-generics/releases)
 
 ## The transformation in 30 seconds
 
@@ -185,7 +185,7 @@ or [design rationale](docs/architecture/rationale.md) for the trade-offs.
 
 </details>
 
-[External BYOE adoption example](https://github.com/bsayli/licensing)
+[Maintainer’s BYOE application example](https://github.com/bsayli/licensing)
 
 ## Contributing and license
 
@@ -193,6 +193,9 @@ or [design rationale](docs/architecture/rationale.md) for the trade-offs.
 [Discussions](https://github.com/blueprint-platform/openapi-generics/discussions)
 
 MIT — see [LICENSE](LICENSE). **Barış Saylı** · [GitHub](https://github.com/bsayli)
+
+Documentation measurement: this README uses a Scarf page-view pixel; the docs site also uses Google Analytics.
+These measure documentation visits, not library runtime activity. [Details](docs/index.md#documentation-measurement).
 
 <!-- Scarf tracking pixel - README -->
 <img referrerpolicy="no-referrer-when-downgrade"

@@ -67,13 +67,18 @@ body:
     id: environment
     attributes:
       label: "Environment"
-      description: "Tooling and runtime details"
+      description: "Include applicable versions; mark tools you do not use as N/A. Remove credentials from logs."
       placeholder: |
+        - OpenAPI Generics (producer/codegen/plugin):
         - Java:
-        - Maven:
-        - OpenAPI Generator:
-        - Spring Boot:
+        - Maven or Gradle (including wrapper):
+        - Official OpenAPI Generator plugin/runtime:
+        - Client library and serialization options:
+        - Spring Boot / Springdoc (producer only):
         - OS:
+
+    validations:
+      required: true
 
   - type: textarea
     id: additional

@@ -31,7 +31,9 @@ Security fixes are provided for the latest stable release line and the `main` br
 | `< 1.0.0` | Not supported |
 
 > **Note**
-> Please upgrade to the latest stable release before reporting a security issue. Security fixes are provided only for the current supported release line.
+> Reports affecting older versions are welcome. If practical, also check the latest stable release and
+> include both results; upgrading is not a prerequisite for reporting. Fixes are provided for the
+> supported release line listed above, without promising backports to older binaries.
 
 ---
 

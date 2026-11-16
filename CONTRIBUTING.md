@@ -55,6 +55,54 @@ different things. Report the commands actually executed, not just the existence 
 Committed OpenAPI snapshots are reviewed artifacts: inspect diffs and retain CI drift detection.
 Generated Java, target/build output and local investigation plans are not source authority.
 
+## Choose the smallest useful check
+
+| Change | Start with |
+| --- | --- |
+| README, docs, sample README | Jekyll and internal links below; the Documentation workflow also compiles the public first-client example |
+| Maven contract/server/codegen | Tests and `spotless:check` in the affected module; root install before sample verification |
+| Gradle runtime integration | Plugin `./gradlew check`; `e2eTest` for real generation/compile changes |
+| Gradle release build tooling | Plugin `./gradlew :buildSrc:test check`; no signing credentials or upload needed |
+
+### Documentation
+
+Use Ruby 3.3 and Bundler. From the repository root:
+
+```bash
+BUNDLE_GEMFILE=docs/Gemfile bundle install
+BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build --source docs --destination _site
+BUNDLE_GEMFILE=docs/Gemfile bundle exec ruby scripts/test-docs-checks.rb
+BUNDLE_GEMFILE=docs/Gemfile bundle exec ruby scripts/check-docs.rb --site _site
+```
+
+The link checker reads tracked Markdown, so stage new documentation files before running it. It checks
+local files/anchors and the rendered site; external URL availability is deliberately outside the gate.
+The Pages workflow still deploys only from main. The public-client fixture uses released dependencies,
+not a reactor install: [first-client instructions](examples/first-client/README.md).
+
+### Java formatting
+
+For handwritten core Java, select the affected Maven module(s); for example:
+
+```bash
+mvn -pl openapi-generics-contract,openapi-generics-server-starter,openapi-generics-java-codegen spotless:check
+# Apply the configured fix, then review the diff:
+mvn -pl openapi-generics-contract,openapi-generics-server-starter,openapi-generics-java-codegen spotless:apply
+```
+
+The samples aggregator owns handwritten sample formatting independently of their parent chains:
+
+```bash
+mvn -N -f samples/pom.xml spotless:check
+mvn -N -f samples/pom.xml spotless:apply
+```
+
+Use JDK 21+ for the configured formatter; the complete samples build uses JDK 25. Samples currently
+apply that formatting during `process-sources`, so inspect source diffs after builds. The independent
+Gradle plugin has **no handwritten Spotless Gradle task**: preserve its existing style and run its
+checks. Embedded generated-source normalization is a separate consumer lifecycle, not a contributor
+formatter command. Do not hand-edit generated Java to fix source formatting.
+
 ## Prepare a review
 
 Lead with the concrete change and outcome, then the evidence. Explain any contract/protocol or support

@@ -1,0 +1,80 @@
+name: Documentation
+
+on:
+  pull_request:
+    paths:
+      - '**/*.md'
+      - 'docs/**'
+      - 'examples/first-client/**'
+      - 'scripts/check-docs.rb'
+      - 'scripts/test-docs-checks.rb'
+      - 'scripts/verify-first-client.py'
+      - '.github/workflows/docs.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - 'docs/**'
+      - 'examples/first-client/**'
+      - 'scripts/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  docs:
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
+    name: Jekyll and internal links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: docs
+      - name: Build the existing Pages site
+        env:
+          BUNDLE_GEMFILE: docs/Gemfile
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --source docs --destination _site
+      - name: Check repository and rendered links
+        env:
+          BUNDLE_GEMFILE: docs/Gemfile
+        run: |
+          bundle exec ruby scripts/test-docs-checks.rb
+          bundle exec ruby scripts/check-docs.rb --site _site
+
+  first-client:
+    name: Public first-client generation and compilation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.9.1'
+          cache-disabled: true
+      - name: Build tutorial files outside the checkout with clean public caches
+        shell: bash
+        env:
+          GRADLE_USER_HOME: ${{ runner.temp }}/first-client-gradle-home
+        run: |
+          set -euo pipefail
+          cp -R examples/first-client "$RUNNER_TEMP/first-client"
+          printf '<settings/>\n' > "$RUNNER_TEMP/first-client-settings.xml"
+          mvn -B -ntp -s "$RUNNER_TEMP/first-client-settings.xml" -gs "$RUNNER_TEMP/first-client-settings.xml" \
+            -Dmaven.repo.local="$RUNNER_TEMP/first-client-maven-cache" \
+            -f "$RUNNER_TEMP/first-client/maven/pom.xml" clean verify
+          gradle -p "$RUNNER_TEMP/first-client/gradle" --no-daemon --no-build-cache \
+            -Dmaven.repo.local="$RUNNER_TEMP/first-client-gradle-maven-cache" clean build
+          python3 scripts/verify-first-client.py "$RUNNER_TEMP/first-client"

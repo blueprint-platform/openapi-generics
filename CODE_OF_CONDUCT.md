@@ -22,8 +22,9 @@ The following behaviors are unacceptable:
 - Misleading identity or impersonation.
 
 ## Reporting an Issue
-If you experience or witness unacceptable behavior, please report it by opening an issue or contacting the maintainer at **baris.sayli@gmail.com**.
-Reports will be handled promptly and confidentially.
+If you experience or witness unacceptable behavior, contact the maintainer privately at
+**baris.sayli@gmail.com**. Reports will be handled confidentially. Public GitHub issues are not a
+private reporting channel; do not post personal or sensitive details there.
 
 ## Attribution
 This Code of Conduct is adapted from the [Contributor Covenant v3.0](https://www.contributor-covenant.org/version/3/0/code_of_conduct/), licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

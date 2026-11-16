@@ -1,0 +1,7 @@
+source "https://rubygems.org"
+
+# Same Pages dependency family used by actions/jekyll-build-pages.
+gem "github-pages", "~> 232", group: :jekyll_plugins
+
+# The remote theme loads its gemspec runtime dependency during a local build.
+gem "rake"

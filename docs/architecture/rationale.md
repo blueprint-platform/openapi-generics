@@ -1,7 +1,8 @@
 ---
 layout: default
-title: Architectural Rationale
-nav_exclude: true
+title: Rationale
+parent: Understand
+nav_order: 2
 ---
 
 # Architectural rationale: why preserve Java contract identity?

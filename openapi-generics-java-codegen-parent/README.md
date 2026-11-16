@@ -16,6 +16,16 @@ spec, library, packages and normal options. [Complete Maven adoption →](../doc
 In the official generator execution, select `java-generics-contract` and declare the shared-contract
 and selected client-library dependencies. Run `mvn clean verify`.
 
+## Existing corporate or Spring Boot parent
+
+Maven allows only one parent. This client module must inherit the codegen parent, so it cannot also
+inherit a corporate parent or `spring-boot-starter-parent`. A separate client module can use this
+parent while sibling applications keep theirs; aggregation does not require parent inheritance.
+Use a framework dependency BOM in that client module when needed. The platform BOM supplies dependency
+alignment, **not** template preparation, generation or normalization. No separately packaged,
+parent-free Maven lifecycle is currently documented or verified; do not replace the parent with a BOM
+and expect equivalent generation.
+
 ## What the parent wires
 
 | Stage | Responsibility |

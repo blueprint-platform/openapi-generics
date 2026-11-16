@@ -22,6 +22,9 @@ contracts. Ordinary DTO/API/authentication/transport generation stays upstream-o
 is generated normally unless you opt into BYOC (Bring Your Own Contract). Treat the wrapper as a transport binding: expose a
 stable adapter API and keep generated API/invoker classes inside the client library.
 
+New to the platform? Start with the [first working client](../first-client.md), then return here for
+application configuration and ownership choices.
+
 ## Before you start
 
 You need the producer's [projected OpenAPI document](server-side-adoption.md#check-the-projected-document),
@@ -43,6 +46,14 @@ Both paths use the same reconstruction semantics. You retain spec, output, libra
 ordinary generator options. [Supported lines and integration edges →](../compatibility.md)
 
 ## Maven
+
+Maven allows only one parent. This client module must inherit the codegen parent, so it cannot also
+inherit a corporate parent or `spring-boot-starter-parent`. A separate client module can use this
+parent while sibling applications keep theirs; aggregation does not require parent inheritance.
+Use a framework dependency BOM in that client module when needed. The platform BOM supplies dependency
+alignment, **not** template preparation, generation or normalization. No separately packaged,
+parent-free Maven lifecycle is currently documented or verified; do not replace the parent with a BOM
+and expect equivalent generation.
 
 Inherit the parent:
 
@@ -274,6 +285,8 @@ plugin tests alone do not establish runtime interoperability. See [verification 
 
 Invalid wrapper metadata and required template patch drift fail explicitly. Do not work around these
 failures by inventing envelope/container identity or hand-editing generated source.
+
+For build failures, use the [troubleshooting table](troubleshooting.md).
 
 ## Compare with stock generation
 

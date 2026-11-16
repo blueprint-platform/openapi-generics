@@ -75,3 +75,9 @@ buildNumber.properties
 
 # Samples intentionally commit generated OpenAPI snapshots when required.
 !samples/**/generated-sources/
+
+# Local documentation build
+/_site/
+/.jekyll-cache/
+/.jekyll-metadata
+/.sass-cache/
