@@ -24,6 +24,12 @@ jobs:
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      BUNDLE_GEMFILE: ${{ github.workspace }}/docs/Gemfile
+      JEKYLL_ENV: production
+      JEKYLL_GITHUB_TOKEN: ${{ github.token }}
+      PAGES_REPO_NWO: ${{ github.repository }}
+      JEKYLL_BUILD_REVISION: ${{ github.sha }}
+      PAGES_API_URL: ${{ github.api_url }}
 
     steps:
       - name: Checkout
@@ -32,11 +38,17 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      # Use the same locked, patched Pages gems as the Documentation validation job.
+      # actions/jekyll-build-pages@v1 carries its own github-pages 232 bundle.
+      - name: Set up Ruby and locked Pages dependencies
+        uses: ruby/setup-ruby@v1
         with:
-          source: ./docs
-          destination: ./_site
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: docs
+
+      - name: Build with locked Jekyll
+        run: bundle exec jekyll build --source docs --destination _site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
