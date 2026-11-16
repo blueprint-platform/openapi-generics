@@ -24,7 +24,7 @@ plugins {
 }
 
 group = "io.github.blueprint-platform"
-version = "1.3.0"
+version = "1.3.1-SNAPSHOT"
 
 // Explicit opt-in: ordinary verification and TestKit publication never need signing keys.
 val releasePublication = providers.gradleProperty("releasePublication")
@@ -272,7 +272,7 @@ publishing {
                 url = "https://github.com/blueprint-platform/openapi-generics"
                 connection = "scm:git:https://github.com/blueprint-platform/openapi-generics.git"
                 developerConnection = "scm:git:ssh://git@github.com:blueprint-platform/openapi-generics.git"
-                tag = "v1.3.0"
+                tag = "HEAD"
             }
         }
     }

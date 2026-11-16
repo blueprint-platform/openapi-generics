@@ -37,10 +37,10 @@ class OpenApiGenericsCodegenClasspathTest {
         Configuration extra = project.getConfigurations().create("openApiGeneratorExtra");
         Dependency otherModule = project.getDependencies().add(extra.getName(), "io.github.blueprint-platform:other:9.0");
         Dependency otherGroup = project.getDependencies().add(extra.getName(), "example:openapi-generics-java-codegen:9.0");
-        try (URLClassLoader loader = versionedMarker("1.3.0")) {
+        try (URLClassLoader loader = versionedMarker("1.3.1-SNAPSHOT")) {
             var provisioning = new OpenApiGenericsCodegenClasspath(loader.loadClass(PluginMarker.class.getName()));
             Dependency first = provisioning.register(project, extra);
-            assertEquals("1.3.0", first.getVersion());
+            assertEquals("1.3.1-SNAPSHOT", first.getVersion());
             assertEquals(OpenApiGenericsCodegenClasspath.OPENAPI_GENERICS_GROUP, first.getGroup());
             assertEquals(OpenApiGenericsCodegenClasspath.OPENAPI_GENERICS_CODEGEN_MODULE, first.getName());
             assertSame(first, provisioning.register(project, extra));
@@ -54,11 +54,11 @@ class OpenApiGenericsCodegenClasspathTest {
     void reusesMatchingConsumerDeclarationAndAcceptsLaterMatchingDeclarations() throws Exception {
         Project project = ProjectBuilder.builder().build();
         Configuration extra = project.getConfigurations().create("openApiGeneratorExtra");
-        Dependency existing = project.getDependencies().add(extra.getName(), MODULE + ":1.3.0");
-        try (URLClassLoader loader = versionedMarker("1.3.0")) {
+        Dependency existing = project.getDependencies().add(extra.getName(), MODULE + ":1.3.1-SNAPSHOT");
+        try (URLClassLoader loader = versionedMarker("1.3.1-SNAPSHOT")) {
             var provisioning = new OpenApiGenericsCodegenClasspath(loader.loadClass(PluginMarker.class.getName()));
             assertSame(existing, provisioning.register(project, extra));
-            assertDoesNotThrow(() -> project.getDependencies().add(extra.getName(), MODULE + ":1.3.0"));
+            assertDoesNotThrow(() -> project.getDependencies().add(extra.getName(), MODULE + ":1.3.1-SNAPSHOT"));
             assertEquals(1, extra.getDependencies().size());
         }
     }
@@ -68,7 +68,7 @@ class OpenApiGenericsCodegenClasspathTest {
     void rejectsConflictingVersionRegardlessOfDeclarationOrder(boolean before) throws Exception {
         Project project = ProjectBuilder.builder().build();
         Configuration extra = project.getConfigurations().create("openApiGeneratorExtra");
-        try (URLClassLoader loader = versionedMarker("1.3.0")) {
+        try (URLClassLoader loader = versionedMarker("1.3.1-SNAPSHOT")) {
             var provisioning = new OpenApiGenericsCodegenClasspath(loader.loadClass(PluginMarker.class.getName()));
             if (before) project.getDependencies().add(extra.getName(), MODULE + ":1.2.1");
             else provisioning.register(project, extra);
@@ -76,7 +76,7 @@ class OpenApiGenericsCodegenClasspathTest {
                 if (before) provisioning.register(project, extra);
                 else project.getDependencies().add(extra.getName(), MODULE + ":1.2.1");
             });
-            assertTrue(exception.getMessage().contains(MODULE + ":1.3.0"));
+            assertTrue(exception.getMessage().contains(MODULE + ":1.3.1-SNAPSHOT"));
             assertTrue(exception.getMessage().contains("1.2.1"));
             assertTrue(exception.getMessage().contains(extra.getName()));
         }
@@ -87,7 +87,7 @@ class OpenApiGenericsCodegenClasspathTest {
         Project project = ProjectBuilder.builder().build();
         Configuration extra = project.getConfigurations().create("openApiGeneratorExtra");
         project.getDependencies().add(extra.getName(), MODULE);
-        try (URLClassLoader loader = versionedMarker("1.3.0")) {
+        try (URLClassLoader loader = versionedMarker("1.3.1-SNAPSHOT")) {
             var provisioning = new OpenApiGenericsCodegenClasspath(loader.loadClass(PluginMarker.class.getName()));
             var exception = assertThrows(OpenApiGenericsCodegenVersionConflictException.class,
                     () -> provisioning.register(project, extra));

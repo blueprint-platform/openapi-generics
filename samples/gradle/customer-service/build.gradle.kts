@@ -7,7 +7,7 @@ plugins {
 subprojects {
     apply(plugin = "java-library")
     group = "io.github.blueprint-platform.samples.gradle"
-    version = "1.3.0"
+    version = "1.3.1-SNAPSHOT"
     repositories {
         // Only needed for platform artifacts installed from this checkout for development.
         mavenLocal {

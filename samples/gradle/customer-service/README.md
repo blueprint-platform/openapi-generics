@@ -72,7 +72,7 @@ spec and never starts the producer. Generated Java remains under
 
 ## Repository development bootstrap
 
-Use JDK 25. From the repository root, install platform **1.3.0** from this checkout:
+Use JDK 25. From the repository root, install platform **1.3.1-SNAPSHOT** from this checkout:
 
 ```bash
 mvn -pl openapi-generics-server-starter,openapi-generics-java-codegen -am install -DskipTests

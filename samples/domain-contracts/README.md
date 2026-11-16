@@ -13,7 +13,7 @@ canonical Gradle examples demonstrate that path.
 <dependency>
   <groupId>io.github.blueprint-platform.samples</groupId>
   <artifactId>customer-contract</artifactId>
-  <version>1.3.0</version>
+  <version>1.3.1-SNAPSHOT</version>
 </dependency>
 ```
 
