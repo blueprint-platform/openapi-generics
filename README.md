@@ -56,7 +56,6 @@ x-data-item: CustomerDto
 
 OpenAPI is the protocol between server projection and client reconstruction. These extensions carry
 Java identity without making OpenAPI the contract authority. Other tooling can ignore them.
-[Metadata requirements and checks →](docs/adoption/server-side-adoption.md#check-the-projected-document)
 
 </details>
 
@@ -73,8 +72,7 @@ shared `ServiceResponse` and `Page` identities.
 
 The adoption examples use explicit **1.3.0** platform versions. Configure Maven Central for platform
 dependencies and Gradle Plugin Portal for plugin ID resolution. Repository samples have a separate
-[development setup](samples/README.md#repository-build-and-local-runtime-setup);
-local installs and composite builds are not release-consumer requirements.
+development setup; local installs and composite builds are not release-consumer requirements.
 
 ### 1. Project the contract from your service
 
@@ -107,16 +105,14 @@ Consumer controller → service → CustomerServiceClient
 
 Tests verify direct/paged shared contracts, actual generic-wrapper deserialization and error handling
 across both HTTP hops. Producer snapshot equality and repeated clean-build configuration-cache reuse
-are checked separately. [Build, run and inspect the HTTP acceptance →](samples/gradle/customer-service/README.md#build-and-acceptance-verification)
+are checked separately.
 
 The boundary matters: application code calls a stable client API; generated API/invoker classes and
 wrapper bindings stay inside the client implementation. The **[Boot 4 Maven client library](samples/spring-boot-4/customer-service-client/README.md)**
-shows the same separation with explicit payload mapping and a [consumer web app](samples/spring-boot-4/customer-service-consumer/README.md).
+shows the same separation with explicit payload mapping and a consumer web app.
 Its client HTTP tests use MockWebServer; the full two-application acceptance path above is separate evidence.
 
-For focused checks, see [response-shape coverage](samples/type-coverage/README.md),
-[transport interoperability](samples/transport-coverage/README.md) and
-[multi-spec generation](samples/generation-coverage/multi-spec-maven-client/README.md).
+Focused samples cover response shapes, transport interoperability and multi-spec generation.
 [All samples and run instructions →](samples/README.md)
 
 ## What the platform owns
@@ -143,17 +139,14 @@ openapi-generics:
 
 The client reads envelope identity from the projected metadata; no duplicate client envelope setting
 is needed. Supply that shared Java type on the client classpath.
-[Envelope requirements →](docs/adoption/server-side-adoption.md#choose-the-envelope)
 
 **BYOC — Bring Your Own Contract** is separate, optional client-side DTO reuse. Map a schema name to an
 existing Java type, and supply its dependency, instead of generating that model. It does not select
 the envelope. Without BYOC, ordinary DTOs are still generated; map them at the adapter boundary when
 application code needs its own types.
-[DTO reuse mappings →](docs/adoption/client-side-adoption.md#optional-reuse-existing-dtos-with-byoc)
 
 Built-in containers are `List<T>`, `Set<T>` and the platform's `Page<T>` (distinct from Spring Data's
 `Page<T>`). Explicitly registered application containers use the same metadata-driven reconstruction.
-[Container registration and limits →](docs/adoption/server-side-adoption.md#register-an-application-container)
 
 ## Compatibility and 1.3.0
 
@@ -167,8 +160,7 @@ async/multi-spec verification. Existing 1.2.x runtime contracts require no migra
 
 ## Implementation and further reading
 
-Find configuration and verification tasks in the [documentation hub](docs/index.md). Read
-[architecture](docs/architecture/architecture.md) for projection, reconstruction and build boundaries,
+Read [architecture](docs/architecture/architecture.md) for projection, reconstruction and build boundaries,
 or [design rationale](docs/architecture/rationale.md) for the trade-offs.
 
 <details>
