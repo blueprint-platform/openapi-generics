@@ -10,25 +10,16 @@ Start with one `Greeting` payload and the built-in `ServiceResponse<T>` envelope
 released **1.3.0** artifacts, official OpenAPI Generator **7.27.0**, and the same Boot 4.1.2 / Jackson 3
 RestClient dependency profile. These are example inputs, not support minima or build-tool requirements.
 
-Use **JDK 21** for this quickstart and either Maven (verified with **3.9.9**) or
-**Gradle 9.x** (verified with **9.9.1**). The verified Maven version is not a declared support minimum.
+Use **JDK 21**. The included wrappers download Maven **3.9.9** or Gradle **9.9.1** on the first run.
+These versions make the example reproducible. Internet access is needed for the first build.
 No platform checkout build, local artifact install, producer process, BYOE or BYOC setup is needed.
 
 ## Get the files
 
-Download or clone the repository and copy
+Download or clone the repository, then open
 [`quickstart`](https://github.com/blueprint-platform/openapi-generics/tree/main/quickstart)
-to an empty directory. Keep this structure; choose only one build tool:
-
-```text
-quickstart/
-  spec.yaml
-  maven/pom.xml
-  maven/src/main/java/example/UseClient.java
-  gradle/settings.gradle.kts
-  gradle/build.gradle.kts
-  gradle/src/main/java/example/UseClient.java
-```
+from the checkout. To run the example elsewhere, copy the entire `quickstart/` directory, including
+the hidden `maven/.mvn/` directory. Both builds read the same `spec.yaml`.
 
 The runnable files are the source of this tutorial and are built in CI against public repositories.
 They stay pinned to released platform dependencies while the repository itself develops 1.3.1-SNAPSHOT.
@@ -53,8 +44,11 @@ is independent of the platform artifact version.
 From `quickstart/`:
 
 ```bash
-mvn -f maven/pom.xml clean verify
+cd maven
+./mvnw clean verify
 ```
+
+On Windows, run `.\mvnw.cmd clean verify` from `quickstart/maven/`.
 
 The [complete POM](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/maven/pom.xml)
 inherits the public codegen parent, declares the generator execution and includes shared contract and
@@ -66,11 +60,14 @@ Expected wrapper:
 
 ## Gradle
 
-From `quickstart/`, with Gradle 9.x installed:
+From `quickstart/`:
 
 ```bash
-gradle -p gradle clean build
+cd gradle
+./gradlew clean build
 ```
+
+On Windows, run `.\gradlew.bat clean build` from `quickstart/gradle/`.
 
 The [settings](https://github.com/blueprint-platform/openapi-generics/blob/main/quickstart/gradle/settings.gradle.kts)
 resolve plugin markers through the public Plugin Portal. Content filters keep the platform

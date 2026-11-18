@@ -64,21 +64,24 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.9.1'
-          cache-disabled: true
+      - uses: gradle/actions/wrapper-validation@v4
       - name: Build tutorial files outside the checkout with clean public caches
         shell: bash
         env:
           GRADLE_USER_HOME: ${{ runner.temp }}/first-client-gradle-home
+          MAVEN_USER_HOME: ${{ runner.temp }}/first-client-maven-home
         run: |
           set -euo pipefail
           cp -R quickstart "$RUNNER_TEMP/first-client"
           printf '<settings/>\n' > "$RUNNER_TEMP/first-client-settings.xml"
-          mvn -B -ntp -s "$RUNNER_TEMP/first-client-settings.xml" -gs "$RUNNER_TEMP/first-client-settings.xml" \
-            -Dmaven.repo.local="$RUNNER_TEMP/first-client-maven-cache" \
-            -f "$RUNNER_TEMP/first-client/maven/pom.xml" clean verify
-          gradle -p "$RUNNER_TEMP/first-client/gradle" --no-daemon --no-build-cache \
-            -Dmaven.repo.local="$RUNNER_TEMP/first-client-gradle-maven-cache" clean build
+          (
+            cd "$RUNNER_TEMP/first-client/maven"
+            ./mvnw -B -ntp -s "$RUNNER_TEMP/first-client-settings.xml" -gs "$RUNNER_TEMP/first-client-settings.xml" \
+              -Dmaven.repo.local="$RUNNER_TEMP/first-client-maven-cache" clean verify
+          )
+          (
+            cd "$RUNNER_TEMP/first-client/gradle"
+            ./gradlew --no-daemon --no-build-cache \
+              -Dmaven.repo.local="$RUNNER_TEMP/first-client-gradle-maven-cache" clean build
+          )
           python3 scripts/verify-first-client.py "$RUNNER_TEMP/first-client"
