@@ -21,6 +21,7 @@ plugins {
     id("com.gradle.plugin-publish") version "2.2.1"
     signing
     jacoco
+    idea
 }
 
 group = "io.github.blueprint-platform"
@@ -77,6 +78,12 @@ val functionalTest: SourceSet = sourceSets.create("functionalTest")
 val e2eTest: SourceSet = sourceSets.create("e2eTest")
 functionalTest.java.srcDir("src/testSupport/java")
 e2eTest.java.srcDir("src/testSupport/java")
+
+// IntelliJ treats custom source sets as production sources unless told otherwise.
+idea.module {
+    testSources.from(functionalTest.java.srcDirs, e2eTest.java.srcDirs)
+    testResources.from(functionalTest.resources.srcDirs, e2eTest.resources.srcDirs)
+}
 val combinedCoverage = providers.gradleProperty("combinedCoverage").map(String::toBoolean).orElse(false)
 val nestedCoverageAgent = configurations.create("nestedCoverageAgent") {
     isCanBeConsumed = false
@@ -122,10 +129,10 @@ dependencies {
     compileOnly("org.openapitools:openapi-generator:$minimumOpenApiGeneratorApiCompileVersion")
     implementation("com.diffplug.spotless:spotless-lib:$spotlessLibVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("io.github.solven-eu.cleanthat:java:2.26")
-    testRuntimeOnly("com.github.javaparser:javaparser-symbol-solver-core:3.28.2")
+    testRuntimeOnly(libs.cleanthat.java)
+    testRuntimeOnly(libs.javaparser.symbol.solver)
     testRuntimeOnly(
         "com.google.googlejavaformat:google-java-format:" +
             if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_21)) "1.36.1" else "1.28.0"
@@ -317,7 +324,6 @@ val implementationPublication = providers.provider {
     publishing.publications.getByName("pluginMaven") as MavenPublication
 }
 tasks.withType<CentralBundleTask>().configureEach {
-    group = "publishing"
     coordinates.set("${project.group}:${project.name}:${project.version}")
     releaseEnabled.set(releasePublication)
     validationOnly.set(providers.gradleProperty("releaseValidationOnly").map(String::toBooleanStrict).orElse(false))
@@ -343,6 +349,7 @@ tasks.withType<CentralBundleTask>().configureEach {
     })
 }
 val prepareCentralRelease = tasks.register<CentralBundleTask>("prepareCentralRelease") {
+    group = "publishing"
     description = "Captures source provenance and clears owned release staging/evidence (no upload)."
     phase.set("prepare")
 }
@@ -364,10 +371,12 @@ tasks.withType<PublishToMavenRepository>().configureEach {
     }
 }
 tasks.register<CentralBundleTask>("validateCentralReleaseStaging") {
+    group = "publishing"
     description = "Validates existing signed staging and writes external provenance/inventory; never restages or uploads."
     phase.set("validate")
 }
 tasks.register<CentralBundleTask>("centralReleaseBundle") {
+    group = "publishing"
     description = "Stages, validates and packages only the signed implementation for manual Central upload."
     phase.set("bundle")
     dependsOn("publishPluginMavenPublicationToReleaseStagingRepository")

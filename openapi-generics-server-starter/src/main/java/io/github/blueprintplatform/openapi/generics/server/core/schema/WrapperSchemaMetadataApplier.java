@@ -16,7 +16,8 @@ public final class WrapperSchemaMetadataApplier {
 
   private WrapperSchemaMetadataApplier() {}
 
-  @SuppressWarnings("rawtypes")
+  // Callers consume heterogeneous Swagger schema types through their shared API.
+  @SuppressWarnings({"rawtypes", "java:S1452"})
   public static Schema<?> apply(Map<String, Schema> schemas, ResponseTypeDescriptor descriptor) {
 
     String wrapperName = descriptor.envelopeType().getSimpleName() + descriptor.dataRefName();

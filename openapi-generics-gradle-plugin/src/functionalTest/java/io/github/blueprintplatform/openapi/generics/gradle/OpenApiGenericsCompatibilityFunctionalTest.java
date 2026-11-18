@@ -46,8 +46,6 @@ class OpenApiGenericsCompatibilityFunctionalTest {
                         "OFFICIAL_GENERATOR_RUNTIME_VERSION="
                                 + environment.officialPluginRuntimeVersion()),
                 result::getOutput);
-        System.out.println(
-                "Verified official generator runtime: " + environment.officialPluginRuntimeVersion());
     }
 
     @Test

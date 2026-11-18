@@ -80,6 +80,8 @@ fun GenerateTask.configureModelOnlyGeneration() {
 }
 
 tasks.register<GenerateTask>("generateCustomerClient") {
+    group = "code generation"
+    description = "Generates customer models from the fixture OpenAPI document."
     configureModelOnlyGeneration()
 
     inputSpec.set(
@@ -103,6 +105,8 @@ tasks.register<GenerateTask>("generateCustomerClient") {
 }
 
 tasks.register<GenerateTask>("generateOrderClient") {
+    group = "code generation"
+    description = "Generates order models from the fixture OpenAPI document."
     configureModelOnlyGeneration()
 
     inputSpec.set(

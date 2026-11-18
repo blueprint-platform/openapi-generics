@@ -34,6 +34,45 @@ public final class ConsumerBuildFiles {
 
     public static final String PRINT_REGISTERED_TASKS = "printRegisteredTasks";
 
+    private static final String OFFICIAL_GENERATE_CONFIGURATION = """
+                tasks.named<GenerateTask>("openApiGenerate") {
+                    generatorName.set("java-generics-contract")
+                    outputDir.set(layout.buildDirectory.dir("generated/openapi"))
+                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
+                }
+
+                """;
+
+    private static final String MIXED_GENERATE_TASKS = """
+                tasks.register<GenerateTask>("generateGenericsClient") {
+                    generatorName.set("java-generics-contract")
+                    outputDir.set(layout.buildDirectory.dir("generated/generics"))
+                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
+                }
+
+                tasks.register<GenerateTask>("generateKotlinClient") {
+                    generatorName.set("kotlin")
+                    outputDir.set(layout.buildDirectory.dir("generated/kotlin"))
+                    configOptions.set(emptyMap())
+                }
+
+                """;
+
+    private static final String MULTIPLE_GENERICS_TASKS = """
+                tasks.register<GenerateTask>("generateCustomerClient") {
+                    generatorName.set("java-generics-contract")
+                    outputDir.set(layout.buildDirectory.dir("generated/customer"))
+                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
+                }
+
+                tasks.register<GenerateTask>("generateServiceResponseClient") {
+                    generatorName.set("java-generics-contract")
+                    outputDir.set(layout.buildDirectory.dir("generated/service-response"))
+                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
+                }
+
+                """;
+
     private ConsumerBuildFiles() {}
 
     public static String officialJavaConsumer(
@@ -43,7 +82,7 @@ public final class ConsumerBuildFiles {
 
         return plugins(openApiGeneratorVersion, pluginVersion, true)
                 + repositories(fixtureRepositoryUri)
-                + officialGenerateConfiguration()
+                + OFFICIAL_GENERATE_CONFIGURATION
                 + inspectionTasks(true);
     }
 
@@ -54,7 +93,7 @@ public final class ConsumerBuildFiles {
 
         return plugins(openApiGeneratorVersion, pluginVersion, true)
                 + codegenOnlyRepositories(fixtureRepositoryUri)
-                + officialGenerateConfiguration()
+                + OFFICIAL_GENERATE_CONFIGURATION
                 + inspectionTasks(true);
     }
 
@@ -65,7 +104,7 @@ public final class ConsumerBuildFiles {
 
         return plugins(openApiGeneratorVersion, pluginVersion, true)
                 + repositories(fixtureRepositoryUri)
-                + mixedGenerateTasks()
+                + MIXED_GENERATE_TASKS
                 + inspectionTasks(true);
     }
 
@@ -76,7 +115,7 @@ public final class ConsumerBuildFiles {
 
         return plugins(openApiGeneratorVersion, pluginVersion, true)
                 + repositories(fixtureRepositoryUri)
-                + multipleGenericsTasks()
+                + MULTIPLE_GENERICS_TASKS
                 + inspectionTasks(true);
     }
 
@@ -152,17 +191,6 @@ public final class ConsumerBuildFiles {
                 .formatted(fixtureRepositoryUri);
     }
 
-    private static String officialGenerateConfiguration() {
-        return """
-                tasks.named<GenerateTask>("openApiGenerate") {
-                    generatorName.set("java-generics-contract")
-                    outputDir.set(layout.buildDirectory.dir("generated/openapi"))
-                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
-                }
-
-                """;
-    }
-
     public static String ordinaryJavaConsumerWithTemplate(
             String officialPluginRuntimeVersion,
             String pluginVersion,
@@ -182,40 +210,6 @@ public final class ConsumerBuildFiles {
                 }
                 """
                 + inspectionTasks(true);
-    }
-
-    private static String mixedGenerateTasks() {
-        return """
-                tasks.register<GenerateTask>("generateGenericsClient") {
-                    generatorName.set("java-generics-contract")
-                    outputDir.set(layout.buildDirectory.dir("generated/generics"))
-                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
-                }
-
-                tasks.register<GenerateTask>("generateKotlinClient") {
-                    generatorName.set("kotlin")
-                    outputDir.set(layout.buildDirectory.dir("generated/kotlin"))
-                    configOptions.set(emptyMap())
-                }
-
-                """;
-    }
-
-    private static String multipleGenericsTasks() {
-        return """
-                tasks.register<GenerateTask>("generateCustomerClient") {
-                    generatorName.set("java-generics-contract")
-                    outputDir.set(layout.buildDirectory.dir("generated/customer"))
-                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
-                }
-
-                tasks.register<GenerateTask>("generateServiceResponseClient") {
-                    generatorName.set("java-generics-contract")
-                    outputDir.set(layout.buildDirectory.dir("generated/service-response"))
-                    configOptions.set(mapOf("sourceFolder" to "src/gen/java"))
-                }
-
-                """;
     }
 
     private static String inspectionTasks(boolean includeJavaInspections) {
@@ -375,7 +369,7 @@ public final class ConsumerBuildFiles {
 
                     """
                 .formatted(codegenVersion)
-                + officialGenerateConfiguration()
+                + OFFICIAL_GENERATE_CONFIGURATION
                 + inspectionTasks(true);
     }
 }

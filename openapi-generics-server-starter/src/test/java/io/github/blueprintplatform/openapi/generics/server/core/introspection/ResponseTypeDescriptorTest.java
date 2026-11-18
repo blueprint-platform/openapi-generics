@@ -63,6 +63,8 @@ class ResponseTypeDescriptorTest {
     assertTrue(descriptor.isContainer());
   }
 
+  // JUnit can short-circuit identical references without calling equals.
+  @SuppressWarnings("java:S5785")
   @Test
   @DisplayName("equals -> should return true for same instance")
   void equals_shouldReturnTrueForSameInstance() {
@@ -100,6 +102,8 @@ class ResponseTypeDescriptorTest {
     assertEquals(first.hashCode(), second.hashCode());
   }
 
+  // Call the descriptor implementation even for a null argument.
+  @SuppressWarnings("java:S5785")
   @Test
   @DisplayName("equals -> should return false for null")
   void equals_shouldReturnFalseForNull() {
@@ -109,6 +113,8 @@ class ResponseTypeDescriptorTest {
     assertFalse(descriptor.equals(null));
   }
 
+  // Call the descriptor implementation for an unrelated type.
+  @SuppressWarnings("java:S5785")
   @Test
   @DisplayName("equals -> should return false for unrelated type")
   void equals_shouldReturnFalseForUnrelatedType() {

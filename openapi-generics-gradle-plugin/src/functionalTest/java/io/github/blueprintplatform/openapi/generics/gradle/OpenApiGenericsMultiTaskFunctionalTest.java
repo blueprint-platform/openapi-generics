@@ -38,8 +38,7 @@ class OpenApiGenericsMultiTaskFunctionalTest {
                                                 && line.contains(
                                                         "openapi-generics-java-codegen")),
                 () ->
-                        "Expected selected task '%s' to include the OpenAPI Generics "
-                                + "codegen runtime.%n%n%s"
+                        "Expected selected task '%s' to include the OpenAPI Generics codegen runtime.%n%n%s"
                                 .formatted(
                                         taskName,
                                         result.getOutput()));

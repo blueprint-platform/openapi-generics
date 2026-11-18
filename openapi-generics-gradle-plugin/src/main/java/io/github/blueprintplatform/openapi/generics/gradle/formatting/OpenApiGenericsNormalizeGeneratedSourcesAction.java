@@ -20,6 +20,8 @@ import org.gradle.api.provider.Provider;
  * access task extensions or project state while the task is executing, preserving configuration
  * cache compatibility.
  */
+// Gradle Configuration Cache serializes Provider state using its own codecs.
+@SuppressWarnings("java:S1948")
 public final class OpenApiGenericsNormalizeGeneratedSourcesAction
         implements Action<Task>, Serializable {
 

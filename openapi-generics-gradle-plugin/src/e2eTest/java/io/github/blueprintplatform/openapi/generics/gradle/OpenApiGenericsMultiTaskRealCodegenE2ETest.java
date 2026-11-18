@@ -61,8 +61,7 @@ class OpenApiGenericsMultiTaskRealCodegenE2ETest {
                 task.getOutcome() == SUCCESS
                         || task.getOutcome() == UP_TO_DATE,
                 () ->
-                        "Expected task '%s' to succeed or be up-to-date "
-                                + "but was '%s'.%n%n%s"
+                        "Expected task '%s' to succeed or be up-to-date but was '%s'.%n%nBuild output:%n%s"
                                 .formatted(
                                         taskPath,
                                         task.getOutcome(),

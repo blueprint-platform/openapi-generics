@@ -70,6 +70,8 @@ public abstract class CentralBundleTask extends DefaultTask {
     @Internal public abstract DirectoryProperty getStagingDirectory();
     @Internal public abstract DirectoryProperty getEvidenceDirectory();
 
+    // Gradle cannot instantiate the task through an unannotated protected constructor.
+    @SuppressWarnings("java:S5993")
     public CentralBundleTask() {
         getOutputs().upToDateWhen(task -> false);
     }

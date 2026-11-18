@@ -41,7 +41,7 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                 selection.isSelected()
                         .map(
                                 selected ->
-                                        selected
+                                        Boolean.TRUE.equals(selected)
                                                 ? generatorRuntimeClasspath
                                                 : project.files());
 
@@ -49,7 +49,7 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
                 selection.isSelected()
                         .map(
                                 selected ->
-                                        selected
+                                        Boolean.TRUE.equals(selected)
                                                 ? formatterRuntimeClasspath
                                                 : project.files());
 
@@ -66,10 +66,10 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
 
         task.dependsOn(
                 (Callable<Object>)
-                        () ->
-                                selection.isSelected().get()
-                                        ? templateRuntime.preparationTask()
-                                        : null);
+                        () -> {
+                            boolean selected = selection.isSelected().get();
+                            return selected ? templateRuntime.preparationTask() : null;
+                        });
 
         OpenApiGenericsFormattingSpec formatting =
                 task.getExtensions()

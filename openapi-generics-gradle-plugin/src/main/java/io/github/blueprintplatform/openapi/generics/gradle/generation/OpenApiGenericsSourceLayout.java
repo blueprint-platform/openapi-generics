@@ -52,7 +52,7 @@ public final class OpenApiGenericsSourceLayout {
         return selection.isSelected()
                 .flatMap(
                         selected ->
-                                selected
+                                Boolean.TRUE.equals(selected)
                                         ? directory
                                         : absent);
     }

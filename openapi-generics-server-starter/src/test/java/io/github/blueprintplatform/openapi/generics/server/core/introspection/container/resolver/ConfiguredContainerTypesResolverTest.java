@@ -343,10 +343,12 @@ class ConfiguredContainerTypesResolverTest {
   }
 
   private static final class ValidListContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<T> items;
   }
 
   private static final class ValidSetContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private Set<T> elements;
   }
 
@@ -359,18 +361,22 @@ class ConfiguredContainerTypesResolverTest {
   private @interface GenericAnnotation {}
 
   private abstract static class AbstractContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<T> items;
   }
 
   private static final class NoTypeParameterContainer {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<String> items;
   }
 
   private static final class MultipleTypeParameterContainer<T, U> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<T> items;
   }
 
   private static final class StaticFieldContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private static List<?> items;
   }
 
@@ -380,10 +386,12 @@ class ConfiguredContainerTypesResolverTest {
   }
 
   private static final class CollectionContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private Collection<T> items;
   }
 
   private static final class ConcreteItemContainer<T> {
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<String> items;
   }
 
@@ -393,6 +401,7 @@ class ConfiguredContainerTypesResolverTest {
 
   private static final class InheritedTypeVariableContainer<T> extends ParentContainer<String> {
 
+    @SuppressWarnings("java:S1068") // Read by the configured container resolver through reflection.
     private List<ParentTypeParameter<T>> items;
   }
 
