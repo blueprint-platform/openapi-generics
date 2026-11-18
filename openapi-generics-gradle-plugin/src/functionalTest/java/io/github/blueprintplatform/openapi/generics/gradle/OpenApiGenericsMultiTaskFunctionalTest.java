@@ -15,6 +15,8 @@ import org.junit.jupiter.api.io.TempDir;
  * Verifies plugin wiring when one consumer project declares more than one
  * {@code java-generics-contract} generation task.
  */
+// SonarQube for IDE can classify this custom Gradle test source set as production.
+@SuppressWarnings("java:S5960")
 class OpenApiGenericsMultiTaskFunctionalTest {
 
     @TempDir

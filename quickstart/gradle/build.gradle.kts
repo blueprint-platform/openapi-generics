@@ -7,6 +7,8 @@ repositories { mavenCentral() }
 java { toolchain.languageVersion.set(JavaLanguageVersion.of(21)) }
 dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.2"))
+    // The contract matches the published OpenAPI Generics plugin release used in this quickstart.
+    @Suppress("kotlin:S6624")
     implementation("io.github.blueprint-platform:openapi-generics-contract:1.3.0")
     implementation("org.springframework:spring-web")
     implementation("tools.jackson.core:jackson-databind")

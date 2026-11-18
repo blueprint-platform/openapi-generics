@@ -9,6 +9,8 @@ dependencies {
     implementation(project(":contract"))
     implementation("io.github.blueprint-platform:openapi-generics-server-starter:$platformVersion")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    // Springdoc 3.2.0 is the verified reference for this Boot 4 sample.
+    @Suppress("kotlin:S6624")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.2.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")

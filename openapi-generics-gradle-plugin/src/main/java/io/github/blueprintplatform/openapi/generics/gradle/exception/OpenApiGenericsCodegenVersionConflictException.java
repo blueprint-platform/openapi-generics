@@ -4,6 +4,8 @@ package io.github.blueprintplatform.openapi.generics.gradle.exception;
  * Raised when the consumer declares an OpenAPI Generics codegen version that does not match
  * the applied OpenAPI Generics Gradle Plugin version.
  */
+// Preserve the shared Gradle exception contract and its Gradle/JDK ancestry.
+@SuppressWarnings("java:S110")
 public final class OpenApiGenericsCodegenVersionConflictException
         extends OpenApiGenericsGradleException {
 

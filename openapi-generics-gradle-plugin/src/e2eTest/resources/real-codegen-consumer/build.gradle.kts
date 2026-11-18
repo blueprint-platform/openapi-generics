@@ -40,12 +40,16 @@ dependencies {
         "io.github.blueprint-platform:openapi-generics-contract:$openApiGenericsVersion"
     )
 
+    // Fixed compile inputs keep this isolated generated-model fixture reproducible.
+    @Suppress("kotlin:S6624")
     compileOnly(
         "com.fasterxml.jackson.core:jackson-annotations:2.18.2"
     )
+    @Suppress("kotlin:S6624")
     compileOnly(
         "jakarta.annotation:jakarta.annotation-api:3.0.0"
     )
+    @Suppress("kotlin:S6624")
     compileOnly(
         "jakarta.validation:jakarta.validation-api:3.1.1"
     )

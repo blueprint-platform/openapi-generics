@@ -394,6 +394,8 @@ public abstract class CentralBundleTask extends DefaultTask {
         };
     }
 
+    // Central requires these sidecars. GPG verifies signatures and SHA-256 verifies artifact bytes.
+    @SuppressWarnings("java:S4790")
     private static boolean legacyCentralChecksumMatches(Path file, String suffix, Object expected) throws IOException, NoSuchAlgorithmException {
         MessageDigest checksum = switch (suffix) {
             // Central repository compatibility checksum; not used for security/authenticity.
@@ -408,6 +410,8 @@ public abstract class CentralBundleTask extends DefaultTask {
     }
 
     private static String command(Path directory, List<String> args) throws IOException, InterruptedException {
+        // NIO atomically creates a unique file with restrictive default permissions.
+        @SuppressWarnings("java:S5443")
         Path log = Files.createTempFile("central-release-command-", ".log");
         try {
             Process process = new ProcessBuilder(args).directory(directory.toFile()).redirectErrorStream(true)

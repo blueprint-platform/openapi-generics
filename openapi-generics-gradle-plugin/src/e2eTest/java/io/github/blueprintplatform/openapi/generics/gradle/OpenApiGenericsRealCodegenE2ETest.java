@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
  * Golden-path reconstruction against the real {@code java-generics-contract}
  * artifact. Functional tests must not duplicate this compile proof.
  */
+// SonarQube for IDE can classify this custom Gradle test source set as production.
+@SuppressWarnings("java:S5960")
 class OpenApiGenericsRealCodegenE2ETest {
 
     private static final String GENERATED_MODEL_PACKAGE =

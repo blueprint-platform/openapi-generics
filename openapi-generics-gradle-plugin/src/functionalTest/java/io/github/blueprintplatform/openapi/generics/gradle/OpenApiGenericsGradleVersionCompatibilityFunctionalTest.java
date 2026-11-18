@@ -11,6 +11,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+// SonarQube for IDE can classify this custom Gradle test source set as production.
+@SuppressWarnings("java:S5960")
 class OpenApiGenericsGradleVersionCompatibilityFunctionalTest {
 
     @TempDir

@@ -3,6 +3,8 @@ package io.github.blueprintplatform.openapi.generics.gradle.exception;
 /**
  * Raised when an implementation version cannot be read from an artifact manifest.
  */
+// Preserve the shared Gradle exception contract and its Gradle/JDK ancestry.
+@SuppressWarnings("java:S110")
 public final class PluginVersionResolutionException
         extends OpenApiGenericsGradleException {
 

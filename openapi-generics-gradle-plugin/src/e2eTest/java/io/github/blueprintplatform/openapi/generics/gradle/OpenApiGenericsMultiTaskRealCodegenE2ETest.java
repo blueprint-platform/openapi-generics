@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
  * Real-codegen proof for two selected {@code GenerateTask} instances in one
  * Gradle consumer project.
  */
+// SonarQube for IDE can classify this custom Gradle test source set as production.
+@SuppressWarnings("java:S5960")
 class OpenApiGenericsMultiTaskRealCodegenE2ETest {
 
     private static final List<String> FIXTURE_FILES =
