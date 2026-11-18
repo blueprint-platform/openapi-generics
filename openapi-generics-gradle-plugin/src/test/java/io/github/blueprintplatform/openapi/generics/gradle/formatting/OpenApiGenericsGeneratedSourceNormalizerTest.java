@@ -68,9 +68,9 @@ class OpenApiGenericsGeneratedSourceNormalizerTest {
         String malformed = "package example; public class Broken {";
         Files.writeString(source, malformed);
 
+        var normalizer = OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath());
         var exception = assertThrows(GeneratedSourceNormalizationException.class,
-                () -> OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath())
-                        .normalize(temporaryDirectory));
+                () -> normalizer.normalize(temporaryDirectory));
         assertTrue(exception.getMessage().contains("step '"));
         assertTrue(exception.getMessage().contains(source.toString()));
         assertNotNull(exception.getCause());
@@ -82,9 +82,9 @@ class OpenApiGenericsGeneratedSourceNormalizerTest {
         Path source = temporaryDirectory.resolve("InvalidEncoding.java");
         Files.write(source, new byte[] {(byte) 0xc3, 0x28});
 
+        var normalizer = OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath());
         var exception = assertThrows(GeneratedSourceNormalizationException.class,
-                () -> OpenApiGenericsGeneratedSourceNormalizer.create(testRuntimeClasspath())
-                        .normalize(temporaryDirectory));
+                () -> normalizer.normalize(temporaryDirectory));
         assertTrue(exception.getMessage().contains(temporaryDirectory.toString()));
         assertInstanceOf(IOException.class, exception.getCause());
     }

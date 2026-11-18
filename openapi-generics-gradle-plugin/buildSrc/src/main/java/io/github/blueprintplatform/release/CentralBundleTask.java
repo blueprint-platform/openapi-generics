@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,6 +26,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.file.DirectoryProperty;
@@ -36,11 +38,24 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.util.GradleVersion;
 import org.gradle.work.DisableCachingByDefault;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /** Repository build tooling only; never included in the published plugin. No upload code. */
 @DisableCachingByDefault(because = "Release provenance and signatures must be verified on every invocation")
 public abstract class CentralBundleTask extends DefaultTask {
-    private static final List<String> CHECKSUM_SUFFIXES = List.of(".md5", ".sha1", ".sha256", ".sha512");
+    private static final String GAV_SEGMENT = "[A-Za-z0-9_.-]+";
+    private static final String BUNDLE = "bundle";
+    private static final String MD5_SUFFIX = ".md5";
+    private static final String SHA1_SUFFIX = ".sha1";
+    private static final String SHA256_SUFFIX = ".sha256";
+    private static final String SHA512_SUFFIX = ".sha512";
+    private static final String JAR_SUFFIX = ".jar";
+    private static final String SOURCES_SUFFIX = "-sources.jar";
+    private static final String JAVADOC_SUFFIX = "-javadoc.jar";
+    private static final String POM_SUFFIX = ".pom";
+    private static final String MODULE_SUFFIX = ".module";
+    private static final String SIGNATURE_SUFFIX = ".asc";
+    private static final List<String> CHECKSUM_SUFFIXES = List.of(MD5_SUFFIX, SHA1_SUFFIX, SHA256_SUFFIX, SHA512_SUFFIX);
 
     @Input public abstract Property<String> getPhase();
     @Input public abstract Property<String> getCoordinates();
@@ -59,15 +74,19 @@ public abstract class CentralBundleTask extends DefaultTask {
         getOutputs().upToDateWhen(task -> false);
     }
 
-    @TaskAction public void runReleaseStep() throws Exception {
-        require(Set.of("prepare", "validate", "bundle").contains(getPhase().get()), "Unknown release task phase");
-        require(getReleaseEnabled().get(), "Central staging/bundling requires -PreleasePublication=true");
+    @TaskAction
+    public void runReleaseStep()
+            throws IOException, InterruptedException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
+        require(Set.of("prepare", "validate", BUNDLE).contains(getPhase().get()), "Unknown release task phase");
+        boolean releaseEnabled = getReleaseEnabled().get();
+        require(releaseEnabled, "Central staging/bundling requires -PreleasePublication=true");
         String fingerprint = getSigningFingerprint().get().toUpperCase();
         require(fingerprint.matches("[0-9A-F]{40}|[0-9A-F]{64}"),
                 "An explicit full releaseSigningFingerprint is required (not a short key ID)");
         Path evidence = getEvidenceDirectory().get().getAsFile().toPath();
         Map<String, Object> source = sourceState();
-        require(getValidationOnly().get() || !(Boolean) source.get("dirty"),
+        boolean validationOnly = getValidationOnly().get();
+        require(validationOnly || Boolean.FALSE.equals(source.get("dirty")),
                 "Release source and index must be clean, including all non-ignored untracked files. "
                         + "Disposable tests may use -PreleaseValidationOnly=true; their bundle is NOT release-ready.");
         if (getPhase().get().equals("prepare")) {
@@ -77,14 +96,19 @@ public abstract class CentralBundleTask extends DefaultTask {
             writeJson(evidence.resolve("source-before.json"), source);
             return;
         }
-        Path output = evidence.resolve("bundle");
+        Path output = evidence.resolve(BUNDLE);
         // Invalidate previous success evidence before validating potentially modified staging.
         deleteOwnedDirectory(output);
         Map<?, ?> before = jsonObject(evidence.resolve("source-before.json"));
         require(before.equals(source), "Source commit/tree/content changed since release staging preparation");
+        validateStaging(output, source, fingerprint, validationOnly);
+    }
+
+    private void validateStaging(Path output, Map<String, Object> source, String fingerprint, boolean validationOnly)
+            throws IOException, InterruptedException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
         String[] gav = getCoordinates().get().split(":", -1);
-        require(gav.length == 3 && gav[0].matches("[A-Za-z0-9_.-]+")
-                        && gav[1].matches("[A-Za-z0-9_.-]+") && gav[2].matches("[A-Za-z0-9_.-]+")
+        require(gav.length == 3 && gav[0].matches(GAV_SEGMENT)
+                        && gav[1].matches(GAV_SEGMENT) && gav[2].matches(GAV_SEGMENT)
                         && !gav[2].endsWith("-SNAPSHOT"), "Invalid release GAV");
         String relativeRoot = gav[0].replace('.', '/') + "/" + gav[1] + "/" + gav[2] + "/";
         Path staging = getStagingDirectory().get().getAsFile().toPath();
@@ -100,13 +124,28 @@ public abstract class CentralBundleTask extends DefaultTask {
                     "Duplicate publication filename");
         }
         String prefix = relativeRoot + gav[1] + "-" + gav[2];
-        for (String extension : List.of(".jar", "-sources.jar", "-javadoc.jar", ".pom", ".module")) {
+        for (String extension : List.of(JAR_SUFFIX, SOURCES_SUFFIX, JAVADOC_SUFFIX, POM_SUFFIX, MODULE_SUFFIX)) {
             require(payload.containsKey(prefix + extension), "Required publication output missing: " + extension);
         }
+        Map<String, Path> actual = scanStaging(staging, payload);
+        Map<String, String> validatedContents = inventory(actual);
+        Map<String, String> signers = validatePayload(payload, actual, fingerprint);
+        validatePom(actual.get(prefix + POM_SUFFIX), gav);
+        validateModule(actual.get(prefix + MODULE_SUFFIX), actual, relativeRoot, gav);
+        validateJars(actual, prefix, gav[2]);
+        require(source.equals(sourceState()), "Source changed during bundle validation");
+        require(validatedContents.equals(inventory(actual)), "Staging changed during validation");
+        writeEvidence(output, source, fingerprint, signers, validatedContents, validationOnly);
+        if (getPhase().get().equals(BUNDLE)) {
+            writeBundle(output, gav, actual, validatedContents, source, validationOnly);
+        }
+    }
+
+    private static Map<String, Path> scanStaging(Path staging, Map<String, Path> payload) throws IOException {
         Set<String> permitted = new TreeSet<>();
         for (String name : payload.keySet()) {
             permitted.add(name);
-            permitted.add(name + ".asc");
+            permitted.add(name + SIGNATURE_SUFFIX);
             for (String suffix : CHECKSUM_SUFFIXES) permitted.add(name + suffix);
         }
         Map<String, Path> actual = new TreeMap<>();
@@ -125,7 +164,11 @@ public abstract class CentralBundleTask extends DefaultTask {
                 }
             }
         }
-        Map<String, String> validatedContents = inventory(actual);
+        return actual;
+    }
+
+    private Map<String, String> validatePayload(Map<String, Path> payload, Map<String, Path> actual, String fingerprint)
+            throws IOException, InterruptedException, NoSuchAlgorithmException {
         Map<String, String> signers = new TreeMap<>();
         for (var item : payload.entrySet()) {
             String name = item.getKey();
@@ -135,13 +178,13 @@ public abstract class CentralBundleTask extends DefaultTask {
                             && !Files.isSymbolicLink(item.getValue())
                             && sha256(file).equals(sha256(item.getValue())),
                     "Staged artifact differs from generated publication output: " + name);
-            Path signature = actual.get(name + ".asc");
+            Path signature = actual.get(name + SIGNATURE_SUFFIX);
             require(signature != null && Files.size(signature) > 0, "Missing signature: " + name);
             signers.put(name, verifySignature(file, signature, fingerprint));
             for (String suffix : CHECKSUM_SUFFIXES) {
                 Path sidecar = actual.get(name + suffix);
                 if (sidecar == null) {
-                    require(!Set.of(".md5", ".sha1").contains(suffix),
+                    require(!Set.of(MD5_SUFFIX, SHA1_SUFFIX).contains(suffix),
                             "Missing required checksum: " + name + suffix);
                 } else {
                     String expected = Files.readString(sidecar).trim().toLowerCase(Locale.ROOT);
@@ -150,36 +193,40 @@ public abstract class CentralBundleTask extends DefaultTask {
                 }
             }
         }
-        validatePom(actual.get(prefix + ".pom"), gav);
-        validateModule(actual.get(prefix + ".module"), actual, relativeRoot, gav);
-        for (String suffix : List.of(".jar", "-sources.jar", "-javadoc.jar")) {
+        return signers;
+    }
+
+    private static void validateJars(Map<String, Path> actual, String prefix, String version) throws IOException {
+        for (String suffix : List.of(JAR_SUFFIX, SOURCES_SUFFIX, JAVADOC_SUFFIX)) {
             try (ZipFile jar = new ZipFile(actual.get(prefix + suffix).toFile())) {
                 require(jar.size() > 0, "Empty JAR: " + suffix);
-                if (suffix.equals("-sources.jar")) require(jar.stream().anyMatch(e -> e.getName().endsWith(".java")),
+                if (suffix.equals(SOURCES_SUFFIX)) require(jar.stream().anyMatch(e -> e.getName().endsWith(".java")),
                         "Sources JAR contains no Java sources");
-                if (suffix.equals("-javadoc.jar")) require(jar.stream().anyMatch(e -> e.getName().endsWith(".html")),
+                if (suffix.equals(JAVADOC_SUFFIX)) require(jar.stream().anyMatch(e -> e.getName().endsWith(".html")),
                         "Javadoc JAR contains no HTML documentation");
-                if (suffix.equals(".jar")) {
+                if (suffix.equals(JAR_SUFFIX)) {
                     var entry = jar.getEntry("META-INF/MANIFEST.MF");
                     require(entry != null, "Missing implementation manifest");
                     try (var input = jar.getInputStream(entry)) {
                         var manifest = new java.util.jar.Manifest(input);
-                        require(gav[2].equals(manifest.getMainAttributes().getValue("Implementation-Version")),
+                        require(version.equals(manifest.getMainAttributes().getValue("Implementation-Version")),
                                 "Implementation-Version does not match release GAV");
                     }
                 }
             }
         }
-        require(source.equals(sourceState()), "Source changed during bundle validation");
-        require(validatedContents.equals(inventory(actual)), "Staging changed during validation");
+    }
+
+    private void writeEvidence(Path output, Map<String, Object> source, String fingerprint,
+                               Map<String, String> signers, Map<String, String> inventory, boolean validationOnly)
+            throws IOException {
         Files.createDirectories(output);
-        Map<String, String> inventory = validatedContents;
         StringBuilder sums = new StringBuilder();
         inventory.forEach((name, sha) -> sums.append(sha).append("  ").append(name).append('\n'));
         Files.writeString(output.resolve("SHA256SUMS"), sums);
         Map<String, Object> provenance = new LinkedHashMap<>();
         provenance.put("source", source);
-        provenance.put("releaseReady", !getValidationOnly().get());
+        provenance.put("releaseReady", !validationOnly);
         provenance.put("gav", getCoordinates().get());
         provenance.put("jdk", System.getProperty("java.version"));
         provenance.put("jdkVendor", System.getProperty("java.vendor"));
@@ -191,34 +238,37 @@ public abstract class CentralBundleTask extends DefaultTask {
                 "tool", "gradle",
                 "operation", "central-release-" + getPhase().get(),
                 "releasePublication", true,
-                "validationOnly", getValidationOnly().get()));
+                "validationOnly", validationOnly));
         provenance.put("files", inventory);
         writeJson(output.resolve("provenance.json"), provenance);
-        if (getPhase().get().equals("bundle")) {
-            String filename = gav[1] + "-" + gav[2]
-                    + (getValidationOnly().get() ? "-VALIDATION-ONLY" : "") + "-central.zip";
-            Path zip = output.resolve(filename);
-            try (ZipOutputStream stream = new ZipOutputStream(Files.newOutputStream(zip))) {
-                for (var item : actual.entrySet()) {
-                    byte[] bytes = Files.readAllBytes(item.getValue());
-                    require(sha256(bytes).equals(inventory.get(item.getKey())),
-                            "Staging changed during packaging: " + item.getKey());
-                    ZipEntry entry = new ZipEntry(item.getKey());
-                    entry.setTimeLocal(java.time.LocalDateTime.of(1980, 1, 1, 0, 0));
-                    stream.putNextEntry(entry);
-                    stream.write(bytes);
-                    stream.closeEntry();
-                }
-            }
-            require(inventory.equals(inventory(actual)) && source.equals(sourceState()),
-                    "Staging/source changed during packaging");
-            Files.writeString(output.resolve(filename + ".sha256"), sha256(zip) + "  " + filename + "\n");
-            getLogger().lifecycle("Local Central bundle: {} ({} files, releaseReady={})", zip, actual.size(),
-                    !getValidationOnly().get());
-        }
     }
 
-    private Map<String, Object> sourceState() throws Exception {
+    private void writeBundle(Path output, String[] gav, Map<String, Path> actual, Map<String, String> inventory,
+                             Map<String, Object> source, boolean validationOnly)
+            throws IOException, InterruptedException, NoSuchAlgorithmException {
+        String filename = gav[1] + "-" + gav[2]
+                + (validationOnly ? "-VALIDATION-ONLY" : "") + "-central.zip";
+        Path zip = output.resolve(filename);
+        try (ZipOutputStream stream = new ZipOutputStream(Files.newOutputStream(zip))) {
+            for (var item : actual.entrySet()) {
+                byte[] bytes = Files.readAllBytes(item.getValue());
+                require(sha256(bytes).equals(inventory.get(item.getKey())),
+                        "Staging changed during packaging: " + item.getKey());
+                ZipEntry entry = new ZipEntry(item.getKey());
+                entry.setTimeLocal(java.time.LocalDateTime.of(1980, 1, 1, 0, 0));
+                stream.putNextEntry(entry);
+                stream.write(bytes);
+                stream.closeEntry();
+            }
+        }
+        require(inventory.equals(inventory(actual)) && source.equals(sourceState()),
+                "Staging/source changed during packaging");
+        Files.writeString(output.resolve(filename + SHA256_SUFFIX), sha256(zip) + "  " + filename + "\n");
+        getLogger().lifecycle("Local Central bundle: {} ({} files, releaseReady={})", zip, actual.size(),
+                !validationOnly);
+    }
+
+    private Map<String, Object> sourceState() throws IOException, InterruptedException, NoSuchAlgorithmException {
         Path root = getSourceRoot().get().getAsFile().toPath();
         String commit = command(root, List.of("git", "rev-parse", "HEAD")).trim();
         String tree = command(root, List.of("git", "rev-parse", "HEAD^{tree}")).trim();
@@ -228,8 +278,13 @@ public abstract class CentralBundleTask extends DefaultTask {
         for (String file : files.split("\0")) {
             if (file.isEmpty()) continue;
             Path path = root.resolve(file);
-            contents.put(file, Files.isSymbolicLink(path) ? "symlink:" + Files.readSymbolicLink(path)
-                    : Files.exists(path) ? sha256(path) : "deleted");
+            String content;
+            if (Files.isSymbolicLink(path)) {
+                content = "symlink:" + Files.readSymbolicLink(path);
+            } else {
+                content = Files.exists(path) ? sha256(path) : "deleted";
+            }
+            contents.put(file, content);
         }
         Map<String, Object> state = new LinkedHashMap<>();
         state.put("commit", commit);
@@ -239,7 +294,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         return state;
     }
 
-    private String verifySignature(Path file, Path signature, String expected) throws Exception {
+    private String verifySignature(Path file, Path signature, String expected) throws IOException, InterruptedException {
         List<String> args = new ArrayList<>(List.of(getGpgExecutable().get(), "--batch", "--no-auto-key-retrieve"));
         if (!getGpgHome().get().isBlank()) args.addAll(List.of("--homedir", getGpgHome().get()));
         args.addAll(List.of("--status-fd=1", "--verify", signature.toString(), file.toString()));
@@ -255,7 +310,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         throw new GradleException("No valid GPG signature: " + file);
     }
 
-    private static void validatePom(Path path, String[] gav) throws Exception {
+    private static void validatePom(Path path, String[] gav) throws IOException, ParserConfigurationException, SAXException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -278,7 +333,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         return "";
     }
 
-    private static void validateModule(Path module, Map<String, Path> actual, String directory, String[] gav) throws Exception {
+    private static void validateModule(Path module, Map<String, Path> actual, String directory, String[] gav) throws IOException, NoSuchAlgorithmException {
         Map<?, ?> data = jsonObject(module);
         Map<?, ?> component = (Map<?, ?>) data.get("component");
         require(component != null && gav[0].equals(component.get("group"))
@@ -302,7 +357,7 @@ public abstract class CentralBundleTask extends DefaultTask {
         }
     }
 
-    private static Map<String, String> inventory(Map<String, Path> files) throws Exception {
+    private static Map<String, String> inventory(Map<String, Path> files) throws IOException, NoSuchAlgorithmException {
         Map<String, String> result = new TreeMap<>();
         for (var entry : files.entrySet()) result.put(entry.getKey(), sha256(entry.getValue()));
         return result;
@@ -317,40 +372,40 @@ public abstract class CentralBundleTask extends DefaultTask {
         Files.writeString(file, JsonOutput.prettyPrint(JsonOutput.toJson(data)) + "\n");
     }
 
-    private static String sha256(Path file) throws Exception {
+    private static String sha256(Path file) throws IOException, NoSuchAlgorithmException {
         return sha256(Files.readAllBytes(file));
     }
 
-    private static String sha256(byte[] bytes) throws Exception {
+    private static String sha256(byte[] bytes) throws NoSuchAlgorithmException {
         return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
     }
 
     // Repository-format equality only. Authenticity is verified by GPG; source,
     // artifact, inventory and ZIP integrity checks always use the SHA-256 path above.
-    private static boolean centralRepositoryChecksumMatches(Path file, String suffix, Object expected) throws Exception {
+    private static boolean centralRepositoryChecksumMatches(Path file, String suffix, Object expected) throws IOException, NoSuchAlgorithmException {
         return switch (suffix) {
-            case ".md5", ".sha1" -> legacyCentralChecksumMatches(file, suffix, expected);
-            case ".sha256" -> sha256(file).equals(expected);
-            case ".sha512" -> HexFormat.of().formatHex(
+            case MD5_SUFFIX, SHA1_SUFFIX -> legacyCentralChecksumMatches(file, suffix, expected);
+            case SHA256_SUFFIX -> sha256(file).equals(expected);
+            case SHA512_SUFFIX -> HexFormat.of().formatHex(
                     MessageDigest.getInstance("SHA-512").digest(Files.readAllBytes(file))).equals(expected);
             default -> throw new GradleException("Unsupported Central checksum sidecar: " + suffix);
         };
     }
 
-    private static boolean legacyCentralChecksumMatches(Path file, String suffix, Object expected) throws Exception {
+    private static boolean legacyCentralChecksumMatches(Path file, String suffix, Object expected) throws IOException, NoSuchAlgorithmException {
         MessageDigest checksum = switch (suffix) {
             // Central repository compatibility checksum; not used for security/authenticity.
             // codeql[java/potentially-weak-cryptographic-algorithm]
-            case ".md5" -> MessageDigest.getInstance("MD5");
+            case MD5_SUFFIX -> MessageDigest.getInstance("MD5");
             // Central repository compatibility checksum; not used for security/authenticity.
             // codeql[java/potentially-weak-cryptographic-algorithm]
-            case ".sha1" -> MessageDigest.getInstance("SHA-1");
+            case SHA1_SUFFIX -> MessageDigest.getInstance("SHA-1");
             default -> throw new GradleException("Unsupported legacy Central checksum sidecar: " + suffix);
         };
         return HexFormat.of().formatHex(checksum.digest(Files.readAllBytes(file))).equals(expected);
     }
 
-    private static String command(Path directory, List<String> args) throws Exception {
+    private static String command(Path directory, List<String> args) throws IOException, InterruptedException {
         Path log = Files.createTempFile("central-release-command-", ".log");
         try {
             Process process = new ProcessBuilder(args).directory(directory.toFile()).redirectErrorStream(true)

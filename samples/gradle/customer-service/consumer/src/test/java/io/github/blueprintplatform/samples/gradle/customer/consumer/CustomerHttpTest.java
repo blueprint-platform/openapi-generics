@@ -85,10 +85,8 @@ class CustomerHttpTest {
 
   @Test
   void upstreamNotFoundBecomesConsumerProblemResponse() {
-    var error =
-        assertThrows(
-            RestClientResponseException.class,
-            () -> http.get().uri("/customers/999").retrieve().toBodilessEntity());
+    var response = http.get().uri("/customers/999").retrieve();
+    var error = assertThrows(RestClientResponseException.class, response::toBodilessEntity);
     assertThat(error.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     assertThat(error.getResponseHeaders().getContentType())
         .isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
@@ -101,10 +99,8 @@ class CustomerHttpTest {
 
   @Test
   void invalidConsumerPathReturnsBadRequestProblem() {
-    var error =
-        assertThrows(
-            RestClientResponseException.class,
-            () -> http.get().uri("/customers/invalid").retrieve().toBodilessEntity());
+    var response = http.get().uri("/customers/invalid").retrieve();
+    var error = assertThrows(RestClientResponseException.class, response::toBodilessEntity);
     assertThat(error.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     assertThat(error.getResponseBodyAs(ProblemDetail.class).getStatus()).isEqualTo(400);
   }

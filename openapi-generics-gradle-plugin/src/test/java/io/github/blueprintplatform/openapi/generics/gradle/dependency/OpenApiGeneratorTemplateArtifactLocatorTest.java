@@ -163,8 +163,9 @@ class OpenApiGeneratorTemplateArtifactLocatorTest {
     @ValueSource(strings = {"", "model.mustache"})
     void rejectsResourceUrlsThatRunOutOfPathSegments(String relative) throws Exception {
         URL resource = tempDir.getRoot().resolve(relative).toUri().toURL();
+        ClassLoader loader = loaderReturning(resource);
         var exception = assertThrows(TemplatePreparationException.class,
-                () -> locator.locate(loaderReturning(resource), RESOURCE_PATH));
+                () -> locator.locate(loader, RESOURCE_PATH));
 
         assertTrue(exception.getMessage().contains("does not end with expected resource path"));
     }

@@ -378,9 +378,7 @@ class ResponseTypeIntrospectorTest {
 
   private static final class Wrapper<T> {}
 
-  private static final class Paging<T> {
-    private List<T> content;
-  }
+  private static final class Paging<T> {}
 
   @Schema(enumAsRef = true)
   private enum SupportedStatus {

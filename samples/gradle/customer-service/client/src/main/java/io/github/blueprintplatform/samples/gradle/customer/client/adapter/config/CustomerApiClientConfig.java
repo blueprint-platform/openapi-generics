@@ -46,7 +46,7 @@ public class CustomerApiClientConfig {
       if (problem != null && problem.getTitle() != null && problem.getDetail() != null) {
         return problem;
       }
-    } catch (JacksonException | IOException exception) {
+    } catch (JacksonException | IOException _) {
       // Empty, malformed or non-JSON upstream bodies still have a stable client error boundary.
     }
     return ProblemDetail.forStatusAndDetail(status, "Customer service returned an HTTP error.");

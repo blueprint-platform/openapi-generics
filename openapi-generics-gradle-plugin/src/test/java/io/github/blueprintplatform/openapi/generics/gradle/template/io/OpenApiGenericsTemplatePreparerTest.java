@@ -28,8 +28,9 @@ class OpenApiGenericsTemplatePreparerTest {
         Files.writeString(blocker, "consumer file");
         Path effective = blocker.resolve("effective");
 
+        List<Path> noArtifacts = List.of();
         var exception = assertThrows(TemplatePreparationException.class,
-                () -> preparer.prepare(List.of(), List.of(), effective));
+                () -> preparer.prepare(noArtifacts, noArtifacts, effective));
         assertTrue(exception.getMessage().contains(effective.toString()));
         assertInstanceOf(IOException.class, exception.getCause());
         assertTrue(Files.isRegularFile(blocker));
@@ -66,14 +67,14 @@ class OpenApiGenericsTemplatePreparerTest {
                         "META-INF/MANIFEST.MF",
                         "Manifest-Version: 1.0\n");
 
+        List<Path> generatorArtifacts = List.of(generatorJar);
+        List<Path> codegenArtifacts = List.of(emptyCodegen);
+        Path effective = tempDir.resolve("effective");
         TemplatePreparationException exception =
                 assertThrows(
                         TemplatePreparationException.class,
                         () ->
-                                preparer.prepare(
-                                        List.of(generatorJar),
-                                        List.of(emptyCodegen),
-                                        tempDir.resolve("effective")));
+                                preparer.prepare(generatorArtifacts, codegenArtifacts, effective));
 
         assertTrue(exception.getMessage().contains("No OpenAPI Generics template overlays"));
     }
@@ -87,12 +88,12 @@ class OpenApiGenericsTemplatePreparerTest {
                         "no templates");
         Path codegenJar = TemplateArtifactFixtures.codegenJar(tempDir, "WRAPPER");
 
+        List<Path> generatorArtifacts = List.of(emptyGenerator);
+        List<Path> codegenArtifacts = List.of(codegenJar);
+        Path effective = tempDir.resolve("effective");
         assertThrows(
                 TemplatePreparationException.class,
                 () ->
-                        preparer.prepare(
-                                List.of(emptyGenerator),
-                                List.of(codegenJar),
-                                tempDir.resolve("effective")));
+                        preparer.prepare(generatorArtifacts, codegenArtifacts, effective));
     }
 }

@@ -59,12 +59,13 @@ class TemplateArtifactResourceReaderTest {
                         "unrelated.txt",
                         "nope");
 
+        List<Path> artifacts = List.of(emptyJar);
         TemplatePreparationException exception =
                 assertThrows(
                         TemplatePreparationException.class,
                         () ->
                                 reader.readUniqueTextResource(
-                                        List.of(emptyJar),
+                                        artifacts,
                                         TemplateArtifactFixtures.UPSTREAM_MODEL_TEMPLATE,
                                         true));
 
@@ -76,12 +77,13 @@ class TemplateArtifactResourceReaderTest {
         Path first = TemplateArtifactFixtures.generatorJar(tempDir.resolve("one"), "A");
         Path second = TemplateArtifactFixtures.generatorJar(tempDir.resolve("two"), "B");
 
+        List<Path> artifacts = List.of(first, second);
         TemplatePreparationException exception =
                 assertThrows(
                         TemplatePreparationException.class,
                         () ->
                                 reader.readUniqueTextResource(
-                                        List.of(first, second),
+                                        artifacts,
                                         TemplateArtifactFixtures.UPSTREAM_MODEL_TEMPLATE,
                                         true));
 

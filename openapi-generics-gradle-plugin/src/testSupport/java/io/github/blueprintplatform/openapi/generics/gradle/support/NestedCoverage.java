@@ -50,25 +50,16 @@ public final class NestedCoverage {
                 SESSIONS.put(version, session);
             }
             session.configure(runner);
-            Throwable original = null;
-            try {
-                return failure ? runner.buildAndFail() : runner.build();
-            } catch (RuntimeException | Error ex) {
-                original = ex;
-                throw ex;
-            } finally {
-                try {
-                    session.dump();
-                } catch (IOException ex) {
-                    if (original != null) {
-                        original.addSuppressed(ex);
-                    } else {
-                        throw ex;
-                    }
-                }
-            }
+            return buildWithCoverage(runner, failure, session);
         } catch (IOException ex) {
             throw new UncheckedIOException("Nested coverage collection failed", ex);
+        }
+    }
+
+    private static BuildResult buildWithCoverage(GradleRunner runner, boolean failure, Session session)
+            throws IOException {
+        try (var dump = (java.io.Closeable) session::dump) {
+            return failure ? runner.buildAndFail() : runner.build();
         }
     }
 

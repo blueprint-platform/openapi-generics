@@ -69,7 +69,7 @@ class ResponseTypeDescriptorTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    assertEquals(descriptor, descriptor);
+    assertTrue(descriptor.equals(descriptor));
   }
 
   @Test
@@ -106,7 +106,7 @@ class ResponseTypeDescriptorTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    assertNotEquals(descriptor, null);
+    assertFalse(descriptor.equals(null));
   }
 
   @Test
@@ -115,7 +115,7 @@ class ResponseTypeDescriptorTest {
     ResponseTypeDescriptor descriptor =
         ResponseTypeDescriptor.simple(ServiceResponse.class, "data", "CustomerDto");
 
-    assertNotEquals(descriptor, "CustomerDto");
+    assertFalse(descriptor.equals("CustomerDto"));
   }
 
   @Test

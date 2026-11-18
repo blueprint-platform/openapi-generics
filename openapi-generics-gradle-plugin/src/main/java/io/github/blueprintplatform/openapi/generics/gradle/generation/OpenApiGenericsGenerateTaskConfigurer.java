@@ -124,7 +124,8 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
             GenerateTask task,
             OpenApiGenericsTemplateRuntime templateRuntime) {
 
-        if (OpenApiGenericsTaskSelection.from(task).isSelected().get()) {
+        boolean selected = OpenApiGenericsTaskSelection.from(task).isSelected().get();
+        if (selected) {
             task.getTemplateDir().set(
                     templateRuntime.effectiveTemplateDirectory()
                             .map(directory -> directory.dir("Java")));
@@ -135,7 +136,8 @@ public final class OpenApiGenericsGenerateTaskConfigurer {
             GenerateTask task,
             OpenApiGenericsTaskSelection selection) {
 
-        if (selection.isSelected().get()) {
+        boolean selected = selection.isSelected().get();
+        if (selected) {
             task.getLogger()
                     .info(
                             "OpenAPI Generics selected GenerateTask '{}' "

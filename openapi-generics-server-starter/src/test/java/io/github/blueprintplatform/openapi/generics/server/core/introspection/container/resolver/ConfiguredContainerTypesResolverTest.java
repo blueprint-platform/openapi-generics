@@ -103,10 +103,10 @@ class ConfiguredContainerTypesResolverTest {
   @Test
   @DisplayName("resolve -> should reject null container type")
   void resolve_shouldRejectNullContainerType() {
+    var configured = List.of(new ContainerProperties(null, "items"));
     OpenApiGenericsConfigurationException exception =
         assertThrows(
-            OpenApiGenericsConfigurationException.class,
-            () -> resolver.resolve(List.of(new ContainerProperties(null, "items"))));
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(configured));
 
     assertEquals("Container type must not be null or blank", exception.getMessage());
   }
@@ -114,10 +114,10 @@ class ConfiguredContainerTypesResolverTest {
   @Test
   @DisplayName("resolve -> should reject blank container type")
   void resolve_shouldRejectBlankContainerType() {
+    var configured = List.of(new ContainerProperties(" ", "items"));
     OpenApiGenericsConfigurationException exception =
         assertThrows(
-            OpenApiGenericsConfigurationException.class,
-            () -> resolver.resolve(List.of(new ContainerProperties(" ", "items"))));
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(configured));
 
     assertEquals("Container type must not be null or blank", exception.getMessage());
   }
@@ -125,10 +125,10 @@ class ConfiguredContainerTypesResolverTest {
   @Test
   @DisplayName("resolve -> should reject non fully qualified container type")
   void resolve_shouldRejectNonFullyQualifiedContainerType() {
+    var configured = List.of(new ContainerProperties("Paging", "items"));
     OpenApiGenericsConfigurationException exception =
         assertThrows(
-            OpenApiGenericsConfigurationException.class,
-            () -> resolver.resolve(List.of(new ContainerProperties("Paging", "items"))));
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(configured));
 
     assertEquals(
         "Invalid container type 'Paging'. Expected fully-qualified class name "
@@ -141,10 +141,10 @@ class ConfiguredContainerTypesResolverTest {
   void resolve_shouldRejectMissingContainerClass() {
     String type = "com.example.missing.DoesNotExist";
 
+    var configured = List.of(new ContainerProperties(type, "items"));
     OpenApiGenericsConfigurationException exception =
         assertThrows(
-            OpenApiGenericsConfigurationException.class,
-            () -> resolver.resolve(List.of(new ContainerProperties(type, "items"))));
+            OpenApiGenericsConfigurationException.class, () -> resolver.resolve(configured));
 
     assertEquals(
         "Configured container class not found: '"
@@ -329,9 +329,9 @@ class ConfiguredContainerTypesResolverTest {
   private OpenApiGenericsConfigurationException assertInvalidContainer(
       Class<?> type, String itemProperty) {
 
+    var configured = List.of(new ContainerProperties(type.getName(), itemProperty));
     return assertThrows(
-        OpenApiGenericsConfigurationException.class,
-        () -> resolver.resolve(List.of(new ContainerProperties(type.getName(), itemProperty))));
+        OpenApiGenericsConfigurationException.class, () -> resolver.resolve(configured));
   }
 
   private static ContainerProperties properties(Class<?> type, String itemProperty) {

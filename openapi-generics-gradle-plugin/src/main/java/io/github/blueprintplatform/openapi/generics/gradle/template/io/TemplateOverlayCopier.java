@@ -30,11 +30,7 @@ public final class TemplateOverlayCopier {
                                 artifact,
                                 overlayRootPath,
                                 destinationRoot);
-
-                continue;
-            }
-
-            if (isJar(artifact)) {
+            } else if (isJar(artifact)) {
                 copiedResourceCount +=
                         copyFromJar(
                                 artifact,
@@ -107,53 +103,14 @@ public final class TemplateOverlayCopier {
                 String entryName =
                         entry.getName();
 
-                if (entry.isDirectory()
-                        || !entryName.startsWith(
-                        overlayRootPath)) {
-
+                String relativePath = entryName.startsWith(overlayRootPath)
+                        ? entryName.substring(overlayRootPath.length())
+                        : "";
+                if (entry.isDirectory() || relativePath.isBlank()) {
                     continue;
                 }
 
-                String relativePath =
-                        entryName.substring(
-                                overlayRootPath.length());
-
-                if (relativePath.isBlank()) {
-                    continue;
-                }
-
-                Path entryPath;
-                try {
-                    entryPath = Path.of(relativePath);
-                } catch (InvalidPathException exception) {
-                    throw new IOException("Unsafe template overlay entry '" + entryName + "'.", exception);
-                }
-
-                // JAR names use '/' regardless of the host OS. Reject Windows path forms
-                // explicitly so an artifact cannot become unsafe on another supported host.
-                if (entryPath.isAbsolute()
-                        || relativePath.indexOf('\\') >= 0
-                        || (relativePath.length() >= 2
-                            && Character.isLetter(relativePath.charAt(0))
-                            && relativePath.charAt(1) == ':')) {
-                    throw new IOException("Unsafe template overlay entry '" + entryName + "'.");
-                }
-
-                Path destination = root.resolve(entryPath).normalize();
-                if (!destination.startsWith(root) || destination.equals(root)) {
-                    throw new IOException("Unsafe template overlay entry '" + entryName
-                            + "': destination must remain inside template root '" + root + "'.");
-                }
-
-                // Normalization alone cannot contain an existing symlink below the root.
-                Path current = root;
-                for (Path segment : root.relativize(destination)) {
-                    current = current.resolve(segment);
-                    if (Files.isSymbolicLink(current)) {
-                        throw new IOException("Unsafe template overlay entry '" + entryName
-                                + "': destination contains a symbolic link.");
-                    }
-                }
+                Path destination = resolveJarDestination(root, entryName, relativePath);
 
                 Files.createDirectories(
                         destination.getParent());
@@ -172,6 +129,43 @@ public final class TemplateOverlayCopier {
         }
 
         return copiedResourceCount;
+    }
+
+    private Path resolveJarDestination(Path root, String entryName, String relativePath)
+            throws IOException {
+        Path entryPath;
+        try {
+            entryPath = Path.of(relativePath);
+        } catch (InvalidPathException exception) {
+            throw new IOException("Unsafe template overlay entry '" + entryName + "'.", exception);
+        }
+
+        // JAR names use '/' regardless of the host OS. Reject Windows path forms
+        // explicitly so an artifact cannot become unsafe on another supported host.
+        if (entryPath.isAbsolute()
+                || relativePath.indexOf('\\') >= 0
+                || (relativePath.length() >= 2
+                    && Character.isLetter(relativePath.charAt(0))
+                    && relativePath.charAt(1) == ':')) {
+            throw new IOException("Unsafe template overlay entry '" + entryName + "'.");
+        }
+
+        Path destination = root.resolve(entryPath).normalize();
+        if (!destination.startsWith(root) || destination.equals(root)) {
+            throw new IOException("Unsafe template overlay entry '" + entryName
+                    + "': destination must remain inside template root '" + root + "'.");
+        }
+
+        // Normalization alone cannot contain an existing symlink below the root.
+        Path current = root;
+        for (Path segment : root.relativize(destination)) {
+            current = current.resolve(segment);
+            if (Files.isSymbolicLink(current)) {
+                throw new IOException("Unsafe template overlay entry '" + entryName
+                        + "': destination contains a symbolic link.");
+            }
+        }
+        return destination;
     }
 
     private void copyFile(

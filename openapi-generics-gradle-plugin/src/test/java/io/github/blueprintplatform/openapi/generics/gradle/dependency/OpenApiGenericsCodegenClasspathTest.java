@@ -72,10 +72,13 @@ class OpenApiGenericsCodegenClasspathTest {
             var provisioning = new OpenApiGenericsCodegenClasspath(loader.loadClass(PluginMarker.class.getName()));
             if (before) project.getDependencies().add(extra.getName(), MODULE + ":1.2.1");
             else provisioning.register(project, extra);
-            var exception = assertThrows(OpenApiGenericsCodegenVersionConflictException.class, () -> {
-                if (before) provisioning.register(project, extra);
-                else project.getDependencies().add(extra.getName(), MODULE + ":1.2.1");
-            });
+            var dependencies = project.getDependencies();
+            String configurationName = extra.getName();
+            var exception = before
+                    ? assertThrows(OpenApiGenericsCodegenVersionConflictException.class,
+                            () -> provisioning.register(project, extra))
+                    : assertThrows(OpenApiGenericsCodegenVersionConflictException.class,
+                            () -> dependencies.add(configurationName, MODULE + ":1.2.1"));
             assertTrue(exception.getMessage().contains(MODULE + ":1.3.1-SNAPSHOT"));
             assertTrue(exception.getMessage().contains("1.2.1"));
             assertTrue(exception.getMessage().contains(extra.getName()));

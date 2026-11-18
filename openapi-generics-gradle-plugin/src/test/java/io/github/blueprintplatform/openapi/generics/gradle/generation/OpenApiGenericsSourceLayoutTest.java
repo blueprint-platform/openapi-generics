@@ -132,10 +132,10 @@ class OpenApiGenericsSourceLayoutTest {
         var config = project.getLayout().getProjectDirectory().file("invalid-generator.json").getAsFile();
         java.nio.file.Files.writeString(config.toPath(), "{ invalid JSON");
         task.getConfigFile().set(config);
-        var directory = new OpenApiGenericsSourceLayout()
+        var generatedDirectory = new OpenApiGenericsSourceLayout()
                 .generatedJavaDirectory(project, task, OpenApiGenericsTaskSelection.from(task));
 
-        var exception = assertThrows(IllegalStateException.class, directory::get);
+        var exception = assertThrows(IllegalStateException.class, generatedDirectory::get);
         assertTrue(exception.getMessage().contains(config.toString()));
         assertInstanceOf(java.io.IOException.class, exception.getCause());
     }

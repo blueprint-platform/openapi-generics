@@ -48,7 +48,8 @@ public final class OpenApiGenericsNormalizeGeneratedSourcesAction
 
     @Override
     public void execute(Task ignored) {
-        if (!selected.get()) {
+        boolean shouldNormalize = selected.get();
+        if (!shouldNormalize) {
             return;
         }
 

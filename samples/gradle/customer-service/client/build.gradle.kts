@@ -18,6 +18,8 @@ dependencies {
 }
 
 tasks.register<GenerateTask>("generateCustomerClient") {
+    group = "code generation"
+    description = "Generates the Java client from the customer service OpenAPI document."
     generatorName.set("java-generics-contract")
     inputSpec.set(file("../spec/customer-api-docs.json").absolutePath)
     outputDir.set(layout.buildDirectory.dir("generated/customer"))
