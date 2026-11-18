@@ -14,16 +14,13 @@ This project follows a contract-first release discipline:
 
 ### Changed
 
-- Improved public Maven/Gradle quickstarts, adoption guidance and docs navigation, with generation/compilation and internal-link validation in CI.
-- Clarified shared Maven/Gradle Spring Boot support and verified example version roles; removed the obsolete `jsr305` client dependency from adoption guidance.
-- Simplified README navigation and reduced repeated deep-links while preserving contract/codegen evidence.
-- Removed ungated Google Analytics, clarified Scarf measurement disclosure and disabled pixel referrer forwarding.
+- Added public Maven and Gradle quickstarts with CI checks for client generation and compilation, and clarified supported Spring Boot lines for both integrations.
+- Removed Google Analytics from the documentation site and disabled referrer forwarding for Scarf pixels.
 
 ### Security & Maintenance
 
-- Hardened release validation with safe Portal validation defaults, complete source-cleanliness checks and structured provenance without raw command arguments.
-- Added scheduled and on-demand CodeQL freshness controls while preserving Maven core and Gradle plugin coverage; retired obsolete analysis configurations.
-- Routed docs/quickstart changes to relevant CI workflows without changing verification jobs or CodeQL PR/scheduled coverage.
+- Hardened Gradle Plugin Portal release validation with an explicit upload opt-in, complete source-cleanliness checks and structured provenance.
+- Added scheduled and on-demand CodeQL scans.
 - Updated the GitHub Pages dependency set to resolve patched rubyzip 3.7.0 and aligned deployment with the validated lockfile.
 
 ---
@@ -34,7 +31,7 @@ This project follows a contract-first release discipline:
 
 OpenAPI Generics 1.3.0 expands the platform with first-class Gradle integration, stricter client-generation contract validation, normalized generated Java output, and broader build-time verification coverage.
 
-This release introduces a dedicated Gradle plugin for contract-aware client generation, strengthens fail-fast validation of generic wrapper metadata, expands regression coverage for asynchronous Spring MVC response wrappers and multi-spec generation scenarios, and hardens compatibility across supported Gradle and OpenAPI Generator versions while preserving full backward compatibility.
+This release introduces a dedicated Gradle plugin for contract-aware client generation, strengthens fail-fast validation of generic wrapper metadata, expands regression coverage for asynchronous Spring MVC response wrappers and multi-spec generation scenarios, and hardens compatibility across supported Gradle and OpenAPI Generator versions.
 
 ### Added
 
@@ -86,7 +83,7 @@ This release introduces a dedicated Gradle plugin for contract-aware client gene
 
 ### Compatibility
 
-- Fully backward compatible with all 1.2.x runtime contracts.
+- Preserves 1.2.x Java runtime contracts. See the [1.3.0 upgrade guidance](docs/compatibility.md#upgrading-to-130).
 - Java 17+
 - Spring Boot 3.x / 4.x
 - OpenAPI Generator 7.x

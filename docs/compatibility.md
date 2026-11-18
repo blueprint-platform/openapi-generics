@@ -73,8 +73,17 @@ The internal platform bill of materials (BOM) does not manage consumer Boot/OAG/
 compile/test baselines are not universal runtime constraints. Gradle does not implicitly apply, replace
 or override the official plugin. Maven and Gradle share reconstruction semantics, not lifecycle settings.
 
-Keep producer and codegen components aligned around the published metadata protocol, especially
-`x-api-wrapper-type`. **1.3.0 preserves 1.2.x runtime contracts; no 1.2 contract migration is required.**
+## Upgrading to 1.3.0
+
+When upgrading to 1.3.0, move all OpenAPI Generics components you use to the **1.3.0 release line**
+together. This includes the producer's `openapi-generics-server-starter`, the shared
+`openapi-generics-contract`, and the components for your client build. For Maven, align
+`openapi-generics-java-codegen-parent` and `openapi-generics-java-codegen`. For Gradle, upgrade
+`openapi-generics-gradle-plugin`, which provisions the matching codegen version.
+Spring Boot, Springdoc and the official OpenAPI Generator versions remain consumer choices within
+the supported lines and integration boundaries above.
+
+Existing 1.2.x Java runtime contracts can be kept as-is when upgrading the platform components.
 
 Contract backward compatibility is separate from security maintenance. Preserving 1.2.x contracts does
 not promise security backports to 1.2.x binaries; see the [security maintenance table](https://github.com/blueprint-platform/openapi-generics/blob/main/SECURITY.md#supported-versions).

@@ -155,8 +155,8 @@ Supported lines are **Java 17+**, Spring MVC on **Boot 3.5.x / 4.x**, **OpenAPI 
 in the [compatibility reference](docs/compatibility.md); current references are not consumer-wide pins.
 
 1.3.0 adds first-class Gradle integration, stricter wrapper metadata validation and broader
-async/multi-spec verification. Existing 1.2.x runtime contracts require no migration.
-[Changelog →](CHANGELOG.md)
+async/multi-spec verification.
+[Upgrade guidance](docs/compatibility.md#upgrading-to-130) · [Changelog →](CHANGELOG.md)
 
 ## Implementation and further reading
 
