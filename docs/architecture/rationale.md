@@ -191,6 +191,18 @@ OpenAPI Generics functions as an **architectural compatibility layer** rather th
 
 This positioning allows organizations to retain their existing investment in OpenAPI tooling while addressing a specific, recurring gap in contract fidelity for generic response types.
 
+Upstream upgrade risk depends on the extension boundary. The outer `models → model → isEnum`
+dispatch in `Java/model.mustache` is visible in OAG 3.0.0 and persisted through the addition of
+`oneOf` dispatch in 5.0.0. The dispatch block was byte-identical in the checked 7.20.0, 7.23.0,
+7.24.0, 7.25.0, 7.26.0, and 7.27.0 artifacts.
+[OAG 3.0.0 template](https://github.com/OpenAPITools/openapi-generator/blob/v3.0.0/modules/openapi-generator/src/main/resources/Java/model.mustache) ·
+[OAG 5.0.0 template](https://github.com/OpenAPITools/openapi-generator/blob/v5.0.0/modules/openapi-generator/src/main/resources/Java/model.mustache)
+
+Maven reports a missing wrapper patch during the build. Gradle checks the required anchors and
+template ownership in the running official plugin. The observed stability makes recurring template
+rework unlikely at this boundary. Each new upstream reference still requires compatibility
+verification. [Template ownership](architecture.md#template-ownership-and-documentation)
+
 ---
 
 ## When This Approach Is Appropriate
