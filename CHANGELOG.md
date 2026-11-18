@@ -14,14 +14,14 @@ This project follows a contract-first release discipline:
 
 ### Changed
 
-- Added public Maven and Gradle quickstarts with CI checks for client generation and compilation, and clarified supported Spring Boot lines for both integrations.
+- Added public Maven and Gradle quickstarts with bundled wrappers to generate and compile a first client without a global build-tool installation.
+- Clarified supported Spring Boot lines for the Maven and Gradle integrations.
 - Removed Google Analytics from the documentation site and disabled referrer forwarding for Scarf pixels.
 
 ### Security & Maintenance
 
 - Hardened Gradle Plugin Portal release validation with an explicit upload opt-in, complete source-cleanliness checks and structured provenance.
-- Added scheduled and on-demand CodeQL scans.
-- Updated the GitHub Pages dependency set to resolve patched rubyzip 3.7.0 and aligned deployment with the validated lockfile.
+- Updated the documentation site's GitHub Pages dependencies to use patched rubyzip 3.7.0.
 
 ---
 
