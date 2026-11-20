@@ -48,6 +48,7 @@ val jacocoVersion = "0.8.16" // Same reporting tool version as the Maven reactor
 val repositoryRoot = rootProject.projectDir.parentFile
 val repositoryPom = repositoryRoot.resolve("pom.xml")
 val codegenModule = repositoryRoot.resolve("openapi-generics-java-codegen")
+val contractModule = repositoryRoot.resolve("openapi-generics-contract")
 
 val functionalTestPluginRepository =
     layout.buildDirectory.dir("functional-test-plugin-repository")
@@ -451,8 +452,8 @@ fun resolveMavenExecutable(): String {
  * Repository-level prerequisite for the real-codegen E2E.
  *
  * This task is deliberately separate from test and functionalTest. It runs only
- * when e2eTest is requested, builds the actual codegen module through the Maven
- * reactor, and installs the result into a Gradle-owned isolated repository.
+ * when e2eTest is requested and installs the codegen and consumer contract
+ * artifacts from the Maven reactor into a Gradle-owned isolated repository.
  */
 val prepareRealCodegenRepository =
     tasks.register<Exec>("prepareRealCodegenRepository") {
@@ -463,6 +464,8 @@ val prepareRealCodegenRepository =
         inputs.file(repositoryPom)
         inputs.file(codegenModule.resolve("pom.xml"))
         inputs.dir(codegenModule.resolve("src"))
+        inputs.file(contractModule.resolve("pom.xml"))
+        inputs.dir(contractModule.resolve("src"))
 
         outputs.dir(functionalTestCodegenRepository)
 
@@ -496,7 +499,7 @@ val prepareRealCodegenRepository =
                 "--batch-mode",
                 "--no-transfer-progress",
                 "-pl",
-                "openapi-generics-java-codegen",
+                "openapi-generics-java-codegen,openapi-generics-contract",
                 "-am",
                 "install",
                 "-DskipTests",

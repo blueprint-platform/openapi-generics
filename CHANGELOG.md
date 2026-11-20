@@ -14,6 +14,7 @@ This project follows a contract-first release discipline:
 
 ### Changed
 
+- Removed the unused `openapi-generics-contract` dependency from `openapi-generics-java-codegen`. Generated clients that use the platform contracts still require them on the application classpath. The Maven codegen parent supplies them, and Gradle consumers declare them in their application dependencies.
 - Added public Maven and Gradle quickstarts with bundled wrappers to generate and compile a first client without a global build-tool installation.
 - Clarified supported Spring Boot lines for the Maven and Gradle integrations.
 - Removed Google Analytics from the documentation site and disabled referrer forwarding for Scarf pixels.

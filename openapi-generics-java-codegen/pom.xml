@@ -50,11 +50,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>io.github.blueprint-platform</groupId>
-            <artifactId>openapi-generics-contract</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>openapi-generator-core</artifactId>
             <scope>provided</scope>
