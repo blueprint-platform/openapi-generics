@@ -1,5 +1,6 @@
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Exec
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
@@ -34,7 +35,8 @@ signing {
     isRequired = releasePublication.get()
 }
 tasks.withType<Sign>().configureEach {
-    onlyIf("release publication is enabled") { releasePublication.get() }
+    val enabled = releasePublication
+    onlyIf("release publication is enabled") { enabled.get() }
 }
 
 val minimumOpenApiGeneratorApiCompileVersion = "7.25.0"
@@ -189,17 +191,31 @@ tasks.named<Jar>("jar") {
 
 fun Test.configurePluginVerification() {
     useJUnitPlatform()
+    // Local publication regenerates timestamped SNAPSHOT metadata on every invocation.
+    // Track the actual inputs to that publication instead of those changing repository paths.
+    inputs.files(
+        tasks.named("jar"),
+        tasks.named("generatePomFileForPluginMavenPublication"),
+        tasks.named("generatePomFileForOpenApiGenericsPluginMarkerMavenPublication"),
+        tasks.named("generateMetadataFileForPluginMavenPublication")
+    ).withPathSensitivity(PathSensitivity.RELATIVE)
     if (combinedCoverage.get()) {
         maxParallelForks = 1
         systemProperty("junit.jupiter.execution.parallel.enabled", "false")
         val coverageOutput = layout.buildDirectory.dir("jacoco/nested/$name")
+        val coverageTestKit = layout.buildDirectory.dir("coverage-testkit/$name")
+        val pluginClasses = layout.buildDirectory.dir("classes/java/main")
+        val agentFiles = objects.fileCollection().from(nestedCoverageAgent)
+        inputs.files(agentFiles).withPathSensitivity(PathSensitivity.NONE)
         outputs.dir(coverageOutput)
         doFirst {
-            project.delete(coverageOutput)
-            systemProperty("nestedCoverage.agent", nestedCoverageAgent.singleFile.absolutePath)
+            check(coverageOutput.get().asFile.deleteRecursively()) {
+                "Could not clear nested coverage output for $name."
+            }
+            systemProperty("nestedCoverage.agent", agentFiles.singleFile.absolutePath)
             systemProperty("nestedCoverage.output", coverageOutput.get().asFile.absolutePath)
-            systemProperty("nestedCoverage.testKit", layout.buildDirectory.dir("coverage-testkit/$name").get().asFile.absolutePath)
-            systemProperty("nestedCoverage.classes", layout.buildDirectory.dir("classes/java/main").get().asFile.absolutePath)
+            systemProperty("nestedCoverage.testKit", coverageTestKit.get().asFile.absolutePath)
+            systemProperty("nestedCoverage.classes", pluginClasses.get().asFile.absolutePath)
         }
     }
 
@@ -216,13 +232,16 @@ fun Test.configurePluginVerification() {
         project.version.toString()
     )
 
+    val runtimeVersion = selectedOpenApiGeneratorTestRuntimeVersion
+    val referenceVersion = currentOpenApiGeneratorVerificationVersion
+    val baselineVersion = minimumOpenApiGeneratorApiCompileVersion
     doFirst {
         logger.lifecycle(
             "{}: selected official OpenAPI Generator test runtime = {} (reference = {}, API compile baseline = {})",
             path,
-            selectedOpenApiGeneratorTestRuntimeVersion.get(),
-            currentOpenApiGeneratorVerificationVersion,
-            minimumOpenApiGeneratorApiCompileVersion
+            runtimeVersion.get(),
+            referenceVersion,
+            baselineVersion
         )
     }
 
@@ -401,7 +420,7 @@ fun resolveMavenExecutable(): String {
     val configuredExecutable =
         providers.gradleProperty("e2eMavenExecutable").orNull
             ?.takeIf(String::isNotBlank)
-            ?: System.getenv("MAVEN_EXECUTABLE")
+            ?: providers.environmentVariable("MAVEN_EXECUTABLE").orNull
                 ?.takeIf(String::isNotBlank)
 
     if (configuredExecutable != null) {
@@ -425,7 +444,7 @@ fun resolveMavenExecutable(): String {
         }
 
     val pathEntries =
-        System.getenv("PATH")
+        providers.environmentVariable("PATH").orNull
             .orEmpty()
             .split(File.pathSeparator)
             .filter(String::isNotBlank)
@@ -470,46 +489,27 @@ val prepareRealCodegenRepository =
         inputs.dir(codegenModule.resolve("src"))
         inputs.file(contractModule.resolve("pom.xml"))
         inputs.dir(contractModule.resolve("src"))
+        inputs.file(repositoryRoot.resolve("openapi-generics-platform-bom/pom.xml"))
+        inputs.files(fileTree(repositoryRoot.resolve(".mvn")))
+        inputs.property("mavenJavaHome", providers.environmentVariable("JAVA_HOME").orElse(""))
 
         outputs.dir(functionalTestCodegenRepository)
 
         workingDir(repositoryRoot)
-
-        doFirst {
-            if (!repositoryPom.isFile) {
-                throw GradleException(
-                    "OpenAPI Generics repository root could not be located at " +
-                        "'${repositoryRoot.absolutePath}'."
-                )
-            }
-
-            val codegenPom =
-                codegenModule.resolve("pom.xml")
-
-            if (!codegenPom.isFile) {
-                throw GradleException(
-                    "OpenAPI Generics codegen module could not be located at " +
-                        "'${codegenModule.absolutePath}'."
-                )
-            }
-
-            val isolatedRepository =
-                functionalTestCodegenRepository.get().asFile
-
-            isolatedRepository.mkdirs()
-
-            commandLine(
-                resolveMavenExecutable(),
-                "--batch-mode",
-                "--no-transfer-progress",
-                "-pl",
-                "openapi-generics-java-codegen,openapi-generics-contract",
-                "-am",
-                "install",
-                "-DskipTests",
-                "-Dmaven.repo.local=${isolatedRepository.absolutePath}"
-            )
-        }
+        val mavenExecutable = resolveMavenExecutable()
+        inputs.file(mavenExecutable).withPathSensitivity(PathSensitivity.NONE)
+        commandLine(
+            mavenExecutable,
+            "--batch-mode",
+            "--no-transfer-progress",
+            "-pl",
+            "openapi-generics-java-codegen,openapi-generics-contract",
+            "-am",
+            "clean",
+            "install",
+            "-DskipTests",
+            "-Dmaven.repo.local=${functionalTestCodegenRepository.get().asFile.absolutePath}"
+        )
     }
 
 val functionalTestTask =
@@ -539,6 +539,8 @@ val e2eTestTask =
 
         dependsOn(publishFunctionalTestPlugin)
         dependsOn(prepareRealCodegenRepository)
+        inputs.dir(functionalTestCodegenRepository.map { it.dir("io/github/blueprint-platform") })
+            .withPathSensitivity(PathSensitivity.RELATIVE)
 
         systemProperty(
             "functionalTestCodegenRepository",
@@ -555,18 +557,23 @@ tasks.register<JacocoReport>("jacocoCombinedReport") {
     group = "verification"
     description = "Reports unit, nested TestKit and real-codegen plugin coverage (-PcombinedCoverage=true)."
     dependsOn(tasks.test, functionalTestTask, e2eTestTask)
-    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"),
-        fileTree(layout.buildDirectory.dir("jacoco/nested")) { include("**/*.exec") })
+    val coverageEnabled = combinedCoverage
+    inputs.property("combinedCoverage", coverageEnabled)
+    val unitExecutionData = layout.buildDirectory.file("jacoco/test.exec")
+    val nestedExecutionData = listOf("functionalTest", "e2eTest").associateWith { suite ->
+        fileTree(layout.buildDirectory.dir("jacoco/nested/$suite")) { include("*.exec") }
+    }
+    executionData.setFrom(unitExecutionData, nestedExecutionData.values)
     sourceSets(sourceSets.main.get())
     reports {
         xml.required.set(true)
         html.required.set(true)
     }
     doFirst {
-        check(combinedCoverage.get()) { "Combined report requires -PcombinedCoverage=true; use jacocoTestReport for unit-only." }
-        check(layout.buildDirectory.file("jacoco/test.exec").get().asFile.length() > 0) { "Missing unit execution data" }
-        for (suite in listOf("functionalTest", "e2eTest")) {
-            check(fileTree(layout.buildDirectory.dir("jacoco/nested/$suite")).matching { include("*.exec") }.files.any { it.length() > 0 }) {
+        check(coverageEnabled.get()) { "Combined report requires -PcombinedCoverage=true; use jacocoTestReport for unit-only." }
+        check(unitExecutionData.get().asFile.length() > 0) { "Missing unit execution data" }
+        for ((suite, data) in nestedExecutionData) {
+            check(data.files.any { it.length() > 0 }) {
                 "Missing fresh nested execution data for $suite"
             }
         }
