@@ -46,10 +46,8 @@ val spotlessLibVersion = "4.10.4"
 val jacocoVersion = "0.8.16" // Same reporting tool version as the Maven reactor.
 
 val repositoryRoot = rootProject.projectDir.parentFile
-val repositoryPom = repositoryRoot.resolve("pom.xml")
-val codegenModule = repositoryRoot.resolve("openapi-generics-java-codegen")
-val contractModule = repositoryRoot.resolve("openapi-generics-contract")
 
+// Isolated repositories for TestKit consumers.
 val functionalTestPluginRepository =
     layout.buildDirectory.dir("functional-test-plugin-repository")
 
@@ -118,9 +116,7 @@ configurations.named(e2eTest.runtimeOnlyConfigurationName) {
 }
 
 dependencies {
-    add(nestedCoverageAgent.name, "org.jacoco:org.jacoco.agent:$jacocoVersion:runtime")
-    add(functionalTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
-    add(e2eTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
+    // Plugin implementation dependencies.
     /*
      * Declared once. testImplementation inherits compileOnly so component tests
      * can instantiate GenerateTask without repeating the same coordinate.
@@ -130,6 +126,10 @@ dependencies {
     compileOnly("org.openapitools:openapi-generator:$minimumOpenApiGeneratorApiCompileVersion")
     implementation("com.diffplug.spotless:spotless-lib:$spotlessLibVersion")
 
+    // Repository test and coverage dependencies.
+    add(nestedCoverageAgent.name, "org.jacoco:org.jacoco.agent:$jacocoVersion:runtime")
+    add(functionalTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
+    add(e2eTest.implementationConfigurationName, "org.jacoco:org.jacoco.core:$jacocoVersion")
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly(libs.cleanthat.java)
@@ -231,6 +231,7 @@ fun Test.configurePluginVerification() {
     }
 }
 
+// Published plugin identity and implementation entry point.
 gradlePlugin {
     website = "https://github.com/blueprint-platform/openapi-generics"
     vcsUrl = "https://github.com/blueprint-platform/openapi-generics.git"
@@ -252,10 +253,7 @@ gradlePlugin {
     }
 }
 
-/*
- * TestKit consumer projects resolve the plugin marker and implementation
- * artifact from this isolated Maven repository.
- */
+// Publication metadata and repositories for release staging and TestKit.
 publishing {
     publications.withType<MavenPublication>().configureEach {
         pom {
@@ -285,6 +283,7 @@ publishing {
         }
     }
     repositories {
+        // TestKit consumers resolve the plugin marker and implementation here.
         maven {
             name = "functionalTest"
             url = functionalTestPluginRepository.get().asFile.toURI()
@@ -383,6 +382,7 @@ tasks.register<CentralBundleTask>("centralReleaseBundle") {
     dependsOn("publishPluginMavenPublicationToReleaseStagingRepository")
 }
 
+// Repository verification with real Maven reactor artifacts.
 fun resolveMavenExecutable(): String {
     val wrapperName =
         if (System.getProperty("os.name").lowercase().contains("windows")) {
@@ -459,7 +459,11 @@ val prepareRealCodegenRepository =
     tasks.register<Exec>("prepareRealCodegenRepository") {
         group = "verification"
         description =
-            "Builds the real OpenAPI Generics codegen artifact for e2eTest."
+            "Installs Java codegen and contract artifacts for e2eTest."
+
+        val repositoryPom = repositoryRoot.resolve("pom.xml")
+        val codegenModule = repositoryRoot.resolve("openapi-generics-java-codegen")
+        val contractModule = repositoryRoot.resolve("openapi-generics-contract")
 
         inputs.file(repositoryPom)
         inputs.file(codegenModule.resolve("pom.xml"))

@@ -147,6 +147,15 @@ Also declare your actual shared contract dependency, for example `api(project(":
 
 ## Repository verification and development
 
+The published plugin implementation lives in `src/main`. This build's `build.gradle.kts` declares
+the plugin ID, entry point, and dependencies, and configures repository verification and publication.
+
+Unit tests live in `src/test`. The `functionalTest` suite exercises plugin behavior with TestKit
+fixtures. The separate `e2eTest` suite generates and compiles Java clients with the real generator.
+Its `prepareRealCodegenRepository` task installs the codegen and client contract artifacts into an
+isolated Maven repository for the test consumers. Both suites resolve the plugin under test from a
+separate local publication repository. Shared test helpers live in `src/testSupport`.
+
 From this plugin directory:
 
 ```bash
